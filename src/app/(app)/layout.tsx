@@ -1,4 +1,4 @@
-import { LayoutDashboard } from "lucide-react";
+import { LayoutDashboard, Users } from "lucide-react";
 import { Sidebar, type NavItem } from "@/components/Sidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/Logo";
@@ -37,8 +37,11 @@ export default async function AppLayout({ children }: { children: React.ReactNod
     );
   }
 
-  // Once fully verified, Documents has nothing left to offer — just the dashboard.
-  const navItems: NavItem[] = [{ href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="size-4" /> }];
+  // Once fully verified, Documents has nothing left to offer — just the dashboard and the team.
+  const navItems: NavItem[] = [
+    { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="size-4" /> },
+    { href: "/team", label: "Team", icon: <Users className="size-4" /> },
+  ];
 
   return (
     <div className="flex min-h-svh bg-background">
