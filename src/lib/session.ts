@@ -1,9 +1,12 @@
 import "server-only";
 import { cookies } from "next/headers";
 
-const ACCESS_TOKEN_COOKIE = "protegey_access_token";
-const REFRESH_TOKEN_COOKIE = "protegey_refresh_token";
-const USER_COOKIE = "protegey_user";
+// Namespaced "_partner" — admin-web and partner-web both run on localhost (only the port
+// differs), and browsers scope cookies by domain, NOT by port. Sharing a cookie name
+// between the two apps means logging into one silently overwrites the other's session.
+const ACCESS_TOKEN_COOKIE = "protegey_partner_access_token";
+const REFRESH_TOKEN_COOKIE = "protegey_partner_refresh_token";
+const USER_COOKIE = "protegey_partner_user";
 
 const isProduction = process.env.NODE_ENV === "production";
 

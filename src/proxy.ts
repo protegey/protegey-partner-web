@@ -23,7 +23,7 @@ async function isPartnerActive(accessToken: string): Promise<boolean> {
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const accessToken = request.cookies.get("protegey_access_token")?.value;
+  const accessToken = request.cookies.get("protegey_partner_access_token")?.value;
   const hasSession = Boolean(accessToken);
   const isPublicPath = PUBLIC_PATHS.some((path) => pathname.startsWith(path));
 
