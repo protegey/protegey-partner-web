@@ -13,6 +13,7 @@ interface Partner {
   status: string;
   contactEmail: string | null;
   country: string | null;
+  rejectionReason: string | null;
   createdAt: string;
 }
 
@@ -42,6 +43,18 @@ export default async function DashboardPage() {
         <p className="text-sm text-muted-foreground">{user?.email}</p>
       </div>
 
+      {partner?.status === "rejected" ? (
+        <div className="rounded-md border border-destructive/30 bg-destructive/10 p-5">
+          <p className="text-sm font-semibold text-destructive">Your application was not approved</p>
+          {partner.rejectionReason ? (
+            <p className="mt-1 text-sm text-destructive">{partner.rejectionReason}</p>
+          ) : null}
+          <p className="mt-2 text-xs text-destructive/80">
+            Contact your Protegey representative if you believe this is a mistake.
+          </p>
+        </div>
+      ) : null}
+
       {partner ? (
         <div className="rounded-md border border-border bg-card p-5">
           <p className="text-xs font-medium text-muted-foreground">Your organization</p>
@@ -53,7 +66,13 @@ export default async function DashboardPage() {
             </div>
             <div>
               <span className="text-muted-foreground">Status: </span>
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
+              <span
+                className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                  partner.status === "rejected"
+                    ? "bg-destructive/10 text-destructive"
+                    : "bg-primary/10 text-primary"
+                }`}
+              >
                 {formatLabel(partner.status)}
               </span>
             </div>

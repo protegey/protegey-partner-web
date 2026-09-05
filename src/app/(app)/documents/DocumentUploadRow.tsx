@@ -1,0 +1,113 @@
+"use client";
+
+import { useActionState, useEffect, useRef } from "react";
+import { useFormStatus } from "react-dom";
+import { useRouter } from "next/navigation";
+import { Download, Upload } from "lucide-react";
+import { submitDocumentAction, type PartnerDocument, type SubmitDocumentState } from "./actions";
+
+const DOCUMENT_LABELS: Record<string, string> = {
+  business_registration: "Business registration certificate",
+  tax_certificate: "Tax identification certificate",
+  proof_of_address: "Proof of address",
+  director_id: "Director / owner ID",
+};
+
+const STATUS_STYLES: Record<string, string> = {
+  pending: "bg-muted text-muted-foreground",
+  submitted: "bg-primary/10 text-primary",
+  approved: "bg-primary/10 text-primary",
+  rejected: "bg-destructive/10 text-destructive",
+};
+
+function formatLabel(value: string): string {
+  return value
+    .split("_")
+    .map((word) => word[0].toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+const initialState: SubmitDocumentState = {};
+
+function UploadButton() {
+  const { pending } = useFormStatus();
+  return (
+    <button
+      type="submit"
+      disabled={pending}
+      className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+    >
+      <Upload className="size-3.5" />
+      {pending ? "Uploading…" : "Upload"}
+    </button>
+  );
+}
+
+export function DocumentUploadRow({ document }: { document: PartnerDocument }) {
+  const router = useRouter();
+  const action = submitDocumentAction.bind(null, document.id);
+  const [state, formAction] = useActionState(action, initialState);
+  const formRef = useRef<HTMLFormElement>(null);
+  const canUpload = document.status === "pending" || document.status === "rejected";
+
+  useEffect(() => {
+    if (state.success) {
+      formRef.current?.reset();
+      router.refresh();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.success]);
+
+  return (
+    <div className="rounded-md border border-border bg-card p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-medium text-foreground">
+            {DOCUMENT_LABELS[document.type] ?? formatLabel(document.type)}
+          </p>
+          {document.fileName ? (
+            <a
+              href={`/api/documents/${document.id}/download`}
+              className="mt-0.5 flex items-center gap-1 text-xs text-muted-foreground hover:text-primary hover:underline"
+            >
+              <Download className="size-3" />
+              {document.fileName}
+            </a>
+          ) : (
+            <p className="mt-0.5 text-xs text-muted-foreground">No file submitted yet</p>
+          )}
+        </div>
+        <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[document.status]}`}>
+          {formatLabel(document.status)}
+        </span>
+      </div>
+
+      {document.status === "rejected" && document.rejectionReason ? (
+        <p className="mt-3 rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">
+          <span className="font-medium">Why this was rejected: </span>
+          {document.rejectionReason}
+        </p>
+      ) : null}
+
+      {canUpload ? (
+        <form
+          ref={formRef}
+          action={formAction}
+          className="mt-3 flex items-center gap-2"
+        >
+          <input
+            type="file"
+            name="file"
+            accept="application/pdf,image/jpeg,image/png"
+            required
+            className="flex-1 text-xs text-muted-foreground file:mr-3 file:rounded-md file:border file:border-border file:bg-background file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-foreground hover:file:bg-muted"
+          />
+          <UploadButton />
+        </form>
+      ) : null}
+
+      {state.error ? <p className="mt-2 text-xs text-destructive">{state.error}</p> : null}
+      {state.success ? <p className="mt-2 text-xs text-primary">Uploaded — awaiting review.</p> : null}
+    </div>
+  );
+}

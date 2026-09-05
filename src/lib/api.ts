@@ -45,3 +45,28 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
 
   return data as T;
 }
+
+/** For multipart/form-data uploads — the caller builds the FormData (e.g. with a File). */
+export async function apiUpload<T>(path: string, formData: FormData): Promise<T> {
+  const token = await getAccessToken();
+  const headers: Record<string, string> = {};
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${BACKEND_API_URL}${path}`, {
+    method: "POST",
+    headers,
+    body: formData,
+    cache: "no-store",
+  });
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    const message = (data && (data.message as string)) || response.statusText;
+    throw new ApiError(response.status, Array.isArray(message) ? message.join(", ") : message);
+  }
+
+  return data as T;
+}
