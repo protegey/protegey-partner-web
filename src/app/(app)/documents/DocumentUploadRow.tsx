@@ -13,6 +13,13 @@ const DOCUMENT_LABELS: Record<string, string> = {
   director_id: "Director / owner ID",
 };
 
+const STATUS_LABELS: Record<string, string> = {
+  pending: "Pending",
+  submitted: "In review",
+  approved: "Approved",
+  rejected: "Rejected",
+};
+
 const STATUS_STYLES: Record<string, string> = {
   pending: "bg-muted text-muted-foreground",
   submitted: "bg-primary/10 text-primary",
@@ -78,7 +85,7 @@ export function DocumentUploadRow({ document }: { document: PartnerDocument }) {
           )}
         </div>
         <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[document.status]}`}>
-          {formatLabel(document.status)}
+          {STATUS_LABELS[document.status] ?? formatLabel(document.status)}
         </span>
       </div>
 

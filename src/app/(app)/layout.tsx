@@ -1,6 +1,7 @@
 import { LayoutDashboard, FileText } from "lucide-react";
 import { Sidebar, type NavItem } from "@/components/Sidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
+import { Logo } from "@/components/Logo";
 import { getSessionUser } from "@/lib/session";
 import { logoutAction } from "@/lib/auth-actions";
 import { apiFetch, ApiError } from "@/lib/api";
@@ -15,17 +16,44 @@ async function isPartnerActive(): Promise<boolean> {
   }
 }
 
+function SignOutButton() {
+  return (
+    <form action={logoutAction}>
+      <button
+        type="submit"
+        className="rounded-md border border-border px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-muted"
+      >
+        Sign out
+      </button>
+    </form>
+  );
+}
+
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const [user, active] = await Promise.all([getSessionUser(), isPartnerActive()]);
 
-  // While KYB verification is pending or rejected, a partner can only see Documents —
-  // everything else in the product is gated until Protegey validates the organization.
-  const navItems: NavItem[] = active
-    ? [
-        { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="size-4" /> },
-        { href: "/documents", label: "Documents", icon: <FileText className="size-4" /> },
-      ]
-    : [{ href: "/documents", label: "Documents", icon: <FileText className="size-4" /> }];
+  // While KYB verification is pending or rejected, there is nothing else to navigate to —
+  // drop the sidebar entirely and show a plain top bar around the KYB submission screen.
+  if (!active) {
+    return (
+      <div className="flex min-h-svh flex-col bg-background">
+        <header className="flex items-center justify-between border-b border-border px-8 py-4">
+          <Logo className="h-6" />
+          <div className="flex items-center gap-3">
+            <p className="hidden truncate text-xs text-muted-foreground sm:block">{user?.email}</p>
+            <ThemeToggle />
+            <SignOutButton />
+          </div>
+        </header>
+        <main className="flex-1 overflow-y-auto px-8 py-10">{children}</main>
+      </div>
+    );
+  }
+
+  const navItems: NavItem[] = [
+    { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="size-4" /> },
+    { href: "/documents", label: "Documents", icon: <FileText className="size-4" /> },
+  ];
 
   return (
     <div className="flex min-h-svh bg-background">
