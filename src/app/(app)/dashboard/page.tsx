@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { apiFetch, ApiError } from "@/lib/api";
 import { getSessionUser } from "@/lib/session";
+import { DashboardCharts } from "./DashboardCharts";
 
 export const metadata: Metadata = {
   title: "Dashboard — Protegey Partner",
@@ -37,7 +38,7 @@ export default async function DashboardPage() {
   const [user, partner] = await Promise.all([getSessionUser(), loadPartner()]);
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6">
+    <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <div>
         <h1 className="text-xl font-semibold text-foreground">Welcome back</h1>
         <p className="text-sm text-muted-foreground">{user?.email}</p>
@@ -55,46 +56,60 @@ export default async function DashboardPage() {
         </div>
       ) : null}
 
-      {partner ? (
-        <div className="rounded-md border border-border bg-card p-5">
-          <p className="text-xs font-medium text-muted-foreground">Your organization</p>
-          <h2 className="mt-1 text-lg font-semibold text-foreground">{partner.name}</h2>
-          <div className="mt-3 flex flex-wrap gap-x-8 gap-y-2 text-sm">
-            <div>
-              <span className="text-muted-foreground">Type: </span>
-              <span className="text-foreground">{formatLabel(partner.type)}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground">Status: </span>
-              <span
-                className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-                  partner.status === "rejected"
-                    ? "bg-destructive/10 text-destructive"
-                    : "bg-primary/10 text-primary"
-                }`}
-              >
-                {formatLabel(partner.status)}
-              </span>
-            </div>
-            {partner.country ? (
-              <div>
-                <span className="text-muted-foreground">Country: </span>
-                <span className="text-foreground">{partner.country}</span>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <DashboardCharts />
+        </div>
+
+        <div className="flex flex-col gap-6">
+          {partner ? (
+            <div className="rounded-md border border-border bg-card p-5">
+              <p className="text-xs font-medium text-muted-foreground">Your organization</p>
+              <h2 className="mt-1 text-lg font-semibold text-foreground">{partner.name}</h2>
+              <div className="mt-3 flex flex-col gap-2 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Type: </span>
+                  <span className="text-foreground">{formatLabel(partner.type)}</span>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Status: </span>
+                  <span
+                    className={`rounded-full px-2 py-0.5 text-xs font-medium ${
+                      partner.status === "rejected"
+                        ? "bg-destructive/10 text-destructive"
+                        : "bg-primary/10 text-primary"
+                    }`}
+                  >
+                    {formatLabel(partner.status)}
+                  </span>
+                </div>
+                {partner.country ? (
+                  <div>
+                    <span className="text-muted-foreground">Country: </span>
+                    <span className="text-foreground">{partner.country}</span>
+                  </div>
+                ) : null}
+                {partner.contactEmail ? (
+                  <div>
+                    <span className="text-muted-foreground">Contact: </span>
+                    <span className="text-foreground">{partner.contactEmail}</span>
+                  </div>
+                ) : null}
               </div>
-            ) : null}
+            </div>
+          ) : (
+            <div className="rounded-md border border-border bg-card p-5 text-sm text-muted-foreground">
+              Organization details are not available for this account.
+            </div>
+          )}
+
+          <div className="rounded-md border border-border bg-card p-5">
+            <p className="text-xs font-medium text-muted-foreground">Your role</p>
+            <p className="mt-1 text-sm text-foreground">
+              {user?.roles.map(formatLabel).join(", ") || "—"}
+            </p>
           </div>
         </div>
-      ) : (
-        <div className="rounded-md border border-border bg-card p-5 text-sm text-muted-foreground">
-          Organization details are not available for this account.
-        </div>
-      )}
-
-      <div className="rounded-md border border-border bg-card p-5">
-        <p className="text-xs font-medium text-muted-foreground">Your role</p>
-        <p className="mt-1 text-sm text-foreground">
-          {user?.roles.map(formatLabel).join(", ") || "—"}
-        </p>
       </div>
     </div>
   );
