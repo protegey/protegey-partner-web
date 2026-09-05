@@ -5,10 +5,6 @@ import { ReviewingIllustration } from "@/components/ReviewingIllustration";
 import { getMyDocuments } from "./actions";
 import { DocumentUploadRow } from "./DocumentUploadRow";
 
-export const metadata: Metadata = {
-  title: "Documents — Protegey Partner",
-};
-
 interface Partner {
   status: string;
   rejectionReason: string | null;
@@ -21,6 +17,17 @@ async function loadPartner(): Promise<Partner | null> {
     if (error instanceof ApiError) return null;
     throw error;
   }
+}
+
+export async function generateMetadata(): Promise<Metadata> {
+  const partner = await loadPartner();
+  const title =
+    partner?.status === "rejected"
+      ? "Action required — Protegey Partner"
+      : partner?.status !== "active"
+        ? "Verification in progress — Protegey Partner"
+        : "Documents — Protegey Partner";
+  return { title };
 }
 
 export default async function DocumentsPage() {

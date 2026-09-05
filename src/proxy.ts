@@ -2,8 +2,9 @@ import { NextRequest, NextResponse } from "next/server";
 
 const PUBLIC_PATHS = ["/login", "/invitations/accept"];
 // Routes a partner can still reach while their KYB verification is pending or rejected —
-// they must be able to submit/see their documents, but nothing else in the app.
-const ALLOWED_WHILE_UNVERIFIED = ["/documents"];
+// they must be able to submit/see their documents, but nothing else in the app. API routes
+// are always allowed through — they're not pages to redirect, and enforce their own auth.
+const ALLOWED_WHILE_UNVERIFIED = ["/documents", "/api"];
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL ?? "http://localhost:3000";
 

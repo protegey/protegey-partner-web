@@ -8,6 +8,7 @@ export interface PartnerDocument {
   type: string;
   status: "pending" | "submitted" | "approved" | "rejected";
   fileName: string | null;
+  mimeType: string | null;
   submittedAt: string | null;
   reviewedAt: string | null;
   rejectionReason: string | null;

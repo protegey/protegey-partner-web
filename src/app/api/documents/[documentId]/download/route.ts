@@ -21,7 +21,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ doc
   return new NextResponse(backendResponse.body, {
     headers: {
       "Content-Type": backendResponse.headers.get("Content-Type") ?? "application/octet-stream",
-      "Content-Disposition": backendResponse.headers.get("Content-Disposition") ?? "attachment",
+      "Content-Disposition": backendResponse.headers.get("Content-Disposition") ?? "inline",
     },
   });
 }
