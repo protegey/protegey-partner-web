@@ -4,6 +4,7 @@ import { getTeamMembers, getPendingInvitations, getAssignableRoles } from "./act
 import { InviteAgentDialogButton } from "./InviteAgentDialogButton";
 import { TeamMemberActions } from "./TeamMemberActions";
 import { ResendInvitationButton } from "./ResendInvitationButton";
+import { EditInvitationDialogButton } from "./EditInvitationDialogButton";
 
 export const metadata: Metadata = {
   title: "Team — Protegey Partner",
@@ -54,7 +55,8 @@ export default async function TeamPage() {
                     {invitation.roles.map((role) => role.displayName).join(", ") || "—"}
                   </td>
                   <td className="px-4 py-2.5">
-                    <div className="flex justify-end">
+                    <div className="flex justify-end gap-2">
+                      <EditInvitationDialogButton invitation={invitation} roles={roles} />
                       <ResendInvitationButton invitationId={invitation.id} />
                     </div>
                   </td>

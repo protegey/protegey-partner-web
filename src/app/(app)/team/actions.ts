@@ -70,6 +70,49 @@ export async function setAgentStatusAction(userId: string, isActive: boolean): P
   return { success: true };
 }
 
+export async function sendPasswordResetAction(userId: string): Promise<ActionResult> {
+  try {
+    await apiFetch(`/partners/me/team/${userId}/reset-password`, { method: "POST" });
+  } catch (error) {
+    return { error: error instanceof ApiError ? error.message : "Something went wrong." };
+  }
+  return { success: true };
+}
+
+export interface UpdateInvitationState {
+  error?: string;
+  success?: boolean;
+}
+
+/** Bound with the invitation id (see submitDocumentAction for the same pattern) so it fits useActionState's (prevState, formData) shape. */
+export async function updateInvitationAction(
+  invitationId: string,
+  _prevState: UpdateInvitationState,
+  formData: FormData,
+): Promise<UpdateInvitationState> {
+  const firstName = String(formData.get("firstName") ?? "").trim();
+  const lastName = String(formData.get("lastName") ?? "").trim();
+  const roleIds = formData.getAll("roleIds").map(String);
+
+  if (!firstName || !lastName) {
+    return { error: "First and last name are required." };
+  }
+  if (roleIds.length === 0) {
+    return { error: "Select at least one role for this agent." };
+  }
+
+  try {
+    await apiFetch(`/partners/me/team/invitations/${invitationId}`, {
+      method: "PATCH",
+      body: { firstName, lastName, roleIds },
+    });
+  } catch (error) {
+    return { error: error instanceof ApiError ? error.message : "Something went wrong." };
+  }
+  revalidatePath("/team");
+  return { success: true };
+}
+
 export async function inviteAgentAction(
   _prevState: InviteAgentState,
   formData: FormData,

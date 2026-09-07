@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 const PUBLIC_PATHS = [
   "/login",
   "/invitations/accept",
+  "/reset-password",
   "/client-application",
   "/api/client-application-document",
   "/api/client-application-partner-logo",
