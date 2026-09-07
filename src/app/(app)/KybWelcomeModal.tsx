@@ -49,7 +49,7 @@ export function KybWelcomeModal() {
       <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={dismiss} aria-hidden="true" />
       <div className="relative flex w-full max-w-2xl overflow-hidden rounded-md border border-border bg-card shadow-xl">
         <div className="relative hidden w-2/5 shrink-0 bg-[#1DB980] sm:block">
-          <Image src="/images/welcome-documents.png" alt="" fill className="object-cover" />
+          <Image src="/images/document_illustration.png" alt="" fill className="object-cover" />
         </div>
 
         <div className="flex flex-1 flex-col gap-4 p-6">

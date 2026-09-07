@@ -57,5 +57,7 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  // "images/" excludes public/images/* (login hero, welcome illustration, etc.) — static
+  // assets must never go through the session/verification checks above.
+  matcher: ["/((?!_next/static|_next/image|favicon.ico|images/).*)"],
 };
