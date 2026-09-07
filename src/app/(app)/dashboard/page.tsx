@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { apiFetch, ApiError } from "@/lib/api";
 import { getSessionUser } from "@/lib/session";
 import { getTeamMembers } from "../team/actions";
+import { getClients } from "../clients/actions";
 import { DashboardCharts } from "./DashboardCharts";
 
 export const metadata: Metadata = {
@@ -36,11 +37,13 @@ async function loadPartner(): Promise<Partner | null> {
 }
 
 export default async function DashboardPage() {
-  const [user, partner, team] = await Promise.all([
+  const [user, partner, team, clients] = await Promise.all([
     getSessionUser(),
     loadPartner(),
     getTeamMembers().catch(() => []),
+    getClients().catch(() => []),
   ]);
+  const pendingClientReviews = clients.filter((client) => client.status === "pending_review").length;
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
@@ -112,6 +115,19 @@ export default async function DashboardPage() {
             <p className="text-xs font-medium text-muted-foreground">Your role</p>
             <p className="mt-1 text-sm text-foreground">
               {user?.roles.map(formatLabel).join(", ") || "—"}
+            </p>
+          </div>
+
+          <div className="rounded-md border border-border bg-card p-5">
+            <p className="text-xs font-medium text-muted-foreground">Clients</p>
+            <p className="mt-1 text-2xl font-semibold text-foreground">{clients.length}</p>
+            <p className="text-xs text-muted-foreground">
+              {clients.length === 1 ? "business" : "businesses"} invited to onboard
+              {pendingClientReviews > 0 ? (
+                <span className="ml-1.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-primary">
+                  {pendingClientReviews} awaiting review
+                </span>
+              ) : null}
             </p>
           </div>
 

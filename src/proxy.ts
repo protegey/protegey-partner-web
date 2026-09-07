@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 
-const PUBLIC_PATHS = ["/login", "/invitations/accept"];
+// "/client-application" is a business's own KYB questionnaire for a partner (e.g. Neero) — it
+// has no Protegey account and no session at all, so it must never redirect to /login. Its two
+// API proxy routes (document + partner-logo download) are equally public and session-less.
+const PUBLIC_PATHS = [
+  "/login",
+  "/invitations/accept",
+  "/client-application",
+  "/api/client-application-document",
+  "/api/client-application-partner-logo",
+];
 // Routes a partner can still reach while their KYB verification is pending or rejected —
 // they must be able to submit/see their documents, but nothing else in the app. API routes
 // are always allowed through — they're not pages to redirect, and enforce their own auth.

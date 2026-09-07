@@ -47,11 +47,13 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
 }
 
 /** For multipart/form-data uploads — the caller builds the FormData (e.g. with a File). */
-export async function apiUpload<T>(path: string, formData: FormData): Promise<T> {
-  const token = await getAccessToken();
+export async function apiUpload<T>(path: string, formData: FormData, options: { unauthenticated?: boolean } = {}): Promise<T> {
   const headers: Record<string, string> = {};
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
+  if (!options.unauthenticated) {
+    const token = await getAccessToken();
+    if (token) {
+      headers.Authorization = `Bearer ${token}`;
+    }
   }
 
   const response = await fetch(`${BACKEND_API_URL}${path}`, {

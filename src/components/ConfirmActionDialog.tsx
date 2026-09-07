@@ -14,6 +14,8 @@ export function ConfirmActionDialog({
   pendingLabel,
   pending = false,
   variant = "primary",
+  confirmDisabled = false,
+  children,
 }: {
   open: boolean;
   onClose: () => void;
@@ -24,6 +26,10 @@ export function ConfirmActionDialog({
   pendingLabel?: string;
   pending?: boolean;
   variant?: "primary" | "destructive";
+  /** Disables the confirm button beyond the `pending` state — e.g. while a required reason is empty. */
+  confirmDisabled?: boolean;
+  /** Extra content rendered between the header and the footer buttons — e.g. a reason textarea. */
+  children?: React.ReactNode;
 }) {
   useEffect(() => {
     if (!open) return;
@@ -58,6 +64,8 @@ export function ConfirmActionDialog({
             <X className="size-4" />
           </button>
         </div>
+        {children ? <div className="px-5 pt-4">{children}</div> : null}
+
         <div className="flex justify-end gap-2 px-5 py-4">
           <button
             type="button"
@@ -68,7 +76,7 @@ export function ConfirmActionDialog({
           </button>
           <button
             type="button"
-            disabled={pending}
+            disabled={pending || confirmDisabled}
             onClick={onConfirm}
             className={`rounded-md px-4 py-2 text-sm font-semibold transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40 ${
               variant === "destructive" ? "bg-destructive text-white" : "bg-primary text-primary-foreground"
