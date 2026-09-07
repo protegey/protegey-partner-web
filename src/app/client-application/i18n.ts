@@ -27,6 +27,8 @@ const STRINGS = {
 
   legalName: { en: "Legal name", fr: "Dénomination légale" },
   tradingName: { en: "Trading name (if applicable)", fr: "Nom commercial (le cas échéant)" },
+  country: { en: "Country", fr: "Pays" },
+  selectCountry: { en: "Select a country", fr: "Sélectionner un pays" },
   tradingAddress: { en: "Trading address", fr: "Adresse commerciale" },
   mailingAddress: { en: "Mailing address (if different)", fr: "Adresse postale (si différente)" },
   legalStatus: { en: "Legal status (e.g. limited company)", fr: "Statut juridique (ex. société à responsabilité limitée)" },
@@ -106,6 +108,19 @@ const STRINGS = {
   saved: { en: "Progress saved.", fr: "Progression enregistrée." },
   submit: { en: "Submit application", fr: "Soumettre le dossier" },
   submitting: { en: "Submitting…", fr: "Envoi en cours…" },
+  next: { en: "Next", fr: "Suivant" },
+  back: { en: "Back", fr: "Précédent" },
+  stepLabelPrefix: { en: "Step", fr: "Étape" },
+  stepLabelJoiner: { en: "of", fr: "sur" },
+  saveAndExit: { en: "Save & exit", fr: "Enregistrer et quitter" },
+  validationError: {
+    en: "Please complete all required fields before continuing.",
+    fr: "Veuillez compléter tous les champs obligatoires avant de continuer.",
+  },
+  documentRequiredError: {
+    en: "Please upload a supporting document before submitting.",
+    fr: "Veuillez téléverser un document justificatif avant de soumettre.",
+  },
   invalidToken: {
     en: "This application link is invalid or has expired.",
     fr: "Ce lien de dossier est invalide ou a expiré.",

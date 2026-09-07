@@ -4,6 +4,7 @@ import { ArrowLeft } from "lucide-react";
 import { getClient } from "../actions";
 import { ClientDecisionActions } from "./ClientDecisionActions";
 import { ClientDocumentPreview } from "./ClientDocumentPreview";
+import { ComplianceInfoButton } from "./ComplianceInfoButton";
 
 export const metadata: Metadata = {
   title: "Client application — Protegey Partner",
@@ -66,6 +67,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ c
           </div>
           <p className="text-sm text-muted-foreground">{client.contactEmail}</p>
         </div>
+        <ComplianceInfoButton businessName={client.legalName ?? client.contactName} />
       </div>
 
       {client.status === "rejected" && client.rejectionReason ? (
@@ -93,6 +95,14 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ c
             <div className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
               <Field label="Legal name" value={submission.generalInfo?.legalName} />
               <Field label="Trading name" value={submission.generalInfo?.tradingName} />
+              <Field
+                label="Country"
+                value={
+                  submission.generalInfo?.country
+                    ? (new Intl.DisplayNames(["en"], { type: "region" }).of(submission.generalInfo.country) ?? submission.generalInfo.country)
+                    : null
+                }
+              />
               <Field label="Legal status" value={submission.generalInfo?.legalStatus} />
               <Field label="Trading address" value={submission.generalInfo?.tradingAddress} />
               <Field label="Mailing address" value={submission.generalInfo?.mailingAddress} />

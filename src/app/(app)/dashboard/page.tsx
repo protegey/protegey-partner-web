@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { apiFetch, ApiError } from "@/lib/api";
 import { getSessionUser } from "@/lib/session";
+import { OrganizationLogo } from "@/components/OrganizationLogo";
 import { getTeamMembers } from "../team/actions";
 import { getClients } from "../clients/actions";
 import { DashboardCharts } from "./DashboardCharts";
@@ -18,6 +19,7 @@ interface Partner {
   country: string | null;
   rejectionReason: string | null;
   createdAt: string;
+  logoFileName: string | null;
 }
 
 function formatLabel(value: string): string {
@@ -73,7 +75,10 @@ export default async function DashboardPage() {
           {partner ? (
             <div className="rounded-md border border-border bg-card p-5">
               <p className="text-xs font-medium text-muted-foreground">Your organization</p>
-              <h2 className="mt-1 text-lg font-semibold text-foreground">{partner.name}</h2>
+              <div className="mt-1 flex items-center gap-3">
+                <OrganizationLogo logoUrl={partner.logoFileName ? "/api/partner-logo" : null} name={partner.name} size={40} />
+                <h2 className="text-lg font-semibold text-foreground">{partner.name}</h2>
+              </div>
               <div className="mt-3 flex flex-col gap-2 text-sm">
                 <div>
                   <span className="text-muted-foreground">Type: </span>

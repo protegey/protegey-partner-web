@@ -18,6 +18,8 @@ export interface ClientBusinessOwner {
 export interface GeneralInfoSection {
   legalName?: string | null;
   tradingName?: string | null;
+  /** ISO 3166-1 alpha-2 country code — the business's own country, not `countriesOfOperation`. */
+  country?: string | null;
   tradingAddress?: string | null;
   mailingAddress?: string | null;
   legalStatus?: string | null;
@@ -94,9 +96,14 @@ export interface ClientBusiness {
   submission?: ClientKybSubmission;
 }
 
-interface PaginatedClients {
+export type ClientStage = "invited" | "responded";
+
+export interface PaginatedClients {
   data: ClientBusiness[];
   total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
 }
 
 export interface ActionResult {
@@ -109,9 +116,21 @@ export interface InviteClientState {
   success?: boolean;
 }
 
+/** Summary use only (dashboard counts) — not paginated, capped at a generous limit. */
 export async function getClients(): Promise<ClientBusiness[]> {
   const result = await apiFetch<PaginatedClients>("/clients/me?limit=100");
   return result.data;
+}
+
+const CLIENTS_PAGE_SIZE = 10;
+
+export async function getClientsPage(params: { stage: ClientStage; page?: number }): Promise<PaginatedClients> {
+  const query = new URLSearchParams({
+    stage: params.stage,
+    page: String(params.page ?? 1),
+    limit: String(CLIENTS_PAGE_SIZE),
+  });
+  return apiFetch<PaginatedClients>(`/clients/me?${query.toString()}`);
 }
 
 export async function getClient(clientId: string): Promise<ClientBusiness> {
