@@ -33,10 +33,10 @@ async function loadPartner(): Promise<PartnerSummary | null> {
   }
 }
 
-// Only "Applications", "Invites" (both -> the Clients KYB feature), "Organization Profile" and
-// "Team Management" have real pages today. Everything else here is shown for the navigation
-// structure the product is heading towards, but marked disabled ("Soon") rather than faked with
-// a redirect to a page that doesn't exist yet.
+// Only "KYC" (UI-only, no backend enrollment data yet), "Applications"/"Invites" (both -> the
+// Clients KYB feature), "Organization Profile" and "Team Management" have real pages today.
+// Everything else here is shown for the navigation structure the product is heading towards,
+// but marked disabled ("Soon") rather than faked with a redirect to a page that doesn't exist yet.
 const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", label: "Dashboard", icon: <LayoutDashboard className="size-4" /> },
   {
@@ -53,7 +53,7 @@ const NAV_ITEMS: NavItem[] = [
     label: "Pan-ID™",
     icon: <IdCard className="size-4" />,
     children: [
-      { label: "KYC", disabled: true },
+      { href: "/kyc", label: "KYC" },
       { href: "/clients", label: "KYB" },
     ],
   },
