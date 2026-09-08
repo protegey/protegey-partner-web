@@ -92,10 +92,11 @@ export async function updateInvitationAction(
 ): Promise<UpdateInvitationState> {
   const firstName = String(formData.get("firstName") ?? "").trim();
   const lastName = String(formData.get("lastName") ?? "").trim();
+  const email = String(formData.get("email") ?? "").trim();
   const roleIds = formData.getAll("roleIds").map(String);
 
-  if (!firstName || !lastName) {
-    return { error: "First and last name are required." };
+  if (!firstName || !lastName || !email) {
+    return { error: "All fields are required." };
   }
   if (roleIds.length === 0) {
     return { error: "Select at least one role for this agent." };
@@ -104,7 +105,7 @@ export async function updateInvitationAction(
   try {
     await apiFetch(`/partners/me/team/invitations/${invitationId}`, {
       method: "PATCH",
-      body: { firstName, lastName, roleIds },
+      body: { firstName, lastName, email, roleIds },
     });
   } catch (error) {
     return { error: error instanceof ApiError ? error.message : "Something went wrong." };
