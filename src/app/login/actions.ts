@@ -36,6 +36,13 @@ export async function loginAction(_prevState: LoginState, formData: FormData): P
     return { error: "Something went wrong. Please try again." };
   }
 
+  if (!response.user.partnerId) {
+    return {
+      error:
+        "This is a Protegey administrator account, not a partner account. Please use the Protegey admin portal to sign in.",
+    };
+  }
+
   await setSessionCookies(response.accessToken, response.refreshToken, response.user);
   redirect("/dashboard");
 }
