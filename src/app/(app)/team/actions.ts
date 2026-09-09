@@ -8,6 +8,7 @@ export interface TeamMember {
   email: string;
   firstName: string;
   lastName: string;
+  phone: string | null;
   isActive: boolean;
   createdAt: string;
   roles: { name: string; displayName: string }[];
@@ -24,6 +25,7 @@ export interface PendingInvitation {
   email: string;
   firstName: string;
   lastName: string;
+  phone: string | null;
   expiresAt: string;
   roles: { name: string; displayName: string }[];
 }
@@ -93,9 +95,10 @@ export async function updateInvitationAction(
   const firstName = String(formData.get("firstName") ?? "").trim();
   const lastName = String(formData.get("lastName") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
   const roleIds = formData.getAll("roleIds").map(String);
 
-  if (!firstName || !lastName || !email) {
+  if (!firstName || !lastName || !email || !phone) {
     return { error: "All fields are required." };
   }
   if (roleIds.length === 0) {
@@ -105,7 +108,7 @@ export async function updateInvitationAction(
   try {
     await apiFetch(`/partners/me/team/invitations/${invitationId}`, {
       method: "PATCH",
-      body: { firstName, lastName, email, roleIds },
+      body: { firstName, lastName, email, phone, roleIds },
     });
   } catch (error) {
     return { error: error instanceof ApiError ? error.message : "Something went wrong." };
@@ -121,9 +124,10 @@ export async function inviteAgentAction(
   const firstName = String(formData.get("firstName") ?? "").trim();
   const lastName = String(formData.get("lastName") ?? "").trim();
   const email = String(formData.get("email") ?? "").trim();
+  const phone = String(formData.get("phone") ?? "").trim();
   const roleIds = formData.getAll("roleIds").map(String);
 
-  if (!firstName || !lastName || !email) {
+  if (!firstName || !lastName || !email || !phone) {
     return { error: "All fields are required." };
   }
   if (roleIds.length === 0) {
@@ -131,7 +135,7 @@ export async function inviteAgentAction(
   }
 
   try {
-    await apiFetch("/partners/me/team", { method: "POST", body: { firstName, lastName, email, roleIds } });
+    await apiFetch("/partners/me/team", { method: "POST", body: { firstName, lastName, email, phone, roleIds } });
   } catch (error) {
     if (error instanceof ApiError) {
       return { error: error.message };

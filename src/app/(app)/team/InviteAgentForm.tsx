@@ -58,7 +58,14 @@ export function InviteAgentForm({ roles, onSuccess }: { roles: AssignableRole[];
           type="email"
           placeholder="Email address"
           required
-          className="sm:col-span-2 rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+        />
+        <input
+          name="phone"
+          type="text"
+          placeholder="Phone"
+          required
+          className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
 

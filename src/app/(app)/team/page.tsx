@@ -49,7 +49,10 @@ export default async function TeamPage() {
                     <p className="text-foreground">
                       {invitation.firstName} {invitation.lastName}
                     </p>
-                    <p className="text-xs text-muted-foreground">{invitation.email}</p>
+                    <p className="text-xs text-muted-foreground">
+                      {invitation.email}
+                      {invitation.phone ? ` · ${invitation.phone}` : ""}
+                    </p>
                   </td>
                   <td className="px-4 py-2.5 text-muted-foreground">
                     {invitation.roles.map((role) => role.displayName).join(", ") || "—"}
@@ -84,7 +87,10 @@ export default async function TeamPage() {
                 <td className="px-4 py-2.5 text-foreground">
                   {member.firstName} {member.lastName}
                 </td>
-                <td className="px-4 py-2.5 text-muted-foreground">{member.email}</td>
+                <td className="px-4 py-2.5 text-muted-foreground">
+                  {member.email}
+                  {member.phone ? <span className="block text-xs">{member.phone}</span> : null}
+                </td>
                 <td className="px-4 py-2.5 text-muted-foreground">
                   {member.roles.map((role) => role.displayName).join(", ") || "—"}
                 </td>
