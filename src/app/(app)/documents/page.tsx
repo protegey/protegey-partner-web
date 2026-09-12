@@ -4,6 +4,7 @@ import { KybIllustration } from "@/components/KybIllustration";
 import { ReviewingIllustration } from "@/components/ReviewingIllustration";
 import { getMyDocuments } from "./actions";
 import { DocumentUploadRow } from "./DocumentUploadRow";
+import { DocumentUploadWizard } from "./DocumentUploadWizard";
 
 interface Partner {
   status: string;
@@ -90,11 +91,23 @@ export default async function DocumentsPage() {
         </div>
       ) : null}
 
-      <div className="flex flex-col gap-3">
-        {documents.map((document) => (
-          <DocumentUploadRow key={document.id} document={document} />
-        ))}
-      </div>
+      {documents.length > 0 ? (
+        <p className="text-xs text-muted-foreground">
+          <span className="text-destructive">*</span> Required document
+        </p>
+      ) : null}
+
+      <DocumentUploadWizard documents={documents} />
+
+      {documents.some((d) => d.status === "submitted" || d.status === "approved") ? (
+        <div className="flex flex-col gap-3">
+          {documents
+            .filter((d) => d.status === "submitted" || d.status === "approved")
+            .map((document) => (
+              <DocumentUploadRow key={document.id} document={document} />
+            ))}
+        </div>
+      ) : null}
     </div>
   );
 }

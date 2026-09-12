@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
-import { Eye, Upload } from "lucide-react";
+import { CheckCircle2, Eye } from "lucide-react";
 import { DocumentPreviewDialog } from "@/components/DocumentPreviewDialog";
 import { submitDocumentAction, type PartnerDocument, type SubmitDocumentState } from "./actions";
 
@@ -37,18 +37,10 @@ function formatLabel(value: string): string {
 
 const initialState: SubmitDocumentState = {};
 
-function UploadButton() {
+function UploadingIndicator() {
   const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
-    >
-      <Upload className="size-3.5" />
-      {pending ? "Uploading…" : "Upload"}
-    </button>
-  );
+  if (!pending) return null;
+  return <p className="mt-2 text-xs text-muted-foreground">Uploading…</p>;
 }
 
 export function DocumentUploadRow({ document }: { document: PartnerDocument }) {
@@ -73,6 +65,9 @@ export function DocumentUploadRow({ document }: { document: PartnerDocument }) {
         <div>
           <p className="text-sm font-medium text-foreground">
             {DOCUMENT_LABELS[document.type] ?? formatLabel(document.type)}
+            <span className="ml-0.5 text-destructive" title="Required">
+              *
+            </span>
           </p>
           {document.fileName ? (
             <button
@@ -100,24 +95,31 @@ export function DocumentUploadRow({ document }: { document: PartnerDocument }) {
       ) : null}
 
       {canUpload ? (
-        <form
-          ref={formRef}
-          action={formAction}
-          className="mt-3 flex items-center gap-2"
-        >
+        <form ref={formRef} action={formAction} className="mt-3">
           <input
             type="file"
             name="file"
             accept="application/pdf,image/jpeg,image/png"
             required
-            className="flex-1 text-xs text-muted-foreground file:mr-3 file:rounded-md file:border file:border-border file:bg-background file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-foreground hover:file:bg-muted"
+            onChange={(event) => {
+              // Uploads the moment a file is picked — no separate "Upload" click needed.
+              if (event.target.files && event.target.files.length > 0) {
+                formRef.current?.requestSubmit();
+              }
+            }}
+            className="w-full text-xs text-muted-foreground file:mr-3 file:rounded-md file:border file:border-border file:bg-background file:px-3 file:py-1.5 file:text-xs file:font-medium file:text-foreground hover:file:bg-muted"
           />
-          <UploadButton />
+          <UploadingIndicator />
         </form>
       ) : null}
 
       {state.error ? <p className="mt-2 text-xs text-destructive">{state.error}</p> : null}
-      {state.success ? <p className="mt-2 text-xs text-primary">Uploaded — awaiting review.</p> : null}
+      {state.success ? (
+        <p className="mt-2 flex items-center gap-1 text-xs text-primary">
+          <CheckCircle2 className="size-3.5" />
+          Uploaded — you can continue.
+        </p>
+      ) : null}
 
       {document.fileName ? (
         <DocumentPreviewDialog
