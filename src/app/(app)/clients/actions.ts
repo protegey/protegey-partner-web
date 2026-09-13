@@ -68,6 +68,31 @@ export interface DisclosuresSection {
   amlCivilOrCriminalProceedings?: YesNoAnswer | null;
 }
 
+export interface ScreeningMatch {
+  id: string;
+  name: string;
+  source: string;
+  score: number;
+  matchedOn: string;
+}
+
+export interface ScreeningResultEntry {
+  decision: "blocked" | "review" | "clear";
+  score: number;
+  matches: ScreeningMatch[];
+}
+
+export interface OwnerScreeningResult extends ScreeningResultEntry {
+  ownerName: string;
+  ownershipPercent: number | null;
+}
+
+export interface ScreeningResultSnapshot {
+  business: ScreeningResultEntry;
+  owners: OwnerScreeningResult[];
+  screenedAt: string;
+}
+
 export interface ClientKybSubmission {
   id: string;
   status: ClientKybSubmissionStatus;
@@ -81,6 +106,7 @@ export interface ClientKybSubmission {
   reviewedAt: string | null;
   moreInfoNote: string | null;
   rejectionReason: string | null;
+  screeningResult: ScreeningResultSnapshot | null;
 }
 
 export interface ClientBusiness {
