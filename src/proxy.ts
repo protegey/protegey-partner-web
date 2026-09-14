@@ -18,6 +18,7 @@ const ALLOWED_WHILE_UNVERIFIED = ["/documents", "/settings", "/api"];
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL ?? "http://localhost:3000";
 
+
 async function isPartnerActive(accessToken: string): Promise<boolean> {
   try {
     const response = await fetch(`${BACKEND_API_URL}/partners/me`, {
