@@ -71,7 +71,14 @@ export interface DisclosuresSection {
 export interface ScreeningMatch {
   id: string;
   name: string;
+  type: string;
   source: string;
+  sourceId: string | null;
+  aliases: string[];
+  dateOfBirth: string | null;
+  nationality: string | null;
+  listingDate: string | null;
+  notes: string | null;
   score: number;
   matchedOn: string;
 }

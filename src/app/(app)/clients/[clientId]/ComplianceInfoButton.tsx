@@ -1,13 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { ShieldCheck, ShieldAlert, ShieldX, ShieldQuestion } from "lucide-react";
+import { ShieldCheck, ShieldAlert, ShieldX, ShieldQuestion, ChevronDown, ChevronRight } from "lucide-react";
 import { Drawer } from "@/components/Drawer";
 
 interface ScreeningMatch {
   id: string;
   name: string;
+  type: string;
   source: string;
+  sourceId: string | null;
+  aliases: string[];
+  dateOfBirth: string | null;
+  nationality: string | null;
+  listingDate: string | null;
+  notes: string | null;
   score: number;
   matchedOn: string;
 }
@@ -35,6 +42,19 @@ const DECISION_CONFIG: Record<string, { label: string; color: string; icon: type
   clear: { label: "Clear", color: "text-primary", icon: ShieldCheck },
 };
 
+const COUNTRY_FLAGS: Record<string, string> = {
+  NG: "\u{1F1F3}\u{1F1EC}", ZA: "\u{1F1FF}\u{1F1E6}", KE: "\u{1F1F0}\u{1F1EA}",
+  GH: "\u{1F1EC}\u{1F1ED}", EG: "\u{1F1EA}\u{1F1EC}", US: "\u{1F1FA}\u{1F1F8}",
+  GB: "\u{1F1EC}\u{1F1E7}", FR: "\u{1F1EB}\u{1F1F7}", DE: "\u{1F1E9}\u{1F1EA}",
+  SA: "\u{1F1F8}\u{1F1E6}", AE: "\u{1F1E6}\u{1F1EA}", IN: "\u{1F1EE}\u{1F1F3}",
+  CN: "\u{1F1E8}\u{1F1F3}", RU: "\u{1F1F7}\u{1F1FA}", BR: "\u{1F1E7}\u{1F1F7}",
+};
+
+function countryFlag(code: string | null): string {
+  if (!code) return "";
+  return COUNTRY_FLAGS[code.toUpperCase()] ?? "";
+}
+
 function DecisionBadge({ decision }: { decision: string }) {
   const config = DECISION_CONFIG[decision] ?? DECISION_CONFIG.clear;
   const Icon = config.icon;
@@ -46,18 +66,64 @@ function DecisionBadge({ decision }: { decision: string }) {
   );
 }
 
-function MatchList({ matches }: { matches: ScreeningMatch[] }) {
-  if (matches.length === 0) return <p className="text-xs text-muted-foreground">No matches found</p>;
+function Field({ label, value }: { label: string; value: React.ReactNode }) {
+  if (!value) return null;
   return (
-    <div className="flex flex-col gap-1.5">
-      {matches.map((m) => (
-        <div key={m.id} className="flex items-center justify-between rounded bg-muted/50 px-2.5 py-1.5 text-xs">
-          <span className="font-medium text-foreground">{m.name}</span>
-          <span className="text-muted-foreground">
-            {(m.score * 100).toFixed(0)}% · {m.source}
-          </span>
+    <div>
+      <p className="text-[10px] font-medium text-muted-foreground uppercase">{label}</p>
+      <p className="text-xs text-foreground">{value}</p>
+    </div>
+  );
+}
+
+function MatchCard({ match }: { match: ScreeningMatch }) {
+  const [expanded, setExpanded] = useState(false);
+  const flag = countryFlag(match.nationality);
+  let countryName = match.nationality;
+  try {
+    if (match.nationality) countryName = new Intl.DisplayNames(["en"], { type: "region" }).of(match.nationality) ?? match.nationality;
+  } catch {}
+
+  return (
+    <div className="rounded-md border border-border bg-muted/30 p-2.5">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium text-foreground truncate">{match.name}</p>
+          <div className="mt-0.5 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+            <span className="uppercase font-medium">{match.source}</span>
+            {match.sourceId && <span>· {match.sourceId}</span>}
+            <span>· {(match.score * 100).toFixed(0)}%</span>
+            <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px]">{match.type}</span>
+          </div>
         </div>
-      ))}
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="shrink-0 text-muted-foreground hover:text-foreground"
+        >
+          {expanded ? <ChevronDown className="size-4" /> : <ChevronRight className="size-4" />}
+        </button>
+      </div>
+
+      {expanded && (
+        <div className="mt-2.5 space-y-2 border-t border-border pt-2.5">
+          <div className="grid grid-cols-2 gap-2">
+            {match.nationality && (
+              <Field label="Nationality" value={<span className="inline-flex items-center gap-1">{flag && <span>{flag}</span>} {countryName}</span>} />
+            )}
+            {match.dateOfBirth && <Field label="Date of birth" value={match.dateOfBirth} />}
+            {match.listingDate && <Field label="Listed on" value={match.listingDate} />}
+            {match.aliases.length > 0 && (
+              <Field label="Aliases" value={match.aliases.join(", ")} />
+            )}
+          </div>
+          {match.notes && (
+            <div>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase">Notes</p>
+              <p className="text-xs text-foreground">{match.notes}</p>
+            </div>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -70,7 +136,15 @@ function ScreeningSection({ title, result }: { title: string; result: ScreeningR
         <DecisionBadge decision={result.decision} />
       </div>
       <p className="text-xs text-muted-foreground">Score: {(result.score * 100).toFixed(0)}%</p>
-      <MatchList matches={result.matches} />
+      {result.matches.length === 0 ? (
+        <p className="text-xs text-muted-foreground">No matches found</p>
+      ) : (
+        <div className="flex flex-col gap-1.5">
+          {result.matches.map((m) => (
+            <MatchCard key={m.id} match={m} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -125,8 +199,13 @@ export function ComplianceInfoButton({
                       <DecisionBadge decision={owner.decision} />
                     </div>
                     <p className="text-xs text-muted-foreground">Score: {(owner.score * 100).toFixed(0)}%</p>
-                    <div className="mt-1.5">
-                      <MatchList matches={owner.matches} />
+                    <div className="mt-1.5 flex flex-col gap-1.5">
+                      {owner.matches.map((m) => (
+                        <MatchCard key={m.id} match={m} />
+                      ))}
+                      {owner.matches.length === 0 && (
+                        <p className="text-xs text-muted-foreground">No matches found</p>
+                      )}
                     </div>
                   </div>
                 ))}
