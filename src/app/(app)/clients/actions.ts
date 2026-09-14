@@ -201,6 +201,11 @@ export async function resendClientInvitationAction(clientId: string): Promise<Ac
   return { success: true };
 }
 
+/** Live sanctions-database lookup for this client's business name + beneficial owners. */
+export async function screenClientAction(clientId: string): Promise<ScreeningResultSnapshot> {
+  return apiFetch<ScreeningResultSnapshot>(`/clients/me/${clientId}/screen`);
+}
+
 export async function decideClientSubmissionAction(
   clientId: string,
   decision: "approve" | "reject" | "request_more_info",

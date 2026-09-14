@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { ShieldCheck, ShieldAlert, ShieldX, ShieldQuestion, ChevronDown, ChevronRight } from "lucide-react";
+import { ShieldCheck, ShieldAlert, ShieldX, ShieldQuestion, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
 import { Drawer } from "@/components/Drawer";
+import { screenClientAction } from "../actions";
 
 interface ScreeningMatch {
   id: string;
@@ -150,19 +151,32 @@ function ScreeningSection({ title, result }: { title: string; result: ScreeningR
 }
 
 export function ComplianceInfoButton({
+  clientId,
   businessName,
-  screeningResult,
 }: {
+  clientId: string;
   businessName: string;
-  screeningResult: ScreeningResultSnapshot | null;
 }) {
   const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(false);
+  const [screeningResult, setScreeningResult] = useState<ScreeningResultSnapshot | null>(null);
+
+  function handleOpen() {
+    setOpen(true);
+    setLoading(true);
+    setError(false);
+    screenClientAction(clientId)
+      .then(setScreeningResult)
+      .catch(() => setError(true))
+      .finally(() => setLoading(false));
+  }
 
   return (
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={handleOpen}
         className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
       >
         <ShieldCheck className="size-4" />
@@ -170,12 +184,17 @@ export function ComplianceInfoButton({
       </button>
 
       <Drawer open={open} onClose={() => setOpen(false)} title={`Compliance info — ${businessName}`}>
-        {!screeningResult ? (
+        {loading ? (
+          <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
+            <Loader2 className="size-8 animate-spin text-muted-foreground" />
+            <p className="text-sm text-muted-foreground">Checking the sanctions database…</p>
+          </div>
+        ) : error || !screeningResult ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
             <ShieldQuestion className="size-10 text-muted-foreground" />
-            <p className="text-lg font-semibold text-foreground">Not yet screened</p>
+            <p className="text-lg font-semibold text-foreground">Screening unavailable</p>
             <p className="max-w-sm text-sm text-muted-foreground">
-              Screening will run automatically when the client submits their application.
+              Couldn&apos;t reach the sanctions database right now. Please try again.
             </p>
           </div>
         ) : (

@@ -67,10 +67,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ c
           </div>
           <p className="text-sm text-muted-foreground">{client.contactEmail}</p>
         </div>
-        <ComplianceInfoButton
-          businessName={client.legalName ?? client.contactName}
-          screeningResult={submission?.screeningResult ?? null}
-        />
+        <ComplianceInfoButton clientId={client.id} businessName={client.legalName ?? client.contactName} />
       </div>
 
       {client.status === "rejected" && client.rejectionReason ? (
