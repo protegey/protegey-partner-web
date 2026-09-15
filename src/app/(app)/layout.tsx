@@ -5,6 +5,7 @@ import {
   IdCard,
   Activity,
   KeyRound,
+  ShieldCheck,
   Settings as SettingsIcon,
   MoreHorizontal,
 } from "lucide-react";
@@ -56,6 +57,11 @@ const NAV_ITEMS: NavItem[] = [
       { href: "/kyc", label: "KYC" },
       { href: "/clients", label: "KYB" },
     ],
+  },
+  {
+    label: "Sanctions",
+    icon: <ShieldCheck className="size-4" />,
+    children: [{ href: "/sanctions", label: "Sanctions List" }],
   },
   {
     label: "Pan-Monitor™",
