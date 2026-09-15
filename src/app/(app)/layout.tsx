@@ -79,7 +79,7 @@ const NAV_ITEMS: NavItem[] = [
     label: "Partner Integrations",
     icon: <KeyRound className="size-4" />,
     children: [
-      { label: "API Keys" },
+      { label: "API Keys", href: "/settings" },
       { label: "Integration Guide", disabled: true },
       { label: "Integration Health", disabled: true },
       { label: "Webhooks", disabled: true },
