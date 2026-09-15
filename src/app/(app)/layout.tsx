@@ -7,7 +7,8 @@ import {
   KeyRound,
   ShieldCheck,
   Settings as SettingsIcon,
-}, MoreHorizontal from "lucide-react";
+  MoreHorizontal,
+} from "lucide-react";
 import { Sidebar, type NavItem } from "@/components/Sidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/Logo";
