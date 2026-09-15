@@ -1,14 +1,15 @@
 import type { Metadata } from "next";
 import { getSessionUser } from "@/lib/session";
-import { getPartnerSettings } from "./actions";
+import { getPartnerSettings, getApiCredentials } from "./actions";
 import { LogoUploadForm } from "./LogoUploadForm";
+import { ApiAccessSection } from "./ApiAccessSection";
 
 export const metadata: Metadata = {
   title: "Settings — Protegey Partner",
 };
 
 export default async function SettingsPage() {
-  const [user, partner] = await Promise.all([getSessionUser(), getPartnerSettings()]);
+  const [user, partner, credentials] = await Promise.all([getSessionUser(), getPartnerSettings(), getApiCredentials()]);
   const canManageSettings = user?.permissions.includes("partners.manage_settings") ?? false;
 
   return (
@@ -22,6 +23,8 @@ export default async function SettingsPage() {
         <p className="mb-3 text-sm font-semibold text-foreground">Organization logo</p>
         <LogoUploadForm organizationName={partner.name} hasLogo={Boolean(partner.logoFileName)} canManage={canManageSettings} />
       </div>
+
+      <ApiAccessSection credentials={credentials} canManage={canManageSettings} />
     </div>
   );
 }
