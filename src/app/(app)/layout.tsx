@@ -80,11 +80,6 @@ const NAV_ITEMS: NavItem[] = [
     icon: <KeyRound className="size-4" />,
     children: [
       { label: "API Keys", href: "/settings" },
-      { label: "Integration Guide", disabled: true },
-      { label: "Integration Health", disabled: true },
-      { label: "Webhooks", disabled: true },
-      { label: "Quota & Status", disabled: true },
-      { label: "Documentation", disabled: true },
     ],
   },
   {
