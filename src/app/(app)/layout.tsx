@@ -82,7 +82,6 @@ const NAV_ITEMS: NavItem[] = [
       { label: "API Keys", href: "/settings" },
       { label: "Integration Guide", href: "/integration-guide" },
       { label: "Integration Health", disabled: true },
-      { label: "Quota & Status", disabled: true },
       { label: "Documentation", disabled: true },
     ],
   },
