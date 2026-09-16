@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, apiFetchGuarded, type AuthExpired } from "@/lib/api";
 
 export type DiditSessionStatus =
   | "Not Started"
@@ -41,6 +41,16 @@ export async function getKycEnrollments(params: { page?: number; status?: DiditS
   const query = new URLSearchParams({ page: String(params.page ?? 1), limit: "20" });
   if (params.status) query.set("status", params.status);
   return apiFetch<PaginatedKycEnrollments>(`/kyc/me/sessions?${query.toString()}`);
+}
+
+export interface KycEnrollmentDetail extends KycEnrollment {
+  /** Full Didit V3 decision payload, verbatim — images, AML hits, IP/device, everything. */
+  decision: Record<string, unknown> | null;
+}
+
+/** Fetched on demand when the partner opens a row's detail panel — not included in the list. */
+export async function getKycEnrollmentDetail(id: string): Promise<KycEnrollmentDetail | AuthExpired> {
+  return apiFetchGuarded<KycEnrollmentDetail>(`/kyc/me/sessions/${id}`);
 }
 
 export interface StartKycSessionState {
