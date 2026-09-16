@@ -22,6 +22,10 @@ export interface KycEnrollment {
   sessionUrl: string | null;
   country: string | null;
   livenessScore: number | null;
+  faceMatchScore: number | null;
+  amlRiskScore: number | null;
+  amlTotalHits: number | null;
+  documentType: string | null;
   createdAt: string;
 }
 

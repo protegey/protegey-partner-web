@@ -14,6 +14,7 @@ export function KycDashboardTab({ enrollments, total }: { enrollments: KycEnroll
       accent: "border-t-amber-500",
     },
     { label: "Declined", value: countByStatus(enrollments, ["Declined", "Abandoned", "Expired"]), accent: "border-t-destructive" },
+    { label: "AML flags", value: enrollments.filter((e) => (e.amlTotalHits ?? 0) > 0).length, accent: "border-t-red-500" },
   ];
 
   return (
@@ -23,7 +24,7 @@ export function KycDashboardTab({ enrollments, total }: { enrollments: KycEnroll
         <p className="text-sm text-muted-foreground">Identity verification sessions started through Didit.</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
         {cards.map((card) => (
           <div key={card.label} className={`rounded-md border border-border border-t-2 bg-card p-4 ${card.accent}`}>
             <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">{card.label}</p>

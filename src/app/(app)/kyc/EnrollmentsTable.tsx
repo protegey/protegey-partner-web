@@ -25,16 +25,35 @@ function StatusBadge({ status }: { status: DiditSessionStatus }) {
   );
 }
 
+function ScoreCell({ score }: { score: number | null }) {
+  if (score == null) return <span className="text-muted-foreground">—</span>;
+  return <span className="text-foreground">{score.toFixed(0)}%</span>;
+}
+
+function AmlCell({ riskScore, totalHits }: { riskScore: number | null; totalHits: number | null }) {
+  if (!totalHits) return <span className="text-xs text-muted-foreground">Clear</span>;
+  const color = (riskScore ?? 0) >= 66 ? "text-destructive" : (riskScore ?? 0) >= 33 ? "text-amber-600" : "text-foreground";
+  return (
+    <span className={`text-xs font-medium ${color}`}>
+      {totalHits} hit{totalHits > 1 ? "s" : ""}
+      {riskScore != null ? ` · risk ${riskScore.toFixed(0)}` : ""}
+    </span>
+  );
+}
+
 export function EnrollmentsTable({ enrollments }: { enrollments: KycEnrollment[] }) {
   return (
-    <div className="rounded-md border border-border">
+    <div className="overflow-x-auto rounded-md border border-border">
       <table className="w-full text-left text-sm">
         <thead className="bg-muted text-muted-foreground">
           <tr>
             <th className="px-4 py-2.5 font-medium">Name</th>
             <th className="px-4 py-2.5 font-medium">Status</th>
             <th className="px-4 py-2.5 font-medium">Country</th>
-            <th className="px-4 py-2.5 font-medium">Liveness score</th>
+            <th className="px-4 py-2.5 font-medium">Document</th>
+            <th className="px-4 py-2.5 font-medium">Liveness</th>
+            <th className="px-4 py-2.5 font-medium">Face match</th>
+            <th className="px-4 py-2.5 font-medium">AML</th>
             <th className="px-4 py-2.5 font-medium">Started</th>
             <th className="px-4 py-2.5 font-medium text-right">Link</th>
           </tr>
@@ -42,7 +61,7 @@ export function EnrollmentsTable({ enrollments }: { enrollments: KycEnrollment[]
         <tbody className="divide-y divide-border">
           {enrollments.length === 0 ? (
             <tr>
-              <td colSpan={6} className="px-4 py-6 text-center text-muted-foreground">
+              <td colSpan={9} className="px-4 py-6 text-center text-muted-foreground">
                 No verification sessions yet.
               </td>
             </tr>
@@ -54,8 +73,15 @@ export function EnrollmentsTable({ enrollments }: { enrollments: KycEnrollment[]
                   <StatusBadge status={e.status} />
                 </td>
                 <td className="px-4 py-2.5 text-muted-foreground">{e.country ?? "—"}</td>
-                <td className="px-4 py-2.5 text-muted-foreground">
-                  {e.livenessScore != null ? `${e.livenessScore.toFixed(0)}%` : "—"}
+                <td className="px-4 py-2.5 text-muted-foreground">{e.documentType ?? "—"}</td>
+                <td className="px-4 py-2.5">
+                  <ScoreCell score={e.livenessScore} />
+                </td>
+                <td className="px-4 py-2.5">
+                  <ScoreCell score={e.faceMatchScore} />
+                </td>
+                <td className="px-4 py-2.5">
+                  <AmlCell riskScore={e.amlRiskScore} totalHits={e.amlTotalHits} />
                 </td>
                 <td className="px-4 py-2.5 text-muted-foreground">{new Date(e.createdAt).toLocaleString()}</td>
                 <td className="px-4 py-2.5 text-right">
