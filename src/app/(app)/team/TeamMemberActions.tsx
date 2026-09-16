@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
+import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { setAgentStatusAction, sendPasswordResetAction } from "./actions";
 
 export function TeamMemberActions({
@@ -15,6 +16,7 @@ export function TeamMemberActions({
   isSelf: boolean;
 }) {
   const router = useRouter();
+  const guard = useSessionGuard();
   const [statusOpen, setStatusOpen] = useState(false);
   const [statusPending, setStatusPending] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
@@ -31,8 +33,9 @@ export function TeamMemberActions({
   async function handleStatusConfirm() {
     setStatusPending(true);
     setStatusError(null);
-    const result = await setAgentStatusAction(userId, !isActive);
+    const result = await guard(() => setAgentStatusAction(userId, !isActive));
     setStatusPending(false);
+    if (!result) return;
     if (result.error) {
       setStatusError(result.error);
       return;
@@ -44,8 +47,9 @@ export function TeamMemberActions({
   async function handleResetConfirm() {
     setResetPending(true);
     setResetError(null);
-    const result = await sendPasswordResetAction(userId);
+    const result = await guard(() => sendPasswordResetAction(userId));
     setResetPending(false);
+    if (!result) return;
     if (result.error) {
       setResetError(result.error);
       return;

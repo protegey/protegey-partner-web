@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiFetch, apiUpload, ApiError } from "@/lib/api";
+import { apiFetch, apiUpload, ApiError, type AuthExpired } from "@/lib/api";
 
 export interface PartnerSettings {
   id: string;
@@ -18,7 +18,7 @@ export async function getPartnerSettings(): Promise<PartnerSettings> {
   return apiFetch<PartnerSettings>("/partners/me");
 }
 
-export async function uploadLogoAction(formData: FormData): Promise<ActionResult> {
+export async function uploadLogoAction(formData: FormData): Promise<ActionResult | AuthExpired> {
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
     return { error: "Please choose an image to upload." };
@@ -30,6 +30,7 @@ export async function uploadLogoAction(formData: FormData): Promise<ActionResult
   try {
     await apiUpload("/partners/me/logo", uploadForm);
   } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return { authExpired: true };
     return { error: error instanceof ApiError ? error.message : "Something went wrong." };
   }
   revalidatePath("/settings");
@@ -37,10 +38,11 @@ export async function uploadLogoAction(formData: FormData): Promise<ActionResult
   return { success: true };
 }
 
-export async function removeLogoAction(): Promise<ActionResult> {
+export async function removeLogoAction(): Promise<ActionResult | AuthExpired> {
   try {
     await apiFetch("/partners/me/logo", { method: "DELETE" });
   } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return { authExpired: true };
     return { error: error instanceof ApiError ? error.message : "Something went wrong." };
   }
   revalidatePath("/settings");
@@ -67,17 +69,18 @@ export async function getApiCredentials(): Promise<ApiCredentialSummary> {
   return apiFetch<ApiCredentialSummary>("/partners/me/api-credentials");
 }
 
-export async function generateApiKeyAction(): Promise<GenerateApiKeyResult> {
+export async function generateApiKeyAction(): Promise<GenerateApiKeyResult | AuthExpired> {
   try {
     const { apiKey } = await apiFetch<{ apiKey: string }>("/partners/me/api-credentials", { method: "POST" });
     revalidatePath("/settings");
     return { success: true, apiKey };
   } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return { authExpired: true };
     return { error: error instanceof ApiError ? error.message : "Something went wrong." };
   }
 }
 
-export async function configureWebhookAction(url: string): Promise<ConfigureWebhookResult> {
+export async function configureWebhookAction(url: string): Promise<ConfigureWebhookResult | AuthExpired> {
   try {
     const { webhookSecret } = await apiFetch<{ webhookSecret: string }>("/partners/me/api-credentials/webhook", {
       method: "PATCH",
@@ -86,6 +89,7 @@ export async function configureWebhookAction(url: string): Promise<ConfigureWebh
     revalidatePath("/settings");
     return { success: true, webhookSecret };
   } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return { authExpired: true };
     return { error: error instanceof ApiError ? error.message : "Something went wrong." };
   }
 }

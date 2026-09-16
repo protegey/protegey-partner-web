@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api";
 
 export type ClientBusinessStatus = "invited" | "pending_review" | "more_info_required" | "active" | "rejected";
 export type ClientKybSubmissionStatus = "pending" | "submitted" | "more_info_required" | "approved" | "rejected";
@@ -191,10 +191,11 @@ export async function inviteClientAction(
   return { success: true };
 }
 
-export async function resendClientInvitationAction(clientId: string): Promise<ActionResult> {
+export async function resendClientInvitationAction(clientId: string): Promise<ActionResult | AuthExpired> {
   try {
     await apiFetch(`/clients/me/${clientId}/resend-invitation`, { method: "POST" });
   } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return { authExpired: true };
     return { error: error instanceof ApiError ? error.message : "Something went wrong." };
   }
   revalidatePath("/clients");
@@ -202,15 +203,15 @@ export async function resendClientInvitationAction(clientId: string): Promise<Ac
 }
 
 /** Live sanctions-database lookup for this client's business name + beneficial owners. */
-export async function screenClientAction(clientId: string): Promise<ScreeningResultSnapshot> {
-  return apiFetch<ScreeningResultSnapshot>(`/clients/me/${clientId}/screen`);
+export async function screenClientAction(clientId: string): Promise<ScreeningResultSnapshot | AuthExpired> {
+  return apiFetchGuarded<ScreeningResultSnapshot>(`/clients/me/${clientId}/screen`);
 }
 
 export async function decideClientSubmissionAction(
   clientId: string,
   decision: "approve" | "reject" | "request_more_info",
   detail?: string,
-): Promise<ActionResult> {
+): Promise<ActionResult | AuthExpired> {
   try {
     await apiFetch(`/clients/me/${clientId}/decision`, {
       method: "PATCH",
@@ -221,6 +222,7 @@ export async function decideClientSubmissionAction(
       },
     });
   } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return { authExpired: true };
     return { error: error instanceof ApiError ? error.message : "Something went wrong." };
   }
   revalidatePath("/clients");

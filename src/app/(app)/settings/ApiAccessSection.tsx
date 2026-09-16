@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Check, Copy } from "lucide-react";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
+import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { generateApiKeyAction, configureWebhookAction, type ApiCredentialSummary } from "./actions";
 
 function CopyRevealField({ label, value }: { label: string; value: string }) {
@@ -50,6 +51,7 @@ export function ApiAccessSection({
   canManage: boolean;
 }) {
   const router = useRouter();
+  const guard = useSessionGuard();
   const [confirmRegenerateOpen, setConfirmRegenerateOpen] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [revealedKey, setRevealedKey] = useState<string | null>(null);
@@ -62,9 +64,10 @@ export function ApiAccessSection({
   async function handleGenerate() {
     setGenerating(true);
     setError(null);
-    const result = await generateApiKeyAction();
+    const result = await guard(() => generateApiKeyAction());
     setGenerating(false);
     setConfirmRegenerateOpen(false);
+    if (!result) return;
     if (result.error || !result.apiKey) {
       setError(result.error ?? "Something went wrong.");
       return;
@@ -77,8 +80,9 @@ export function ApiAccessSection({
     e.preventDefault();
     setSavingWebhook(true);
     setError(null);
-    const result = await configureWebhookAction(webhookUrl);
+    const result = await guard(() => configureWebhookAction(webhookUrl));
     setSavingWebhook(false);
+    if (!result) return;
     if (result.error || !result.webhookSecret) {
       setError(result.error ?? "Something went wrong.");
       return;

@@ -18,6 +18,7 @@ import { KybWelcomeModal } from "./KybWelcomeModal";
 import { getSessionUser } from "@/lib/session";
 import { apiFetch, ApiError } from "@/lib/api";
 import { OrganizationLogo } from "@/components/OrganizationLogo";
+import { SessionExpiredProvider } from "@/components/SessionExpiredProvider";
 
 interface PartnerSummary {
   name: string;
@@ -114,29 +115,31 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const active = partner?.status === "active";
 
   return (
-    <div className="flex h-svh bg-background">
-      <Sidebar
-        navItems={NAV_ITEMS}
-        footer={
-          <div className="flex flex-col">
-            <ActivationProgress status={partner?.status ?? "active"} />
-            <div className="flex flex-col gap-3 pt-3">
-              {partner ? (
-                <div className="flex items-center gap-2 px-1">
-                  <OrganizationLogo logoUrl={partner.logoFileName ? "/api/partner-logo" : null} name={partner.name} size={28} />
-                  <p className="truncate text-sm font-medium text-foreground">{partner.name}</p>
+    <SessionExpiredProvider>
+      <div className="flex h-svh bg-background">
+        <Sidebar
+          navItems={NAV_ITEMS}
+          footer={
+            <div className="flex flex-col">
+              <ActivationProgress status={partner?.status ?? "active"} />
+              <div className="flex flex-col gap-3 pt-3">
+                {partner ? (
+                  <div className="flex items-center gap-2 px-1">
+                    <OrganizationLogo logoUrl={partner.logoFileName ? "/api/partner-logo" : null} name={partner.name} size={28} />
+                    <p className="truncate text-sm font-medium text-foreground">{partner.name}</p>
+                  </div>
+                ) : null}
+                <p className="truncate px-1 text-xs text-muted-foreground">{user?.email}</p>
+                <div className="flex items-center gap-2">
+                  <ThemeToggle />
+                  <SignOutButton className="rounded-md border border-border px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-muted" />
                 </div>
-              ) : null}
-              <p className="truncate px-1 text-xs text-muted-foreground">{user?.email}</p>
-              <div className="flex items-center gap-2">
-                <ThemeToggle />
-                <SignOutButton className="rounded-md border border-border px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-muted" />
               </div>
             </div>
-          </div>
-        }
-      />
-      <main className="relative flex-1 overflow-y-auto px-8 py-8">{children}</main>
-    </div>
+          }
+        />
+        <main className="relative flex-1 overflow-y-auto px-8 py-8">{children}</main>
+      </div>
+    </SessionExpiredProvider>
   );
 }

@@ -3,12 +3,14 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
+import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { decideClientSubmissionAction } from "../actions";
 
 type Decision = "approve" | "reject" | "request_more_info" | null;
 
 export function ClientDecisionActions({ clientId }: { clientId: string }) {
   const router = useRouter();
+  const guard = useSessionGuard();
   const [confirmDecision, setConfirmDecision] = useState<Decision>(null);
   const [detail, setDetail] = useState("");
   const [pending, setPending] = useState(false);
@@ -24,8 +26,9 @@ export function ClientDecisionActions({ clientId }: { clientId: string }) {
     if (!confirmDecision) return;
     setPending(true);
     setError(null);
-    const result = await decideClientSubmissionAction(clientId, confirmDecision, detail.trim() || undefined);
+    const result = await guard(() => decideClientSubmissionAction(clientId, confirmDecision, detail.trim() || undefined));
     setPending(false);
+    if (!result) return; // dialog was cancelled — leave the confirm dialog open as-is
     if (result.error) {
       setError(result.error);
       return;

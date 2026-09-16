@@ -1,48 +1,23 @@
 "use server";
 
 import { redirect } from "next/navigation";
-import { apiFetch, ApiError } from "@/lib/api";
-import { setSessionCookies, type SessionUser } from "@/lib/session";
+import { performLogin } from "@/lib/auth-actions";
 
 export interface LoginState {
   error?: string;
 }
 
-interface LoginResponse {
-  accessToken: string;
-  refreshToken: string;
-  user: SessionUser;
-}
-
 export async function loginAction(_prevState: LoginState, formData: FormData): Promise<LoginState> {
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
+  const returnTo = String(formData.get("returnTo") ?? "").trim();
 
-  if (!email || !password) {
-    return { error: "Please enter your email and password." };
+  const result = await performLogin(email, password);
+  if (result.error) {
+    return { error: result.error };
   }
 
-  let response: LoginResponse;
-  try {
-    response = await apiFetch<LoginResponse>("/auth/login", {
-      method: "POST",
-      body: { email, password },
-      unauthenticated: true,
-    });
-  } catch (error) {
-    if (error instanceof ApiError && (error.status === 401 || error.status === 403)) {
-      return { error: "Incorrect email or password." };
-    }
-    return { error: "Something went wrong. Please try again." };
-  }
-
-  if (!response.user.partnerId) {
-    return {
-      error:
-        "This is a Protegey administrator account, not a partner account. Please use the Protegey admin portal to sign in.",
-    };
-  }
-
-  await setSessionCookies(response.accessToken, response.refreshToken, response.user);
-  redirect("/dashboard");
+  // Only ever redirect back into our own app tree — an absolute or protocol-relative
+  // returnTo would let a crafted login link send the user somewhere else after signing in.
+  redirect(returnTo.startsWith("/") && !returnTo.startsWith("//") ? returnTo : "/dashboard");
 }

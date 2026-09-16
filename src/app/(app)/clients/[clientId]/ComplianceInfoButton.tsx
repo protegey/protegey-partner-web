@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ShieldCheck, ShieldAlert, ShieldX, ShieldQuestion, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
 import { Drawer } from "@/components/Drawer";
+import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { screenClientAction } from "../actions";
 
 interface ScreeningMatch {
@@ -161,15 +162,21 @@ export function ComplianceInfoButton({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
   const [screeningResult, setScreeningResult] = useState<ScreeningResultSnapshot | null>(null);
+  const guard = useSessionGuard();
 
-  function handleOpen() {
+  async function handleOpen() {
     setOpen(true);
     setLoading(true);
     setError(false);
-    screenClientAction(clientId)
-      .then(setScreeningResult)
-      .catch(() => setError(true))
-      .finally(() => setLoading(false));
+    try {
+      const result = await guard(() => screenClientAction(clientId));
+      if (result) setScreeningResult(result);
+      else setError(true);
+    } catch {
+      setError(true);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (

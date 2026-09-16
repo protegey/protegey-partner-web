@@ -8,7 +8,9 @@ export const metadata: Metadata = {
   title: "Sign in — Protegey Partner",
 };
 
-export default function LoginPage() {
+export default async function LoginPage({ searchParams }: { searchParams: Promise<{ returnTo?: string }> }) {
+  const { returnTo } = await searchParams;
+
   return (
     <div className="relative flex min-h-svh bg-background">
       <div className="absolute top-4 right-4 z-10">
@@ -22,12 +24,14 @@ export default function LoginPage() {
               <Logo />
               <div className="space-y-1 text-center">
                 <h1 className="text-xl font-semibold text-foreground">Partner sign in</h1>
-                <p className="text-sm text-muted-foreground">Continental Fraud Intelligence Engine</p>
+                <p className="text-sm text-muted-foreground">
+                  {returnTo ? "Your session expired — sign in to continue." : "Continental Fraud Intelligence Engine"}
+                </p>
               </div>
             </div>
 
             <div className="rounded-md border border-border bg-card p-6 shadow-sm">
-              <LoginForm />
+              <LoginForm returnTo={returnTo} />
             </div>
           </div>
         </div>

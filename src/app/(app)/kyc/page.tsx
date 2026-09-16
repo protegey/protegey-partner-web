@@ -3,6 +3,7 @@ import { getKycEnrollments } from "./actions";
 import { KycDashboardTab } from "./KycDashboardTab";
 import { EnrollmentsTable } from "./EnrollmentsTable";
 import { StartVerificationDialogButton } from "./StartVerificationDialogButton";
+import { RefreshButton } from "./RefreshButton";
 
 export const metadata: Metadata = {
   title: "KYC — Protegey Partner",
@@ -20,7 +21,10 @@ export default async function KycPage() {
             Identity verification sessions for your end users, powered by Didit.
           </p>
         </div>
-        <StartVerificationDialogButton />
+        <div className="flex shrink-0 items-center gap-2">
+          <RefreshButton />
+          <StartVerificationDialogButton />
+        </div>
       </div>
 
       <KycDashboardTab enrollments={result.data} total={result.total} />

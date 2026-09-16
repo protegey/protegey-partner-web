@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { OrganizationLogo } from "@/components/OrganizationLogo";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
+import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { uploadLogoAction, removeLogoAction } from "./actions";
 
 export function LogoUploadForm({
@@ -16,6 +17,7 @@ export function LogoUploadForm({
   canManage: boolean;
 }) {
   const router = useRouter();
+  const guard = useSessionGuard();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [removeOpen, setRemoveOpen] = useState(false);
@@ -29,8 +31,9 @@ export function LogoUploadForm({
     setMessage(null);
     const formData = new FormData();
     formData.append("file", file);
-    const result = await uploadLogoAction(formData);
+    const result = await guard(() => uploadLogoAction(formData));
     setUploading(false);
+    if (!result) return;
     if (result.error) {
       setMessage({ type: "error", text: result.error });
       return;
@@ -42,9 +45,10 @@ export function LogoUploadForm({
 
   async function handleRemove() {
     setRemoving(true);
-    const result = await removeLogoAction();
+    const result = await guard(() => removeLogoAction());
     setRemoving(false);
     setRemoveOpen(false);
+    if (!result) return;
     if (result.error) {
       setMessage({ type: "error", text: result.error });
       return;

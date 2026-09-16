@@ -19,11 +19,12 @@ function SubmitButton() {
   );
 }
 
-export function LoginForm() {
+export function LoginForm({ returnTo }: { returnTo?: string }) {
   const [state, formAction] = useActionState(loginAction, initialState);
 
   return (
     <form action={formAction} className="flex flex-col gap-4">
+      {returnTo ? <input type="hidden" name="returnTo" value={returnTo} /> : null}
       <div className="flex flex-col gap-1.5">
         <label htmlFor="email" className="text-sm font-medium text-foreground">
           Email

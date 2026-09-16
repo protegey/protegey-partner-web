@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch, ApiError, type AuthExpired } from "@/lib/api";
 
 export interface TeamMember {
   id: string;
@@ -52,30 +52,33 @@ export async function getAssignableRoles(): Promise<AssignableRole[]> {
   return apiFetch<AssignableRole[]>("/roles?scope=partner");
 }
 
-export async function resendAgentInvitationAction(invitationId: string): Promise<ActionResult> {
+export async function resendAgentInvitationAction(invitationId: string): Promise<ActionResult | AuthExpired> {
   try {
     await apiFetch(`/partners/me/team/invitations/${invitationId}/resend`, { method: "POST" });
   } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return { authExpired: true };
     return { error: error instanceof ApiError ? error.message : "Something went wrong." };
   }
   revalidatePath("/team");
   return { success: true };
 }
 
-export async function setAgentStatusAction(userId: string, isActive: boolean): Promise<ActionResult> {
+export async function setAgentStatusAction(userId: string, isActive: boolean): Promise<ActionResult | AuthExpired> {
   try {
     await apiFetch(`/partners/me/team/${userId}/status`, { method: "PATCH", body: { isActive } });
   } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return { authExpired: true };
     return { error: error instanceof ApiError ? error.message : "Something went wrong." };
   }
   revalidatePath("/team");
   return { success: true };
 }
 
-export async function sendPasswordResetAction(userId: string): Promise<ActionResult> {
+export async function sendPasswordResetAction(userId: string): Promise<ActionResult | AuthExpired> {
   try {
     await apiFetch(`/partners/me/team/${userId}/reset-password`, { method: "POST" });
   } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return { authExpired: true };
     return { error: error instanceof ApiError ? error.message : "Something went wrong." };
   }
   return { success: true };

@@ -4,11 +4,21 @@ import { cookies } from "next/headers";
 // Namespaced "_partner" — admin-web and partner-web both run on localhost (only the port
 // differs), and browsers scope cookies by domain, NOT by port. Sharing a cookie name
 // between the two apps means logging into one silently overwrites the other's session.
-const ACCESS_TOKEN_COOKIE = "protegey_partner_access_token";
-const REFRESH_TOKEN_COOKIE = "protegey_partner_refresh_token";
+// Exported (just the names) so middleware.ts can read/write the same cookies — middleware
+// runs outside the next/headers cookies() context and can't call the functions below.
+export const ACCESS_TOKEN_COOKIE = "protegey_partner_access_token";
+export const REFRESH_TOKEN_COOKIE = "protegey_partner_refresh_token";
 const USER_COOKIE = "protegey_partner_user";
 
 const isProduction = process.env.NODE_ENV === "production";
+
+export const ACCESS_TOKEN_MAX_AGE = 60 * 15;
+export const REFRESH_TOKEN_MAX_AGE = 60 * 60 * 24 * 30;
+
+/** Same cookie attributes used everywhere a session cookie is set — middleware.ts reuses this shape directly. */
+export function sessionCookieOptions(maxAge: number) {
+  return { httpOnly: true, secure: isProduction, sameSite: "lax" as const, path: "/", maxAge };
+}
 
 export interface SessionUser {
   sub: string;
@@ -24,15 +34,9 @@ export async function setSessionCookies(
   user: SessionUser,
 ) {
   const store = await cookies();
-  const common = {
-    httpOnly: true,
-    secure: isProduction,
-    sameSite: "lax" as const,
-    path: "/",
-  };
-  store.set(ACCESS_TOKEN_COOKIE, accessToken, { ...common, maxAge: 60 * 15 });
-  store.set(REFRESH_TOKEN_COOKIE, refreshToken, { ...common, maxAge: 60 * 60 * 24 * 30 });
-  store.set(USER_COOKIE, JSON.stringify(user), { ...common, maxAge: 60 * 60 * 24 * 30 });
+  store.set(ACCESS_TOKEN_COOKIE, accessToken, sessionCookieOptions(ACCESS_TOKEN_MAX_AGE));
+  store.set(REFRESH_TOKEN_COOKIE, refreshToken, sessionCookieOptions(REFRESH_TOKEN_MAX_AGE));
+  store.set(USER_COOKIE, JSON.stringify(user), sessionCookieOptions(REFRESH_TOKEN_MAX_AGE));
 }
 
 export async function clearSessionCookies() {

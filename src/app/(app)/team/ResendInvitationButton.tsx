@@ -2,19 +2,21 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { resendAgentInvitationAction } from "./actions";
 
 export function ResendInvitationButton({ invitationId }: { invitationId: string }) {
   const router = useRouter();
+  const guard = useSessionGuard();
   const [pending, setPending] = useState(false);
   const [result, setResult] = useState<{ error?: string; success?: boolean } | null>(null);
 
   async function handleClick() {
     setPending(true);
-    const res = await resendAgentInvitationAction(invitationId);
+    const res = await guard(() => resendAgentInvitationAction(invitationId));
     setPending(false);
     setResult(res);
-    if (res.success) router.refresh();
+    if (res?.success) router.refresh();
   }
 
   return (
