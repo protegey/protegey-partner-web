@@ -71,7 +71,7 @@ const NAV_ITEMS: NavItem[] = [
       { label: "Transactions", disabled: true },
       { label: "Transaction Analytics", disabled: true },
       { label: "Alerts", disabled: true },
-      { label: "Alert Rules", disabled: true },
+      { href: "/alert-rules", label: "Alert Rules" },
       { label: "Cases", disabled: true },
       { label: "Advisories", disabled: true },
     ],

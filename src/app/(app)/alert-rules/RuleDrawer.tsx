@@ -1,0 +1,206 @@
+"use client";
+
+import { useState } from "react";
+import { Loader2, Play, Plus, Save, Trash2 } from "lucide-react";
+import { Drawer } from "@/components/Drawer";
+import { useSessionGuard } from "@/components/SessionExpiredProvider";
+import {
+  updateAlertRule,
+  simulateAlertRule,
+  type AlertRule,
+  type SimulateTransactionInput,
+  type SimulationOutcome,
+} from "./actions";
+
+function isError(value: unknown): value is { error: string } {
+  return Boolean(value) && typeof value === "object" && "error" in (value as object);
+}
+
+function nowIso(offsetMinutes = 0): string {
+  return new Date(Date.now() + offsetMinutes * 60_000).toISOString();
+}
+
+function emptyTransaction(index: number): SimulateTransactionInput {
+  return {
+    externalCustomerId: "sim-customer",
+    direction: "DEBIT",
+    amount: 0,
+    occurredAt: nowIso(index),
+  };
+}
+
+export function RuleDrawer({ rule, onClose, onUpdated }: { rule: AlertRule; onClose: () => void; onUpdated: (rule: AlertRule) => void }) {
+  const guard = useSessionGuard();
+  const [parameters, setParameters] = useState<Record<string, number>>(rule.parameters);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const [transactions, setTransactions] = useState<SimulateTransactionInput[]>([emptyTransaction(0), emptyTransaction(1)]);
+  const [outcomes, setOutcomes] = useState<SimulationOutcome[] | null>(null);
+  const [simulating, setSimulating] = useState(false);
+  const [simError, setSimError] = useState<string | null>(null);
+
+  async function handleSaveParameters() {
+    setSaving(true);
+    setSaveError(null);
+    try {
+      const result = await guard(() => updateAlertRule(rule.id, { parameters }));
+      if (result === null) return;
+      if (isError(result)) {
+        setSaveError(result.error);
+        return;
+      }
+      onUpdated(result);
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function updateTransaction(index: number, patch: Partial<SimulateTransactionInput>) {
+    setTransactions((prev) => prev.map((t, i) => (i === index ? { ...t, ...patch } : t)));
+  }
+
+  async function handleSimulate() {
+    setSimulating(true);
+    setSimError(null);
+    setOutcomes(null);
+    try {
+      const result = await guard(() => simulateAlertRule(rule.id, transactions));
+      if (result === null) return;
+      if (isError(result)) {
+        setSimError(result.error);
+        return;
+      }
+      setOutcomes(result);
+    } finally {
+      setSimulating(false);
+    }
+  }
+
+  return (
+    <Drawer open onClose={onClose} title={`${rule.code} — ${rule.name}`}>
+      <div className="flex flex-col gap-6">
+        <div>
+          <p className="text-xs font-medium uppercase text-muted-foreground">Description</p>
+          <p className="mt-1 text-sm text-foreground">{rule.description}</p>
+        </div>
+
+        <div>
+          <p className="mb-2 text-sm font-semibold text-foreground">Thresholds</p>
+          {Object.keys(parameters).length === 0 ? (
+            <p className="text-sm text-muted-foreground">This rule has no configurable thresholds.</p>
+          ) : (
+            <div className="flex flex-col gap-3">
+              {Object.entries(parameters).map(([key, value]) => (
+                <div key={key} className="flex items-center gap-3">
+                  <label className="w-40 shrink-0 text-sm text-foreground">{key}</label>
+                  <input
+                    type="number"
+                    value={value}
+                    onChange={(e) => setParameters((prev) => ({ ...prev, [key]: Number(e.target.value) }))}
+                    className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+                  />
+                </div>
+              ))}
+            </div>
+          )}
+          {saveError ? <p className="mt-2 text-sm text-destructive">{saveError}</p> : null}
+          <button
+            type="button"
+            onClick={handleSaveParameters}
+            disabled={saving || Object.keys(parameters).length === 0}
+            className="mt-3 flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
+            Save thresholds
+          </button>
+          {rule.partnerId === null ? (
+            <p className="mt-2 text-xs text-muted-foreground">
+              This is the shared system default — saving creates your own copy of this rule; other institutions are unaffected.
+            </p>
+          ) : null}
+        </div>
+
+        <div className="border-t border-border pt-5">
+          <p className="mb-1 text-sm font-semibold text-foreground">Simulate</p>
+          <p className="mb-3 text-xs text-muted-foreground">
+            Try this rule against a sequence of hypothetical transactions for one test customer — nothing here touches real data.
+          </p>
+
+          <div className="flex flex-col gap-3">
+            {transactions.map((t, i) => (
+              <div key={i} className="flex flex-wrap items-center gap-2 rounded-md border border-border p-2">
+                <select
+                  value={t.direction}
+                  onChange={(e) => updateTransaction(i, { direction: e.target.value as "DEBIT" | "CREDIT" })}
+                  className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                >
+                  <option value="DEBIT">Debit</option>
+                  <option value="CREDIT">Credit</option>
+                </select>
+                <input
+                  type="number"
+                  placeholder="Amount"
+                  value={t.amount || ""}
+                  onChange={(e) => updateTransaction(i, { amount: Number(e.target.value) })}
+                  className="w-28 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                />
+                <input
+                  type="datetime-local"
+                  value={t.occurredAt.slice(0, 16)}
+                  onChange={(e) => updateTransaction(i, { occurredAt: new Date(e.target.value).toISOString() })}
+                  className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                />
+                <input
+                  type="text"
+                  placeholder="Counterparty (optional)"
+                  value={t.counterpartyExternalId ?? ""}
+                  onChange={(e) => updateTransaction(i, { counterpartyExternalId: e.target.value || undefined })}
+                  className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                />
+                <label className="flex items-center gap-1 text-xs text-muted-foreground">
+                  <input type="checkbox" checked={Boolean(t.isCash)} onChange={(e) => updateTransaction(i, { isCash: e.target.checked })} />
+                  Cash
+                </label>
+                {outcomes?.[i] ? (
+                  <span className={`ml-auto text-xs font-semibold ${outcomes[i].matched ? "text-destructive" : "text-muted-foreground"}`}>
+                    {outcomes[i].matched ? "Matched" : "No match"}
+                  </span>
+                ) : null}
+                <button
+                  type="button"
+                  onClick={() => setTransactions((prev) => prev.filter((_, idx) => idx !== i))}
+                  className="text-muted-foreground transition-colors hover:text-destructive"
+                  aria-label="Remove transaction"
+                >
+                  <Trash2 className="size-3.5" />
+                </button>
+              </div>
+            ))}
+          </div>
+
+          <div className="mt-3 flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setTransactions((prev) => [...prev, emptyTransaction(prev.length)])}
+              className="flex items-center gap-1 rounded-md border border-border px-2.5 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              <Plus className="size-3.5" />
+              Add transaction
+            </button>
+            <button
+              type="button"
+              onClick={handleSimulate}
+              disabled={simulating || transactions.length === 0}
+              className="flex items-center gap-1.5 rounded-md bg-foreground px-3 py-1.5 text-xs font-semibold text-background transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              {simulating ? <Loader2 className="size-3.5 animate-spin" /> : <Play className="size-3.5" />}
+              Run simulation
+            </button>
+          </div>
+          {simError ? <p className="mt-2 text-sm text-destructive">{simError}</p> : null}
+        </div>
+      </div>
+    </Drawer>
+  );
+}
