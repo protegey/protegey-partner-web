@@ -12,6 +12,7 @@ import {
 import { Sidebar, type NavItem } from "@/components/Sidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { LangToggle } from "@/components/LangToggle";
+import { NotificationBellLink } from "@/components/NotificationBellLink";
 import { Logo } from "@/components/Logo";
 import { SignOutButton } from "@/components/SignOutButton";
 import { ActivationProgress } from "./ActivationProgress";
@@ -22,6 +23,7 @@ import { OrganizationLogo } from "@/components/OrganizationLogo";
 import { SessionExpiredProvider } from "@/components/SessionExpiredProvider";
 import { getLang } from "@/lib/i18n/lang";
 import { t, type Lang } from "@/lib/i18n/strings";
+import { getUnreadNotificationsCount } from "./notifications/actions";
 
 interface PartnerSummary {
   name: string;
@@ -89,7 +91,7 @@ function buildNavItems(lang: Lang): NavItem[] {
         { label: tt("navWebhooks"), href: "/settings" },
         { label: tt("navIntegrationGuide"), href: "/integration-guide" },
         { label: tt("navIntegrationHealth"), disabled: true },
-        { label: tt("navDocumentation"), disabled: true },
+        { label: tt("navDocumentation"), href: "/documentation" },
       ],
     },
     {
@@ -97,27 +99,31 @@ function buildNavItems(lang: Lang): NavItem[] {
       icon: <SettingsIcon className="size-4" />,
       children: [
         { href: "/settings", label: tt("navOrganizationProfile") },
-        { label: tt("navBillingPlans"), disabled: true },
-        { label: tt("navUsageQuotas"), disabled: true },
+        { href: "/settings/billing", label: tt("navBillingPlans") },
+        { href: "/settings/usage", label: tt("navUsageQuotas") },
         { href: "/team", label: tt("navTeamManagement") },
-        { label: tt("navSecurity"), disabled: true },
-        { label: tt("navAuditLogs"), disabled: true },
+        { href: "/settings/security", label: tt("navSecurity") },
+        { href: "/audit-logs", label: tt("navAuditLogs") },
       ],
     },
     {
       label: tt("navOthers"),
       icon: <MoreHorizontal className="size-4" />,
       children: [
-        { label: tt("navNotifications"), disabled: true },
-        { label: tt("navSupport"), disabled: true },
-        { label: tt("navSandbox"), disabled: true },
+        { href: "/notifications", label: tt("navNotifications") },
+        { href: "/support", label: tt("navSupport") },
       ],
     },
   ];
 }
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const [user, partner, lang] = await Promise.all([getSessionUser(), loadPartner(), getLang()]);
+  const [user, partner, lang, unreadCount] = await Promise.all([
+    getSessionUser(),
+    loadPartner(),
+    getLang(),
+    getUnreadNotificationsCount(),
+  ]);
   const active = partner?.status === "active";
 
   return (
@@ -138,6 +144,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 ) : null}
                 <p className="truncate px-1 text-xs text-muted-foreground">{user?.email}</p>
                 <div className="flex items-center gap-2">
+                  <NotificationBellLink unreadCount={unreadCount} ariaLabel={t(lang, "notificationsBellAria")} />
                   <ThemeToggle />
                   <LangToggle />
                   <SignOutButton className="rounded-md border border-border px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-muted" />

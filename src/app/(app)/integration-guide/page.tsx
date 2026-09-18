@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { getSessionUser } from "@/lib/session";
+import Link from "next/link";
+import { KeyRound, IdCard, ArrowRightLeft, Building2, Webhook, ArrowRight, BookOpen } from "lucide-react";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 
@@ -7,56 +8,108 @@ export const metadata: Metadata = {
   title: "Integration Guide — Protegey Partner",
 };
 
+const TRANSACTION_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/transactions \\
+  -H "Content-Type: application/json" \\
+  -H "x-api-key: YOUR_API_KEY" \\
+  -d '{
+    "externalTransactionId": "tx-00234",
+    "externalCustomerId": "cust-9981",
+    "direction": "DEBIT",
+    "amount": 250000,
+    "transactionType": "cashout",
+    "occurredAt": "2026-01-15T10:00:00.000Z"
+  }'`;
+
 export default async function IntegrationGuidePage() {
-  const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
-  const canManage = user?.permissions.includes("partners.manage_clients") ?? false;
-  void canManage;
+  const lang = await getLang();
+
+  const useCases = [
+    { icon: IdCard, title: t(lang, "igCardKycTitle"), body: t(lang, "igCardKycBody"), href: "/kyc" },
+    { icon: ArrowRightLeft, title: t(lang, "igCardTxTitle"), body: t(lang, "igCardTxBody"), href: "/transactions" },
+    { icon: Building2, title: t(lang, "igCardKybTitle"), body: t(lang, "igCardKybBody"), href: "/clients" },
+  ];
 
   return (
-    <div className="mx-auto flex max-w-2xl flex-col gap-6">
+    <div className="mx-auto flex max-w-4xl flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t(lang, "igPageTitle")}</h1>
-        <p className="text-sm text-muted-foreground">{t(lang, "igPageSubtitle")}</p>
+        <h1 className="text-xl font-semibold text-foreground">{t(lang, "igHeroTitle")}</h1>
+        <p className="text-sm text-muted-foreground">{t(lang, "igHeroSubtitle")}</p>
       </div>
 
       <div className="rounded-md border border-border bg-card p-5">
-        <p className="mb-3 text-sm font-semibold text-foreground">{t(lang, "igAuthTitle")}</p>
-        <p className="text-xs text-muted-foreground">
-          {t(lang, "igAuthBodyPrefix")} <a href="/settings" className="text-primary hover:text-primary/90">{t(lang, "settingsPageTitle")}</a>
-          {" "}{t(lang, "igAuthBodySuffix")}
-        </p>
+        <div className="flex items-center gap-2.5">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">1</div>
+          <p className="text-sm font-semibold text-foreground">{t(lang, "igStep1Title")}</p>
+        </div>
+        <p className="mt-2 text-sm text-muted-foreground">{t(lang, "igStep1Body")}</p>
+        <Link
+          href="/settings"
+          className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+        >
+          <KeyRound className="size-4" />
+          {t(lang, "igStep1Button")}
+        </Link>
+      </div>
 
-        <p className="mb-3 text-sm font-semibold text-foreground">{t(lang, "igWorkflowTitle")}</p>
-        <ol className="list-decimal space-y-2 text-sm text-muted-foreground">
-          <li>
-            <strong>{t(lang, "igStepInviteLabel")}</strong> {t(lang, "igStepInvitePrefix")} <code>/clients/me</code> {t(lang, "igStepInviteMiddle")} <code>contactName</code> {t(lang, "igStepInviteSuffix")} <code>contactEmail</code>.
-          </li>
-          <li>
-            <strong>{t(lang, "igStepFormLabel")}</strong> {t(lang, "igStepFormPrefix")} <code>/client-application/:token</code>.
-          </li>
-          <li>
-            <strong>{t(lang, "igStepScreeningLabel")}</strong> {t(lang, "igStepScreeningBody")}
-          </li>
-          <li>
-            <strong>{t(lang, "igStepConsultLabel")}</strong> {t(lang, "igStepConsultPrefix")} <code>/clients/:clientId</code> {t(lang, "igStepConsultMiddle")} <strong>{t(lang, "igComplianceInfoLabel")}</strong>.
-          </li>
-        </ol>
+      <div>
+        <div className="mb-3 flex items-center gap-2.5">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">2</div>
+          <div>
+            <p className="text-sm font-semibold text-foreground">{t(lang, "igStep2Title")}</p>
+            <p className="text-xs text-muted-foreground">{t(lang, "igStep2Subtitle")}</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {useCases.map((useCase) => (
+            <Link
+              key={useCase.title}
+              href={useCase.href}
+              className="group flex flex-col gap-2 rounded-md border border-border bg-card p-4 transition-colors hover:border-primary/50 hover:bg-primary/5"
+            >
+              <useCase.icon className="size-5 text-primary" />
+              <p className="text-sm font-semibold text-foreground">{useCase.title}</p>
+              <p className="flex-1 text-xs text-muted-foreground">{useCase.body}</p>
+              <span className="flex items-center gap-1 text-xs font-medium text-primary opacity-0 transition-opacity group-hover:opacity-100">
+                <ArrowRight className="size-3.5" />
+              </span>
+            </Link>
+          ))}
+        </div>
+        <div className="mt-3 rounded-md border border-border bg-card p-4">
+          <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
+          <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
+            <code>{TRANSACTION_EXAMPLE}</code>
+          </pre>
+        </div>
+      </div>
 
-        <p className="mb-3 text-sm font-semibold text-foreground">{t(lang, "igWebhookTitle")}</p>
-        <p className="text-xs text-muted-foreground">
-          {t(lang, "igWebhookPrefix")} <code>/settings</code> {t(lang, "igWebhookSuffix")} <code>pending_review</code> {t(lang, "igWebhookMiddle")} <code>active</code>).
-        </p>
+      <div className="rounded-md border border-border bg-card p-5">
+        <div className="flex items-center gap-2.5">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">3</div>
+          <p className="text-sm font-semibold text-foreground">{t(lang, "igStep3Title")}</p>
+        </div>
+        <p className="mt-2 text-sm text-muted-foreground">{t(lang, "igStep3Body")}</p>
+        <Link
+          href="/settings"
+          className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-border px-3.5 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+        >
+          <Webhook className="size-4" />
+          {t(lang, "igStep1Button")}
+        </Link>
+      </div>
 
-        <p className="mb-3 text-sm font-semibold text-foreground">{t(lang, "igEndpointsTitle")}</p>
-        <ul className="list-disc text-sm text-muted-foreground space-y-1">
-          <li><strong>GET /partners/me</strong>: {t(lang, "igEndpointPartnerProfile")}</li>
-          <li><code>GET /partners/me/api-credentials</code>: {t(lang, "igEndpointApiCredGet")}</li>
-          <li><code>POST /partners/me/api-credentials</code>: {t(lang, "igEndpointApiCredPost")}</li>
-          <li><code>PATCH /partners/me/api-credentials/webhook</code>: {t(lang, "igEndpointWebhookPatch")}</li>
-          <li><code>GET /clients/me</code>: {t(lang, "igEndpointClientsList")}</li>
-          <li><code>GET /clients/:clientId</code>: {t(lang, "igEndpointClientDetail")}</li>
-          <li><code>GET /clients/:clientId/screen</code>: {t(lang, "igEndpointClientScreen")}</li>
-        </ul>
+      <div className="flex items-center justify-between gap-4 rounded-md border border-dashed border-border p-5">
+        <div>
+          <p className="text-sm font-semibold text-foreground">{t(lang, "igMoreDetailTitle")}</p>
+          <p className="text-xs text-muted-foreground">{t(lang, "igMoreDetailBody")}</p>
+        </div>
+        <Link
+          href="/documentation"
+          className="flex shrink-0 items-center gap-1.5 rounded-md border border-border px-3.5 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+        >
+          <BookOpen className="size-4" />
+          {t(lang, "igMoreDetailButton")}
+        </Link>
       </div>
     </div>
   );

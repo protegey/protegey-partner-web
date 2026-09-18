@@ -885,6 +885,204 @@ const STRINGS = {
   alertsUpdating: { en: "Updating…", fr: "Mise à jour…" },
   alertsViewRuleDetails: { en: "Why this fired", fr: "Pourquoi elle s'est déclenchée" },
   alertsNoTransaction: { en: "Not tied to one transaction", fr: "Non liée à une transaction précise" },
+
+  // ── Nav additions ───────────────────────────────────────────────────────
+  navDocumentation2: { en: "Documentation", fr: "Documentation" },
+
+  // ── Notification / audit event sentences ────────────────────────────────
+  eventSystemActor: { en: "Protegey", fr: "Protegey" },
+  eventTeamInviteSent: { en: "{actor} invited {agentEmail} to join the team.", fr: "{actor} a invité {agentEmail} à rejoindre l'équipe." },
+  eventTeamInviteAccepted: {
+    en: "{agentName} ({agentEmail}) accepted their invitation and joined the team.",
+    fr: "{agentName} ({agentEmail}) a accepté son invitation et a rejoint l'équipe.",
+  },
+  eventKycApproved: { en: "Identity verification approved for {customerLabel}.", fr: "Vérification d'identité approuvée pour {customerLabel}." },
+  eventKycDeclined: { en: "Identity verification declined for {customerLabel}.", fr: "Vérification d'identité refusée pour {customerLabel}." },
+  eventKybSubmitted: {
+    en: "{businessName} submitted their business application for review.",
+    fr: "{businessName} a soumis son dossier d'entreprise pour examen.",
+  },
+  eventKybApproved: { en: "{actor} approved the business application from {businessName}.", fr: "{actor} a approuvé le dossier d'entreprise de {businessName}." },
+  eventKybRejected: { en: "{actor} rejected the business application from {businessName}.", fr: "{actor} a rejeté le dossier d'entreprise de {businessName}." },
+  eventKybMoreInfo: {
+    en: "{actor} asked {businessName} for more information on their application.",
+    fr: "{actor} a demandé plus d'informations à {businessName} concernant son dossier.",
+  },
+  eventRuleCreated: { en: "{actor} created a new alert rule: {ruleName}.", fr: "{actor} a créé une nouvelle règle d'alerte : {ruleName}." },
+  eventRuleActivated: { en: "{actor} turned on the rule \"{ruleName}\".", fr: "{actor} a activé la règle « {ruleName} »." },
+  eventRuleDisabled: { en: "{actor} turned off the rule \"{ruleName}\".", fr: "{actor} a désactivé la règle « {ruleName} »." },
+  eventAlertStatusChanged: {
+    en: "{actor} marked an alert on rule \"{ruleName}\" as {status}.",
+    fr: "{actor} a marqué une alerte sur la règle « {ruleName} » comme {status}.",
+  },
+  eventApiKeyGenerated: { en: "{actor} generated a new API key.", fr: "{actor} a généré une nouvelle clé API." },
+  eventWebhookConfigured: { en: "{actor} configured the webhook.", fr: "{actor} a configuré le webhook." },
+  eventUnknown: { en: "Something happened in your account.", fr: "Quelque chose s'est produit sur votre compte." },
+
+  // ── Notifications page ───────────────────────────────────────────────────
+  notificationsPageTitle: { en: "Notifications", fr: "Notifications" },
+  notificationsPageSubtitle: {
+    en: "Everything that's happened in your account — team changes, KYC/KYB decisions, rule and alert activity.",
+    fr: "Tout ce qui s'est passé sur votre compte — changements d'équipe, décisions KYC/KYB, activité des règles et alertes.",
+  },
+  notificationsEmpty: { en: "No notifications yet.", fr: "Aucune notification pour l'instant." },
+  notificationsBellAria: { en: "Notifications", fr: "Notifications" },
+  notificationsMarkAllSeen: { en: "Mark all as read", fr: "Tout marquer comme lu" },
+  notificationsViewAll: { en: "View all notifications", fr: "Voir toutes les notifications" },
+
+  // ── Audit Logs page ──────────────────────────────────────────────────────
+  auditLogsPageTitle: { en: "Audit Logs", fr: "Journaux d'audit" },
+  auditLogsPageSubtitle: {
+    en: "A complete, permanent record of every action taken on your account — for your own review or a compliance audit.",
+    fr: "Un registre complet et permanent de chaque action effectuée sur votre compte — pour votre propre suivi ou un audit de conformité.",
+  },
+  auditLogsEmpty: { en: "Nothing recorded yet.", fr: "Rien n'a encore été enregistré." },
+  auditLogsColWhen: { en: "When", fr: "Quand" },
+  auditLogsColEvent: { en: "Event", fr: "Événement" },
+  auditLogsColActor: { en: "Who", fr: "Qui" },
+
+  // ── Support page ─────────────────────────────────────────────────────────
+  supportPageTitle: { en: "Support", fr: "Support" },
+  supportPageSubtitle: {
+    en: "Need help? Our team is here for you.",
+    fr: "Besoin d'aide ? Notre équipe est là pour vous.",
+  },
+  supportEmailCardTitle: { en: "Email support", fr: "Support par e-mail" },
+  supportEmailCardBody: {
+    en: "For any question — technical, billing, or general — write to us and we'll get back to you.",
+    fr: "Pour toute question — technique, facturation, ou générale — écrivez-nous, nous vous répondrons.",
+  },
+  supportEmailButton: { en: "Email support@protegey.com", fr: "Écrire à support@protegey.com" },
+  supportDocsCardTitle: { en: "Looking for the API reference?", fr: "Vous cherchez la référence de l'API ?" },
+  supportDocsCardBody: {
+    en: "Most technical questions are already answered in our documentation.",
+    fr: "La plupart des questions techniques trouvent déjà réponse dans notre documentation.",
+  },
+  supportDocsButton: { en: "Open documentation", fr: "Ouvrir la documentation" },
+
+  // ── Billing & Plans page ─────────────────────────────────────────────────
+  billingPageTitle: { en: "Billing & Plans", fr: "Facturation et forfaits" },
+  billingPageSubtitle: {
+    en: "Your current plan and what's included. Plans are informational for now — nothing here limits what you can do yet.",
+    fr: "Votre forfait actuel et ce qu'il inclut. Les forfaits sont indicatifs pour l'instant — rien ici ne limite ce que vous pouvez faire.",
+  },
+  billingCurrentPlanBadge: { en: "Your current plan", fr: "Votre forfait actuel" },
+  billingContactToChange: {
+    en: "To change your plan, contact your Protegey representative or support@protegey.com.",
+    fr: "Pour changer de forfait, contactez votre représentant Protegey ou support@protegey.com.",
+  },
+
+  // ── Usage & Quotas page ──────────────────────────────────────────────────
+  usagePageTitle: { en: "Usage & Quotas", fr: "Utilisation et quotas" },
+  usagePageSubtitle: {
+    en: "Your activity over the last 30 days. Informational only — nothing here is capped or blocked today.",
+    fr: "Votre activité au cours des 30 derniers jours. À titre informatif uniquement — rien n'est plafonné ou bloqué aujourd'hui.",
+  },
+  usageStatTransactions: { en: "Transactions monitored", fr: "Transactions surveillées" },
+  usageStatKyc: { en: "KYC sessions started", fr: "Sessions KYC démarrées" },
+  usageStatClients: { en: "Business clients invited", fr: "Clients entreprises invités" },
+  usageStatTeam: { en: "Team members", fr: "Membres de l'équipe" },
+  usageWindowLabel: { en: "Last 30 days", fr: "30 derniers jours" },
+  usagePlanNote: {
+    en: "See what's included in your plan:",
+    fr: "Consultez ce qui est inclus dans votre forfait :",
+  },
+
+  // ── Security page ────────────────────────────────────────────────────────
+  securityPageTitle: { en: "Security", fr: "Sécurité" },
+  securityPageSubtitle: { en: "Manage how you sign in to your account.", fr: "Gérez la façon dont vous vous connectez à votre compte." },
+  securityPasswordCardTitle: { en: "Change your password", fr: "Changer votre mot de passe" },
+  securityPasswordCardBody: {
+    en: "Choose a strong password you don't use anywhere else.",
+    fr: "Choisissez un mot de passe fort que vous n'utilisez nulle part ailleurs.",
+  },
+  securityCurrentPasswordLabel: { en: "Current password", fr: "Mot de passe actuel" },
+  securityNewPasswordLabel: { en: "New password", fr: "Nouveau mot de passe" },
+  securityConfirmPasswordLabel: { en: "Confirm new password", fr: "Confirmer le nouveau mot de passe" },
+  securityUpdateButton: { en: "Update password", fr: "Mettre à jour le mot de passe" },
+  securityUpdating: { en: "Updating…", fr: "Mise à jour…" },
+  securityUpdateSuccess: { en: "Your password has been updated.", fr: "Votre mot de passe a été mis à jour." },
+  securityPasswordMismatch: { en: "The new password and confirmation don't match.", fr: "Le nouveau mot de passe et la confirmation ne correspondent pas." },
+  securityPasswordTooShort: { en: "Password must be at least 8 characters.", fr: "Le mot de passe doit contenir au moins 8 caractères." },
+  security2faCardTitle: { en: "Two-factor authentication", fr: "Authentification à deux facteurs" },
+  security2faCardBody: {
+    en: "An extra layer of security for your account.",
+    fr: "Une couche de sécurité supplémentaire pour votre compte.",
+  },
+
+  // ── Documentation page ───────────────────────────────────────────────────
+  docsPageTitle: { en: "Documentation", fr: "Documentation" },
+  docsPageSubtitle: {
+    en: "Everything you need to integrate Protegey into your own systems.",
+    fr: "Tout ce dont vous avez besoin pour intégrer Protegey à vos propres systèmes.",
+  },
+  docsNavAuth: { en: "Authentication", fr: "Authentification" },
+  docsNavTransactions: { en: "Sending transactions", fr: "Envoyer des transactions" },
+  docsNavKyc: { en: "Identity verification (KYC)", fr: "Vérification d'identité (KYC)" },
+  docsNavWebhooks: { en: "Webhooks", fr: "Webhooks" },
+  docsNavErrors: { en: "Errors", fr: "Erreurs" },
+  docsAuthTitle: { en: "Authentication", fr: "Authentification" },
+  docsAuthBody: {
+    en: "Every server-to-server request is authenticated with an API key, sent as the x-api-key header. Generate or rotate your key from Settings — the raw value is only ever shown once, right after you generate it, so store it somewhere safe immediately.",
+    fr: "Chaque requête serveur à serveur est authentifiée avec une clé API, envoyée dans l'en-tête x-api-key. Générez ou renouvelez votre clé depuis les Paramètres — la valeur brute n'est affichée qu'une seule fois, juste après sa génération, alors conservez-la immédiatement dans un endroit sûr.",
+  },
+  docsTransactionsTitle: { en: "Sending transactions for monitoring", fr: "Envoyer des transactions pour surveillance" },
+  docsTransactionsBody: {
+    en: "POST each transaction to /partner-api/transactions as it happens. Protegey runs it against your active alert rules immediately and responds with a decision (clear, review or blocked), a 0-100 risk score, and the list of any rules that matched.",
+    fr: "Envoyez chaque transaction par POST à /partner-api/transactions au moment où elle a lieu. Protegey l'évalue immédiatement selon vos règles d'alerte actives et répond avec une décision (clear, review ou blocked), un score de risque de 0 à 100, et la liste des règles éventuellement déclenchées.",
+  },
+  docsKycTitle: { en: "Starting an identity verification session", fr: "Démarrer une session de vérification d'identité" },
+  docsKycBody: {
+    en: "Start a session for one of your end users from the KYC page, or server-to-server via POST /partner-api/kyc/sessions. You get back a hosted verification link to send your user however you like (SMS, email, in-app). Status updates arrive on your configured webhook as the user completes each step.",
+    fr: "Démarrez une session pour l'un de vos utilisateurs depuis la page KYC, ou en serveur à serveur via POST /partner-api/kyc/sessions. Vous recevez un lien de vérification hébergé à envoyer à votre utilisateur comme vous le souhaitez (SMS, e-mail, in-app). Les mises à jour de statut arrivent sur votre webhook configuré au fur et à mesure que l'utilisateur complète chaque étape.",
+  },
+  docsWebhooksTitle: { en: "Webhooks", fr: "Webhooks" },
+  docsWebhooksBody: {
+    en: "Configure a single https:// webhook URL from Settings to receive KYC status updates as they happen. Every delivery is signed — verify it using the webhook secret shown once when you configure the URL. A delivery is retried automatically if your endpoint doesn't respond successfully.",
+    fr: "Configurez une seule URL de webhook https:// depuis les Paramètres pour recevoir les mises à jour de statut KYC au fur et à mesure. Chaque envoi est signé — vérifiez-le à l'aide du secret de webhook affiché une seule fois lors de la configuration de l'URL. Un envoi est automatiquement réessayé si votre point de terminaison ne répond pas correctement.",
+  },
+  docsErrorsTitle: { en: "Errors", fr: "Erreurs" },
+  docsErrorsBody: {
+    en: "Every error comes back as JSON with a statusCode and a human-readable message — 400 for a validation problem, 401 for a missing/invalid API key, 404 for something that doesn't exist or isn't yours, 409 for a duplicate (e.g. resubmitting the same transaction id).",
+    fr: "Chaque erreur revient au format JSON avec un statusCode et un message lisible — 400 pour un problème de validation, 401 pour une clé API manquante/invalide, 404 pour quelque chose qui n'existe pas ou ne vous appartient pas, 409 pour un doublon (par ex. renvoyer le même identifiant de transaction).",
+  },
+  docsSeeAlsoRules: {
+    en: "For the full list of default monitoring rules and how to test them, see the Alert Rules page.",
+    fr: "Pour la liste complète des règles de surveillance par défaut et comment les tester, consultez la page Règles d'alerte.",
+  },
+
+  // ── Integration Guide (redesigned) ──────────────────────────────────────
+  igHeroTitle: { en: "Get integrated in three steps", fr: "Intégrez-vous en trois étapes" },
+  igHeroSubtitle: {
+    en: "A quick, practical path to sending your first real request. For the complete reference, see Documentation.",
+    fr: "Un chemin rapide et pratique pour envoyer votre première requête réelle. Pour la référence complète, consultez la Documentation.",
+  },
+  igStep1Title: { en: "1. Get your API key", fr: "1. Récupérez votre clé API" },
+  igStep1Body: {
+    en: "Generate a key from Settings — API access. Send it on every request as the x-api-key header.",
+    fr: "Générez une clé depuis Paramètres — Accès API. Envoyez-la sur chaque requête dans l'en-tête x-api-key.",
+  },
+  igStep1Button: { en: "Go to Settings", fr: "Aller aux Paramètres" },
+  igStep2Title: { en: "2. Pick what you need", fr: "2. Choisissez ce dont vous avez besoin" },
+  igStep2Subtitle: { en: "Most partners use one or both of these:", fr: "La plupart des partenaires utilisent l'un ou l'autre (ou les deux) :" },
+  igCardKycTitle: { en: "Identity verification (KYC)", fr: "Vérification d'identité (KYC)" },
+  igCardKycBody: { en: "Verify a person's identity with a hosted, guided flow.", fr: "Vérifiez l'identité d'une personne avec un parcours guidé et hébergé." },
+  igCardTxTitle: { en: "Transaction monitoring", fr: "Surveillance des transactions" },
+  igCardTxBody: { en: "Send us each transaction, get back a risk decision instantly.", fr: "Envoyez-nous chaque transaction, recevez une décision de risque instantanément." },
+  igCardKybTitle: { en: "Business onboarding (KYB)", fr: "Intégration d'entreprise (KYB)" },
+  igCardKybBody: { en: "Invite a business client to complete your own KYB questionnaire.", fr: "Invitez un client entreprise à compléter votre propre questionnaire KYB." },
+  igStep3Title: { en: "3. Listen for webhooks", fr: "3. Recevez les webhooks" },
+  igStep3Body: {
+    en: "Configure one https:// URL from Settings to be notified the moment a KYC session's status changes — no polling needed.",
+    fr: "Configurez une URL https:// depuis les Paramètres pour être notifié dès qu'un statut de session KYC change — aucun sondage nécessaire.",
+  },
+  igMoreDetailTitle: { en: "Need the full reference?", fr: "Besoin de la référence complète ?" },
+  igMoreDetailBody: {
+    en: "Every endpoint, every field, every error code.",
+    fr: "Chaque point de terminaison, chaque champ, chaque code d'erreur.",
+  },
+  igMoreDetailButton: { en: "Open full documentation", fr: "Ouvrir la documentation complète" },
+  igCodeExampleTitle: { en: "Example — sending a transaction", fr: "Exemple — envoyer une transaction" },
 } as const;
 
 export type StringKey = keyof typeof STRINGS;
