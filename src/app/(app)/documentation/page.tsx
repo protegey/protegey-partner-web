@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KeyRound, ArrowRightLeft, IdCard, Webhook, AlertTriangle } from "lucide-react";
+import { KeyRound, ArrowRightLeft, IdCard, ShieldCheck, Webhook, AlertTriangle } from "lucide-react";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 
@@ -28,6 +28,26 @@ const TRANSACTION_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/t
   "decision": "review",
   "riskScore": 20,
   "alerts": [ { "ruleCode": "IND006-KYC1", "status": "open", ... } ]
+}`;
+
+const KYC_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/kyc/sessions \\
+  -H "Content-Type: application/json" \\
+  -H "x-api-key: YOUR_API_KEY" \\
+  -d '{ "externalUserId": "cust-9981" }'
+
+# Response
+{ "sessionId": "sess_...", "url": "https://verify.didit.me/session/..." }`;
+
+const SANCTIONS_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/sanctions/screen \\
+  -H "Content-Type: application/json" \\
+  -H "x-api-key: YOUR_API_KEY" \\
+  -d '{ "name": "Jane Doe", "type": "person" }'
+
+# Response
+{
+  "decision": "clear",
+  "score": 0,
+  "matches": []
 }`;
 
 function Section({
@@ -64,6 +84,7 @@ export default async function DocumentationPage() {
     { id: "auth", label: t(lang, "docsNavAuth") },
     { id: "transactions", label: t(lang, "docsNavTransactions") },
     { id: "kyc", label: t(lang, "docsNavKyc") },
+    { id: "sanctions", label: t(lang, "docsNavSanctions") },
     { id: "webhooks", label: t(lang, "docsNavWebhooks") },
     { id: "errors", label: t(lang, "docsNavErrors") },
   ];
@@ -94,7 +115,19 @@ export default async function DocumentationPage() {
           <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsSeeAlsoRules")}</p>
         </Section>
 
-        <Section id="kyc" icon={IdCard} title={t(lang, "docsKycTitle")} body={t(lang, "docsKycBody")} />
+        <Section id="kyc" icon={IdCard} title={t(lang, "docsKycTitle")} body={t(lang, "docsKycBody")}>
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
+          <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
+            <code>{KYC_EXAMPLE}</code>
+          </pre>
+        </Section>
+
+        <Section id="sanctions" icon={ShieldCheck} title={t(lang, "docsSanctionsTitle")} body={t(lang, "docsSanctionsBody")}>
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
+          <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
+            <code>{SANCTIONS_EXAMPLE}</code>
+          </pre>
+        </Section>
 
         <Section id="webhooks" icon={Webhook} title={t(lang, "docsWebhooksTitle")} body={t(lang, "docsWebhooksBody")} />
 

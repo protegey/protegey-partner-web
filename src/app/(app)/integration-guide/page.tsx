@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KeyRound, IdCard, ArrowRightLeft, Building2, Webhook, ArrowRight, BookOpen } from "lucide-react";
+import { KeyRound, IdCard, ArrowRightLeft, Building2, ShieldCheck, Webhook, ArrowRight, BookOpen } from "lucide-react";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 
@@ -26,6 +26,7 @@ export default async function IntegrationGuidePage() {
   const useCases = [
     { icon: IdCard, title: t(lang, "igCardKycTitle"), body: t(lang, "igCardKycBody"), href: "/kyc" },
     { icon: ArrowRightLeft, title: t(lang, "igCardTxTitle"), body: t(lang, "igCardTxBody"), href: "/transactions" },
+    { icon: ShieldCheck, title: t(lang, "igCardSanctionsTitle"), body: t(lang, "igCardSanctionsBody"), href: "/sanctions" },
     { icon: Building2, title: t(lang, "igCardKybTitle"), body: t(lang, "igCardKybBody"), href: "/clients" },
   ];
 
@@ -59,7 +60,7 @@ export default async function IntegrationGuidePage() {
             <p className="text-xs text-muted-foreground">{t(lang, "igStep2Subtitle")}</p>
           </div>
         </div>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {useCases.map((useCase) => (
             <Link
               key={useCase.title}

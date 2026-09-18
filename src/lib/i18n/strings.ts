@@ -1104,6 +1104,16 @@ const STRINGS = {
     fr: "Vous n'avez pas encore envoyé de transaction. Suivez le guide d'intégration pour connecter vos systèmes.",
   },
   dashboardGettingStartedButton: { en: "Open integration guide", fr: "Ouvrir le guide d'intégration" },
+
+  // ── Documentation — Sanctions screening API ──────────────────────────────
+  docsNavSanctions: { en: "Sanctions screening", fr: "Filtrage des sanctions" },
+  docsSanctionsTitle: { en: "Screening a name against sanctions lists", fr: "Filtrer un nom sur les listes de sanctions" },
+  docsSanctionsBody: {
+    en: "POST a name to /partner-api/sanctions/screen to check it in real time — useful right before you onboard a customer. You get back a decision (clear, review or blocked), a match score, and the list of any sanctions entries it matched, with their source and aliases.",
+    fr: "Envoyez un nom par POST à /partner-api/sanctions/screen pour le vérifier en temps réel — utile juste avant d'intégrer un client. Vous recevez une décision (clear, review ou blocked), un score de correspondance, et la liste des entrées de sanctions éventuellement trouvées, avec leur source et leurs alias.",
+  },
+  igCardSanctionsTitle: { en: "Sanctions screening", fr: "Filtrage des sanctions" },
+  igCardSanctionsBody: { en: "Check a name against sanctions lists before you onboard them.", fr: "Vérifiez un nom sur les listes de sanctions avant de l'intégrer." },
 } as const;
 
 export type StringKey = keyof typeof STRINGS;
