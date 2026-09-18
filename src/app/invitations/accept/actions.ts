@@ -3,6 +3,8 @@
 import { redirect } from "next/navigation";
 import { apiFetch, ApiError } from "@/lib/api";
 import { setSessionCookies, type SessionUser } from "@/lib/session";
+import { getLang } from "@/lib/i18n/lang";
+import { t } from "@/lib/i18n/strings";
 
 export interface AcceptInvitationState {
   error?: string;
@@ -21,15 +23,16 @@ export async function acceptInvitationAction(
   const token = String(formData.get("token") ?? "");
   const password = String(formData.get("password") ?? "");
   const confirmPassword = String(formData.get("confirmPassword") ?? "");
+  const lang = await getLang();
 
   if (!token) {
-    return { error: "This invitation link is missing its token." };
+    return { error: t(lang, "acceptInvitationMissingTokenError") };
   }
   if (password.length < 10) {
-    return { error: "Password must be at least 10 characters long." };
+    return { error: t(lang, "resetPasswordTooShortError") };
   }
   if (password !== confirmPassword) {
-    return { error: "Passwords do not match." };
+    return { error: t(lang, "resetPasswordMismatchError") };
   }
 
   let response: AcceptInvitationResponse;
@@ -43,7 +46,7 @@ export async function acceptInvitationAction(
     if (error instanceof ApiError) {
       return { error: error.message };
     }
-    return { error: "Something went wrong. Please try again." };
+    return { error: t(lang, "commonGenericErrorTryAgain") };
   }
 
   await setSessionCookies(response.accessToken, response.refreshToken, response.user);

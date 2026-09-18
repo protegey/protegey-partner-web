@@ -27,7 +27,7 @@ function isChildActive(pathname: string, href?: string): boolean {
   return pathname === path || pathname.startsWith(`${path}/`);
 }
 
-function NavGroup({ item, pathname }: { item: NavItem; pathname: string }) {
+function NavGroup({ item, pathname, soonLabel }: { item: NavItem; pathname: string; soonLabel: string }) {
   const hasActiveChild = item.children?.some((child) => isChildActive(pathname, child.href)) ?? false;
   const [open, setOpen] = useState(hasActiveChild);
 
@@ -53,7 +53,7 @@ function NavGroup({ item, pathname }: { item: NavItem; pathname: string }) {
                   className="flex items-center justify-between gap-2 rounded-md px-3 py-1.5 text-sm text-muted-foreground/50"
                 >
                   {child.label}
-                  <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">Soon</span>
+                  <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{soonLabel}</span>
                 </span>
               );
             }
@@ -75,7 +75,7 @@ function NavGroup({ item, pathname }: { item: NavItem; pathname: string }) {
   );
 }
 
-export function Sidebar({ navItems, footer }: { navItems: NavItem[]; footer: React.ReactNode }) {
+export function Sidebar({ navItems, footer, soonLabel = "Soon" }: { navItems: NavItem[]; footer: React.ReactNode; soonLabel?: string }) {
   const pathname = usePathname();
 
   return (
@@ -87,7 +87,7 @@ export function Sidebar({ navItems, footer }: { navItems: NavItem[]; footer: Rea
       <nav className="flex flex-1 flex-col gap-1 px-3">
         {navItems.map((item) => {
           if (item.children) {
-            return <NavGroup key={item.label} item={item} pathname={pathname} />;
+            return <NavGroup key={item.label} item={item} pathname={pathname} soonLabel={soonLabel} />;
           }
 
           if (item.disabled || !item.href) {
@@ -100,7 +100,7 @@ export function Sidebar({ navItems, footer }: { navItems: NavItem[]; footer: Rea
                   {item.icon}
                   {item.label}
                 </span>
-                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">Soon</span>
+                <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{soonLabel}</span>
               </span>
             );
           }

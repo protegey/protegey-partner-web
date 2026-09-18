@@ -1,23 +1,21 @@
 import type { Metadata } from "next";
 import { getAlertRules } from "./actions";
 import { AlertRulesBoard } from "./AlertRulesBoard";
+import { getLang } from "@/lib/i18n/lang";
+import { t } from "@/lib/i18n/strings";
 
 export const metadata: Metadata = {
   title: "Alert Rules — Protegey Partner",
 };
 
 export default async function AlertRulesPage() {
-  const rules = await getAlertRules();
+  const [rules, lang] = await Promise.all([getAlertRules(), getLang()]);
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
+    <div className="mx-auto flex min-h-0 max-w-6xl flex-1 flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Pan-Monitor™ — Alert Rules</h1>
-        <p className="text-sm text-muted-foreground">
-          Transaction-monitoring rules evaluated against every transaction you submit. System defaults are shared
-          across every institution — editing one forks your own copy, the shared default is never changed. Every
-          rule you or Pan-Studio proposes starts as a draft and only fires once you switch it to active.
-        </p>
+        <h1 className="text-xl font-semibold text-foreground">Pan-Monitor™ — {t(lang, "alertRulesTitle")}</h1>
+        <p className="text-sm text-muted-foreground">{t(lang, "alertRulesSubtitle")}</p>
       </div>
 
       <AlertRulesBoard initialRules={rules} />

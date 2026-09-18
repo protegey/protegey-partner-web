@@ -3,25 +3,28 @@
 import { useActionState, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { Check, Copy } from "lucide-react";
+import { useLang } from "@/lib/i18n/LangProvider";
 import { startKycSessionAction, type StartKycSessionState } from "./actions";
 
 const initialState: StartKycSessionState = {};
 
 function SubmitButton() {
   const { pending } = useFormStatus();
+  const { t } = useLang();
   return (
     <button
       type="submit"
       disabled={pending}
       className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
     >
-      {pending ? "Starting…" : "Start verification"}
+      {pending ? t("kycFormStarting") : t("kycStartVerificationButton")}
     </button>
   );
 }
 
 function CopyLinkField({ url }: { url: string }) {
   const [copied, setCopied] = useState(false);
+  const { t } = useLang();
 
   async function copy() {
     try {
@@ -36,7 +39,7 @@ function CopyLinkField({ url }: { url: string }) {
   return (
     <div className="flex flex-col gap-3">
       <p className="text-sm text-foreground">
-        Verification link ready — send it to the user however you like (SMS, email, in-app).
+        {t("kycFormLinkReady")}
       </p>
       <div className="flex items-center gap-2">
         <input
@@ -51,7 +54,7 @@ function CopyLinkField({ url }: { url: string }) {
           className="flex shrink-0 items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
         >
           {copied ? <Check className="size-4 text-primary" /> : <Copy className="size-4" />}
-          {copied ? "Copied" : "Copy"}
+          {copied ? t("kycFormCopied") : t("kycFormCopy")}
         </button>
       </div>
       <a
@@ -60,13 +63,14 @@ function CopyLinkField({ url }: { url: string }) {
         rel="noreferrer"
         className="text-sm font-medium text-primary hover:underline"
       >
-        Open verification page →
+        {t("kycFormOpenPage")}
       </a>
     </div>
   );
 }
 
 export function StartVerificationForm() {
+  const { t } = useLang();
   const [state, formAction] = useActionState(startKycSessionAction, initialState);
 
   if (state.url) {
@@ -78,7 +82,7 @@ export function StartVerificationForm() {
       <input
         name="fullName"
         type="text"
-        placeholder="Full name (optional label — Didit fills this in from the ID document)"
+        placeholder={t("kycFormFullNamePlaceholder")}
         className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
       />
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}

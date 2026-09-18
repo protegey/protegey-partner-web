@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { useLang } from "@/lib/i18n/LangProvider";
 
 export interface SelectableRole {
   id: string;
@@ -24,6 +25,7 @@ export function RoleMultiSelect({
     () => new Set(roles.filter((r) => defaultSelectedNames.includes(r.name)).map((r) => r.id)),
   );
   const containerRef = useRef<HTMLDivElement>(null);
+  const { t } = useLang();
 
   useEffect(() => {
     if (!open) return;
@@ -68,7 +70,7 @@ export function RoleMultiSelect({
         className="flex w-full items-center justify-between rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
       >
         <span className={selectedLabels.length ? "text-foreground" : "text-muted-foreground"}>
-          {selectedLabels.length ? selectedLabels.join(", ") : "Select roles"}
+          {selectedLabels.length ? selectedLabels.join(", ") : t("roleSelectPlaceholder")}
         </span>
         <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
       </button>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { X, ZoomIn, ZoomOut, RotateCcw } from "lucide-react";
+import { useLang } from "@/lib/i18n/LangProvider";
 
 const MIN_ZOOM = 1;
 const MAX_ZOOM = 3;
@@ -21,6 +22,7 @@ export function DocumentPreviewDialog({
   mimeType: string | null;
 }) {
   const [zoom, setZoom] = useState(1);
+  const { t } = useLang();
 
   useEffect(() => {
     if (!open) return;
@@ -55,7 +57,7 @@ export function DocumentPreviewDialog({
                   onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z - ZOOM_STEP))}
                   disabled={zoom <= MIN_ZOOM}
                   className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40"
-                  aria-label="Zoom out"
+                  aria-label={t("zoomOutAria")}
                 >
                   <ZoomOut className="size-4" />
                 </button>
@@ -64,7 +66,7 @@ export function DocumentPreviewDialog({
                   onClick={() => setZoom((z) => Math.min(MAX_ZOOM, z + ZOOM_STEP))}
                   disabled={zoom >= MAX_ZOOM}
                   className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40"
-                  aria-label="Zoom in"
+                  aria-label={t("zoomInAria")}
                 >
                   <ZoomIn className="size-4" />
                 </button>
@@ -73,7 +75,7 @@ export function DocumentPreviewDialog({
                   onClick={() => setZoom(1)}
                   disabled={zoom === 1}
                   className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:opacity-40"
-                  aria-label="Reset zoom"
+                  aria-label={t("resetZoomAria")}
                 >
                   <RotateCcw className="size-4" />
                 </button>
@@ -84,7 +86,7 @@ export function DocumentPreviewDialog({
               type="button"
               onClick={onClose}
               className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              aria-label="Close preview"
+              aria-label={t("closePreviewAria")}
             >
               <X className="size-4" />
             </button>
@@ -103,7 +105,7 @@ export function DocumentPreviewDialog({
             <iframe src={fileUrl} title={fileName} className="h-full w-full rounded-sm border-0" />
           ) : (
             <p className="flex h-full items-center justify-center text-sm text-muted-foreground">
-              Preview isn&rsquo;t available for this file type.
+              {t("previewUnavailable")}
             </p>
           )}
         </div>

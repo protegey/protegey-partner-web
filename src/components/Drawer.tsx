@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { X } from "lucide-react";
+import { useLang } from "@/lib/i18n/LangProvider";
 
 /**
  * A full-width slide-over panel scoped to the content area only — it must NOT cover the
@@ -21,6 +22,7 @@ export function Drawer({
   children: React.ReactNode;
 }) {
   const [entered, setEntered] = useState(false);
+  const { t } = useLang();
 
   useEffect(() => {
     if (!open) {
@@ -64,7 +66,7 @@ export function Drawer({
             type="button"
             onClick={onClose}
             className="rounded-md p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            aria-label="Close"
+            aria-label={t("close")}
           >
             <X className="size-5" />
           </button>

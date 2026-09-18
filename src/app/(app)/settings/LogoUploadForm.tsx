@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { OrganizationLogo } from "@/components/OrganizationLogo";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
+import { useLang } from "@/lib/i18n/LangProvider";
 import { uploadLogoAction, removeLogoAction } from "./actions";
 
 export function LogoUploadForm({
@@ -18,6 +19,7 @@ export function LogoUploadForm({
 }) {
   const router = useRouter();
   const guard = useSessionGuard();
+  const { t } = useLang();
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [removeOpen, setRemoveOpen] = useState(false);
@@ -38,7 +40,7 @@ export function LogoUploadForm({
       setMessage({ type: "error", text: result.error });
       return;
     }
-    setMessage({ type: "success", text: "Logo updated." });
+    setMessage({ type: "success", text: t("settingsLogoUpdatedSuccess") });
     setLogoVersion((v) => v + 1);
     router.refresh();
   }
@@ -62,7 +64,7 @@ export function LogoUploadForm({
       <OrganizationLogo logoUrl={hasLogo ? `/api/partner-logo?v=${logoVersion}` : null} name={organizationName} size={64} />
       <div className="flex flex-col gap-2">
         <p className="text-sm text-foreground">
-          This logo appears on the KYB application pages and emails you send to your own business clients.
+          {t("settingsLogoDescription")}
         </p>
         {canManage ? (
           <div className="flex items-center gap-2">
@@ -82,7 +84,7 @@ export function LogoUploadForm({
               onClick={() => inputRef.current?.click()}
               className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
             >
-              {uploading ? "Uploading…" : hasLogo ? "Replace logo" : "Upload logo"}
+              {uploading ? t("settingsUploading") : hasLogo ? t("settingsReplaceLogo") : t("settingsUploadLogo")}
             </button>
             {hasLogo ? (
               <button
@@ -90,12 +92,12 @@ export function LogoUploadForm({
                 onClick={() => setRemoveOpen(true)}
                 className="rounded-md border border-destructive/30 px-3 py-1.5 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10"
               >
-                Remove
+                {t("settingsRemove")}
               </button>
             ) : null}
           </div>
         ) : (
-          <p className="text-xs text-muted-foreground">You don&apos;t have permission to change this.</p>
+          <p className="text-xs text-muted-foreground">{t("settingsNoPermissionChange")}</p>
         )}
         {message ? (
           <p className={`text-xs ${message.type === "error" ? "text-destructive" : "text-primary"}`}>{message.text}</p>
@@ -106,10 +108,10 @@ export function LogoUploadForm({
         open={removeOpen}
         onClose={() => setRemoveOpen(false)}
         onConfirm={handleRemove}
-        title="Remove your organization logo?"
-        description="Your KYB pages and emails will show a generic icon instead."
-        confirmLabel="Remove"
-        pendingLabel="Removing…"
+        title={t("settingsRemoveLogoDialogTitle")}
+        description={t("settingsRemoveLogoDialogDescription")}
+        confirmLabel={t("settingsRemove")}
+        pendingLabel={t("settingsRemoving")}
         pending={removing}
         variant="destructive"
       />

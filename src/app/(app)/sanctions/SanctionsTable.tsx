@@ -1,3 +1,4 @@
+import { useLang } from "@/lib/i18n/LangProvider";
 import type { SanctionsEntity } from "./actions";
 
 function countryFlag(code: string | null): string {
@@ -19,26 +20,27 @@ function formatDate(d: string | null): string {
 }
 
 export function SanctionsTable({ sanctions, total }: { sanctions: SanctionsEntity[]; total: number }) {
+  const { t } = useLang();
   return (
     <div className="overflow-x-auto rounded-md border border-border">
       <table className="w-full text-left text-sm">
         <thead className="bg-muted text-muted-foreground">
           <tr>
-            <th className="px-4 py-2.5 font-medium">Name</th>
-            <th className="px-4 py-2.5 font-medium">Aliases</th>
-            <th className="px-4 py-2.5 font-medium">Type</th>
-            <th className="px-4 py-2.5 font-medium">Source</th>
-            <th className="px-4 py-2.5 font-medium">Nationality</th>
-            <th className="px-4 py-2.5 font-medium">Listing date</th>
-            <th className="px-4 py-2.5 font-medium">Notes</th>
-            <th className="px-4 py-2.5 font-medium">Status</th>
+            <th className="px-4 py-2.5 font-medium">{t("sanctionsColName")}</th>
+            <th className="px-4 py-2.5 font-medium">{t("sanctionsColAliases")}</th>
+            <th className="px-4 py-2.5 font-medium">{t("sanctionsColType")}</th>
+            <th className="px-4 py-2.5 font-medium">{t("sanctionsColSource")}</th>
+            <th className="px-4 py-2.5 font-medium">{t("clientsComplianceFieldNationality")}</th>
+            <th className="px-4 py-2.5 font-medium">{t("sanctionsColListingDate")}</th>
+            <th className="px-4 py-2.5 font-medium">{t("clientsComplianceFieldNotes")}</th>
+            <th className="px-4 py-2.5 font-medium">{t("sanctionsColStatus")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
           {sanctions.length === 0 ? (
             <tr>
               <td colSpan={8} className="px-4 py-6 text-center text-muted-foreground">
-                No sanctions entries found.
+                {t("sanctionsNoEntries")}
               </td>
             </tr>
           ) : (
@@ -72,9 +74,9 @@ export function SanctionsTable({ sanctions, total }: { sanctions: SanctionsEntit
                 <td className="max-w-56 truncate px-4 py-2.5 text-muted-foreground">{s.notes ?? "—"}</td>
                 <td className="px-4 py-2.5">
                   {s.delistedAt ? (
-                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">Delisted</span>
+                    <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">{t("sanctionsDelisted")}</span>
                   ) : (
-                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">Active</span>
+                    <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">{t("sanctionsActive")}</span>
                   )}
                 </td>
               </tr>
@@ -83,7 +85,7 @@ export function SanctionsTable({ sanctions, total }: { sanctions: SanctionsEntit
         </tbody>
       </table>
       <div className="border-t border-border px-4 py-2.5 text-xs text-muted-foreground">
-        Showing {sanctions.length} of {total.toLocaleString()} entries
+        {t("sanctionsShowingPrefix")} {sanctions.length} {t("paginationOf")} {total.toLocaleString()} {t("sanctionsShowingSuffix")}
       </div>
     </div>
   );

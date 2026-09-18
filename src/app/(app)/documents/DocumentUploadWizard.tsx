@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { Check } from "lucide-react";
+import { useLang } from "@/lib/i18n/LangProvider";
 import { DocumentUploadRow } from "./DocumentUploadRow";
 import type { PartnerDocument } from "./actions";
 
@@ -15,6 +16,7 @@ function isActionable(document: PartnerDocument): boolean {
  * leaving "actionable" (once uploaded) doesn't reshuffle the remaining steps.
  */
 export function DocumentUploadWizard({ documents }: { documents: PartnerDocument[] }) {
+  const { t } = useLang();
   const [frozenIds] = useState(() => documents.filter(isActionable).map((document) => document.id));
   const [stepIndex, setStepIndex] = useState(0);
 
@@ -54,7 +56,7 @@ export function DocumentUploadWizard({ documents }: { documents: PartnerDocument
         })}
       </div>
       <p className="text-center text-xs text-muted-foreground">
-        Document {stepIndex + 1} of {frozenIds.length}
+        {t("docWizardStepPrefix")} {stepIndex + 1} {t("paginationOf")} {frozenIds.length}
       </p>
 
       <DocumentUploadRow key={current.id} document={current} />
@@ -66,7 +68,7 @@ export function DocumentUploadWizard({ documents }: { documents: PartnerDocument
           disabled={stepIndex === 0}
           className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-40"
         >
-          Back
+          {t("docWizardBack")}
         </button>
         <button
           type="button"
@@ -74,7 +76,7 @@ export function DocumentUploadWizard({ documents }: { documents: PartnerDocument
           disabled={!canAdvance}
           className="rounded-md bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
         >
-          {isLastStep ? "Finish" : "Continue"}
+          {isLastStep ? t("docWizardFinish") : t("docWizardContinue")}
         </button>
       </div>
     </div>

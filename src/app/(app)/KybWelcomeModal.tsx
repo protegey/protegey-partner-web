@@ -3,11 +3,13 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import { X } from "lucide-react";
+import { useLang } from "@/lib/i18n/LangProvider";
 
 const STORAGE_KEY = "protegey_partner_kyb_welcome_seen";
 
 /** Shown once, the first time a partner lands on their account while still unverified. */
 export function KybWelcomeModal() {
+  const { t } = useLang();
   const [open, setOpen] = useState(false);
 
   useEffect(() => {
@@ -55,23 +57,20 @@ export function KybWelcomeModal() {
         <div className="flex flex-1 flex-col gap-4 p-6">
           <div className="flex items-start justify-between gap-2">
             <div>
-              <h2 className="text-lg font-semibold text-foreground">Welcome to Protegey</h2>
-              <p className="mt-0.5 text-sm text-muted-foreground">Let&apos;s get your organization verified.</p>
+              <h2 className="text-lg font-semibold text-foreground">{t("kybWelcomeTitle")}</h2>
+              <p className="mt-0.5 text-sm text-muted-foreground">{t("kybWelcomeSubtitle")}</p>
             </div>
             <button
               type="button"
               onClick={dismiss}
               className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-              aria-label="Close"
+              aria-label={t("close")}
             >
               <X className="size-4" />
             </button>
           </div>
 
-          <p className="text-sm text-foreground">
-            Before you can access your dashboard, team and clients, we need to verify your organization. Please
-            submit the required documents below to continue.
-          </p>
+          <p className="text-sm text-foreground">{t("kybWelcomeBody")}</p>
 
           <div className="mt-auto flex justify-end">
             <button
@@ -79,7 +78,7 @@ export function KybWelcomeModal() {
               onClick={dismiss}
               className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
             >
-              Got it
+              {t("kybWelcomeGotIt")}
             </button>
           </div>
         </div>

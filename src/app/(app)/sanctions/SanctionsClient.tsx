@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { RefreshCw } from "lucide-react";
+import { useLang } from "@/lib/i18n/LangProvider";
 import { StatsCards } from "./StatsCards";
 import { SanctionsTable } from "./SanctionsTable";
 import type { SanctionsEntity, SanctionsStats } from "./actions";
@@ -29,6 +30,7 @@ export function SanctionsClient({
   initialIncludeDelisted: boolean;
 }) {
   const router = useRouter();
+  const { t } = useLang();
   const [isPending, startTransition] = useTransition();
   const [search, setSearch] = useState(initialSearch);
   const [type, setType] = useState(initialType);
@@ -51,9 +53,9 @@ export function SanctionsClient({
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Sanctions list</h1>
+          <h1 className="text-xl font-semibold text-foreground">{t("sanctionsPageTitle")}</h1>
           <p className="text-sm text-muted-foreground">
-            Read-only view of the sanctions database Protegey screens against for KYB and KYC.
+            {t("sanctionsPageSubtitle")}
           </p>
         </div>
         <button
@@ -62,7 +64,7 @@ export function SanctionsClient({
           className="flex shrink-0 items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
         >
           <RefreshCw className={`size-4 ${isPending ? "animate-spin" : ""}`} />
-          Refresh
+          {t("kycRefreshButton")}
         </button>
       </div>
 
@@ -70,42 +72,42 @@ export function SanctionsClient({
 
       <div className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-muted-foreground">Search</label>
+          <label className="text-xs font-medium text-muted-foreground">{t("sanctionsSearchLabel")}</label>
           <input
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && applyFilters()}
-            placeholder="Name…"
+            placeholder={t("sanctionsSearchPlaceholder")}
             className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-muted-foreground">Type</label>
+          <label className="text-xs font-medium text-muted-foreground">{t("sanctionsColType")}</label>
           <select
             value={type}
             onChange={(e) => setType(e.target.value)}
             className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
           >
-            <option value="all">All</option>
-            <option value="person">Person</option>
-            <option value="business">Business</option>
+            <option value="all">{t("sanctionsTypeAll")}</option>
+            <option value="person">{t("sanctionsTypePerson")}</option>
+            <option value="business">{t("sanctionsTypeBusiness")}</option>
           </select>
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-xs font-medium text-muted-foreground">Source</label>
+          <label className="text-xs font-medium text-muted-foreground">{t("sanctionsColSource")}</label>
           <select
             value={source}
             onChange={(e) => setSource(e.target.value)}
             className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
           >
-            <option value="all">All</option>
+            <option value="all">{t("sanctionsTypeAll")}</option>
             <option value="nigsac">NIGSAC</option>
             <option value="ofac">OFAC</option>
             <option value="eu">EU</option>
             <option value="un">UN</option>
             <option value="au">AU</option>
-            <option value="custom">Custom</option>
+            <option value="custom">{t("sanctionsSourceCustom")}</option>
           </select>
         </div>
         <label className="flex items-center gap-2 pb-1.5 text-sm text-muted-foreground">
@@ -115,14 +117,14 @@ export function SanctionsClient({
             onChange={(e) => setIncludeDelisted(e.target.checked)}
             className="rounded border-border"
           />
-          Include delisted
+          {t("sanctionsIncludeDelisted")}
         </label>
         <button
           type="button"
           onClick={() => applyFilters()}
           className="rounded-md bg-primary px-4 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
         >
-          Apply
+          {t("sanctionsApplyButton")}
         </button>
       </div>
 
@@ -136,10 +138,10 @@ export function SanctionsClient({
             disabled={page <= 1}
             className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Previous
+            {t("paginationPrevious")}
           </button>
           <span className="text-sm text-muted-foreground">
-            Page {page} of {totalPages}
+            {t("paginationPagePrefix")} {page} {t("paginationOf")} {totalPages}
           </span>
           <button
             type="button"
@@ -147,7 +149,7 @@ export function SanctionsClient({
             disabled={page >= totalPages}
             className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
           >
-            Next
+            {t("paginationNext")}
           </button>
         </div>
       ) : null}

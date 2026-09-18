@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { apiFetch, ApiError, type AuthExpired } from "@/lib/api";
+import { getLang } from "@/lib/i18n/lang";
+import { t } from "@/lib/i18n/strings";
 
 export interface TeamMember {
   id: string;
@@ -53,33 +55,36 @@ export async function getAssignableRoles(): Promise<AssignableRole[]> {
 }
 
 export async function resendAgentInvitationAction(invitationId: string): Promise<ActionResult | AuthExpired> {
+  const lang = await getLang();
   try {
     await apiFetch(`/partners/me/team/invitations/${invitationId}/resend`, { method: "POST" });
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) return { authExpired: true };
-    return { error: error instanceof ApiError ? error.message : "Something went wrong." };
+    return { error: error instanceof ApiError ? error.message : t(lang, "commonGenericError") };
   }
   revalidatePath("/team");
   return { success: true };
 }
 
 export async function setAgentStatusAction(userId: string, isActive: boolean): Promise<ActionResult | AuthExpired> {
+  const lang = await getLang();
   try {
     await apiFetch(`/partners/me/team/${userId}/status`, { method: "PATCH", body: { isActive } });
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) return { authExpired: true };
-    return { error: error instanceof ApiError ? error.message : "Something went wrong." };
+    return { error: error instanceof ApiError ? error.message : t(lang, "commonGenericError") };
   }
   revalidatePath("/team");
   return { success: true };
 }
 
 export async function sendPasswordResetAction(userId: string): Promise<ActionResult | AuthExpired> {
+  const lang = await getLang();
   try {
     await apiFetch(`/partners/me/team/${userId}/reset-password`, { method: "POST" });
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) return { authExpired: true };
-    return { error: error instanceof ApiError ? error.message : "Something went wrong." };
+    return { error: error instanceof ApiError ? error.message : t(lang, "commonGenericError") };
   }
   return { success: true };
 }
@@ -100,12 +105,13 @@ export async function updateInvitationAction(
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
   const roleIds = formData.getAll("roleIds").map(String);
+  const lang = await getLang();
 
   if (!firstName || !lastName || !email || !phone) {
-    return { error: "All fields are required." };
+    return { error: t(lang, "commonAllFieldsRequired") };
   }
   if (roleIds.length === 0) {
-    return { error: "Select at least one role for this agent." };
+    return { error: t(lang, "teamSelectRoleError") };
   }
 
   try {
@@ -114,7 +120,7 @@ export async function updateInvitationAction(
       body: { firstName, lastName, email, phone, roleIds },
     });
   } catch (error) {
-    return { error: error instanceof ApiError ? error.message : "Something went wrong." };
+    return { error: error instanceof ApiError ? error.message : t(lang, "commonGenericError") };
   }
   revalidatePath("/team");
   return { success: true };
@@ -129,12 +135,13 @@ export async function inviteAgentAction(
   const email = String(formData.get("email") ?? "").trim();
   const phone = String(formData.get("phone") ?? "").trim();
   const roleIds = formData.getAll("roleIds").map(String);
+  const lang = await getLang();
 
   if (!firstName || !lastName || !email || !phone) {
-    return { error: "All fields are required." };
+    return { error: t(lang, "commonAllFieldsRequired") };
   }
   if (roleIds.length === 0) {
-    return { error: "Select at least one role for this agent." };
+    return { error: t(lang, "teamSelectRoleError") };
   }
 
   try {
@@ -143,7 +150,7 @@ export async function inviteAgentAction(
     if (error instanceof ApiError) {
       return { error: error.message };
     }
-    return { error: "Something went wrong. Please try again." };
+    return { error: t(lang, "commonGenericErrorTryAgain") };
   }
 
   revalidatePath("/team");

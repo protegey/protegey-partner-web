@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { apiFetch, apiUpload, ApiError } from "@/lib/api";
+import { getLang } from "@/lib/i18n/lang";
+import { t } from "@/lib/i18n/strings";
 
 export interface PartnerDocument {
   id: string;
@@ -28,9 +30,10 @@ export async function submitDocumentAction(
   _prevState: SubmitDocumentState,
   formData: FormData,
 ): Promise<SubmitDocumentState> {
+  const lang = await getLang();
   const file = formData.get("file");
   if (!(file instanceof File) || file.size === 0) {
-    return { error: "Please choose a file to upload." };
+    return { error: t(lang, "docFileRequiredError") };
   }
 
   const uploadForm = new FormData();
@@ -39,7 +42,7 @@ export async function submitDocumentAction(
   try {
     await apiUpload(`/partners/me/documents/${documentId}/submit`, uploadForm);
   } catch (error) {
-    return { error: error instanceof ApiError ? error.message : "Something went wrong. Please try again." };
+    return { error: error instanceof ApiError ? error.message : t(lang, "commonGenericErrorTryAgain") };
   }
 
   revalidatePath("/documents");

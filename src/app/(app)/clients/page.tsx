@@ -5,17 +5,19 @@ import { getSessionUser } from "@/lib/session";
 import { getClientsPage, type ClientStage } from "./actions";
 import { InviteClientDialogButton } from "./InviteClientDialogButton";
 import { ResendClientInvitationButton } from "./ResendClientInvitationButton";
+import { getLang } from "@/lib/i18n/lang";
+import { t, type StringKey } from "@/lib/i18n/strings";
 
 export const metadata: Metadata = {
   title: "KYB — Protegey Partner",
 };
 
-const STATUS_LABELS: Record<string, string> = {
-  invited: "Invited",
-  pending_review: "Needs review",
-  more_info_required: "More info requested",
-  active: "Active",
-  rejected: "Rejected",
+const STATUS_LABEL_KEYS: Record<string, StringKey> = {
+  invited: "clientStatusInvited",
+  pending_review: "clientStatusPendingReview",
+  more_info_required: "clientStatusMoreInfoRequired",
+  active: "clientStatusActive",
+  rejected: "clientStatusRejected",
 };
 
 const STATUS_STYLES: Record<string, string> = {
@@ -26,9 +28,9 @@ const STATUS_STYLES: Record<string, string> = {
   rejected: "bg-destructive/10 text-destructive",
 };
 
-const TABS: { value: ClientStage; label: string }[] = [
-  { value: "invited", label: "Invited" },
-  { value: "responded", label: "Responded" },
+const TABS: { value: ClientStage; labelKey: StringKey }[] = [
+  { value: "invited", labelKey: "clientsTabInvited" },
+  { value: "responded", labelKey: "clientsTabResponded" },
 ];
 
 function tabHref(tab: string): string {
@@ -43,6 +45,7 @@ export default async function ClientsPage({
   const { tab, page: pageParam } = await searchParams;
   const activeTab = tab === "responded" ? "responded" : tab === "questionnaires" ? "questionnaires" : "invited";
   const page = Math.max(1, Number(pageParam) || 1);
+  const lang = await getLang();
 
   const user = await getSessionUser();
   const canManageClients = user?.permissions.includes("partners.manage_clients") ?? false;
@@ -51,9 +54,7 @@ export default async function ClientsPage({
     return (
       <div className="mx-auto flex max-w-4xl flex-col gap-6">
         <h1 className="text-xl font-semibold text-foreground">KYB</h1>
-        <p className="text-sm text-muted-foreground">
-          You don&apos;t have permission to manage clients. Ask a colleague with the right role to grant you access.
-        </p>
+        <p className="text-sm text-muted-foreground">{t(lang, "clientsNoPermission")}</p>
       </div>
     );
   }
@@ -66,35 +67,32 @@ export default async function ClientsPage({
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-foreground">KYB</h1>
-          <p className="text-sm text-muted-foreground">
-            The businesses you&apos;ve invited to complete their own onboarding on your platform.
-          </p>
+          <p className="text-sm text-muted-foreground">{t(lang, "clientsSubtitle")}</p>
         </div>
         <InviteClientDialogButton />
       </div>
 
       <div className="flex gap-1 border-b border-border">
-        {TABS.map((t) => (
+        {TABS.map((tab) => (
           <Link
-            key={t.value}
-            href={tabHref(t.value)}
+            key={tab.value}
+            href={tabHref(tab.value)}
             className={`px-3 py-2 text-sm font-medium ${
-              activeTab === t.value ? "border-b-2 border-primary text-primary" : "text-muted-foreground hover:text-foreground"
+              activeTab === tab.value ? "border-b-2 border-primary text-primary" : "text-muted-foreground hover:text-foreground"
             }`}
           >
-            {t.label}
+            {t(lang, tab.labelKey)}
           </Link>
         ))}
         <span className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-muted-foreground/50">
-          Questionnaires
-          <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">Soon</span>
+          {t(lang, "clientsTabQuestionnaires")}
+          <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{t(lang, "soonBadge")}</span>
         </span>
       </div>
 
       {activeTab === "questionnaires" ? (
         <div className="rounded-md border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          Custom, dynamic questionnaires are coming soon — you&apos;ll be able to build and tailor your own KYB
-          form here instead of the fixed one used today.
+          {t(lang, "clientsQuestionnairesComingSoon")}
         </div>
       ) : (
         <>
@@ -102,10 +100,12 @@ export default async function ClientsPage({
             <table className="w-full text-left text-sm">
               <thead className="bg-muted text-muted-foreground">
                 <tr>
-                  <th className="px-4 py-2.5 font-medium">Business</th>
-                  <th className="px-4 py-2.5 font-medium">Status</th>
-                  <th className="px-4 py-2.5 font-medium">{activeTab === "invited" ? "Invited" : "Submitted"}</th>
-                  <th className="px-4 py-2.5 font-medium text-right">Actions</th>
+                  <th className="px-4 py-2.5 font-medium">{t(lang, "clientsColBusiness")}</th>
+                  <th className="px-4 py-2.5 font-medium">{t(lang, "clientsColStatus")}</th>
+                  <th className="px-4 py-2.5 font-medium">
+                    {t(lang, activeTab === "invited" ? "clientsColInvitedDate" : "clientsColSubmittedDate")}
+                  </th>
+                  <th className="px-4 py-2.5 font-medium text-right">{t(lang, "clientsColActions")}</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
@@ -119,7 +119,7 @@ export default async function ClientsPage({
                     </td>
                     <td className="px-4 py-2.5">
                       <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[client.status]}`}>
-                        {STATUS_LABELS[client.status]}
+                        {t(lang, STATUS_LABEL_KEYS[client.status])}
                       </span>
                     </td>
                     <td className="px-4 py-2.5 text-muted-foreground">
@@ -135,13 +135,13 @@ export default async function ClientsPage({
                           href={`/clients/${client.id}`}
                           className="rounded-md bg-primary px-2.5 py-1 text-xs font-semibold text-primary-foreground transition-opacity hover:opacity-90"
                         >
-                          Review
+                          {t(lang, "commonReview")}
                         </Link>
                       ) : client.status === "invited" || client.status === "more_info_required" ? (
                         <ResendClientInvitationButton clientId={client.id} />
                       ) : (
                         <Link href={`/clients/${client.id}`} className="text-xs text-muted-foreground hover:text-primary hover:underline">
-                          View
+                          {t(lang, "commonView")}
                         </Link>
                       )}
                     </td>
@@ -150,9 +150,7 @@ export default async function ClientsPage({
                 {result?.data.length === 0 ? (
                   <tr>
                     <td colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
-                      {activeTab === "invited"
-                        ? "No pending invites — everyone you've invited has started their application."
-                        : "No one has responded yet."}
+                      {t(lang, activeTab === "invited" ? "clientsEmptyInvited" : "clientsEmptyResponded")}
                     </td>
                   </tr>
                 ) : null}
@@ -163,7 +161,8 @@ export default async function ClientsPage({
           {result && result.totalPages > 1 ? (
             <div className="flex items-center justify-between text-sm text-muted-foreground">
               <p>
-                Page {result.page} of {result.totalPages} — {result.total} total
+                {t(lang, "paginationPagePrefix")} {result.page} {t(lang, "paginationOf")} {result.totalPages} — {result.total}{" "}
+                {t(lang, "paginationTotalSuffix")}
               </p>
               <div className="flex gap-2">
                 {result.page > 1 ? (
@@ -172,12 +171,12 @@ export default async function ClientsPage({
                     className="flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-foreground transition-colors hover:bg-muted"
                   >
                     <ChevronLeft className="size-4" />
-                    Previous
+                    {t(lang, "paginationPrevious")}
                   </Link>
                 ) : (
                   <span className="flex cursor-not-allowed items-center gap-1 rounded-md border border-border px-3 py-1.5 opacity-40">
                     <ChevronLeft className="size-4" />
-                    Previous
+                    {t(lang, "paginationPrevious")}
                   </span>
                 )}
                 {result.page < result.totalPages ? (
@@ -185,12 +184,12 @@ export default async function ClientsPage({
                     href={`/clients?tab=${activeTab}&page=${result.page + 1}`}
                     className="flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-foreground transition-colors hover:bg-muted"
                   >
-                    Next
+                    {t(lang, "paginationNext")}
                     <ChevronRight className="size-4" />
                   </Link>
                 ) : (
                   <span className="flex cursor-not-allowed items-center gap-1 rounded-md border border-border px-3 py-1.5 opacity-40">
-                    Next
+                    {t(lang, "paginationNext")}
                     <ChevronRight className="size-4" />
                   </span>
                 )}

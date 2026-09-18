@@ -5,6 +5,8 @@ import { OrganizationLogo } from "@/components/OrganizationLogo";
 import { getTeamMembers } from "../team/actions";
 import { getClients } from "../clients/actions";
 import { DashboardCharts } from "./DashboardCharts";
+import { getLang } from "@/lib/i18n/lang";
+import { t } from "@/lib/i18n/strings";
 
 export const metadata: Metadata = {
   title: "Dashboard — Protegey Partner",
@@ -39,30 +41,29 @@ async function loadPartner(): Promise<Partner | null> {
 }
 
 export default async function DashboardPage() {
-  const [user, partner, team, clients] = await Promise.all([
+  const [user, partner, team, clients, lang] = await Promise.all([
     getSessionUser(),
     loadPartner(),
     getTeamMembers().catch(() => []),
     getClients().catch(() => []),
+    getLang(),
   ]);
   const pendingClientReviews = clients.filter((client) => client.status === "pending_review").length;
 
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">Welcome back</h1>
+        <h1 className="text-xl font-semibold text-foreground">{t(lang, "dashboardWelcomeBack")}</h1>
         <p className="text-sm text-muted-foreground">{user?.email}</p>
       </div>
 
       {partner?.status === "rejected" ? (
         <div className="rounded-md border border-destructive/30 bg-destructive/10 p-5">
-          <p className="text-sm font-semibold text-destructive">Your application was not approved</p>
+          <p className="text-sm font-semibold text-destructive">{t(lang, "dashboardApplicationRejectedTitle")}</p>
           {partner.rejectionReason ? (
             <p className="mt-1 text-sm text-destructive">{partner.rejectionReason}</p>
           ) : null}
-          <p className="mt-2 text-xs text-destructive/80">
-            Contact your Protegey representative if you believe this is a mistake.
-          </p>
+          <p className="mt-2 text-xs text-destructive/80">{t(lang, "dashboardApplicationRejectedContact")}</p>
         </div>
       ) : null}
 
@@ -74,18 +75,18 @@ export default async function DashboardPage() {
         <div className="flex flex-col gap-6">
           {partner ? (
             <div className="rounded-md border border-border bg-card p-5">
-              <p className="text-xs font-medium text-muted-foreground">Your organization</p>
+              <p className="text-xs font-medium text-muted-foreground">{t(lang, "dashboardOrgSectionTitle")}</p>
               <div className="mt-1 flex items-center gap-3">
                 <OrganizationLogo logoUrl={partner.logoFileName ? "/api/partner-logo" : null} name={partner.name} size={40} />
                 <h2 className="text-lg font-semibold text-foreground">{partner.name}</h2>
               </div>
               <div className="mt-3 flex flex-col gap-2 text-sm">
                 <div>
-                  <span className="text-muted-foreground">Type: </span>
+                  <span className="text-muted-foreground">{t(lang, "dashboardOrgTypeLabel")}{" "}</span>
                   <span className="text-foreground">{formatLabel(partner.type)}</span>
                 </div>
                 <div>
-                  <span className="text-muted-foreground">Status: </span>
+                  <span className="text-muted-foreground">{t(lang, "dashboardOrgStatusLabel")}{" "}</span>
                   <span
                     className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                       partner.status === "rejected"
@@ -98,13 +99,13 @@ export default async function DashboardPage() {
                 </div>
                 {partner.country ? (
                   <div>
-                    <span className="text-muted-foreground">Country: </span>
+                    <span className="text-muted-foreground">{t(lang, "dashboardOrgCountryLabel")}{" "}</span>
                     <span className="text-foreground">{partner.country}</span>
                   </div>
                 ) : null}
                 {partner.contactEmail ? (
                   <div>
-                    <span className="text-muted-foreground">Contact: </span>
+                    <span className="text-muted-foreground">{t(lang, "dashboardOrgContactLabel")}{" "}</span>
                     <span className="text-foreground">{partner.contactEmail}</span>
                   </div>
                 ) : null}
@@ -112,34 +113,36 @@ export default async function DashboardPage() {
             </div>
           ) : (
             <div className="rounded-md border border-border bg-card p-5 text-sm text-muted-foreground">
-              Organization details are not available for this account.
+              {t(lang, "dashboardOrgUnavailable")}
             </div>
           )}
 
           <div className="rounded-md border border-border bg-card p-5">
-            <p className="text-xs font-medium text-muted-foreground">Your role</p>
+            <p className="text-xs font-medium text-muted-foreground">{t(lang, "dashboardRoleTitle")}</p>
             <p className="mt-1 text-sm text-foreground">
               {user?.roles.map(formatLabel).join(", ") || "—"}
             </p>
           </div>
 
           <div className="rounded-md border border-border bg-card p-5">
-            <p className="text-xs font-medium text-muted-foreground">Clients</p>
+            <p className="text-xs font-medium text-muted-foreground">{t(lang, "dashboardClientsTitle")}</p>
             <p className="mt-1 text-2xl font-semibold text-foreground">{clients.length}</p>
             <p className="text-xs text-muted-foreground">
-              {clients.length === 1 ? "business" : "businesses"} invited to onboard
+              {t(lang, clients.length === 1 ? "dashboardClientsInvitedSingular" : "dashboardClientsInvitedPlural")}
               {pendingClientReviews > 0 ? (
                 <span className="ml-1.5 rounded-full bg-primary/10 px-1.5 py-0.5 text-primary">
-                  {pendingClientReviews} awaiting review
+                  {pendingClientReviews} {t(lang, "dashboardAwaitingReview")}
                 </span>
               ) : null}
             </p>
           </div>
 
           <div className="rounded-md border border-border bg-card p-5">
-            <p className="text-xs font-medium text-muted-foreground">Team</p>
+            <p className="text-xs font-medium text-muted-foreground">{t(lang, "dashboardTeamTitle")}</p>
             <p className="mt-1 text-2xl font-semibold text-foreground">{team.length}</p>
-            <p className="text-xs text-muted-foreground">agent{team.length === 1 ? "" : "s"} in your organization</p>
+            <p className="text-xs text-muted-foreground">
+              {t(lang, team.length === 1 ? "dashboardTeamAgentSingular" : "dashboardTeamAgentPlural")}
+            </p>
             {team.length > 0 ? (
               <div className="mt-3 flex flex-col gap-2 border-t border-border pt-3">
                 {team.map((member) => (

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
+import { useLang } from "@/lib/i18n/LangProvider";
 
 export interface GalleryImage {
   url: string;
@@ -20,6 +21,7 @@ export function ImageLightbox({
   initialIndex: number;
   onClose: () => void;
 }) {
+  const { t } = useLang();
   const [index, setIndex] = useState(initialIndex);
   const [zoom, setZoom] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
@@ -80,7 +82,7 @@ export function ImageLightbox({
             type="button"
             onClick={() => setZoom((z) => Math.max(MIN_ZOOM, z - 0.5))}
             className="rounded-md p-1.5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-            aria-label="Zoom out"
+            aria-label={t("zoomOutAria")}
           >
             <ZoomOut className="size-5" />
           </button>
@@ -88,7 +90,7 @@ export function ImageLightbox({
             type="button"
             onClick={() => setZoom((z) => Math.min(MAX_ZOOM, z + 0.5))}
             className="rounded-md p-1.5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-            aria-label="Zoom in"
+            aria-label={t("zoomInAria")}
           >
             <ZoomIn className="size-5" />
           </button>
@@ -96,7 +98,7 @@ export function ImageLightbox({
             type="button"
             onClick={onClose}
             className="rounded-md p-1.5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
-            aria-label="Close"
+            aria-label={t("close")}
           >
             <X className="size-5" />
           </button>
@@ -117,7 +119,7 @@ export function ImageLightbox({
             type="button"
             onClick={() => setIndex((i) => i - 1)}
             className="absolute left-4 z-10 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
-            aria-label="Previous image"
+            aria-label={t("kycLightboxPrevAria")}
           >
             <ChevronLeft className="size-6" />
           </button>
@@ -137,14 +139,14 @@ export function ImageLightbox({
             type="button"
             onClick={() => setIndex((i) => i + 1)}
             className="absolute right-4 z-10 rounded-full bg-white/10 p-2 text-white transition-colors hover:bg-white/20"
-            aria-label="Next image"
+            aria-label={t("kycLightboxNextAria")}
           >
             <ChevronRight className="size-6" />
           </button>
         ) : null}
       </div>
 
-      <p className="pb-3 text-center text-xs text-white/40">Scroll to zoom · drag to pan · arrow keys to navigate · Esc to close</p>
+      <p className="pb-3 text-center text-xs text-white/40">{t("kycLightboxHint")}</p>
     </div>
   );
 }

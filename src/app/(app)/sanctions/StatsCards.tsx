@@ -1,14 +1,16 @@
+import { useLang } from "@/lib/i18n/LangProvider";
 import type { SanctionsStats } from "./actions";
 
 export function StatsCards({ stats }: { stats: SanctionsStats }) {
-  const persons = stats.byType.find((t) => t.type === "person")?.count ?? 0;
-  const businesses = stats.byType.find((t) => t.type === "business")?.count ?? 0;
+  const { t } = useLang();
+  const persons = stats.byType.find((bt) => bt.type === "person")?.count ?? 0;
+  const businesses = stats.byType.find((bt) => bt.type === "business")?.count ?? 0;
 
   const cards = [
-    { label: "Active", value: stats.active, accent: "border-t-primary" },
-    { label: "Delisted", value: stats.delisted, accent: "border-t-muted-foreground" },
-    { label: "Persons", value: persons, accent: "border-t-sky-500" },
-    { label: "Businesses", value: businesses, accent: "border-t-foreground" },
+    { label: t("sanctionsActive"), value: stats.active, accent: "border-t-primary" },
+    { label: t("sanctionsDelisted"), value: stats.delisted, accent: "border-t-muted-foreground" },
+    { label: t("sanctionsStatPersons"), value: persons, accent: "border-t-sky-500" },
+    { label: t("sanctionsStatBusinesses"), value: businesses, accent: "border-t-foreground" },
   ];
 
   return (

@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { apiFetch, apiFetchGuarded, type AuthExpired } from "@/lib/api";
+import { getLang } from "@/lib/i18n/lang";
+import { t } from "@/lib/i18n/strings";
 
 export type DiditSessionStatus =
   | "Not Started"
@@ -62,6 +64,7 @@ export async function startKycSessionAction(
   _prevState: StartKycSessionState,
   formData: FormData,
 ): Promise<StartKycSessionState> {
+  const lang = await getLang();
   const fullName = String(formData.get("fullName") ?? "").trim();
 
   try {
@@ -70,11 +73,11 @@ export async function startKycSessionAction(
       body: fullName ? { fullName } : {},
     });
     if (!enrollment.sessionUrl) {
-      return { error: "Verification session created but no link was returned. Try again." };
+      return { error: t(lang, "kycNoLinkError") };
     }
     revalidatePath("/kyc");
     return { url: enrollment.sessionUrl };
   } catch {
-    return { error: "Could not start a verification session. Please try again." };
+    return { error: t(lang, "kycStartFailedError") };
   }
 }

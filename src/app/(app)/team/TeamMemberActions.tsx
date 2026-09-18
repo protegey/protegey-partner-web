@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
+import { useLang } from "@/lib/i18n/LangProvider";
 import { setAgentStatusAction, sendPasswordResetAction } from "./actions";
 
 export function TeamMemberActions({
@@ -17,6 +18,7 @@ export function TeamMemberActions({
 }) {
   const router = useRouter();
   const guard = useSessionGuard();
+  const { t } = useLang();
   const [statusOpen, setStatusOpen] = useState(false);
   const [statusPending, setStatusPending] = useState(false);
   const [statusError, setStatusError] = useState<string | null>(null);
@@ -27,7 +29,7 @@ export function TeamMemberActions({
   const [resetSent, setResetSent] = useState(false);
 
   if (isSelf) {
-    return <span className="text-xs text-muted-foreground">You</span>;
+    return <span className="text-xs text-muted-foreground">{t("teamYouLabel")}</span>;
   }
 
   async function handleStatusConfirm() {
@@ -68,7 +70,7 @@ export function TeamMemberActions({
         }}
         className="rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
       >
-        Reset password
+        {t("teamResetPasswordButton")}
       </button>
       <button
         type="button"
@@ -79,21 +81,17 @@ export function TeamMemberActions({
             : "border-border text-foreground hover:bg-muted"
         }`}
       >
-        {isActive ? "Block" : "Unblock"}
+        {isActive ? t("teamBlockButton") : t("teamUnblockButton")}
       </button>
 
       <ConfirmActionDialog
         open={statusOpen}
         onClose={() => setStatusOpen(false)}
         onConfirm={handleStatusConfirm}
-        title={isActive ? "Block this agent?" : "Unblock this agent?"}
-        description={
-          isActive
-            ? "They will no longer be able to sign in or do anything in the organization."
-            : "They will regain access to the organization."
-        }
-        confirmLabel={isActive ? "Block" : "Unblock"}
-        pendingLabel={isActive ? "Blocking…" : "Unblocking…"}
+        title={isActive ? t("teamBlockDialogTitle") : t("teamUnblockDialogTitle")}
+        description={isActive ? t("teamBlockDialogDescription") : t("teamUnblockDialogDescription")}
+        confirmLabel={isActive ? t("teamBlockButton") : t("teamUnblockButton")}
+        pendingLabel={isActive ? t("teamBlocking") : t("teamUnblocking")}
         pending={statusPending}
         variant={isActive ? "destructive" : "primary"}
       >
@@ -104,15 +102,15 @@ export function TeamMemberActions({
         open={resetOpen}
         onClose={() => setResetOpen(false)}
         onConfirm={handleResetConfirm}
-        title="Send a password reset email?"
-        description="They'll receive a link by email to choose a new password."
-        confirmLabel="Send"
-        pendingLabel="Sending…"
+        title={t("teamSendResetDialogTitle")}
+        description={t("teamSendResetDialogDescription")}
+        confirmLabel={t("teamSendButton")}
+        pendingLabel={t("teamSending")}
         pending={resetPending}
         confirmDisabled={resetSent}
       >
         {resetError ? <p className="text-sm text-destructive">{resetError}</p> : null}
-        {resetSent ? <p className="text-sm text-primary">Reset email sent.</p> : null}
+        {resetSent ? <p className="text-sm text-primary">{t("teamResetEmailSent")}</p> : null}
       </ConfirmActionDialog>
     </div>
   );

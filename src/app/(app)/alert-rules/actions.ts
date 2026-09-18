@@ -12,7 +12,11 @@ export interface AlertRule {
   partnerId: string | null;
   code: string;
   name: string;
+  nameFr: string | null;
   description: string;
+  descriptionFr: string | null;
+  explanation: string | null;
+  explanationFr: string | null;
   segment: RuleSegment;
   expression: unknown;
   parameters: Record<string, number>;

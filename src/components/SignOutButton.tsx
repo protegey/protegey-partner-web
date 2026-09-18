@@ -2,24 +2,26 @@
 
 import { useState } from "react";
 import { logoutAction } from "@/lib/auth-actions";
+import { useLang } from "@/lib/i18n/LangProvider";
 import { ConfirmActionDialog } from "./ConfirmActionDialog";
 
 export function SignOutButton({ className }: { className?: string }) {
   const [open, setOpen] = useState(false);
+  const { t } = useLang();
 
   return (
     <>
       <button type="button" onClick={() => setOpen(true)} className={className}>
-        Sign out
+        {t("signOut")}
       </button>
       <ConfirmActionDialog
         open={open}
         onClose={() => setOpen(false)}
         onConfirm={() => logoutAction()}
-        title="Sign out?"
-        description="You'll need to sign in again to access your account."
-        confirmLabel="Sign out"
-        pendingLabel="Signing out…"
+        title={t("signOutConfirmTitle")}
+        description={t("signOutConfirmDescription")}
+        confirmLabel={t("signOut")}
+        pendingLabel={t("signOutPendingLabel")}
       />
     </>
   );

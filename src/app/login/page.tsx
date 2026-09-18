@@ -3,13 +3,15 @@ import Image from "next/image";
 import { LoginForm } from "./LoginForm";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/Logo";
+import { getLang } from "@/lib/i18n/lang";
+import { t } from "@/lib/i18n/strings";
 
 export const metadata: Metadata = {
   title: "Sign in — Protegey Partner",
 };
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ returnTo?: string }> }) {
-  const { returnTo } = await searchParams;
+  const [{ returnTo }, lang] = await Promise.all([searchParams, getLang()]);
 
   return (
     <div className="relative flex min-h-svh bg-background">
@@ -23,9 +25,9 @@ export default async function LoginPage({ searchParams }: { searchParams: Promis
             <div className="flex flex-col items-center gap-4">
               <Logo />
               <div className="space-y-1 text-center">
-                <h1 className="text-xl font-semibold text-foreground">Partner sign in</h1>
+                <h1 className="text-xl font-semibold text-foreground">{t(lang, "loginPageHeading")}</h1>
                 <p className="text-sm text-muted-foreground">
-                  {returnTo ? "Your session expired — sign in to continue." : "Continental Fraud Intelligence Engine"}
+                  {returnTo ? t(lang, "loginSessionExpiredSubtitle") : t(lang, "loginTaglineSubtitle")}
                 </p>
               </div>
             </div>

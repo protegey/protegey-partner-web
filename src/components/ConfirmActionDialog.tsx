@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { X } from "lucide-react";
+import { useLang } from "@/lib/i18n/LangProvider";
 
 /** A real modal popup for confirming a consequential action — never a native browser confirm(). */
 export function ConfirmActionDialog({
@@ -31,6 +32,7 @@ export function ConfirmActionDialog({
   /** Extra content rendered between the header and the footer buttons — e.g. a reason textarea. */
   children?: React.ReactNode;
 }) {
+  const { t } = useLang();
   useEffect(() => {
     if (!open) return;
     function handleKeyDown(event: KeyboardEvent) {
@@ -59,7 +61,7 @@ export function ConfirmActionDialog({
             type="button"
             onClick={onClose}
             className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            aria-label="Close dialog"
+            aria-label={t("closeDialogAria")}
           >
             <X className="size-4" />
           </button>
@@ -72,7 +74,7 @@ export function ConfirmActionDialog({
             onClick={onClose}
             className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
           >
-            Cancel
+            {t("cancel")}
           </button>
           <button
             type="button"
@@ -82,7 +84,7 @@ export function ConfirmActionDialog({
               variant === "destructive" ? "bg-destructive text-white" : "bg-primary text-primary-foreground"
             }`}
           >
-            {pending ? (pendingLabel ?? "Working…") : confirmLabel}
+            {pending ? (pendingLabel ?? t("commonWorking")) : confirmLabel}
           </button>
         </div>
       </div>

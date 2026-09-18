@@ -1,90 +1,98 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Loader2, ShieldAlert, ShieldCheck, ShieldQuestion, SlidersHorizontal } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
+import { useLang } from "@/lib/i18n/LangProvider";
 import { updateAlertRule, type AlertRule, type AlertRuleStatus, type RuleSegment } from "./actions";
-import { PanStudioPanel } from "./PanStudioPanel";
-import { RuleDrawer } from "./RuleDrawer";
+import { RuleChatPanel } from "./RuleChatPanel";
+import { RuleDialog } from "./RuleDialog";
+import { ruleExplanation, ruleName } from "./localize";
+import type { StringKey } from "@/lib/i18n/strings";
 
 const SEGMENT_ORDER: RuleSegment[] = ["KYC1", "KYC2", "AGENT", "SUPER_AGENT", "MERCHANT", "CORPORATE", "ALL"];
-const SEGMENT_LABELS: Record<RuleSegment, string> = {
-  KYC1: "KYC1",
-  KYC2: "KYC2",
-  AGENT: "Agent",
-  SUPER_AGENT: "Super Agent",
-  MERCHANT: "Merchant",
-  CORPORATE: "Corporate",
-  ALL: "All segments",
+const SEGMENT_LABEL_KEYS: Record<RuleSegment, StringKey> = {
+  KYC1: "segmentKyc1",
+  KYC2: "segmentKyc2",
+  AGENT: "segmentAgent",
+  SUPER_AGENT: "segmentSuperAgent",
+  MERCHANT: "segmentMerchant",
+  CORPORATE: "segmentCorporate",
+  ALL: "segmentAll",
 };
-
-const STATUS_CONFIG: Record<AlertRuleStatus, { label: string; color: string; icon: typeof ShieldCheck }> = {
-  active: { label: "Active", color: "text-primary", icon: ShieldCheck },
-  draft: { label: "Draft", color: "text-amber-600", icon: ShieldQuestion },
-  disabled: { label: "Disabled", color: "text-muted-foreground", icon: ShieldAlert },
-};
-
-function StatusBadge({ status }: { status: AlertRuleStatus }) {
-  const config = STATUS_CONFIG[status];
-  const Icon = config.icon;
-  return (
-    <span className={`inline-flex items-center gap-1 text-xs font-semibold ${config.color}`}>
-      <Icon className="size-3.5" />
-      {config.label}
-    </span>
-  );
-}
-
-function SourceBadge({ source }: { source: AlertRule["source"] }) {
-  const label = source === "ai_generated" ? "Pan-Studio" : source === "manual" ? "Custom" : "System default";
-  return <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{label}</span>;
-}
 
 function isError(value: unknown): value is { error: string } {
   return Boolean(value) && typeof value === "object" && "error" in (value as object);
 }
 
-function RuleRow({ rule, onToggle, onEdit, toggling }: { rule: AlertRule; onToggle: () => void; onEdit: () => void; toggling: boolean }) {
+function StatusPill({ rule, t }: { rule: AlertRule; t: (key: StringKey) => string }) {
+  if (rule.status === "draft") {
+    return <span className="inline-flex items-center rounded-full bg-amber-500/15 px-2 py-0.5 text-xs font-semibold text-amber-600">{t("ruleStatusWaiting")}</span>;
+  }
+  if (rule.status === "active") {
+    return <span className="inline-flex items-center rounded-full bg-primary/15 px-2 py-0.5 text-xs font-semibold text-primary">{t("ruleStatusOn")}</span>;
+  }
+  return <span className="inline-flex items-center rounded-full bg-muted px-2 py-0.5 text-xs font-semibold text-muted-foreground">{t("ruleStatusOff")}</span>;
+}
+
+function RuleCard({
+  rule,
+  onToggle,
+  onOpen,
+  toggling,
+  t,
+  lang,
+}: {
+  rule: AlertRule;
+  onToggle: () => void;
+  onOpen: () => void;
+  toggling: boolean;
+  t: (key: StringKey) => string;
+  lang: "en" | "fr";
+}) {
+  const sourceLabel = rule.source === "ai_generated" ? t("ruleSourceAi") : rule.source === "manual" ? t("ruleSourceManual") : t("ruleSourceSystem");
+
   return (
-    <tr>
-      <td className="px-4 py-2.5 font-mono text-xs text-foreground">{rule.code}</td>
-      <td className="px-4 py-2.5">
-        <p className="font-medium text-foreground">{rule.name}</p>
-        <p className="line-clamp-1 text-xs text-muted-foreground">{rule.description}</p>
-      </td>
-      <td className="px-4 py-2.5">
-        <StatusBadge status={rule.status} />
-      </td>
-      <td className="px-4 py-2.5">
-        <span className={`text-xs font-medium ${rule.severity === "block" ? "text-destructive" : "text-foreground"}`}>
-          {rule.severity === "block" ? "Block" : "Review"}
-        </span>
-      </td>
-      <td className="px-4 py-2.5">
-        <SourceBadge source={rule.source} />
-      </td>
-      <td className="px-4 py-2.5 text-right">
-        <div className="flex justify-end gap-2">
-          <button type="button" onClick={onEdit} className="flex items-center gap-1 text-xs font-medium text-primary hover:underline">
-            <SlidersHorizontal className="size-3.5" />
-            Edit &amp; simulate
-          </button>
-          <button
-            type="button"
-            onClick={onToggle}
-            disabled={toggling}
-            className="text-xs font-medium text-foreground hover:underline disabled:opacity-50"
-          >
-            {toggling ? <Loader2 className="size-3.5 animate-spin" /> : rule.status === "active" ? "Disable" : "Activate"}
-          </button>
-        </div>
-      </td>
-    </tr>
+    <div className="flex flex-col gap-2.5 rounded-md border border-border bg-card p-3.5">
+      <div className="flex items-start justify-between gap-2">
+        <button type="button" onClick={onOpen} className="text-left text-sm font-semibold text-foreground hover:underline">
+          {ruleName(rule, lang)}
+        </button>
+        <StatusPill rule={rule} t={t} />
+      </div>
+
+      <p className="text-xs leading-relaxed text-muted-foreground">{ruleExplanation(rule, lang)}</p>
+
+      <div className="flex flex-wrap items-center gap-1.5">
+        <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{sourceLabel}</span>
+        <span className="text-[11px] font-medium text-foreground">{rule.severity === "block" ? t("ruleOnMatchBlock") : t("ruleOnMatchReview")}</span>
+      </div>
+
+      <div className="mt-1 flex items-center justify-between gap-2">
+        <button
+          type="button"
+          onClick={onToggle}
+          disabled={toggling}
+          className={`flex items-center gap-1.5 rounded-md px-2.5 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 ${
+            rule.status === "active"
+              ? "border border-border text-foreground hover:bg-muted"
+              : "bg-primary text-primary-foreground hover:opacity-90"
+          }`}
+        >
+          {toggling ? <Loader2 className="size-3.5 animate-spin" /> : null}
+          {rule.status === "active" ? t("ruleToggleOff") : t("ruleToggleOn")}
+        </button>
+        <button type="button" onClick={onOpen} className="text-xs font-medium text-primary hover:underline">
+          {t("ruleEdit")}
+        </button>
+      </div>
+    </div>
   );
 }
 
 export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] }) {
   const guard = useSessionGuard();
+  const { lang, t } = useLang();
   const [rules, setRules] = useState<AlertRule[]>(initialRules);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [toggleError, setToggleError] = useState<string | null>(null);
@@ -129,48 +137,41 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
   }
 
   return (
-    <div className="flex flex-col gap-6">
-      <PanStudioPanel onGenerated={(rule) => replaceRule(rule)} />
+    <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,380px)_1fr]">
+      <div className="lg:h-[calc(100vh-14rem)] lg:sticky lg:top-8">
+        <RuleChatPanel onGenerated={(rule) => replaceRule(rule)} />
+      </div>
 
-      {toggleError ? <p className="text-sm text-destructive">{toggleError}</p> : null}
+      <div className="flex flex-col gap-6">
+        <p className="text-sm font-semibold text-foreground">{t("rulesListTitle")}</p>
+        {toggleError ? <p className="text-sm text-destructive">{toggleError}</p> : null}
 
-      {grouped.length === 0 ? (
-        <p className="rounded-md border border-border p-6 text-center text-sm text-muted-foreground">No alert rules yet.</p>
-      ) : (
-        grouped.map(({ segment, rules: segmentRules }) => (
-          <div key={segment}>
-            <p className="mb-2 text-sm font-semibold text-foreground">{SEGMENT_LABELS[segment]}</p>
-            <div className="overflow-x-auto rounded-md border border-border">
-              <table className="w-full text-left text-sm">
-                <thead className="bg-muted text-muted-foreground">
-                  <tr>
-                    <th className="px-4 py-2.5 font-medium">Code</th>
-                    <th className="px-4 py-2.5 font-medium">Rule</th>
-                    <th className="px-4 py-2.5 font-medium">Status</th>
-                    <th className="px-4 py-2.5 font-medium">On match</th>
-                    <th className="px-4 py-2.5 font-medium">Source</th>
-                    <th className="px-4 py-2.5 font-medium text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border">
-                  {segmentRules.map((rule) => (
-                    <RuleRow
-                      key={rule.id}
-                      rule={rule}
-                      toggling={togglingId === rule.id}
-                      onToggle={() => handleToggle(rule)}
-                      onEdit={() => setEditingRule(rule)}
-                    />
-                  ))}
-                </tbody>
-              </table>
+        {grouped.length === 0 ? (
+          <p className="rounded-md border border-border p-6 text-center text-sm text-muted-foreground">{t("rulesListEmpty")}</p>
+        ) : (
+          grouped.map(({ segment, rules: segmentRules }) => (
+            <div key={segment}>
+              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t(SEGMENT_LABEL_KEYS[segment])}</p>
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                {segmentRules.map((rule) => (
+                  <RuleCard
+                    key={rule.id}
+                    rule={rule}
+                    lang={lang}
+                    t={t}
+                    toggling={togglingId === rule.id}
+                    onToggle={() => handleToggle(rule)}
+                    onOpen={() => setEditingRule(rule)}
+                  />
+                ))}
+              </div>
             </div>
-          </div>
-        ))
-      )}
+          ))
+        )}
+      </div>
 
       {editingRule ? (
-        <RuleDrawer
+        <RuleDialog
           rule={editingRule}
           onClose={() => setEditingRule(null)}
           onUpdated={(updated) => {

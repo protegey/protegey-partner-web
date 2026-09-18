@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Loader2, ShieldAlert, ShieldCheck, ShieldQuestion, ShieldX, ZoomIn } from "lucide-react";
 import { Drawer } from "@/components/Drawer";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
+import { useLang } from "@/lib/i18n/LangProvider";
 import { getKycEnrollmentDetail, type KycEnrollmentDetail, type DiditSessionStatus } from "./actions";
 import { ImageLightbox, type GalleryImage } from "./ImageLightbox";
 import { countryFlag, countryName } from "./country";
@@ -92,6 +93,7 @@ function GalleryThumb({ image, onClick }: { image: GalleryImage; onClick: () => 
 
 export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: string; fullName: string | null }) {
   const guard = useSessionGuard();
+  const { t } = useLang();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(false);
@@ -141,34 +143,34 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
         onClick={handleOpen}
         className="text-xs font-medium text-primary hover:underline"
       >
-        View details
+        {t("kycViewDetailsButton")}
       </button>
 
-      <Drawer open={open} onClose={() => setOpen(false)} title={`Verification details — ${fullName ?? "Unnamed"}`}>
+      <Drawer open={open} onClose={() => setOpen(false)} title={`${t("kycDetailDrawerTitlePrefix")} — ${fullName ?? t("kycUnnamed")}`}>
         {loading ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
             <Loader2 className="size-8 animate-spin text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Loading verification details…</p>
+            <p className="text-sm text-muted-foreground">{t("kycDetailLoading")}</p>
           </div>
         ) : error || !detail ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
             <ShieldQuestion className="size-10 text-muted-foreground" />
-            <p className="text-lg font-semibold text-foreground">Couldn&apos;t load details</p>
-            <p className="max-w-sm text-sm text-muted-foreground">Please try again.</p>
+            <p className="text-lg font-semibold text-foreground">{t("kycCouldNotLoad")}</p>
+            <p className="max-w-sm text-sm text-muted-foreground">{t("kycTryAgainNotice")}</p>
           </div>
         ) : !decision ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
             <ShieldQuestion className="size-10 text-muted-foreground" />
-            <p className="text-lg font-semibold text-foreground">No decision yet</p>
+            <p className="text-lg font-semibold text-foreground">{t("kycNoDecisionTitle")}</p>
             <p className="max-w-sm text-sm text-muted-foreground">
-              This session hasn&apos;t completed on Didit&apos;s side yet — details appear once it has.
+              {t("kycNoDecisionBody")}
             </p>
           </div>
         ) : (
           <div className="space-y-6">
             {images.length > 0 ? (
               <div>
-                <p className="mb-2 text-sm font-semibold text-foreground">Captured images</p>
+                <p className="mb-2 text-sm font-semibold text-foreground">{t("kycCapturedImages")}</p>
                 <div className="grid grid-cols-3 gap-2">
                   {images.map((image, i) => (
                     <GalleryThumb key={image.label} image={image} onClick={() => setLightboxIndex(i)} />
@@ -180,16 +182,16 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
             {idVerification ? (
               <div>
                 <div className="mb-2 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-foreground">Identity document</p>
+                  <p className="text-sm font-semibold text-foreground">{t("kycIdentityDocument")}</p>
                   <MiniStatus status={str(idVerification, "status")} />
                 </div>
                 <div className="grid grid-cols-2 gap-3 rounded-md border border-border p-3">
-                  <Field label="Full name" value={str(idVerification, "full_name")} />
-                  <Field label="Date of birth" value={str(idVerification, "date_of_birth")} />
-                  <Field label="Document type" value={str(idVerification, "document_type")} />
-                  <Field label="Document number" value={str(idVerification, "document_number")} />
+                  <Field label={t("kycFieldFullName")} value={str(idVerification, "full_name")} />
+                  <Field label={t("clientsComplianceFieldDob")} value={str(idVerification, "date_of_birth")} />
+                  <Field label={t("kycFieldDocumentType")} value={str(idVerification, "document_type")} />
+                  <Field label={t("kycFieldDocumentNumber")} value={str(idVerification, "document_number")} />
                   <Field
-                    label="Nationality"
+                    label={t("clientsComplianceFieldNationality")}
                     value={
                       nationality ? (
                         <span className="inline-flex items-center gap-1.5">
@@ -199,32 +201,32 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
                       ) : null
                     }
                   />
-                  <Field label="Expiration date" value={str(idVerification, "expiration_date")} />
-                  <Field label="Gender" value={str(idVerification, "gender")} />
-                  <Field label="Place of birth" value={str(idVerification, "place_of_birth")} />
+                  <Field label={t("kycFieldExpirationDate")} value={str(idVerification, "expiration_date")} />
+                  <Field label={t("kycFieldGender")} value={str(idVerification, "gender")} />
+                  <Field label={t("kycFieldPlaceOfBirth")} value={str(idVerification, "place_of_birth")} />
                   <div className="col-span-2">
-                    <Field label="Address" value={str(idVerification, "formatted_address") ?? str(idVerification, "address")} />
+                    <Field label={t("kycFieldAddress")} value={str(idVerification, "formatted_address") ?? str(idVerification, "address")} />
                   </div>
                 </div>
               </div>
             ) : null}
 
             <div>
-              <p className="mb-2 text-sm font-semibold text-foreground">Biometric scores</p>
+              <p className="mb-2 text-sm font-semibold text-foreground">{t("kycBiometricScores")}</p>
               <div className="grid grid-cols-2 gap-3">
-                <ScoreBadge label="Liveness" score={num(liveness, "score")} />
-                <ScoreBadge label="Face match" score={num(faceMatch, "score")} />
+                <ScoreBadge label={t("kycScoreLiveness")} score={num(liveness, "score")} />
+                <ScoreBadge label={t("kycColFaceMatch")} score={num(faceMatch, "score")} />
               </div>
             </div>
 
             {amlScreening ? (
               <div>
                 <div className="mb-2 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-foreground">AML / PEP / Sanctions screening</p>
+                  <p className="text-sm font-semibold text-foreground">{t("kycAmlSectionTitle")}</p>
                   <MiniStatus status={str(amlScreening, "status")} />
                 </div>
                 {amlHits.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">No hits — clear.</p>
+                  <p className="text-xs text-muted-foreground">{t("kycAmlNoHits")}</p>
                 ) : (
                   <div className="flex flex-col gap-2">
                     {amlHits.map((hit, i) => {
@@ -233,9 +235,9 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
                       return (
                         <div key={i} className="rounded-md border border-border p-3">
                           <div className="flex items-center justify-between gap-2">
-                            <p className="text-sm font-medium text-foreground">{str(hit, "caption") ?? "Unnamed match"}</p>
+                            <p className="text-sm font-medium text-foreground">{str(hit, "caption") ?? t("kycUnnamedMatch")}</p>
                             {riskScore != null ? (
-                              <span className={`text-xs font-semibold ${riskColor}`}>Risk {riskScore.toFixed(0)}</span>
+                              <span className={`text-xs font-semibold ${riskColor}`}>{t("kycRiskPrefix")} {riskScore.toFixed(0)}</span>
                             ) : null}
                           </div>
                           <div className="mt-1 flex flex-wrap gap-1">
@@ -246,7 +248,7 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
                             ))}
                           </div>
                           {num(hit, "match_score") != null ? (
-                            <p className="mt-1.5 text-xs text-muted-foreground">Name match score: {num(hit, "match_score")}%</p>
+                            <p className="mt-1.5 text-xs text-muted-foreground">{t("kycNameMatchScorePrefix")} {num(hit, "match_score")}%</p>
                           ) : null}
                         </div>
                       );
@@ -259,18 +261,18 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
             {ipAnalysis ? (
               <div>
                 <div className="mb-2 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-foreground">Device &amp; IP</p>
+                  <p className="text-sm font-semibold text-foreground">{t("kycDeviceIpTitle")}</p>
                   {bool(ipAnalysis, "is_vpn_or_tor") || bool(ipAnalysis, "is_data_center") ? (
                     <span className="inline-flex items-center gap-1 text-xs font-semibold text-destructive">
                       <ShieldAlert className="size-3.5" />
-                      VPN/Proxy detected
+                      {t("kycVpnDetected")}
                     </span>
                   ) : null}
                 </div>
                 <div className="grid grid-cols-2 gap-3 rounded-md border border-border p-3">
-                  <Field label="IP address" value={str(ipAnalysis, "ip_address")} />
+                  <Field label={t("kycFieldIpAddress")} value={str(ipAnalysis, "ip_address")} />
                   <Field
-                    label="Location"
+                    label={t("kycFieldLocation")}
                     value={
                       str(ipAnalysis, "ip_country_code") ? (
                         <span className="inline-flex items-center gap-1.5">
@@ -282,12 +284,12 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
                       )
                     }
                   />
-                  <Field label="ISP" value={str(ipAnalysis, "isp")} />
-                  <Field label="Organization" value={str(ipAnalysis, "organization")} />
-                  <Field label="Browser" value={str(ipAnalysis, "browser_family")} />
-                  <Field label="OS / Platform" value={str(ipAnalysis, "platform") ?? str(ipAnalysis, "os_family")} />
-                  <Field label="Device" value={str(ipAnalysis, "device_brand")} />
-                  <Field label="Time zone" value={str(ipAnalysis, "time_zone")} />
+                  <Field label={t("kycFieldIsp")} value={str(ipAnalysis, "isp")} />
+                  <Field label={t("kycFieldOrganization")} value={str(ipAnalysis, "organization")} />
+                  <Field label={t("kycFieldBrowser")} value={str(ipAnalysis, "browser_family")} />
+                  <Field label={t("kycFieldOsPlatform")} value={str(ipAnalysis, "platform") ?? str(ipAnalysis, "os_family")} />
+                  <Field label={t("kycFieldDevice")} value={str(ipAnalysis, "device_brand")} />
+                  <Field label={t("kycFieldTimeZone")} value={str(ipAnalysis, "time_zone")} />
                 </div>
               </div>
             ) : null}

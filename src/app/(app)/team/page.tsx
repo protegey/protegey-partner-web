@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
 import { getSessionUser } from "@/lib/session";
+import { getLang } from "@/lib/i18n/lang";
+import { t } from "@/lib/i18n/strings";
 import { getTeamMembers, getPendingInvitations, getAssignableRoles } from "./actions";
 import { InviteAgentDialogButton } from "./InviteAgentDialogButton";
 import { TeamMemberActions } from "./TeamMemberActions";
@@ -14,19 +16,20 @@ export default async function TeamPage() {
   const user = await getSessionUser();
   const canManageTeam = user?.permissions.includes("partners.manage_team") ?? false;
 
-  const [members, invitations, roles] = await Promise.all([
+  const [members, invitations, roles, lang] = await Promise.all([
     getTeamMembers(),
     canManageTeam ? getPendingInvitations() : Promise.resolve([]),
     canManageTeam ? getAssignableRoles() : Promise.resolve([]),
+    getLang(),
   ]);
 
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">Team</h1>
+          <h1 className="text-xl font-semibold text-foreground">{t(lang, "teamPageTitle")}</h1>
           <p className="text-sm text-muted-foreground">
-            The agents in your organization and what they can access.
+            {t(lang, "teamPageSubtitle")}
           </p>
         </div>
         {canManageTeam ? <InviteAgentDialogButton roles={roles} /> : null}
@@ -37,9 +40,9 @@ export default async function TeamPage() {
           <table className="w-full text-left text-sm">
             <thead className="bg-muted text-muted-foreground">
               <tr>
-                <th className="px-4 py-2.5 font-medium">Pending invitation</th>
-                <th className="px-4 py-2.5 font-medium">Role</th>
-                <th className="px-4 py-2.5 font-medium text-right">Actions</th>
+                <th className="px-4 py-2.5 font-medium">{t(lang, "teamColPendingInvitation")}</th>
+                <th className="px-4 py-2.5 font-medium">{t(lang, "teamColRole")}</th>
+                <th className="px-4 py-2.5 font-medium text-right">{t(lang, "teamColActions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -74,11 +77,11 @@ export default async function TeamPage() {
         <table className="w-full text-left text-sm">
           <thead className="bg-muted text-muted-foreground">
             <tr>
-              <th className="px-4 py-2.5 font-medium">Name</th>
-              <th className="px-4 py-2.5 font-medium">Email</th>
-              <th className="px-4 py-2.5 font-medium">Role</th>
-              <th className="px-4 py-2.5 font-medium">Status</th>
-              {canManageTeam ? <th className="px-4 py-2.5 font-medium text-right">Actions</th> : null}
+              <th className="px-4 py-2.5 font-medium">{t(lang, "teamColName")}</th>
+              <th className="px-4 py-2.5 font-medium">{t(lang, "teamColEmail")}</th>
+              <th className="px-4 py-2.5 font-medium">{t(lang, "teamColRole")}</th>
+              <th className="px-4 py-2.5 font-medium">{t(lang, "teamColStatus")}</th>
+              {canManageTeam ? <th className="px-4 py-2.5 font-medium text-right">{t(lang, "teamColActions")}</th> : null}
             </tr>
           </thead>
           <tbody className="divide-y divide-border">
@@ -100,7 +103,7 @@ export default async function TeamPage() {
                       member.isActive ? "bg-primary/10 text-primary" : "bg-destructive/10 text-destructive"
                     }`}
                   >
-                    {member.isActive ? "Active" : "Blocked"}
+                    {member.isActive ? t(lang, "clientStatusActive") : t(lang, "teamStatusBlocked")}
                   </span>
                 </td>
                 {canManageTeam ? (
@@ -115,7 +118,7 @@ export default async function TeamPage() {
             {members.length === 0 ? (
               <tr>
                 <td colSpan={canManageTeam ? 5 : 4} className="px-4 py-6 text-center text-muted-foreground">
-                  No agents yet.
+                  {t(lang, "teamNoAgentsYet")}
                 </td>
               </tr>
             ) : null}

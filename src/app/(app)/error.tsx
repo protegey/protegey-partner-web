@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { AlertTriangle } from "lucide-react";
+import { useLang } from "@/lib/i18n/LangProvider";
 
 /**
  * Backstop for the rare case where middleware's silent token refresh (src/middleware.ts)
@@ -13,21 +14,20 @@ import { AlertTriangle } from "lucide-react";
  */
 export default function AppError() {
   const pathname = usePathname();
+  const { t } = useLang();
 
   return (
     <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center">
       <AlertTriangle className="size-10 text-muted-foreground" />
       <div>
-        <p className="text-lg font-semibold text-foreground">Something went wrong</p>
-        <p className="mt-1 max-w-sm text-sm text-muted-foreground">
-          This is often because your session has expired. Sign in again to pick up where you left off.
-        </p>
+        <p className="text-lg font-semibold text-foreground">{t("appErrorTitle")}</p>
+        <p className="mt-1 max-w-sm text-sm text-muted-foreground">{t("appErrorSubtitle")}</p>
       </div>
       <Link
         href={`/login?returnTo=${encodeURIComponent(pathname)}`}
         className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
       >
-        Log in again
+        {t("appErrorLoginAgain")}
       </Link>
     </div>
   );

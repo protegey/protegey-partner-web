@@ -4,7 +4,11 @@ import { useState } from "react";
 import { ShieldCheck, ShieldAlert, ShieldX, ShieldQuestion, ChevronDown, ChevronRight, Loader2 } from "lucide-react";
 import { Drawer } from "@/components/Drawer";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
+import { useLang } from "@/lib/i18n/LangProvider";
+import type { StringKey } from "@/lib/i18n/strings";
 import { screenClientAction } from "../actions";
+
+type TFn = (key: StringKey) => string;
 
 interface ScreeningMatch {
   id: string;
@@ -38,10 +42,10 @@ interface ScreeningResultSnapshot {
   screenedAt: string;
 }
 
-const DECISION_CONFIG: Record<string, { label: string; color: string; icon: typeof ShieldCheck }> = {
-  blocked: { label: "Blocked", color: "text-destructive", icon: ShieldX },
-  review: { label: "Review required", color: "text-amber-600", icon: ShieldAlert },
-  clear: { label: "Clear", color: "text-primary", icon: ShieldCheck },
+const DECISION_CONFIG: Record<string, { key: StringKey; color: string; icon: typeof ShieldCheck }> = {
+  blocked: { key: "clientsComplianceDecisionBlocked", color: "text-destructive", icon: ShieldX },
+  review: { key: "clientsComplianceDecisionReview", color: "text-amber-600", icon: ShieldAlert },
+  clear: { key: "clientsComplianceDecisionClear", color: "text-primary", icon: ShieldCheck },
 };
 
 const COUNTRY_FLAGS: Record<string, string> = {
@@ -57,13 +61,13 @@ function countryFlag(code: string | null): string {
   return COUNTRY_FLAGS[code.toUpperCase()] ?? "";
 }
 
-function DecisionBadge({ decision }: { decision: string }) {
+function DecisionBadge({ decision, t }: { decision: string; t: TFn }) {
   const config = DECISION_CONFIG[decision] ?? DECISION_CONFIG.clear;
   const Icon = config.icon;
   return (
     <span className={`inline-flex items-center gap-1 text-xs font-semibold ${config.color}`}>
       <Icon className="size-3.5" />
-      {config.label}
+      {t(config.key)}
     </span>
   );
 }
@@ -78,7 +82,7 @@ function Field({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
-function MatchCard({ match }: { match: ScreeningMatch }) {
+function MatchCard({ match, t }: { match: ScreeningMatch; t: TFn }) {
   const [expanded, setExpanded] = useState(false);
   const flag = countryFlag(match.nationality);
   let countryName = match.nationality;
@@ -110,17 +114,17 @@ function MatchCard({ match }: { match: ScreeningMatch }) {
         <div className="mt-2.5 space-y-2 border-t border-border pt-2.5">
           <div className="grid grid-cols-2 gap-2">
             {match.nationality && (
-              <Field label="Nationality" value={<span className="inline-flex items-center gap-1">{flag && <span>{flag}</span>} {countryName}</span>} />
+              <Field label={t("clientsComplianceFieldNationality")} value={<span className="inline-flex items-center gap-1">{flag && <span>{flag}</span>} {countryName}</span>} />
             )}
-            {match.dateOfBirth && <Field label="Date of birth" value={match.dateOfBirth} />}
-            {match.listingDate && <Field label="Listed on" value={match.listingDate} />}
+            {match.dateOfBirth && <Field label={t("clientsComplianceFieldDob")} value={match.dateOfBirth} />}
+            {match.listingDate && <Field label={t("clientsComplianceFieldListedOn")} value={match.listingDate} />}
             {match.aliases.length > 0 && (
-              <Field label="Aliases" value={match.aliases.join(", ")} />
+              <Field label={t("clientsComplianceFieldAliases")} value={match.aliases.join(", ")} />
             )}
           </div>
           {match.notes && (
             <div>
-              <p className="text-[10px] font-medium text-muted-foreground uppercase">Notes</p>
+              <p className="text-[10px] font-medium text-muted-foreground uppercase">{t("clientsComplianceFieldNotes")}</p>
               <p className="text-xs text-foreground">{match.notes}</p>
             </div>
           )}
@@ -130,20 +134,20 @@ function MatchCard({ match }: { match: ScreeningMatch }) {
   );
 }
 
-function ScreeningSection({ title, result }: { title: string; result: ScreeningResultEntry }) {
+function ScreeningSection({ title, result, t }: { title: string; result: ScreeningResultEntry; t: TFn }) {
   return (
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <p className="text-sm font-semibold text-foreground">{title}</p>
-        <DecisionBadge decision={result.decision} />
+        <DecisionBadge decision={result.decision} t={t} />
       </div>
-      <p className="text-xs text-muted-foreground">Score: {(result.score * 100).toFixed(0)}%</p>
+      <p className="text-xs text-muted-foreground">{t("clientsComplianceScoreLabel")} {(result.score * 100).toFixed(0)}%</p>
       {result.matches.length === 0 ? (
-        <p className="text-xs text-muted-foreground">No matches found</p>
+        <p className="text-xs text-muted-foreground">{t("clientsComplianceNoMatches")}</p>
       ) : (
         <div className="flex flex-col gap-1.5">
           {result.matches.map((m) => (
-            <MatchCard key={m.id} match={m} />
+            <MatchCard key={m.id} match={m} t={t} />
           ))}
         </div>
       )}
@@ -163,6 +167,7 @@ export function ComplianceInfoButton({
   const [error, setError] = useState(false);
   const [screeningResult, setScreeningResult] = useState<ScreeningResultSnapshot | null>(null);
   const guard = useSessionGuard();
+  const { t } = useLang();
 
   async function handleOpen() {
     setOpen(true);
@@ -187,34 +192,34 @@ export function ComplianceInfoButton({
         className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
       >
         <ShieldCheck className="size-4" />
-        See compliance info
+        {t("clientsComplianceButton")}
       </button>
 
-      <Drawer open={open} onClose={() => setOpen(false)} title={`Compliance info — ${businessName}`}>
+      <Drawer open={open} onClose={() => setOpen(false)} title={`${t("clientsComplianceDrawerTitlePrefix")} — ${businessName}`}>
         {loading ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
             <Loader2 className="size-8 animate-spin text-muted-foreground" />
-            <p className="text-sm text-muted-foreground">Checking the sanctions database…</p>
+            <p className="text-sm text-muted-foreground">{t("clientsComplianceChecking")}</p>
           </div>
         ) : error || !screeningResult ? (
           <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
             <ShieldQuestion className="size-10 text-muted-foreground" />
-            <p className="text-lg font-semibold text-foreground">Screening unavailable</p>
+            <p className="text-lg font-semibold text-foreground">{t("clientsComplianceUnavailableTitle")}</p>
             <p className="max-w-sm text-sm text-muted-foreground">
-              Couldn&apos;t reach the sanctions database right now. Please try again.
+              {t("clientsComplianceUnavailableBody")}
             </p>
           </div>
         ) : (
           <div className="space-y-6">
             <p className="text-xs text-muted-foreground">
-              Screened on {new Date(screeningResult.screenedAt).toLocaleString()}
+              {t("clientsComplianceScreenedOnPrefix")} {new Date(screeningResult.screenedAt).toLocaleString()}
             </p>
 
-            <ScreeningSection title="Business" result={screeningResult.business} />
+            <ScreeningSection title={t("clientsComplianceBusinessLabel")} result={screeningResult.business} t={t} />
 
             {screeningResult.owners.length > 0 && (
               <div className="space-y-4">
-                <p className="text-sm font-semibold text-foreground">Beneficial owners</p>
+                <p className="text-sm font-semibold text-foreground">{t("clientsComplianceBeneficialOwners")}</p>
                 {screeningResult.owners.map((owner, i) => (
                   <div key={i} className="rounded-md border border-border p-3">
                     <div className="mb-2 flex items-center justify-between">
@@ -222,15 +227,15 @@ export function ComplianceInfoButton({
                         {owner.ownerName}
                         {owner.ownershipPercent != null ? ` — ${owner.ownershipPercent}%` : ""}
                       </span>
-                      <DecisionBadge decision={owner.decision} />
+                      <DecisionBadge decision={owner.decision} t={t} />
                     </div>
-                    <p className="text-xs text-muted-foreground">Score: {(owner.score * 100).toFixed(0)}%</p>
+                    <p className="text-xs text-muted-foreground">{t("clientsComplianceScoreLabel")} {(owner.score * 100).toFixed(0)}%</p>
                     <div className="mt-1.5 flex flex-col gap-1.5">
                       {owner.matches.map((m) => (
-                        <MatchCard key={m.id} match={m} />
+                        <MatchCard key={m.id} match={m} t={t} />
                       ))}
                       {owner.matches.length === 0 && (
-                        <p className="text-xs text-muted-foreground">No matches found</p>
+                        <p className="text-xs text-muted-foreground">{t("clientsComplianceNoMatches")}</p>
                       )}
                     </div>
                   </div>

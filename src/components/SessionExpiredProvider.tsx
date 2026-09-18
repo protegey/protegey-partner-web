@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useRef, useState } from "react"
 import { useFormStatus } from "react-dom";
 import { reauthenticateAction } from "@/lib/auth-actions";
 import type { AuthExpired } from "@/lib/api";
+import { useLang } from "@/lib/i18n/LangProvider";
 import { Dialog } from "./Dialog";
 
 function isAuthExpired(value: unknown): value is AuthExpired {
@@ -31,13 +32,14 @@ export function useSessionGuard() {
 
 function SubmitButton() {
   const { pending } = useFormStatus();
+  const { t } = useLang();
   return (
     <button
       type="submit"
       disabled={pending}
       className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
     >
-      {pending ? "Signing in…" : "Sign in"}
+      {pending ? t("sessionExpiredSigningIn") : t("sessionExpiredSignIn")}
     </button>
   );
 }
@@ -48,6 +50,7 @@ export function SessionExpiredProvider({ children }: { children: React.ReactNode
   // Holds the resolver for the promise `guard` is awaiting while the dialog is open —
   // resolved(true) on successful re-login, resolved(false) on cancel.
   const resolverRef = useRef<((success: boolean) => void) | null>(null);
+  const { t } = useLang();
 
   const guard = useCallback(async <T,>(action: () => Promise<T | AuthExpired>): Promise<T | null> => {
     const result = await action();
@@ -87,8 +90,8 @@ export function SessionExpiredProvider({ children }: { children: React.ReactNode
       <Dialog
         open={open}
         onClose={handleCancel}
-        title="Your session has expired"
-        description="Sign back in to continue where you left off — nothing you were doing has been lost."
+        title={t("sessionExpiredTitle")}
+        description={t("sessionExpiredDescription")}
       >
         <form action={handleSubmit} className="flex flex-col gap-3">
           <input
@@ -97,7 +100,7 @@ export function SessionExpiredProvider({ children }: { children: React.ReactNode
             autoComplete="email"
             required
             autoFocus
-            placeholder="Email"
+            placeholder={t("sessionExpiredEmailPlaceholder")}
             className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
           />
           <input
@@ -105,7 +108,7 @@ export function SessionExpiredProvider({ children }: { children: React.ReactNode
             type="password"
             autoComplete="current-password"
             required
-            placeholder="Password"
+            placeholder={t("sessionExpiredPasswordPlaceholder")}
             className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
           />
           {error ? <p className="text-sm text-destructive">{error}</p> : null}
@@ -115,7 +118,7 @@ export function SessionExpiredProvider({ children }: { children: React.ReactNode
               onClick={handleCancel}
               className="rounded-md border border-border px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
             >
-              Cancel
+              {t("cancel")}
             </button>
             <SubmitButton />
           </div>

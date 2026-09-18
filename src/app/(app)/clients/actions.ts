@@ -2,6 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api";
+import { getLang } from "@/lib/i18n/lang";
+import { t } from "@/lib/i18n/strings";
 
 export type ClientBusinessStatus = "invited" | "pending_review" | "more_info_required" | "active" | "rejected";
 export type ClientKybSubmissionStatus = "pending" | "submitted" | "more_info_required" | "approved" | "rejected";
@@ -176,15 +178,16 @@ export async function inviteClientAction(
 ): Promise<InviteClientState> {
   const contactName = String(formData.get("contactName") ?? "").trim();
   const contactEmail = String(formData.get("contactEmail") ?? "").trim();
+  const lang = await getLang();
 
   if (!contactName || !contactEmail) {
-    return { error: "All fields are required." };
+    return { error: t(lang, "commonAllFieldsRequired") };
   }
 
   try {
     await apiFetch("/clients/me", { method: "POST", body: { contactName, contactEmail } });
   } catch (error) {
-    return { error: error instanceof ApiError ? error.message : "Something went wrong. Please try again." };
+    return { error: error instanceof ApiError ? error.message : t(lang, "commonGenericErrorTryAgain") };
   }
 
   revalidatePath("/clients");
@@ -196,7 +199,7 @@ export async function resendClientInvitationAction(clientId: string): Promise<Ac
     await apiFetch(`/clients/me/${clientId}/resend-invitation`, { method: "POST" });
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) return { authExpired: true };
-    return { error: error instanceof ApiError ? error.message : "Something went wrong." };
+    return { error: error instanceof ApiError ? error.message : t(await getLang(), "commonGenericError") };
   }
   revalidatePath("/clients");
   return { success: true };
@@ -223,7 +226,7 @@ export async function decideClientSubmissionAction(
     });
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) return { authExpired: true };
-    return { error: error instanceof ApiError ? error.message : "Something went wrong." };
+    return { error: error instanceof ApiError ? error.message : t(await getLang(), "commonGenericError") };
   }
   revalidatePath("/clients");
   revalidatePath(`/clients/${clientId}`);
