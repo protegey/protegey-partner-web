@@ -73,9 +73,9 @@ function buildNavItems(lang: Lang): NavItem[] {
       label: tt("navPanMonitor"),
       icon: <Activity className="size-4" />,
       children: [
-        { label: tt("navTransactions"), disabled: true },
-        { label: tt("navTransactionAnalytics"), disabled: true },
-        { label: tt("navAlerts"), disabled: true },
+        { href: "/transactions", label: tt("navTransactions") },
+        { href: "/transactions/analytics", label: tt("navTransactionAnalytics") },
+        { href: "/alerts", label: tt("navAlerts") },
         { href: "/alert-rules", label: tt("navAlertRules") },
         { label: tt("navCases"), disabled: true },
         { label: tt("navAdvisories"), disabled: true },
