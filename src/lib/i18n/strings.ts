@@ -631,6 +631,7 @@ const STRINGS = {
   settingsRegenerateButton: { en: "Regenerate", fr: "Régénérer" },
   settingsGenerateKeyButton: { en: "Generate key", fr: "Générer une clé" },
   settingsWebhookLabel: { en: "Webhook", fr: "Webhook" },
+  settingsWebhookNoPermissionTitle: { en: "Webhook configuration", fr: "Configuration du webhook" },
   settingsWebhookDescription: {
     en: "Protegey will POST a signed notification here whenever a KYC session's status changes.",
     fr: "Protegey enverra une notification signée ici à chaque changement de statut d'une session KYC.",

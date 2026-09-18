@@ -87,8 +87,8 @@ function buildNavItems(lang: Lang): NavItem[] {
       label: tt("navPartnerIntegrations"),
       icon: <KeyRound className="size-4" />,
       children: [
-        { label: tt("navApiKeys"), href: "/settings" },
-        { label: tt("navWebhooks"), href: "/settings" },
+        { label: tt("navApiKeys"), href: "/settings/api-keys" },
+        { label: tt("navWebhooks"), href: "/settings/webhooks" },
         { label: tt("navIntegrationGuide"), href: "/integration-guide" },
         { label: tt("navIntegrationHealth"), disabled: true },
         { label: tt("navDocumentation"), href: "/documentation" },
@@ -98,7 +98,7 @@ function buildNavItems(lang: Lang): NavItem[] {
       label: tt("navPlatformAdministration"),
       icon: <SettingsIcon className="size-4" />,
       children: [
-        { href: "/settings", label: tt("navOrganizationProfile") },
+        { href: "/settings/profile", label: tt("navOrganizationProfile") },
         { href: "/settings/billing", label: tt("navBillingPlans") },
         { href: "/settings/usage", label: tt("navUsageQuotas") },
         { href: "/team", label: tt("navTeamManagement") },

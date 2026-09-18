@@ -44,7 +44,7 @@ export default async function IntegrationGuidePage() {
         </div>
         <p className="mt-2 text-sm text-muted-foreground">{t(lang, "igStep1Body")}</p>
         <Link
-          href="/settings"
+          href="/settings/api-keys"
           className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
         >
           <KeyRound className="size-4" />
@@ -91,7 +91,7 @@ export default async function IntegrationGuidePage() {
         </div>
         <p className="mt-2 text-sm text-muted-foreground">{t(lang, "igStep3Body")}</p>
         <Link
-          href="/settings"
+          href="/settings/webhooks"
           className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-border px-3.5 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
         >
           <Webhook className="size-4" />
