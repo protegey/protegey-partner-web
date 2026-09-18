@@ -1083,6 +1083,27 @@ const STRINGS = {
   },
   igMoreDetailButton: { en: "Open full documentation", fr: "Ouvrir la documentation complète" },
   igCodeExampleTitle: { en: "Example — sending a transaction", fr: "Exemple — envoyer une transaction" },
+
+  // ── Dashboard (real data) ────────────────────────────────────────────────
+  dashboardKpiTransactions: { en: "Transactions (30d)", fr: "Transactions (30j)" },
+  dashboardKpiOpenAlerts: { en: "Open alerts", fr: "Alertes ouvertes" },
+  dashboardKpiAvgRisk: { en: "Average risk score", fr: "Score de risque moyen" },
+  dashboardKpiPendingKyb: { en: "Pending reviews", fr: "En attente d'examen" },
+  dashboardChartVolumeTitle: { en: "Transaction volume", fr: "Volume de transactions" },
+  dashboardChartDecisionTitle: { en: "Decisions", fr: "Décisions" },
+  dashboardRecentActivityTitle: { en: "Recent activity", fr: "Activité récente" },
+  dashboardRecentActivityEmpty: { en: "Nothing has happened yet.", fr: "Rien ne s'est encore passé." },
+  dashboardViewAllActivity: { en: "View all notifications", fr: "Voir toutes les notifications" },
+  dashboardNoTxYet: {
+    en: "No transactions monitored yet — once you send some through the API, this chart fills in automatically.",
+    fr: "Aucune transaction surveillée pour l'instant — dès que vous en enverrez via l'API, ce graphique se remplira automatiquement.",
+  },
+  dashboardGettingStartedTitle: { en: "Get started", fr: "Pour commencer" },
+  dashboardGettingStartedBody: {
+    en: "You haven't sent any transactions yet. Follow the integration guide to connect your systems.",
+    fr: "Vous n'avez pas encore envoyé de transaction. Suivez le guide d'intégration pour connecter vos systèmes.",
+  },
+  dashboardGettingStartedButton: { en: "Open integration guide", fr: "Ouvrir le guide d'intégration" },
 } as const;
 
 export type StringKey = keyof typeof STRINGS;
