@@ -17,16 +17,25 @@ const STRINGS = {
 
   // ── Sidebar navigation ──────────────────────────────────────────────────
   navDashboard: { en: "Dashboard", fr: "Tableau de bord" },
-  navIntelligence: { en: "Intelligence", fr: "Renseignement" },
-  navSignalLogs: { en: "Signal Logs", fr: "Journal des signaux" },
+  navPanGuard: { en: "Pan-Guard™", fr: "Pan-Guard™" },
+  navDeviceSignals: { en: "Device Signals", fr: "Signaux d'appareil" },
+  navBehavioralSignals: { en: "Behavioral Signals", fr: "Signaux comportementaux" },
+  navRiskProfiles: { en: "Risk Profiles", fr: "Profils de risque" },
   navSignalAnalytics: { en: "Signal Analytics", fr: "Analyse des signaux" },
-  navEntityIntelligence: { en: "Entity Intelligence", fr: "Renseignement sur les entités" },
   navIntelligenceFeed: { en: "Intelligence Feed", fr: "Flux de renseignement" },
   navPanId: { en: "Pan-ID™", fr: "Pan-ID™" },
   navKyc: { en: "KYC", fr: "KYC" },
   navKyb: { en: "KYB", fr: "KYB" },
-  navSanctions: { en: "Sanctions", fr: "Sanctions" },
-  navSanctionsList: { en: "Sanctions List", fr: "Liste des sanctions" },
+  navPanRisk: { en: "Pan-Risk™", fr: "Pan-Risk™" },
+  navSanctionsList: { en: "Sanctions Control", fr: "Contrôle Sanctions" },
+  navPanStudio: { en: "Pan-Studio™", fr: "Pan-Studio™" },
+  navComplianceDashboard: { en: "Compliance Dashboard", fr: "Tableau de Conformité" },
+  navComplianceRules: { en: "Compliance Rules", fr: "Règles de Conformité" },
+  navPepControl: { en: "PEP Control", fr: "Contrôle PPE" },
+  navAmlSurveillance: { en: "AML Surveillance", fr: "Surveillance AML" },
+  navSarStr: { en: "SAR/STR Filing", fr: "Déclaration SAR/STR" },
+  navRegulatoryReports: { en: "Regulatory Reports", fr: "Rapports Réglementaires" },
+  navComplianceCalendar: { en: "Compliance Calendar", fr: "Calendrier de Conformité" },
   navPanMonitor: { en: "Pan-Monitor™", fr: "Pan-Monitor™" },
   navTransactions: { en: "Transactions", fr: "Transactions" },
   navTransactionAnalytics: { en: "Transaction Analytics", fr: "Analyse des transactions" },
@@ -922,10 +931,63 @@ const STRINGS = {
     en: "Device check flagged a transaction from {customerLabel}: {deviceAction}.",
     fr: "Le contrôle d'appareil a signalé une transaction de {customerLabel} : {deviceAction}.",
   },
+  deviceActionAllow: { en: "allowed", fr: "autorisée" },
   deviceActionSoftChallenge: { en: "extra verification recommended", fr: "vérification supplémentaire recommandée" },
   deviceActionHardChallenge: { en: "strong verification required", fr: "vérification renforcée requise" },
   deviceActionBlock: { en: "blocked", fr: "bloquée" },
   eventUnknown: { en: "Something happened in your account.", fr: "Quelque chose s'est produit sur votre compte." },
+
+  // ── Pan-Guard pages (device/behavioral signals, risk profiles) ──────────
+  signalsFilterCustomerLabel: { en: "Customer", fr: "Client" },
+  signalsFilterCustomerPlaceholder: { en: "External customer ID", fr: "ID client externe" },
+  signalsColWhen: { en: "When", fr: "Quand" },
+  signalsColCustomer: { en: "Customer", fr: "Client" },
+
+  deviceSignalsPageTitle: { en: "Device Signals", fr: "Signaux d'appareil" },
+  deviceSignalsPageSubtitle: {
+    en: "Device/session verdicts from Keverd — both linked to a transaction and reported standalone.",
+    fr: "Verdicts d'appareil/session de Keverd — rattachés à une transaction ou signalés de façon autonome.",
+  },
+  deviceSignalsFilterActionLabel: { en: "Action", fr: "Action" },
+  deviceSignalsEmpty: { en: "No device signals yet.", fr: "Aucun signal d'appareil pour l'instant." },
+  deviceSignalsColSource: { en: "Source", fr: "Source" },
+  deviceSignalsColAction: { en: "Action", fr: "Action" },
+  deviceSignalsColRiskScore: { en: "Risk Score", fr: "Score de risque" },
+  deviceSignalsColReasons: { en: "Reasons", fr: "Raisons" },
+  deviceSignalsSourceWebhook: { en: "Webhook", fr: "Webhook" },
+  deviceSignalsSourceDeviceEvent: { en: "Device event", fr: "Événement d'appareil" },
+
+  behavioralSignalsPageTitle: { en: "Behavioral Signals", fr: "Signaux comportementaux" },
+  behavioralSignalsPageSubtitle: {
+    en: "Sessions scored against each customer's own typing, touch, and navigation history.",
+    fr: "Sessions notées par rapport à l'historique propre de frappe, tactile et navigation de chaque client.",
+  },
+  behavioralFilterTierLabel: { en: "Confidence", fr: "Confiance" },
+  behavioralSignalsEmpty: { en: "No behavioral signals yet.", fr: "Aucun signal comportemental pour l'instant." },
+  behavioralColSession: { en: "Session", fr: "Session" },
+  behavioralColDeviationScore: { en: "Deviation Score", fr: "Score de déviation" },
+  behavioralColConfidence: { en: "Confidence", fr: "Confiance" },
+  behavioralColCategories: { en: "Deviated Categories", fr: "Catégories déviées" },
+  behavioralTierLow: { en: "Low", fr: "Faible" },
+  behavioralTierMedium: { en: "Medium", fr: "Moyenne" },
+  behavioralTierHigh: { en: "High", fr: "Élevée" },
+  behavioralCategoryKeystroke: { en: "Keystroke", fr: "Frappe" },
+  behavioralCategoryTouch: { en: "Touch/pointer", fr: "Tactile/pointeur" },
+  behavioralCategoryNavigation: { en: "Navigation", fr: "Navigation" },
+  behavioralCategoryLoginTime: { en: "Login time", fr: "Horaire de connexion" },
+  behavioralCategorySessionVelocity: { en: "Session velocity", fr: "Vélocité de session" },
+
+  riskProfilesPageTitle: { en: "Risk Profiles", fr: "Profils de risque" },
+  riskProfilesPageSubtitle: {
+    en: "Cumulative risk per customer, across every signal source — highest risk first.",
+    fr: "Risque cumulé par client, toutes sources de signal confondues — risque le plus élevé en premier.",
+  },
+  riskProfilesEmpty: { en: "No risk profiles yet.", fr: "Aucun profil de risque pour l'instant." },
+  riskProfilesColScore: { en: "Cumulative Score", fr: "Score cumulé" },
+  riskProfilesColContributions: { en: "Contributions", fr: "Contributions" },
+  riskProfilesColLastUpdated: { en: "Last Updated", fr: "Dernière mise à jour" },
+  riskProfileSourceDevice: { en: "Device", fr: "Appareil" },
+  riskProfileSourceBehavioral: { en: "Behavioral", fr: "Comportemental" },
 
   // ── Notifications page ───────────────────────────────────────────────────
   notificationsPageTitle: { en: "Notifications", fr: "Notifications" },
@@ -1074,6 +1136,14 @@ const STRINGS = {
     en: "For the full list of default monitoring rules and how to test them, see the Alert Rules page.",
     fr: "Pour la liste complète des règles de surveillance par défaut et comment les tester, consultez la page Règles d'alerte.",
   },
+  docsSeeAlsoDeviceSignals: {
+    en: "See every device signal received so far in Pan-Guard → Device Signals.",
+    fr: "Consultez tous les signaux d'appareil reçus jusqu'ici dans Pan-Guard → Signaux d'appareil.",
+  },
+  docsSeeAlsoBehavioralSignals: {
+    en: "See every scored session so far in Pan-Guard → Behavioral Signals.",
+    fr: "Consultez toutes les sessions notées jusqu'ici dans Pan-Guard → Signaux comportementaux.",
+  },
 
   // ── Integration Guide (redesigned) ──────────────────────────────────────
   igHeroTitle: { en: "Get integrated in three steps", fr: "Intégrez-vous en trois étapes" },
@@ -1138,6 +1208,8 @@ const STRINGS = {
   },
   igCardSanctionsTitle: { en: "Sanctions screening", fr: "Filtrage des sanctions" },
   igCardSanctionsBody: { en: "Check a name against sanctions lists before you onboard them.", fr: "Vérifiez un nom sur les listes de sanctions avant de l'intégrer." },
+  igCardSignalsTitle: { en: "Device & behavioral signals", fr: "Signaux d'appareil et comportementaux" },
+  igCardSignalsBody: { en: "Optional enrichment — report a device check or a scored session, tied to a transaction or on their own.", fr: "Enrichissement optionnel — signalez un contrôle d'appareil ou une session notée, rattachés à une transaction ou de façon autonome." },
 } as const;
 
 export type StringKey = keyof typeof STRINGS;

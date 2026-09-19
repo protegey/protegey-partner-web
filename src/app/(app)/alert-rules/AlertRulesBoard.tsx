@@ -138,7 +138,7 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
 
   return (
     <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,380px)_1fr]">
-      <div className="lg:h-[calc(100vh-14rem)] lg:sticky lg:top-8">
+      <div id="pan-studio" className="scroll-mt-8 lg:h-[calc(100vh-14rem)] lg:sticky lg:top-8">
         <RuleChatPanel onGenerated={(rule) => replaceRule(rule)} />
       </div>
 

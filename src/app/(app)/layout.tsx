@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
   LayoutDashboard,
-  BrainCircuit,
+  Fingerprint,
   IdCard,
   Activity,
   KeyRound,
@@ -49,12 +49,13 @@ function buildNavItems(lang: Lang): NavItem[] {
   return [
     { href: "/dashboard", label: tt("navDashboard"), icon: <LayoutDashboard className="size-4" /> },
     {
-      label: tt("navIntelligence"),
-      icon: <BrainCircuit className="size-4" />,
+      label: tt("navPanGuard"),
+      icon: <Fingerprint className="size-4" />,
       children: [
-        { label: tt("navSignalLogs"), disabled: true },
+        { href: "/pan-guard/device-signals", label: tt("navDeviceSignals") },
+        { href: "/pan-guard/behavioral-signals", label: tt("navBehavioralSignals") },
+        { href: "/pan-guard/risk-profiles", label: tt("navRiskProfiles") },
         { label: tt("navSignalAnalytics"), disabled: true },
-        { label: tt("navEntityIntelligence"), disabled: true },
         { label: tt("navIntelligenceFeed"), disabled: true },
       ],
     },
@@ -67,9 +68,19 @@ function buildNavItems(lang: Lang): NavItem[] {
       ],
     },
     {
-      label: tt("navSanctions"),
+      label: tt("navPanRisk"),
       icon: <ShieldCheck className="size-4" />,
-      children: [{ href: "/sanctions", label: tt("navSanctionsList") }],
+      children: [
+        { href: "/sanctions", label: tt("navSanctionsList") },
+        { href: "/alert-rules#pan-studio", label: tt("navPanStudio") },
+        { label: tt("navComplianceDashboard"), disabled: true },
+        { label: tt("navComplianceRules"), disabled: true },
+        { label: tt("navPepControl"), disabled: true },
+        { label: tt("navAmlSurveillance"), disabled: true },
+        { label: tt("navSarStr"), disabled: true },
+        { label: tt("navRegulatoryReports"), disabled: true },
+        { label: tt("navComplianceCalendar"), disabled: true },
+      ],
     },
     {
       label: tt("navPanMonitor"),

@@ -163,6 +163,11 @@ export default async function DocumentationPage() {
           <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
             <code>{DEVICE_EVENT_EXAMPLE}</code>
           </pre>
+          <p className="mt-3 text-xs text-muted-foreground">
+            <Link href="/pan-guard/device-signals" className="text-primary hover:underline">
+              {t(lang, "docsSeeAlsoDeviceSignals")}
+            </Link>
+          </p>
         </Section>
 
         <Section id="behavioral-events" icon={Activity} title={t(lang, "docsBehavioralEventsTitle")} body={t(lang, "docsBehavioralEventsBody")}>
@@ -171,6 +176,11 @@ export default async function DocumentationPage() {
             <code>{BEHAVIORAL_EVENT_EXAMPLE}</code>
           </pre>
           <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsBehavioralEventsStepUpNote")}</p>
+          <p className="mt-3 text-xs text-muted-foreground">
+            <Link href="/pan-guard/behavioral-signals" className="text-primary hover:underline">
+              {t(lang, "docsSeeAlsoBehavioralSignals")}
+            </Link>
+          </p>
         </Section>
 
         <Section id="webhooks" icon={Webhook} title={t(lang, "docsWebhooksTitle")} body={t(lang, "docsWebhooksBody")} />

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KeyRound, IdCard, ArrowRightLeft, Building2, ShieldCheck, Webhook, ArrowRight, BookOpen } from "lucide-react";
+import { KeyRound, IdCard, ArrowRightLeft, Building2, ShieldCheck, Webhook, ArrowRight, BookOpen, Fingerprint } from "lucide-react";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 
@@ -28,6 +28,7 @@ export default async function IntegrationGuidePage() {
     { icon: ArrowRightLeft, title: t(lang, "igCardTxTitle"), body: t(lang, "igCardTxBody"), href: "/transactions" },
     { icon: ShieldCheck, title: t(lang, "igCardSanctionsTitle"), body: t(lang, "igCardSanctionsBody"), href: "/sanctions" },
     { icon: Building2, title: t(lang, "igCardKybTitle"), body: t(lang, "igCardKybBody"), href: "/clients" },
+    { icon: Fingerprint, title: t(lang, "igCardSignalsTitle"), body: t(lang, "igCardSignalsBody"), href: "/pan-guard/device-signals" },
   ];
 
   return (
