@@ -22,6 +22,12 @@ const STATUS_KEY: Record<string, StringKey> = {
   dismissed: "alertsStatusDismissed",
 };
 
+const DEVICE_ACTION_KEY: Record<string, StringKey> = {
+  soft_challenge: "deviceActionSoftChallenge",
+  hard_challenge: "deviceActionHardChallenge",
+  block: "deviceActionBlock",
+};
+
 /** Turns a stable event `type` + `metadata` into the sentence shown in Notifications/Audit Logs — the one place this translation happens, see NotificationEvent's backend docstring for why. */
 export function describeEvent(lang: Lang, event: NotificationEvent): string {
   const actor = event.actorLabel ?? t(lang, "eventSystemActor");
@@ -60,6 +66,11 @@ export function describeEvent(lang: Lang, event: NotificationEvent): string {
       return interpolate(t(lang, "eventApiKeyGenerated"), { actor });
     case "webhook.configured":
       return interpolate(t(lang, "eventWebhookConfigured"), { actor });
+    case "device.signal_flagged": {
+      const actionKey = DEVICE_ACTION_KEY[str("deviceAction")];
+      const actionLabel = actionKey ? t(lang, actionKey) : str("deviceAction");
+      return interpolate(t(lang, "eventDeviceSignalFlagged"), { customerLabel: str("customerLabel"), deviceAction: actionLabel });
+    }
     default:
       return t(lang, "eventUnknown");
   }

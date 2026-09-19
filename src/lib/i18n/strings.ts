@@ -918,6 +918,13 @@ const STRINGS = {
   },
   eventApiKeyGenerated: { en: "{actor} generated a new API key.", fr: "{actor} a généré une nouvelle clé API." },
   eventWebhookConfigured: { en: "{actor} configured the webhook.", fr: "{actor} a configuré le webhook." },
+  eventDeviceSignalFlagged: {
+    en: "Device check flagged a transaction from {customerLabel}: {deviceAction}.",
+    fr: "Le contrôle d'appareil a signalé une transaction de {customerLabel} : {deviceAction}.",
+  },
+  deviceActionSoftChallenge: { en: "extra verification recommended", fr: "vérification supplémentaire recommandée" },
+  deviceActionHardChallenge: { en: "strong verification required", fr: "vérification renforcée requise" },
+  deviceActionBlock: { en: "blocked", fr: "bloquée" },
   eventUnknown: { en: "Something happened in your account.", fr: "Quelque chose s'est produit sur votre compte." },
 
   // ── Notifications page ───────────────────────────────────────────────────
@@ -1029,8 +1036,8 @@ const STRINGS = {
   },
   docsTransactionsTitle: { en: "Sending transactions for monitoring", fr: "Envoyer des transactions pour surveillance" },
   docsTransactionsBody: {
-    en: "POST each transaction to /partner-api/transactions as it happens. Protegey runs it against your active alert rules immediately and responds with a decision (clear, review or blocked), a 0-100 risk score, and the list of any rules that matched.",
-    fr: "Envoyez chaque transaction par POST à /partner-api/transactions au moment où elle a lieu. Protegey l'évalue immédiatement selon vos règles d'alerte actives et répond avec une décision (clear, review ou blocked), un score de risque de 0 à 100, et la liste des règles éventuellement déclenchées.",
+    en: "POST each transaction to /partner-api/transactions as it happens. Protegey runs it against your active alert rules immediately and responds with a decision (clear, review or blocked), a 0-100 risk score, and the list of any rules that matched. The optional deviceEventId field lets you pass in a device/session signal (e.g. from a device-intelligence provider on your side) — when present, Protegey factors it into the same decision automatically.",
+    fr: "Envoyez chaque transaction par POST à /partner-api/transactions au moment où elle a lieu. Protegey l'évalue immédiatement selon vos règles d'alerte actives et répond avec une décision (clear, review ou blocked), un score de risque de 0 à 100, et la liste des règles éventuellement déclenchées. Le champ optionnel deviceEventId permet de transmettre un signal d'appareil/de session (par ex. issu d'un fournisseur de renseignement sur l'appareil de votre côté) — s'il est présent, Protegey l'intègre automatiquement à la même décision.",
   },
   docsKycTitle: { en: "Starting an identity verification session", fr: "Démarrer une session de vérification d'identité" },
   docsKycBody: {
