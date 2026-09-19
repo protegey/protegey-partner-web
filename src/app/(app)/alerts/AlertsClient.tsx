@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2 } from "lucide-react";
+import Link from "next/link";
+import { Loader2, Briefcase } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { updateAlertStatus, type AlertStatus, type AlertWithContext } from "./actions";
@@ -176,6 +177,13 @@ export function AlertsClient({
                       {t("alertsActionReopen")}
                     </button>
                   )}
+                  <Link
+                    href={`/cases/new?customer=${encodeURIComponent(alert.externalCustomerId)}&alertId=${alert.id}`}
+                    className={`flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted ${explanation ? "" : "ml-auto"}`}
+                  >
+                    <Briefcase className="size-3.5" />
+                    {t("alertsOpenCase")}
+                  </Link>
                   {explanation ? (
                     <button
                       type="button"

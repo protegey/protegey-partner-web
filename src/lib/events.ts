@@ -28,6 +28,18 @@ const DEVICE_ACTION_KEY: Record<string, StringKey> = {
   block: "deviceActionBlock",
 };
 
+const CASE_STATUS_KEY: Record<string, StringKey> = {
+  open: "caseStatusOpen",
+  investigating: "caseStatusInvestigating",
+  closed: "caseStatusClosed",
+};
+
+const CASE_OUTCOME_KEY: Record<string, StringKey> = {
+  no_action: "caseOutcomeNoAction",
+  false_positive: "caseOutcomeFalsePositive",
+  sar_filed: "caseOutcomeSarFiled",
+};
+
 /** Turns a stable event `type` + `metadata` into the sentence shown in Notifications/Audit Logs — the one place this translation happens, see NotificationEvent's backend docstring for why. */
 export function describeEvent(lang: Lang, event: NotificationEvent): string {
   const actor = event.actorLabel ?? t(lang, "eventSystemActor");
@@ -71,6 +83,24 @@ export function describeEvent(lang: Lang, event: NotificationEvent): string {
       const actionLabel = actionKey ? t(lang, actionKey) : str("deviceAction");
       return interpolate(t(lang, "eventDeviceSignalFlagged"), { customerLabel: str("customerLabel"), deviceAction: actionLabel });
     }
+    case "case.created":
+      return interpolate(t(lang, "eventCaseCreated"), { actor, customerLabel: str("customerLabel"), title: str("title") });
+    case "case.note_added":
+      return interpolate(t(lang, "eventCaseNoteAdded"), { actor, title: str("title") });
+    case "case.assigned":
+      return interpolate(t(lang, "eventCaseAssigned"), { actor, title: str("title") });
+    case "case.status_changed": {
+      const statusKey = CASE_STATUS_KEY[str("status")];
+      const statusLabel = statusKey ? t(lang, statusKey) : str("status");
+      return interpolate(t(lang, "eventCaseStatusChanged"), { actor, title: str("title"), status: statusLabel });
+    }
+    case "case.closed": {
+      const outcomeKey = CASE_OUTCOME_KEY[str("outcome")];
+      const outcomeLabel = outcomeKey ? t(lang, outcomeKey) : str("outcome");
+      return interpolate(t(lang, "eventCaseClosed"), { actor, title: str("title"), outcome: outcomeLabel });
+    }
+    case "sar.submitted":
+      return interpolate(t(lang, "eventSarSubmitted"), { actor });
     default:
       return t(lang, "eventUnknown");
   }

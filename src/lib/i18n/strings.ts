@@ -101,6 +101,7 @@ const STRINGS = {
 
   // ── Rules list (right column) ───────────────────────────────────────────
   rulesListTitle: { en: "Your rules", fr: "Vos règles" },
+  ruleJustAddedLabel: { en: "Just added", fr: "Vient d'être ajoutée" },
   rulesListEmpty: { en: "No rules yet. Ask for one on the left!", fr: "Aucune règle pour l'instant. Demandez-en une à gauche !" },
   ruleStatusOn: { en: "On", fr: "Activée" },
   ruleStatusOff: { en: "Off", fr: "Désactivée" },
@@ -383,6 +384,7 @@ const STRINGS = {
 
   // ── Shared loading spinner ───────────────────────────────────────────────
   commonLoading: { en: "Loading...", fr: "Chargement..." },
+  commonCancel: { en: "Cancel", fr: "Annuler" },
 
   // ── Shared components: dialogs, drawer, role select, sign out, session guard ──
   closeDialogAria: { en: "Close dialog", fr: "Fermer la boîte de dialogue" },
@@ -935,6 +937,12 @@ const STRINGS = {
   deviceActionSoftChallenge: { en: "extra verification recommended", fr: "vérification supplémentaire recommandée" },
   deviceActionHardChallenge: { en: "strong verification required", fr: "vérification renforcée requise" },
   deviceActionBlock: { en: "blocked", fr: "bloquée" },
+  eventCaseCreated: { en: "{actor} opened a case on {customerLabel}: {title}.", fr: "{actor} a ouvert un dossier sur {customerLabel} : {title}." },
+  eventCaseNoteAdded: { en: "{actor} added a note to the case \"{title}\".", fr: "{actor} a ajouté une note au dossier « {title} »." },
+  eventCaseAssigned: { en: "{actor} assigned the case \"{title}\".", fr: "{actor} a assigné le dossier « {title} »." },
+  eventCaseStatusChanged: { en: "{actor} marked the case \"{title}\" as {status}.", fr: "{actor} a marqué le dossier « {title} » comme {status}." },
+  eventCaseClosed: { en: "{actor} closed the case \"{title}\" — {outcome}.", fr: "{actor} a clos le dossier « {title} » — {outcome}." },
+  eventSarSubmitted: { en: "{actor} submitted a SAR/STR declaration.", fr: "{actor} a soumis une déclaration SAR/STR." },
   eventUnknown: { en: "Something happened in your account.", fr: "Quelque chose s'est produit sur votre compte." },
 
   // ── Pan-Guard pages (device/behavioral signals, risk profiles) ──────────
@@ -988,6 +996,91 @@ const STRINGS = {
   riskProfilesColLastUpdated: { en: "Last Updated", fr: "Dernière mise à jour" },
   riskProfileSourceDevice: { en: "Device", fr: "Appareil" },
   riskProfileSourceBehavioral: { en: "Behavioral", fr: "Comportemental" },
+
+  // ── Cases (Pan-Monitor) ──────────────────────────────────────────────────
+  casesPageTitle: { en: "Cases", fr: "Dossiers" },
+  casesPageSubtitle: {
+    en: "Investigation dossiers — evidence, notes, and an auditable decision for every case you open.",
+    fr: "Dossiers d'investigation — preuves, notes, et une décision auditable pour chaque dossier ouvert.",
+  },
+  casesNewButton: { en: "New case", fr: "Nouveau dossier" },
+  casesFilterStatusLabel: { en: "Status", fr: "Statut" },
+  caseStatusOpen: { en: "Open", fr: "Ouvert" },
+  caseStatusInvestigating: { en: "Investigating", fr: "En investigation" },
+  caseStatusClosed: { en: "Closed", fr: "Clos" },
+  casesEmpty: { en: "No cases yet.", fr: "Aucun dossier pour l'instant." },
+  casesColTitle: { en: "Title", fr: "Titre" },
+  casesColStatus: { en: "Status", fr: "Statut" },
+  caseNewPageTitle: { en: "Open a case", fr: "Ouvrir un dossier" },
+  caseNewPageSubtitle: {
+    en: "Start an investigation dossier for a customer — attach evidence, assign it, and document your decision.",
+    fr: "Démarrez un dossier d'investigation pour un client — rattachez des preuves, assignez-le, et documentez votre décision.",
+  },
+  caseNewTitleLabel: { en: "Case title", fr: "Titre du dossier" },
+  caseNewTitlePlaceholder: { en: "e.g. Unusual velocity after dormant period", fr: "ex. Vélocité anormale après période dormante" },
+  caseNewAlertAttachedNote: { en: "The alert you came from will be attached as evidence.", fr: "L'alerte d'origine sera rattachée comme preuve." },
+  caseNewSubmitButton: { en: "Open case", fr: "Ouvrir le dossier" },
+  caseBackToList: { en: "← Back to cases", fr: "← Retour aux dossiers" },
+  caseLinkedAlertsTitle: { en: "Linked alerts", fr: "Alertes rattachées" },
+  caseAssignLabel: { en: "Assigned to", fr: "Assigné à" },
+  caseUnassigned: { en: "Unassigned", fr: "Non assigné" },
+  caseMarkInvestigating: { en: "Mark as investigating", fr: "Marquer en investigation" },
+  caseCloseButton: { en: "Close case", fr: "Clore le dossier" },
+  caseDraftSarButton: { en: "Draft SAR/STR", fr: "Rédiger SAR/STR" },
+  caseClosedWithOutcome: { en: "Closed with outcome", fr: "Clos avec pour décision" },
+  caseCloseDialogTitle: { en: "Close this case", fr: "Clore ce dossier" },
+  caseConfirmClose: { en: "Confirm closure", fr: "Confirmer la clôture" },
+  caseOutcomeNoAction: { en: "No action needed", fr: "Aucune suite nécessaire" },
+  caseOutcomeFalsePositive: { en: "False positive", fr: "Faux positif" },
+  caseOutcomeSarFiled: { en: "SAR/STR filed", fr: "SAR/STR déposé" },
+  caseNotesTitle: { en: "Investigation notes", fr: "Notes d'investigation" },
+  caseNotesEmpty: { en: "No notes yet.", fr: "Aucune note pour l'instant." },
+  caseNotePlaceholder: { en: "What did you check? What did you decide?", fr: "Qu'avez-vous vérifié ? Qu'avez-vous décidé ?" },
+  caseAddNoteButton: { en: "Add note", fr: "Ajouter la note" },
+  alertsOpenCase: { en: "Open a case", fr: "Ouvrir un dossier" },
+
+  // ── SAR/STR declarations (Pan-Risk) ──────────────────────────────────────
+  sarStrPageTitle: { en: "SAR/STR Declarations", fr: "Déclarations SAR/STR" },
+  sarStrPageSubtitle: {
+    en: "Suspicious activity/transaction reports drafted from your cases — Protegey never files these for you.",
+    fr: "Déclarations de soupçon rédigées à partir de vos dossiers — Protegey ne les dépose jamais à votre place.",
+  },
+  sarStatusDraft: { en: "Draft", fr: "Brouillon" },
+  sarStatusSubmitted: { en: "Submitted", fr: "Soumise" },
+  sarStrEmpty: { en: "No declarations yet.", fr: "Aucune déclaration pour l'instant." },
+  sarStrEmptyHint: {
+    en: "Open a case, then use \"Draft SAR/STR\" from its detail page.",
+    fr: "Ouvrez un dossier, puis utilisez « Rédiger SAR/STR » depuis sa page de détail.",
+  },
+  sarColReference: { en: "Reference", fr: "Référence" },
+  sarNewPageTitle: { en: "Draft a SAR/STR declaration", fr: "Rédiger une déclaration SAR/STR" },
+  sarNewPageSubtitle: {
+    en: "Protegey pre-fills what it already knows from this case — you write the rest.",
+    fr: "Protegey pré-remplit ce qu'il connaît déjà de ce dossier — vous rédigez le reste.",
+  },
+  sarNewCountryLabel: { en: "Regulator / country", fr: "Régulateur / pays" },
+  sarNewCountryHint: {
+    en: "Determines which form is used — more countries can be added without changing any code.",
+    fr: "Détermine quel formulaire est utilisé — d'autres pays peuvent être ajoutés sans changer de code.",
+  },
+  sarNewSubmitButton: { en: "Generate draft", fr: "Générer le brouillon" },
+  sarNewMissingCase: { en: "No case selected — start from a case's detail page.", fr: "Aucun dossier sélectionné — démarrez depuis la page de détail d'un dossier." },
+  sarBackToList: { en: "← Back to declarations", fr: "← Retour aux déclarations" },
+  sarSubmittedNote: {
+    en: "This declaration is locked. Export/print it and file it with your regulator yourself — Protegey never transmits it.",
+    fr: "Cette déclaration est verrouillée. Exportez/imprimez-la et déposez-la vous-même auprès de votre régulateur — Protegey ne la transmet jamais.",
+  },
+  sarNarrativeTitle: { en: "Indicators (narrative)", fr: "Indices (narratif)" },
+  sarNarrativeHint: {
+    en: "Describe every element grounding this suspicion — this is always written by a human, never auto-filled.",
+    fr: "Décrivez tous les éléments permettant de fonder le soupçon — toujours rédigé par un humain, jamais auto-rempli.",
+  },
+  sarSaveButton: { en: "Save draft", fr: "Enregistrer le brouillon" },
+  sarSubmitButton: { en: "Submit declaration", fr: "Soumettre la déclaration" },
+  sarSubmitNoPermission: {
+    en: "Only the MLRO-equivalent role can submit this declaration.",
+    fr: "Seul le rôle équivalent MLRO peut soumettre cette déclaration.",
+  },
 
   // ── Notifications page ───────────────────────────────────────────────────
   notificationsPageTitle: { en: "Notifications", fr: "Notifications" },

@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Loader2 } from "lucide-react";
+import { useMemo, useRef, useState } from "react";
+import { Loader2, Sparkles, X } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { updateAlertRule, type AlertRule, type AlertRuleStatus, type RuleSegment } from "./actions";
@@ -97,6 +97,9 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [toggleError, setToggleError] = useState<string | null>(null);
   const [editingRule, setEditingRule] = useState<AlertRule | null>(null);
+  const [justAddedRuleId, setJustAddedRuleId] = useState<string | null>(null);
+  const rulesListRef = useRef<HTMLDivElement>(null);
+  const justAddedRule = rules.find((r) => r.id === justAddedRuleId) ?? null;
 
   const grouped = useMemo(() => {
     const bySegment = new Map<RuleSegment, AlertRule[]>();
@@ -119,6 +122,14 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
     });
   }
 
+  /** Rules are sorted alphabetically within their segment, so a freshly generated rule can easily
+   * land off-screen — pin a highlighted callout at the very top of the list so it's impossible to miss. */
+  function handleRuleGenerated(rule: AlertRule) {
+    replaceRule(rule);
+    setJustAddedRuleId(rule.id);
+    rulesListRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   async function handleToggle(rule: AlertRule) {
     setTogglingId(rule.id);
     setToggleError(null);
@@ -139,11 +150,37 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
   return (
     <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,380px)_1fr]">
       <div id="pan-studio" className="scroll-mt-8 lg:h-[calc(100vh-14rem)] lg:sticky lg:top-8">
-        <RuleChatPanel onGenerated={(rule) => replaceRule(rule)} />
+        <RuleChatPanel onGenerated={handleRuleGenerated} />
       </div>
 
-      <div className="flex flex-col gap-6">
+      <div ref={rulesListRef} className="flex scroll-mt-8 flex-col gap-6">
         <p className="text-sm font-semibold text-foreground">{t("rulesListTitle")}</p>
+
+        {justAddedRule ? (
+          <div className="flex items-start gap-3 rounded-md border-2 border-primary/40 bg-primary/5 p-3.5">
+            <Sparkles className="mt-0.5 size-4 shrink-0 text-primary" />
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-primary">{t("ruleJustAddedLabel")}</p>
+              <RuleCard
+                rule={justAddedRule}
+                lang={lang}
+                t={t}
+                toggling={togglingId === justAddedRule.id}
+                onToggle={() => handleToggle(justAddedRule)}
+                onOpen={() => setEditingRule(justAddedRule)}
+              />
+            </div>
+            <button
+              type="button"
+              onClick={() => setJustAddedRuleId(null)}
+              aria-label={t("commonCancel")}
+              className="shrink-0 rounded-md p-1 text-primary/60 transition-colors hover:bg-primary/10 hover:text-primary"
+            >
+              <X className="size-4" />
+            </button>
+          </div>
+        ) : null}
+
         {toggleError ? <p className="text-sm text-destructive">{toggleError}</p> : null}
 
         {grouped.length === 0 ? (
