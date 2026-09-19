@@ -1028,6 +1028,8 @@ const STRINGS = {
   docsNavTransactions: { en: "Sending transactions", fr: "Envoyer des transactions" },
   docsNavKyc: { en: "Identity verification (KYC)", fr: "Vérification d'identité (KYC)" },
   docsNavWebhooks: { en: "Webhooks", fr: "Webhooks" },
+  docsNavDeviceEvents: { en: "Device events", fr: "Événements d'appareil" },
+  docsNavBehavioralEvents: { en: "Behavioral events", fr: "Événements comportementaux" },
   docsNavErrors: { en: "Errors", fr: "Erreurs" },
   docsAuthTitle: { en: "Authentication", fr: "Authentification" },
   docsAuthBody: {
@@ -1043,6 +1045,20 @@ const STRINGS = {
   docsKycBody: {
     en: "Start a session for one of your end users from the KYC page, or server-to-server via POST /partner-api/kyc/sessions. You get back a hosted verification link to send your user however you like (SMS, email, in-app). Status updates arrive on your configured webhook as the user completes each step.",
     fr: "Démarrez une session pour l'un de vos utilisateurs depuis la page KYC, ou en serveur à serveur via POST /partner-api/kyc/sessions. Vous recevez un lien de vérification hébergé à envoyer à votre utilisateur comme vous le souhaitez (SMS, e-mail, in-app). Les mises à jour de statut arrivent sur votre webhook configuré au fur et à mesure que l'utilisateur complète chaque étape.",
+  },
+  docsDeviceEventsTitle: { en: "Reporting a device signal outside a transaction", fr: "Signaler un signal d'appareil hors transaction" },
+  docsDeviceEventsBody: {
+    en: "For a device/session signal that isn't tied to a transaction — a login, a session start — POST the event id from your device-intelligence provider to /partner-api/device-events along with the customer it belongs to. Protegey verifies it and stores it as a standalone signal, so you build up a device/session history per customer over time, not just at the moment of a purchase.",
+    fr: "Pour un signal d'appareil/de session qui n'est pas rattaché à une transaction — une connexion, un début de session — envoyez par POST l'identifiant d'événement de votre fournisseur de renseignement sur l'appareil à /partner-api/device-events, avec le client concerné. Protegey le vérifie et le stocke comme signal autonome, ce qui constitue un historique d'appareil/de session par client dans le temps, pas seulement au moment d'un achat.",
+  },
+  docsBehavioralEventsTitle: { en: "Reporting behavioral signals (keystroke, touch, navigation)", fr: "Signaler des signaux comportementaux (frappe, tactile, navigation)" },
+  docsBehavioralEventsBody: {
+    en: "For each session, capture aggregated timing/gesture metadata client-side — never actual typed content or screen content — and POST it here from your own backend (never directly from the browser or app, since the API key must stay server-side). Protegey builds a private baseline per customer from their own history, then scores each new session against it. The first sessions for a customer come back as \"learning\" — there's no score yet, that's expected.",
+    fr: "Pour chaque session, capturez côté client des métadonnées agrégées de timing/geste — jamais le contenu réellement tapé ni le contenu d'écran — et envoyez-les ici par POST depuis votre propre backend (jamais directement depuis le navigateur ou l'app, la clé API doit rester côté serveur). Protegey construit une ligne de base privée par client à partir de son propre historique, puis note chaque nouvelle session par rapport à celle-ci. Les premières sessions d'un client reviennent en statut « learning » — pas encore de score, c'est normal.",
+  },
+  docsBehavioralEventsStepUpNote: {
+    en: "Protegey never triggers reauthentication itself — when stepUpRecommended is true, it's up to you to challenge that user (OTP, biometric, however you already do it). Protegey provides the recommendation; your app carries out the action, exactly like the device-events response above.",
+    fr: "Protegey ne déclenche jamais la réauthentification lui-même — quand stepUpRecommended vaut true, c'est à vous de challenger cet utilisateur (OTP, biométrie, ou toute méthode déjà en place chez vous). Protegey fournit la recommandation, votre application exécute l'action, exactement comme pour la réponse des événements d'appareil ci-dessus.",
   },
   docsWebhooksTitle: { en: "Webhooks", fr: "Webhooks" },
   docsWebhooksBody: {

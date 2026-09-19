@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KeyRound, ArrowRightLeft, IdCard, ShieldCheck, Webhook, AlertTriangle } from "lucide-react";
+import { KeyRound, ArrowRightLeft, IdCard, ShieldCheck, Webhook, AlertTriangle, Smartphone, Activity } from "lucide-react";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 
@@ -51,6 +51,32 @@ const SANCTIONS_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/san
   "matches": []
 }`;
 
+const DEVICE_EVENT_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/device-events \\
+  -H "Content-Type: application/json" \\
+  -H "x-api-key: YOUR_API_KEY" \\
+  -d '{ "eventId": "evt_from_your_device_signal_provider", "externalCustomerId": "cust-9981" }'
+
+# Response
+{ "recorded": true, "action": "allow", "riskScore": 5 }`;
+
+const BEHAVIORAL_EVENT_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/behavioral-events \\
+  -H "Content-Type: application/json" \\
+  -H "x-api-key: YOUR_API_KEY" \\
+  -d '{
+    "externalCustomerId": "cust-9981",
+    "sessionId": "sess-20260115-01",
+    "keystroke": { "avgInterKeyLatencyMs": 145, "typingSpeedCharsPerSec": 4.2, "errorRate": 0.02 },
+    "touch": { "avgSwipeVelocity": 22, "scrollBehaviorScore": 0.8 },
+    "navigation": { "screenSequence": ["login", "dashboard", "transfer", "confirm"] },
+    "session": { "loginHourBucket": 14, "loginDayOfWeek": 2, "sessionDurationMs": 45000 }
+  }'
+
+# Response — first sessions for a customer come back as "learning" (no score yet)
+{ "status": "learning", "deviationScore": 0, "confidenceTier": null, "stepUpRecommended": false, "escalatedAlertId": null }
+
+# Response — once a baseline exists for that customer
+{ "status": "scored", "deviationScore": 35, "confidenceTier": "medium", "stepUpRecommended": true, "escalatedAlertId": null }`;
+
 function Section({
   id,
   icon: Icon,
@@ -86,6 +112,8 @@ export default async function DocumentationPage() {
     { id: "transactions", label: t(lang, "docsNavTransactions") },
     { id: "kyc", label: t(lang, "docsNavKyc") },
     { id: "sanctions", label: t(lang, "docsNavSanctions") },
+    { id: "device-events", label: t(lang, "docsNavDeviceEvents") },
+    { id: "behavioral-events", label: t(lang, "docsNavBehavioralEvents") },
     { id: "webhooks", label: t(lang, "docsNavWebhooks") },
     { id: "errors", label: t(lang, "docsNavErrors") },
   ];
@@ -128,6 +156,21 @@ export default async function DocumentationPage() {
           <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
             <code>{SANCTIONS_EXAMPLE}</code>
           </pre>
+        </Section>
+
+        <Section id="device-events" icon={Smartphone} title={t(lang, "docsDeviceEventsTitle")} body={t(lang, "docsDeviceEventsBody")}>
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
+          <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
+            <code>{DEVICE_EVENT_EXAMPLE}</code>
+          </pre>
+        </Section>
+
+        <Section id="behavioral-events" icon={Activity} title={t(lang, "docsBehavioralEventsTitle")} body={t(lang, "docsBehavioralEventsBody")}>
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
+          <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
+            <code>{BEHAVIORAL_EVENT_EXAMPLE}</code>
+          </pre>
+          <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsBehavioralEventsStepUpNote")}</p>
         </Section>
 
         <Section id="webhooks" icon={Webhook} title={t(lang, "docsWebhooksTitle")} body={t(lang, "docsWebhooksBody")} />
