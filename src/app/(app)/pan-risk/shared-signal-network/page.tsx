@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
-import { getSharedSignalReports, type SharedSignalCategory } from "./actions";
+import { getSharedSignalNetworkStatus, getSharedSignalReports, type SharedSignalCategory } from "./actions";
 import { SharedSignalNetworkClient } from "./SharedSignalNetworkClient";
+import { SharedSignalNetworkGate } from "./SharedSignalNetworkGate";
 
 export const metadata: Metadata = {
   title: "Shared Signal Network — Protegey Partner",
@@ -13,6 +14,11 @@ export default async function SharedSignalNetworkPage({
 }) {
   const { page: pageParam, category } = await searchParams;
   const page = Math.max(1, Number(pageParam) || 1);
+
+  const status = await getSharedSignalNetworkStatus();
+  if (!status.eligible) {
+    return <SharedSignalNetworkGate status={status} />;
+  }
 
   const result = await getSharedSignalReports({ page, category: category as SharedSignalCategory | undefined });
 

@@ -1208,6 +1208,18 @@ const STRINGS = {
     en: "The closed case this signal was shared from — only visible to you, never to other partners.",
     fr: "Le dossier clos depuis lequel ce signal a été partagé — visible uniquement par vous, jamais par les autres partenaires.",
   },
+  sharedSignalGateDisabledTitle: { en: "Shared signal network is off", fr: "Le réseau de signaux partagés est désactivé" },
+  sharedSignalGateDisabledBody: {
+    en: "You can't check identities or see what your organization has shared until you turn on network sharing. It's reciprocal — you can't benefit without contributing.",
+    fr: "Vous ne pouvez pas vérifier d'identités ni voir ce que votre organisation a partagé tant que vous n'avez pas activé le partage réseau. C'est réciproque — on ne peut pas en profiter sans y contribuer.",
+  },
+  sharedSignalGateGoToSettings: { en: "Turn it on in Organization Profile", fr: "Activer dans le Profil de l'organisation" },
+  sharedSignalGateWaitingTitle: { en: "Almost there", fr: "Presque prêt" },
+  sharedSignalGateWaitingBody: {
+    en: "Network sharing is on, but you need {n} more consecutive day(s) of participation before you can check identities or see what your organization has shared — this stops anyone from switching it on just to look, then switching it back off.",
+    fr: "Le partage réseau est activé, mais il vous faut encore {n} jour(s) consécutif(s) de participation avant de pouvoir vérifier des identités ou voir ce que votre organisation a partagé — cela empêche d'activer le partage juste pour regarder, puis de le désactiver aussitôt après.",
+  },
+  sharedSignalGateEnabledSince: { en: "Enabled since", fr: "Activé depuis le" },
 
   // ── Notifications page ───────────────────────────────────────────────────
   notificationsPageTitle: { en: "Notifications", fr: "Notifications" },

@@ -30,6 +30,17 @@ export interface SharedSignalReportsQuery {
   category?: SharedSignalCategory;
 }
 
+export interface SharedSignalNetworkStatus {
+  enabled: boolean;
+  enabledAt: string | null;
+  eligible: boolean;
+  daysUntilEligible: number;
+}
+
+export async function getSharedSignalNetworkStatus(): Promise<SharedSignalNetworkStatus> {
+  return apiFetch<SharedSignalNetworkStatus>(`/partners/me/shared-signals/status`);
+}
+
 export async function getSharedSignalReports(query: SharedSignalReportsQuery = {}): Promise<PaginatedResult<SharedSignalReportSummary>> {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
