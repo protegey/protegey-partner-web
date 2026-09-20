@@ -101,6 +101,17 @@ export function describeEvent(lang: Lang, event: NotificationEvent): string {
     }
     case "sar.submitted":
       return interpolate(t(lang, "eventSarSubmitted"), { actor });
+    case "shared_signal.reported": {
+      const categoryKey: Record<string, StringKey> = {
+        confirmed_fraud: "sharedSignalCategoryConfirmedFraud",
+        identity_theft: "sharedSignalCategoryIdentityTheft",
+        money_laundering: "sharedSignalCategoryMoneyLaundering",
+        other: "sharedSignalCategoryOther",
+      };
+      const key = categoryKey[str("category")];
+      const categoryLabel = key ? t(lang, key) : str("category");
+      return interpolate(t(lang, "eventSharedSignalReported"), { actor, title: str("title"), category: categoryLabel });
+    }
     default:
       return t(lang, "eventUnknown");
   }

@@ -4,6 +4,7 @@ import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import { getPartnerSettings } from "./actions";
 import { LogoUploadForm } from "./LogoUploadForm";
+import { SharedSignalsToggle } from "./SharedSignalsToggle";
 
 export const metadata: Metadata = {
   title: "Organization Profile — Protegey Partner",
@@ -25,6 +26,11 @@ export default async function OrganizationProfilePage() {
       <div className="rounded-md border border-border bg-card p-5">
         <p className="mb-3 text-sm font-semibold text-foreground">{t(lang, "settingsOrgLogoTitle")}</p>
         <LogoUploadForm organizationName={partner.name} hasLogo={Boolean(partner.logoFileName)} canManage={canManageSettings} />
+      </div>
+
+      <div className="rounded-md border border-border bg-card p-5">
+        <p className="mb-3 text-sm font-semibold text-foreground">{t(lang, "sharedSignalsCardTitle")}</p>
+        <SharedSignalsToggle initialEnabled={partner.sharedSignalsEnabled} canManage={canManageSettings} />
       </div>
     </div>
   );

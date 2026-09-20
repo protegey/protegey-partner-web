@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KeyRound, ArrowRightLeft, IdCard, ShieldCheck, Webhook, AlertTriangle, Smartphone, Activity } from "lucide-react";
+import { KeyRound, ArrowRightLeft, IdCard, ShieldCheck, Webhook, AlertTriangle, Smartphone, Activity, Share2 } from "lucide-react";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 
@@ -77,6 +77,17 @@ const BEHAVIORAL_EVENT_EXAMPLE = `curl -X POST https://api.protegey.com/partner-
 # Response — once a baseline exists for that customer
 { "status": "scored", "deviationScore": 35, "confidenceTier": "medium", "stepUpRecommended": true, "escalatedAlertId": null }`;
 
+const SHARED_SIGNAL_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/shared-signal/check \\
+  -H "Content-Type: application/json" \\
+  -H "x-api-key: YOUR_API_KEY" \\
+  -d '{ "phoneNumber": "+22890123456", "externalCustomerId": "cust-9981" }'
+
+# Response — no match
+{ "flagged": false, "category": null, "reportedDaysAgo": null }
+
+# Response — a match (never reveals which partner reported it, or their case details)
+{ "flagged": true, "category": "confirmed_fraud", "reportedDaysAgo": 12 }`;
+
 function Section({
   id,
   icon: Icon,
@@ -114,6 +125,7 @@ export default async function DocumentationPage() {
     { id: "sanctions", label: t(lang, "docsNavSanctions") },
     { id: "device-events", label: t(lang, "docsNavDeviceEvents") },
     { id: "behavioral-events", label: t(lang, "docsNavBehavioralEvents") },
+    { id: "shared-signal", label: t(lang, "docsNavSharedSignal") },
     { id: "webhooks", label: t(lang, "docsNavWebhooks") },
     { id: "errors", label: t(lang, "docsNavErrors") },
   ];
@@ -181,6 +193,14 @@ export default async function DocumentationPage() {
               {t(lang, "docsSeeAlsoBehavioralSignals")}
             </Link>
           </p>
+        </Section>
+
+        <Section id="shared-signal" icon={Share2} title={t(lang, "docsSharedSignalTitle")} body={t(lang, "docsSharedSignalBody")}>
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
+          <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
+            <code>{SHARED_SIGNAL_EXAMPLE}</code>
+          </pre>
+          <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsSharedSignalOptInNote")}</p>
         </Section>
 
         <Section id="webhooks" icon={Webhook} title={t(lang, "docsWebhooksTitle")} body={t(lang, "docsWebhooksBody")} />

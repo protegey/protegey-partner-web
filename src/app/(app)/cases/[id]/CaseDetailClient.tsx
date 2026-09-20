@@ -3,10 +3,17 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, FileText } from "lucide-react";
+import { Loader2, FileText, Share2, CheckCircle2 } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
-import { addCaseNoteAction, updateCaseAction, type CaseOutcome, type CaseWithNotes } from "../actions";
+import {
+  addCaseNoteAction,
+  updateCaseAction,
+  shareCaseSignalAction,
+  type CaseOutcome,
+  type CaseWithNotes,
+  type SharedSignalCategory,
+} from "../actions";
 import type { TeamMember } from "../../team/actions";
 
 function isError(value: unknown): value is { error: string } {
@@ -19,7 +26,19 @@ const STATUS_COLOR: Record<string, string> = {
   closed: "bg-muted text-muted-foreground",
 };
 
-export function CaseDetailClient({ kase: initialCase, teamMembers }: { kase: CaseWithNotes; teamMembers: TeamMember[] }) {
+export function CaseDetailClient({
+  kase: initialCase,
+  teamMembers,
+  sharedSignalsEnabled,
+  canShareSignal,
+  initialAlreadyShared,
+}: {
+  kase: CaseWithNotes;
+  teamMembers: TeamMember[];
+  sharedSignalsEnabled: boolean;
+  canShareSignal: boolean;
+  initialAlreadyShared: boolean;
+}) {
   const router = useRouter();
   const guard = useSessionGuard();
   const { t, lang } = useLang();
@@ -30,6 +49,12 @@ export function CaseDetailClient({ kase: initialCase, teamMembers }: { kase: Cas
   const [closing, setClosing] = useState(false);
   const [outcome, setOutcome] = useState<CaseOutcome>("no_action");
   const [error, setError] = useState<string | null>(null);
+  const [sharing, setSharing] = useState(false);
+  const [sharingBusy, setSharingBusy] = useState(false);
+  const [shareError, setShareError] = useState<string | null>(null);
+  const [alreadyShared, setAlreadyShared] = useState(initialAlreadyShared);
+  const [sharePhone, setSharePhone] = useState("");
+  const [shareCategory, setShareCategory] = useState<SharedSignalCategory>("confirmed_fraud");
 
   const statusLabel: Record<string, string> = {
     open: t("caseStatusOpen"),
@@ -106,6 +131,25 @@ export function CaseDetailClient({ kase: initialCase, teamMembers }: { kase: Cas
       setClosing(false);
     } finally {
       setUpdating(false);
+    }
+  }
+
+  async function handleShareSignal() {
+    if (!sharePhone.trim()) return;
+    setSharingBusy(true);
+    setShareError(null);
+    try {
+      const result = await guard(() => shareCaseSignalAction(kase.id, sharePhone, shareCategory));
+      if (result === null) return;
+      if (isError(result)) {
+        setShareError(result.error);
+        return;
+      }
+      setAlreadyShared(true);
+      setSharing(false);
+      setSharePhone("");
+    } finally {
+      setSharingBusy(false);
     }
   }
 
@@ -186,11 +230,76 @@ export function CaseDetailClient({ kase: initialCase, teamMembers }: { kase: Cas
             </Link>
           </>
         ) : (
-          <p className="text-sm text-muted-foreground">
-            {t("caseClosedWithOutcome")}: <span className="font-medium text-foreground">{kase.outcome ? outcomeLabel[kase.outcome] : "—"}</span>
-          </p>
+          <div className="flex flex-1 flex-wrap items-center justify-between gap-3">
+            <p className="text-sm text-muted-foreground">
+              {t("caseClosedWithOutcome")}: <span className="font-medium text-foreground">{kase.outcome ? outcomeLabel[kase.outcome] : "—"}</span>
+            </p>
+            {canShareSignal && sharedSignalsEnabled && !alreadyShared ? (
+              <button
+                type="button"
+                onClick={() => setSharing(true)}
+                className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+              >
+                <Share2 className="size-4" />
+                {t("caseShareSignalButton")}
+              </button>
+            ) : null}
+            {alreadyShared ? (
+              <p className="flex items-center gap-1.5 text-sm text-emerald-600">
+                <CheckCircle2 className="size-4" />
+                {t("caseShareSignalDone")}
+              </p>
+            ) : null}
+          </div>
         )}
       </div>
+
+      {isClosed && canShareSignal && !sharedSignalsEnabled ? (
+        <p className="text-xs text-muted-foreground">{t("caseShareSignalDisabledHint")}</p>
+      ) : null}
+
+      {sharing ? (
+        <div className="flex flex-col gap-3 rounded-md border border-border bg-card p-4">
+          <p className="text-sm font-semibold text-foreground">{t("caseShareSignalDialogTitle")}</p>
+          <p className="text-xs text-muted-foreground">{t("caseShareSignalDialogHint")}</p>
+          <input
+            type="tel"
+            value={sharePhone}
+            onChange={(e) => setSharePhone(e.target.value)}
+            placeholder={t("caseShareSignalPhonePlaceholder")}
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          />
+          <select
+            value={shareCategory}
+            onChange={(e) => setShareCategory(e.target.value as SharedSignalCategory)}
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="confirmed_fraud">{t("sharedSignalCategoryConfirmedFraud")}</option>
+            <option value="identity_theft">{t("sharedSignalCategoryIdentityTheft")}</option>
+            <option value="money_laundering">{t("sharedSignalCategoryMoneyLaundering")}</option>
+            <option value="other">{t("sharedSignalCategoryOther")}</option>
+          </select>
+          {shareError ? <p className="text-sm text-destructive">{shareError}</p> : null}
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={sharingBusy || !sharePhone.trim()}
+              onClick={handleShareSignal}
+              className="flex items-center gap-2 rounded-md bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+            >
+              {sharingBusy ? <Loader2 className="size-4 animate-spin" /> : null}
+              {t("caseShareSignalConfirm")}
+            </button>
+            <button
+              type="button"
+              onClick={() => setSharing(false)}
+              className="rounded-md border border-border px-3.5 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              {t("commonCancel")}
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {closing ? (
         <div className="flex flex-col gap-3 rounded-md border border-border bg-card p-4">

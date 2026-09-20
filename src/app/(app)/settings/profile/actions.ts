@@ -9,6 +9,7 @@ export interface PartnerSettings {
   id: string;
   name: string;
   logoFileName: string | null;
+  sharedSignalsEnabled: boolean;
 }
 
 export interface ActionResult {
@@ -51,5 +52,17 @@ export async function removeLogoAction(): Promise<ActionResult | AuthExpired> {
   }
   revalidatePath("/settings/profile");
   revalidatePath("/clients");
+  return { success: true };
+}
+
+export async function updateSharedSignalsAction(enabled: boolean): Promise<ActionResult | AuthExpired> {
+  const lang = await getLang();
+  try {
+    await apiFetch("/partners/me/shared-signals", { method: "PATCH", body: { enabled } });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return { authExpired: true };
+    return { error: error instanceof ApiError ? error.message : t(lang, "commonGenericError") };
+  }
+  revalidatePath("/settings/profile");
   return { success: true };
 }

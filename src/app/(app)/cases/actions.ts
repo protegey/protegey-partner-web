@@ -77,6 +77,33 @@ export async function addCaseNoteAction(id: string, body: string): Promise<Mutat
   }
 }
 
+export type SharedSignalCategory = "confirmed_fraud" | "identity_theft" | "money_laundering" | "other";
+
+export interface SharedSignalReceipt {
+  id: string;
+  category: SharedSignalCategory;
+  reportedAt: string;
+}
+
+export async function getCaseSignalStatus(id: string): Promise<{ shared: boolean }> {
+  return apiFetch<{ shared: boolean }>(`/cases/me/${id}/share-signal`);
+}
+
+export async function shareCaseSignalAction(
+  id: string,
+  phoneNumber: string,
+  category: SharedSignalCategory,
+): Promise<MutationResult<SharedSignalReceipt>> {
+  try {
+    const result = await apiFetchGuarded<SharedSignalReceipt>(`/cases/me/${id}/share-signal`, { method: "POST", body: { phoneNumber, category } });
+    if (!("error" in result) && !("authExpired" in result)) revalidatePath(`/cases/${id}`);
+    return result;
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
+}
+
 export async function updateCaseAction(
   id: string,
   patch: { status?: CaseStatus; assignedToUserId?: string; outcome?: CaseOutcome },

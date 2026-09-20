@@ -943,6 +943,10 @@ const STRINGS = {
   eventCaseStatusChanged: { en: "{actor} marked the case \"{title}\" as {status}.", fr: "{actor} a marqué le dossier « {title} » comme {status}." },
   eventCaseClosed: { en: "{actor} closed the case \"{title}\" — {outcome}.", fr: "{actor} a clos le dossier « {title} » — {outcome}." },
   eventSarSubmitted: { en: "{actor} submitted a SAR/STR declaration.", fr: "{actor} a soumis une déclaration SAR/STR." },
+  eventSharedSignalReported: {
+    en: "{actor} shared the case \"{title}\" with the fraud signal network ({category}).",
+    fr: "{actor} a partagé le dossier « {title} » avec le réseau de signaux de fraude ({category}).",
+  },
   eventUnknown: { en: "Something happened in your account.", fr: "Quelque chose s'est produit sur votre compte." },
 
   // ── Pan-Guard pages (device/behavioral signals, risk profiles) ──────────
@@ -1082,6 +1086,31 @@ const STRINGS = {
     fr: "Seul le rôle équivalent MLRO peut soumettre cette déclaration.",
   },
 
+  // ── Shared fraud signal network (cross-partner) ──────────────────────────
+  sharedSignalsCardTitle: { en: "Shared fraud signal network", fr: "Réseau de signaux de fraude partagés" },
+  sharedSignalsToggleLabel: { en: "Participate in the shared network", fr: "Participer au réseau partagé" },
+  sharedSignalsToggleHint: {
+    en: "When enabled, you can flag a closed case's phone number to other participating partners (as a hashed, anonymous signal only — never your case details), and check incoming customers against what others have flagged. Off by default.",
+    fr: "Une fois activé, vous pouvez signaler le numéro de téléphone d'un dossier clos aux autres partenaires participants (uniquement sous forme de signal haché et anonyme — jamais le détail de votre dossier), et vérifier vos nouveaux clients par rapport à ce que d'autres ont signalé. Désactivé par défaut.",
+  },
+  caseShareSignalButton: { en: "Share with network", fr: "Partager avec le réseau" },
+  caseShareSignalDone: { en: "Shared", fr: "Partagé" },
+  caseShareSignalDisabledHint: {
+    en: "Enable the shared fraud signal network in Organization Profile to share this case.",
+    fr: "Activez le réseau de signaux de fraude partagés dans le Profil de l'organisation pour partager ce dossier.",
+  },
+  caseShareSignalDialogTitle: { en: "Share this signal with the network", fr: "Partager ce signal avec le réseau" },
+  caseShareSignalDialogHint: {
+    en: "The phone number is hashed immediately and never stored in readable form — other partners only ever see a match, never the number or which partner reported it.",
+    fr: "Le numéro est haché immédiatement et jamais stocké en clair — les autres partenaires ne voient qu'une correspondance, jamais le numéro ni quel partenaire l'a signalé.",
+  },
+  caseShareSignalPhonePlaceholder: { en: "Phone number", fr: "Numéro de téléphone" },
+  caseShareSignalConfirm: { en: "Share signal", fr: "Partager le signal" },
+  sharedSignalCategoryConfirmedFraud: { en: "Confirmed fraud", fr: "Fraude confirmée" },
+  sharedSignalCategoryIdentityTheft: { en: "Identity theft", fr: "Usurpation d'identité" },
+  sharedSignalCategoryMoneyLaundering: { en: "Money laundering", fr: "Blanchiment de capitaux" },
+  sharedSignalCategoryOther: { en: "Other", fr: "Autre" },
+
   // ── Notifications page ───────────────────────────────────────────────────
   notificationsPageTitle: { en: "Notifications", fr: "Notifications" },
   notificationsPageSubtitle: {
@@ -1185,6 +1214,7 @@ const STRINGS = {
   docsNavWebhooks: { en: "Webhooks", fr: "Webhooks" },
   docsNavDeviceEvents: { en: "Device events", fr: "Événements d'appareil" },
   docsNavBehavioralEvents: { en: "Behavioral events", fr: "Événements comportementaux" },
+  docsNavSharedSignal: { en: "Shared signal network", fr: "Réseau de signaux partagés" },
   docsNavErrors: { en: "Errors", fr: "Erreurs" },
   docsAuthTitle: { en: "Authentication", fr: "Authentification" },
   docsAuthBody: {
@@ -1214,6 +1244,15 @@ const STRINGS = {
   docsBehavioralEventsStepUpNote: {
     en: "Protegey never triggers reauthentication itself — when stepUpRecommended is true, it's up to you to challenge that user (OTP, biometric, however you already do it). Protegey provides the recommendation; your app carries out the action, exactly like the device-events response above.",
     fr: "Protegey ne déclenche jamais la réauthentification lui-même — quand stepUpRecommended vaut true, c'est à vous de challenger cet utilisateur (OTP, biométrie, ou toute méthode déjà en place chez vous). Protegey fournit la recommandation, votre application exécute l'action, exactement comme pour la réponse des événements d'appareil ci-dessus.",
+  },
+  docsSharedSignalTitle: { en: "Checking the shared fraud signal network", fr: "Vérifier le réseau de signaux de fraude partagés" },
+  docsSharedSignalBody: {
+    en: "Check a customer's phone number against fraud signals other participating partners have shared — e.g. at onboarding. The number is hashed on arrival and never stored or logged in readable form; a match never reveals which partner reported it, only a category and how long ago.",
+    fr: "Vérifiez le numéro de téléphone d'un client par rapport aux signaux de fraude partagés par d'autres partenaires participants — par exemple à l'onboarding. Le numéro est haché à l'arrivée et jamais stocké ou journalisé en clair ; une correspondance ne révèle jamais quel partenaire l'a signalé, seulement une catégorie et depuis combien de temps.",
+  },
+  docsSharedSignalOptInNote: {
+    en: "Both checking and reporting require your organization to opt in first, in Organization Profile — off by default.",
+    fr: "Vérifier comme signaler nécessitent d'abord d'activer l'option dans le Profil de l'organisation — désactivé par défaut.",
   },
   docsWebhooksTitle: { en: "Webhooks", fr: "Webhooks" },
   docsWebhooksBody: {
