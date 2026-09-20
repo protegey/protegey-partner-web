@@ -1259,6 +1259,52 @@ const STRINGS = {
     en: "Both checking and reporting require your organization to opt in first, in Organization Profile — off by default.",
     fr: "Vérifier comme signaler nécessitent d'abord d'activer l'option dans le Profil de l'organisation — désactivé par défaut.",
   },
+  // ── First-login onboarding tour ──────────────────────────────────────────
+  tourWelcomeTitle: { en: "Welcome to Protegey", fr: "Bienvenue sur Protegey" },
+  tourWelcomeBody: {
+    en: "A quick tour of what's here — eight short stops, skip anytime. You can always come back to any of these sections from the sidebar.",
+    fr: "Un tour rapide de ce qui est disponible — huit étapes courtes, passable à tout moment. Vous pourrez toujours revenir à chaque section depuis le menu.",
+  },
+  tourDashboardTitle: { en: "Dashboard", fr: "Tableau de bord" },
+  tourDashboardBody: {
+    en: "Your account's overview — activity, risk, and what needs attention, at a glance.",
+    fr: "La vue d'ensemble de votre compte — activité, risque, et ce qui mérite votre attention, en un coup d'œil.",
+  },
+  tourPanMonitorTitle: { en: "Pan-Monitor™", fr: "Pan-Monitor™" },
+  tourPanMonitorBody: {
+    en: "Every transaction you send us, the alert rules that watch them, and the alerts they raise — configurable, and explainable in plain language.",
+    fr: "Chaque transaction que vous nous envoyez, les règles d'alerte qui les surveillent, et les alertes qu'elles déclenchent — configurables, et expliquées en langage clair.",
+  },
+  tourPanGuardTitle: { en: "Pan-Guard™", fr: "Pan-Guard™" },
+  tourPanGuardBody: {
+    en: "Device and behavioral signals, plus a cumulative risk profile per customer — built from every signal source combined.",
+    fr: "Signaux d'appareil et comportementaux, plus un profil de risque cumulé par client — construit à partir de toutes les sources de signal combinées.",
+  },
+  tourPanIdTitle: { en: "Pan-ID™", fr: "Pan-ID™" },
+  tourPanIdBody: {
+    en: "Identity verification (KYC) for individuals and business onboarding (KYB) for your own business clients.",
+    fr: "Vérification d'identité (KYC) pour les particuliers et intégration d'entreprises (KYB) pour vos propres clients professionnels.",
+  },
+  tourPanRiskTitle: { en: "Pan-Risk™", fr: "Pan-Risk™" },
+  tourPanRiskBody: {
+    en: "Sanctions and PEP screening (your own list, or Dow Jones), SAR/STR declarations, and the cross-partner shared fraud signal network.",
+    fr: "Filtrage sanctions et PPE (votre propre liste, ou Dow Jones), déclarations SAR/STR, et le réseau de signaux de fraude partagés entre partenaires.",
+  },
+  tourCasesTitle: { en: "Cases", fr: "Dossiers" },
+  tourCasesBody: {
+    en: "Investigation dossiers — gather evidence, assign, document, and close with an auditable decision.",
+    fr: "Dossiers d'investigation — rassemblez des preuves, assignez, documentez, et clôturez avec une décision auditable.",
+  },
+  tourIntegrationsTitle: { en: "Partner Integrations", fr: "Intégrations partenaire" },
+  tourIntegrationsBody: {
+    en: "Your API key, webhook, and real, curl-able documentation for every endpoint you can call.",
+    fr: "Votre clé API, votre webhook, et une documentation réelle, testable par curl, pour chaque point d'accès disponible.",
+  },
+  tourSkip: { en: "Skip", fr: "Passer" },
+  tourPrevious: { en: "Back", fr: "Précédent" },
+  tourNext: { en: "Next", fr: "Suivant" },
+  tourFinish: { en: "Get started", fr: "Commencer" },
+
   navScreeningProvider: { en: "Screening Provider", fr: "Fournisseur de Screening" },
   screeningProviderPageTitle: { en: "Screening Provider", fr: "Fournisseur de Screening" },
   screeningProviderPageSubtitle: {

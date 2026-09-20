@@ -17,6 +17,7 @@ import { Logo } from "@/components/Logo";
 import { SignOutButton } from "@/components/SignOutButton";
 import { ActivationProgress } from "./ActivationProgress";
 import { KybWelcomeModal } from "./KybWelcomeModal";
+import { OnboardingTour } from "./OnboardingTour";
 import { getSessionUser } from "@/lib/session";
 import { apiFetch, ApiError } from "@/lib/api";
 import { OrganizationLogo } from "@/components/OrganizationLogo";
@@ -167,6 +168,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         />
         <main className="relative flex-1 overflow-y-auto px-8 py-8">{children}</main>
       </div>
+      <OnboardingTour />
     </SessionExpiredProvider>
   );
 }
