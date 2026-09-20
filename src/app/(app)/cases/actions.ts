@@ -91,11 +91,14 @@ export async function getCaseSignalStatus(id: string): Promise<{ shared: boolean
 
 export async function shareCaseSignalAction(
   id: string,
-  phoneNumber: string,
+  identifiers: { phoneNumber?: string; email?: string },
   category: SharedSignalCategory,
-): Promise<MutationResult<SharedSignalReceipt>> {
+): Promise<MutationResult<SharedSignalReceipt[]>> {
   try {
-    const result = await apiFetchGuarded<SharedSignalReceipt>(`/cases/me/${id}/share-signal`, { method: "POST", body: { phoneNumber, category } });
+    const result = await apiFetchGuarded<SharedSignalReceipt[]>(`/cases/me/${id}/share-signal`, {
+      method: "POST",
+      body: { ...identifiers, category },
+    });
     if (!("error" in result) && !("authExpired" in result)) revalidatePath(`/cases/${id}`);
     return result;
   } catch (error) {

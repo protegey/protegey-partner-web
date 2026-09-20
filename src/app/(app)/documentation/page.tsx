@@ -80,7 +80,8 @@ const BEHAVIORAL_EVENT_EXAMPLE = `curl -X POST https://api.protegey.com/partner-
 const SHARED_SIGNAL_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/shared-signal/check \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: YOUR_API_KEY" \\
-  -d '{ "phoneNumber": "+22890123456", "externalCustomerId": "cust-9981" }'
+  -d '{ "phoneNumber": "+22890123456", "email": "jane@example.com", "externalCustomerId": "cust-9981" }'
+  # phoneNumber and email are both optional — send whichever you have, or both
 
 # Response — no match
 { "flagged": false, "category": null, "reportedDaysAgo": null }

@@ -54,6 +54,7 @@ export function CaseDetailClient({
   const [shareError, setShareError] = useState<string | null>(null);
   const [alreadyShared, setAlreadyShared] = useState(initialAlreadyShared);
   const [sharePhone, setSharePhone] = useState("");
+  const [shareEmail, setShareEmail] = useState("");
   const [shareCategory, setShareCategory] = useState<SharedSignalCategory>("confirmed_fraud");
 
   const statusLabel: Record<string, string> = {
@@ -135,11 +136,12 @@ export function CaseDetailClient({
   }
 
   async function handleShareSignal() {
-    if (!sharePhone.trim()) return;
+    if (!sharePhone.trim() && !shareEmail.trim()) return;
     setSharingBusy(true);
     setShareError(null);
     try {
-      const result = await guard(() => shareCaseSignalAction(kase.id, sharePhone, shareCategory));
+      const identifiers = { phoneNumber: sharePhone.trim() || undefined, email: shareEmail.trim() || undefined };
+      const result = await guard(() => shareCaseSignalAction(kase.id, identifiers, shareCategory));
       if (result === null) return;
       if (isError(result)) {
         setShareError(result.error);
@@ -148,6 +150,7 @@ export function CaseDetailClient({
       setAlreadyShared(true);
       setSharing(false);
       setSharePhone("");
+      setShareEmail("");
     } finally {
       setSharingBusy(false);
     }
@@ -269,6 +272,14 @@ export function CaseDetailClient({
             placeholder={t("caseShareSignalPhonePlaceholder")}
             className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
           />
+          <input
+            type="email"
+            value={shareEmail}
+            onChange={(e) => setShareEmail(e.target.value)}
+            placeholder={t("caseShareSignalEmailPlaceholder")}
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          />
+          {!sharePhone.trim() && !shareEmail.trim() ? <p className="text-xs text-muted-foreground">{t("caseShareSignalAtLeastOneHint")}</p> : null}
           <select
             value={shareCategory}
             onChange={(e) => setShareCategory(e.target.value as SharedSignalCategory)}
@@ -283,7 +294,7 @@ export function CaseDetailClient({
           <div className="flex gap-2">
             <button
               type="button"
-              disabled={sharingBusy || !sharePhone.trim()}
+              disabled={sharingBusy || (!sharePhone.trim() && !shareEmail.trim())}
               onClick={handleShareSignal}
               className="flex items-center gap-2 rounded-md bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
             >

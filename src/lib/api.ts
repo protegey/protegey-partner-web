@@ -13,7 +13,7 @@ export class ApiError extends Error {
 }
 
 export interface RequestOptions {
-  method?: "GET" | "POST" | "PATCH" | "DELETE";
+  method?: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
   body?: unknown;
   /** Skip attaching the session's access token (e.g. for /auth/login itself). */
   unauthenticated?: boolean;
