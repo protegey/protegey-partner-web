@@ -1463,17 +1463,30 @@ const STRINGS = {
     fr: "Configurez une seule URL de webhook https:// depuis les Paramètres pour recevoir les mises à jour de statut au fur et à mesure, pour tout ce que Protegey ne peut pas répondre de façon synchrone. Chaque envoi est signé — vérifiez-le à l'aide du secret de webhook affiché une seule fois lors de la configuration de l'URL.",
   },
   docsWebhooksSyncNote: {
-    en: "Every other action — device intelligence, transactions, behavioral events, shared-signal checks — answers synchronously in the response itself; there's no webhook involved and nothing more to predict. Webhooks exist only for the one thing Protegey can't answer immediately: identity verification, since your user goes through a hosted flow that takes time.",
-    fr: "Toutes les autres actions — intelligence d'appareil, transactions, événements comportementaux, vérifications de signaux partagés — répondent de façon synchrone dans la réponse elle-même ; aucun webhook n'est impliqué et il n'y a rien de plus à prévoir. Les webhooks n'existent que pour la seule chose que Protegey ne peut pas répondre immédiatement : la vérification d'identité, puisque votre utilisateur passe par un parcours hébergé qui prend du temps.",
+    en: "Every action already answers synchronously in its own response — a transaction's alerts, a device check's action, a behavioral event's escalation. Webhooks add a second, independent channel for the same events (useful when the system that calls the API isn't the same one that should act on the result), and are the ONLY channel for two things nothing else tells you: identity verification completing (your user goes through a hosted flow that takes time) and an alert's status being changed by someone on your team from the portal.",
+    fr: "Chaque action répond déjà de façon synchrone dans sa propre réponse — les alertes d'une transaction, l'action d'un contrôle d'appareil, l'escalade d'un événement comportemental. Les webhooks ajoutent un second canal indépendant pour ces mêmes événements (utile quand le système qui appelle l'API n'est pas celui qui doit agir sur le résultat), et sont le SEUL canal pour deux choses que rien d'autre ne vous signale : la fin d'une vérification d'identité (votre utilisateur passe par un parcours hébergé qui prend du temps) et le changement de statut d'une alerte par un membre de votre équipe depuis le portail.",
   },
   docsWebhooksEventsTitle: { en: "Events", fr: "Événements" },
   docsWebhooksColTrigger: { en: "Trigger", fr: "Déclencheur" },
-  docsWebhooksColStatusValues: { en: "Possible status values", fr: "Valeurs de statut possibles" },
-  docsWebhooksKycTrigger: { en: "A KYC session's status changes", fr: "Le statut d'une session KYC change" },
-  docsWebhooksOnlyKycNote: {
-    en: "This is the only event type today. It fires on every status transition, not just terminal ones (Approved/Declined) — filter on status client-side if you only care about the final outcome.",
-    fr: "C'est le seul type d'événement aujourd'hui. Il se déclenche à chaque changement de statut, pas seulement aux statuts terminaux (Approved/Declined) — filtrez sur status côté client si seul le résultat final vous intéresse.",
+  docsWebhooksKycTrigger: {
+    en: "A KYC session's status changes — fires on every transition (Not Started, In Progress, ..., Approved, Declined), not just terminal ones.",
+    fr: "Le statut d'une session KYC change — se déclenche à chaque transition (Not Started, In Progress, ..., Approved, Declined), pas seulement aux statuts terminaux.",
   },
+  docsWebhooksAlertCreatedTrigger: {
+    en: "A new fraud/compliance alert is created — from a transaction rule match or a behavioral-biometrics escalation.",
+    fr: "Une nouvelle alerte fraude/conformité est créée — issue d'une règle transactionnelle ou d'une escalade de biométrie comportementale.",
+  },
+  docsWebhooksAlertStatusTrigger: {
+    en: "Someone on your team changes an alert's status from the portal (open → confirmed / dismissed / more_info_requested).",
+    fr: "Un membre de votre équipe change le statut d'une alerte depuis le portail (open → confirmed / dismissed / more_info_requested).",
+  },
+  docsWebhooksMoreTypesNote: {
+    en: "Filter on \"type\" and ignore anything you don't recognize — more event types will be added over time without breaking this contract.",
+    fr: "Filtrez sur « type » et ignorez ce que vous ne reconnaissez pas — d'autres types d'événements seront ajoutés au fil du temps sans casser ce contrat.",
+  },
+  docsWebhooksHeadersExampleTitle: { en: "Request shape", fr: "Forme de la requête" },
+  docsWebhooksKycStatusValuesLabel: { en: "Possible status values", fr: "Valeurs de statut possibles" },
+  docsWebhooksDispatchTitle: { en: "Handling multiple event types", fr: "Gérer plusieurs types d'événements" },
   docsWebhooksPayloadTitle: { en: "Payload", fr: "Payload" },
   docsWebhooksHeadersTitle: { en: "Headers", fr: "En-têtes" },
   docsWebhooksHeaderSignature: {
@@ -1488,8 +1501,8 @@ const STRINGS = {
   },
   docsWebhooksReliabilityTitle: { en: "Delivery reliability", fr: "Fiabilité de l'envoi" },
   docsWebhooksReliabilityBody: {
-    en: "Best-effort: one automatic retry if your endpoint doesn't respond successfully, then the delivery is dropped (logged on our side, not queued). For anything you must be certain of, poll GET /partner-api/kyc/sessions/:sessionId (or protegey.kyc.getSession() from an SDK) instead of relying on the webhook alone.",
-    fr: "Fait au mieux : un réessai automatique si votre point de terminaison ne répond pas correctement, puis l'envoi est abandonné (journalisé de notre côté, pas mis en file d'attente). Pour tout ce dont vous devez être certain, interrogez GET /partner-api/kyc/sessions/:sessionId (ou protegey.kyc.getSession() depuis un SDK) plutôt que de vous fier uniquement au webhook.",
+    en: "Best-effort for every event type: one automatic retry if your endpoint doesn't respond successfully, then the delivery is dropped (logged on our side, not queued). For anything you must be certain of, poll instead of relying on the webhook alone: GET /partner-api/kyc/sessions/:sessionId (or protegey.kyc.getSession() from an SDK) for identity verification, GET /alerts for fraud/compliance alerts.",
+    fr: "Fait au mieux pour chaque type d'événement : un réessai automatique si votre point de terminaison ne répond pas correctement, puis l'envoi est abandonné (journalisé de notre côté, pas mis en file d'attente). Pour tout ce dont vous devez être certain, interrogez plutôt que de vous fier uniquement au webhook : GET /partner-api/kyc/sessions/:sessionId (ou protegey.kyc.getSession() depuis un SDK) pour la vérification d'identité, GET /alerts pour les alertes fraude/conformité.",
   },
   docsErrorsTitle: { en: "Errors", fr: "Erreurs" },
   docsErrorsBody: {
