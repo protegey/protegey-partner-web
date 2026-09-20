@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   Settings as SettingsIcon,
   MoreHorizontal,
+  Package,
 } from "lucide-react";
 import { Sidebar, type NavItem } from "@/components/Sidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -105,6 +106,14 @@ function buildNavItems(lang: Lang): NavItem[] {
         { label: tt("navIntegrationGuide"), href: "/integration-guide" },
         { label: tt("navIntegrationHealth"), disabled: true },
         { label: tt("navDocumentation"), href: "/documentation" },
+      ],
+    },
+    {
+      label: tt("navSdks"),
+      icon: <Package className="size-4" />,
+      children: [
+        { label: tt("navSdkJs"), href: "/sdks/js" },
+        { label: tt("navSdkFlutter"), href: "/sdks/flutter" },
       ],
     },
     {

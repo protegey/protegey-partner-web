@@ -49,6 +49,9 @@ const STRINGS = {
   navIntegrationGuide: { en: "Integration Guide", fr: "Guide d'intégration" },
   navIntegrationHealth: { en: "Integration Health", fr: "État de l'intégration" },
   navDocumentation: { en: "Documentation", fr: "Documentation" },
+  navSdks: { en: "SDKs", fr: "SDKs" },
+  navSdkJs: { en: "Node.js / JavaScript", fr: "Node.js / JavaScript" },
+  navSdkFlutter: { en: "Flutter", fr: "Flutter" },
   navPlatformAdministration: { en: "Platform Administration", fr: "Administration de la plateforme" },
   navOrganizationProfile: { en: "Organization Profile", fr: "Profil de l'organisation" },
   navBillingPlans: { en: "Billing & Plans", fr: "Facturation et forfaits" },
@@ -1280,8 +1283,6 @@ const STRINGS = {
     en: "One Protegey-branded package instead of hand-built API calls — for web/Node/React/Angular/React Native, and for Flutter. Both call Protegey directly from your app with your own x-api-key, and cover device intelligence, transactions and identity verification today, with more of the API surface added over time.",
     fr: "Un seul package Protegey plutôt que des appels API construits à la main — pour web/Node/React/Angular/React Native, et pour Flutter. Les deux appellent Protegey directement depuis votre application avec votre propre x-api-key, et couvrent dès aujourd'hui l'intelligence d'appareil, les transactions et la vérification d'identité, avec le reste de la surface d'API ajouté progressivement.",
   },
-  docsSdksJsLabel: { en: "JavaScript / TypeScript", fr: "JavaScript / TypeScript" },
-  docsSdksFlutterLabel: { en: "Flutter", fr: "Flutter" },
   docsSdksSourceLink: { en: "View source on GitHub ↗", fr: "Voir le code source sur GitHub ↗" },
   docsSdksInstallGithub: { en: "Install — works today", fr: "Installation — fonctionne dès aujourd'hui" },
   docsSdksInstallFuture: { en: "Once published to a package registry", fr: "Une fois publié sur un registre de paquets" },
@@ -1289,10 +1290,55 @@ const STRINGS = {
   docsSdksCapabilityDevice: { en: "Device intelligence", fr: "Intelligence d'appareil" },
   docsSdksCapabilityTransactions: { en: "Transactions", fr: "Transactions" },
   docsSdksCapabilityKyc: { en: "Identity verification (KYC)", fr: "Vérification d'identité (KYC)" },
-  docsSdksNote: {
-    en: "Your x-api-key is passed to the SDK and used directly from your app — keep it out of source control and public bundles the same way you would any other secret.",
-    fr: "Votre x-api-key est transmise au SDK et utilisée directement depuis votre application — gardez-la hors du contrôle de version et des bundles publics, comme tout autre secret.",
+
+  // ── Dedicated SDK pages (sidebar → SDKs) ─────────────────────────────────
+  sdkJsPageTitle: { en: "Node.js / JavaScript SDK", fr: "SDK Node.js / JavaScript" },
+  sdkJsPageSubtitle: {
+    en: "One Protegey-branded package for Node.js, the browser (React, Angular, plain JS) and React Native — everything below works identically in all of them.",
+    fr: "Un seul package Protegey pour Node.js, le navigateur (React, Angular, JS brut) et React Native — tout ce qui suit fonctionne à l'identique partout.",
   },
+  sdkFlutterPageTitle: { en: "Flutter SDK", fr: "SDK Flutter" },
+  sdkFlutterPageSubtitle: {
+    en: "One Protegey-branded package for your Flutter app — everything below is called directly from your app with your own API key.",
+    fr: "Un seul package Protegey pour votre application Flutter — tout ce qui suit est appelé directement depuis votre application avec votre propre clé API.",
+  },
+  docsSdksInstallLabel: { en: "Install", fr: "Installation" },
+  sdkBaseUrlNote: {
+    en: "baseUrl is required, with no built-in default — this package ships inside apps that can't be force-updated the moment Protegey's API domain changes, so confirm the current value with Protegey before you ship.",
+    fr: "baseUrl est obligatoire, sans valeur par défaut intégrée — ce package est embarqué dans des applications qui ne peuvent pas être mises à jour de force au moment où le domaine API de Protegey change, donc confirmez la valeur actuelle avec Protegey avant de déployer.",
+  },
+  sdkDeviceBody: {
+    en: "Call this on login or session start. In a browser it computes a real device fingerprint automatically (wrapping ThumbmarkJS internally — you only ever see Protegey's own API).",
+    fr: "Appelez ceci à la connexion ou au début de session. Dans un navigateur, cela calcule automatiquement une véritable empreinte d'appareil (ThumbmarkJS est utilisé en interne — vous ne voyez que l'API de Protegey).",
+  },
+  sdkDeviceBodyFlutter: {
+    en: "Call this on login or session start. Computes a real, stable per-device fingerprint on Android/iOS via device_info_plus, using only policy-safe, non-hardware identifiers (Android ID / identifierForVendor) — never IMEI/UDID.",
+    fr: "Appelez ceci à la connexion ou au début de session. Calcule une véritable empreinte d'appareil stable sur Android/iOS via device_info_plus, en utilisant uniquement des identifiants conformes aux politiques Apple/Google (Android ID / identifierForVendor) — jamais IMEI/UDID.",
+  },
+  sdkDeviceOutsideBrowserLabel: { en: "Outside the browser (Node.js, React Native)", fr: "Hors navigateur (Node.js, React Native)" },
+  sdkDeviceOtherPlatformLabel: { en: "On any other platform", fr: "Sur toute autre plateforme" },
+  sdkTransactionsBody: {
+    en: "A thin, faithful mapping onto the transactions API — no business logic lives in the SDK, all validation and rule evaluation stays server-side.",
+    fr: "Un mappage fidèle et léger vers l'API des transactions — aucune logique métier ne vit dans le SDK, toute la validation et l'évaluation des règles reste côté serveur.",
+  },
+  sdkKycBody: {
+    en: "Starts a hosted identity verification session for one of your end users, and lets you check its status without waiting on a webhook.",
+    fr: "Démarre une session de vérification d'identité hébergée pour l'un de vos utilisateurs, et permet de vérifier son statut sans attendre un webhook.",
+  },
+  sdkKycWebhookNote: {
+    en: "For the full list of possible status values and the exact webhook payload Protegey sends when a session changes, see",
+    fr: "Pour la liste complète des valeurs de statut possibles et le payload exact du webhook envoyé par Protegey lors d'un changement de session, voir",
+  },
+  sdkBehavioralBody: {
+    en: "Reports one session's aggregated keystroke/touch/navigation metadata. The first few sessions for a customer come back as \"learning\" — expected, not an error.",
+    fr: "Signale les métadonnées agrégées de frappe/tactile/navigation d'une session. Les premières sessions d'un client reviennent en statut « apprentissage » — c'est normal, pas une erreur.",
+  },
+  sdkSecurityTitle: { en: "Security note", fr: "Note de sécurité" },
+  sdkSecurityBody: {
+    en: "Your API key is used directly from your app (browser or mobile) — the same key your backend would otherwise use server-side. Keep it out of source control and public bundles the same way you would any other secret. Protegey does not perform request rate-limiting or origin/bundle-id allowlisting on your behalf today.",
+    fr: "Votre clé API est utilisée directement depuis votre application (navigateur ou mobile) — la même clé que votre backend utiliserait autrement côté serveur. Gardez-la hors du contrôle de version et des bundles publics, comme tout autre secret. Protegey n'applique pas de limitation de débit ni de liste blanche d'origine/bundle-id en votre nom aujourd'hui.",
+  },
+  sdkSeeAlsoApiDocs: { en: "See the full API reference (raw HTTP, webhooks, ...)", fr: "Voir la référence API complète (HTTP brut, webhooks, ...)" },
   docsTransactionsTitle: { en: "Sending transactions for monitoring", fr: "Envoyer des transactions pour surveillance" },
   docsTransactionsBody: {
     en: "POST each transaction to /partner-api/transactions as it happens (or use protegey.transactions.report() from an SDK). Protegey runs it against your active alert rules immediately and responds with a decision (clear, review or blocked), a 0-100 risk score, and the list of any rules that matched. The optional visitorId/deviceAttributes fields let you pass in a device/session signal from a Protegey SDK — when present, Protegey factors it into the same decision automatically.",
@@ -1302,6 +1348,11 @@ const STRINGS = {
   docsKycBody: {
     en: "Start a session for one of your end users from the KYC page, or server-to-server via POST /partner-api/kyc/sessions. You get back a hosted verification link to send your user however you like (SMS, email, in-app). Status updates arrive on your configured webhook as the user completes each step.",
     fr: "Démarrez une session pour l'un de vos utilisateurs depuis la page KYC, ou en serveur à serveur via POST /partner-api/kyc/sessions. Vous recevez un lien de vérification hébergé à envoyer à votre utilisateur comme vous le souhaitez (SMS, e-mail, in-app). Les mises à jour de statut arrivent sur votre webhook configuré au fur et à mesure que l'utilisateur complète chaque étape.",
+  },
+  docsKycPollLabel: { en: "Polling fallback (GET)", fr: "Repli par interrogation (GET)" },
+  docsKycPollNote: {
+    en: "Webhook delivery is best-effort — see the Webhooks section below. Use this endpoint whenever you need to be certain of a session's current status.",
+    fr: "L'envoi du webhook est fait au mieux — voir la section Webhooks ci-dessous. Utilisez cet endpoint chaque fois que vous devez être certain du statut actuel d'une session.",
   },
   docsDeviceEventsTitle: { en: "Reporting a device signal outside a transaction", fr: "Signaler un signal d'appareil hors transaction" },
   docsDeviceEventsBody: {
@@ -1408,8 +1459,37 @@ const STRINGS = {
   screeningProviderKeySavedPlaceholder: { en: "•••••••• (saved)", fr: "•••••••• (enregistrée)" },
   docsWebhooksTitle: { en: "Webhooks", fr: "Webhooks" },
   docsWebhooksBody: {
-    en: "Configure a single https:// webhook URL from Settings to receive KYC status updates as they happen. Every delivery is signed — verify it using the webhook secret shown once when you configure the URL. A delivery is retried automatically if your endpoint doesn't respond successfully.",
-    fr: "Configurez une seule URL de webhook https:// depuis les Paramètres pour recevoir les mises à jour de statut KYC au fur et à mesure. Chaque envoi est signé — vérifiez-le à l'aide du secret de webhook affiché une seule fois lors de la configuration de l'URL. Un envoi est automatiquement réessayé si votre point de terminaison ne répond pas correctement.",
+    en: "Configure a single https:// webhook URL from Settings to receive status updates as they happen, for anything Protegey can't answer synchronously. Every delivery is signed — verify it using the webhook secret shown once when you configure the URL.",
+    fr: "Configurez une seule URL de webhook https:// depuis les Paramètres pour recevoir les mises à jour de statut au fur et à mesure, pour tout ce que Protegey ne peut pas répondre de façon synchrone. Chaque envoi est signé — vérifiez-le à l'aide du secret de webhook affiché une seule fois lors de la configuration de l'URL.",
+  },
+  docsWebhooksSyncNote: {
+    en: "Every other action — device intelligence, transactions, behavioral events, shared-signal checks — answers synchronously in the response itself; there's no webhook involved and nothing more to predict. Webhooks exist only for the one thing Protegey can't answer immediately: identity verification, since your user goes through a hosted flow that takes time.",
+    fr: "Toutes les autres actions — intelligence d'appareil, transactions, événements comportementaux, vérifications de signaux partagés — répondent de façon synchrone dans la réponse elle-même ; aucun webhook n'est impliqué et il n'y a rien de plus à prévoir. Les webhooks n'existent que pour la seule chose que Protegey ne peut pas répondre immédiatement : la vérification d'identité, puisque votre utilisateur passe par un parcours hébergé qui prend du temps.",
+  },
+  docsWebhooksEventsTitle: { en: "Events", fr: "Événements" },
+  docsWebhooksColTrigger: { en: "Trigger", fr: "Déclencheur" },
+  docsWebhooksColStatusValues: { en: "Possible status values", fr: "Valeurs de statut possibles" },
+  docsWebhooksKycTrigger: { en: "A KYC session's status changes", fr: "Le statut d'une session KYC change" },
+  docsWebhooksOnlyKycNote: {
+    en: "This is the only event type today. It fires on every status transition, not just terminal ones (Approved/Declined) — filter on status client-side if you only care about the final outcome.",
+    fr: "C'est le seul type d'événement aujourd'hui. Il se déclenche à chaque changement de statut, pas seulement aux statuts terminaux (Approved/Declined) — filtrez sur status côté client si seul le résultat final vous intéresse.",
+  },
+  docsWebhooksPayloadTitle: { en: "Payload", fr: "Payload" },
+  docsWebhooksHeadersTitle: { en: "Headers", fr: "En-têtes" },
+  docsWebhooksHeaderSignature: {
+    en: "Hex-encoded HMAC-SHA256 of \"{timestamp}.{raw request body}\", using your webhook secret.",
+    fr: "HMAC-SHA256 encodé en hexadécimal de « {timestamp}.{corps brut de la requête} », avec votre secret de webhook.",
+  },
+  docsWebhooksHeaderTimestamp: { en: "Unix seconds when the request was sent — part of the signed content, not just informational.", fr: "Secondes Unix au moment de l'envoi — fait partie du contenu signé, pas seulement informatif." },
+  docsWebhooksVerifyTitle: { en: "Verifying a delivery", fr: "Vérifier un envoi" },
+  docsWebhooksVerifyBody: {
+    en: "Recompute the signature yourself and compare — never trust a delivery without checking both the signature and the timestamp's freshness (a signature alone doesn't prevent a captured request from being replayed later).",
+    fr: "Recalculez vous-même la signature et comparez — ne faites jamais confiance à un envoi sans vérifier à la fois la signature et la fraîcheur du timestamp (une signature seule n'empêche pas la relecture d'une requête capturée plus tard).",
+  },
+  docsWebhooksReliabilityTitle: { en: "Delivery reliability", fr: "Fiabilité de l'envoi" },
+  docsWebhooksReliabilityBody: {
+    en: "Best-effort: one automatic retry if your endpoint doesn't respond successfully, then the delivery is dropped (logged on our side, not queued). For anything you must be certain of, poll GET /partner-api/kyc/sessions/:sessionId (or protegey.kyc.getSession() from an SDK) instead of relying on the webhook alone.",
+    fr: "Fait au mieux : un réessai automatique si votre point de terminaison ne répond pas correctement, puis l'envoi est abandonné (journalisé de notre côté, pas mis en file d'attente). Pour tout ce dont vous devez être certain, interrogez GET /partner-api/kyc/sessions/:sessionId (ou protegey.kyc.getSession() depuis un SDK) plutôt que de vous fier uniquement au webhook.",
   },
   docsErrorsTitle: { en: "Errors", fr: "Erreurs" },
   docsErrorsBody: {

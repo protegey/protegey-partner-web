@@ -40,6 +40,13 @@ const KYC_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/kyc/sessi
 # Response
 { "sessionId": "sess_...", "url": "https://verify.didit.me/session/..." }`;
 
+const KYC_POLL_EXAMPLE = `# Polling fallback — see the Webhooks section: delivery is best-effort (one retry, no queue).
+curl https://api.protegey.com/partner-api/kyc/sessions/sess_... \\
+  -H "x-api-key: YOUR_API_KEY"
+
+# Response — identical shape to the outbound webhook payload, minus eventId
+{ "sessionId": "sess_...", "externalUserId": "cust-9981", "status": "Approved", "decision": { ... } }`;
+
 const SANCTIONS_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/sanctions/screen \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: YOUR_API_KEY" \\
@@ -64,73 +71,6 @@ const DEVICE_EVENT_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/
 
 # Response
 { "recorded": true, "action": "allow", "riskScore": 5 }`;
-
-const SDK_JS_INSTALL_GITHUB = `npm install git+https://github.com/protegey/protegey_js_sdk.git`;
-const SDK_JS_INSTALL_NPM = `npm install @protegey/sdk`;
-
-const SDK_JS_INIT = `// Works in Node.js, the browser, React, Angular, and React Native — one package.
-import { Protegey } from "@protegey/sdk";
-
-// baseUrl has no default on purpose — confirm the current value with Protegey, it can
-// change independently of this package (e.g. between staging and production).
-const protegey = new Protegey({ apiKey: "YOUR_API_KEY", baseUrl: "https://api.protegey.com" });`;
-
-const SDK_JS_DEVICE_EXAMPLE = `// Call on login/session start — in a browser this computes a real device fingerprint automatically.
-const { visitorId, action, riskScore } = await protegey.device.identify({
-  externalCustomerId: "cust-9981",
-  phoneNumber: "+22890000001", // optional — you already have it, we never read it off the device
-});`;
-
-const SDK_JS_TRANSACTIONS_EXAMPLE = `// No need to hand-build the curl call yourself
-const result = await protegey.transactions.report({
-  externalTransactionId: "tx-00234",
-  externalCustomerId: "cust-9981",
-  direction: "DEBIT",
-  amount: 250000,
-  currency: "XOF",
-  transactionType: "cashout",
-  isCash: true,
-  visitorId, // fold the device signal above into this transaction's decision
-  occurredAt: new Date().toISOString(),
-});`;
-
-const SDK_JS_KYC_EXAMPLE = `// Starts the session and hands back the link — no curl needed
-const { sessionId, url } = await protegey.kyc.startSession({
-  externalUserId: "cust-9981",
-});`;
-
-const SDK_FLUTTER_INSTALL_GITHUB = `# pubspec.yaml
-dependencies:
-  protegey_sdk:
-    git:
-      url: https://github.com/protegey/protegey_flutter_sdk.git
-      ref: main`;
-
-const SDK_FLUTTER_INSTALL_PUBDEV = `flutter pub add protegey_sdk`;
-
-const SDK_FLUTTER_INIT = `// baseUrl has no default on purpose — confirm the current value with Protegey, it can
-// change independently of this package (e.g. between staging and production).
-final protegey = Protegey(apiKey: 'YOUR_API_KEY', baseUrl: 'https://api.protegey.com');`;
-
-const SDK_FLUTTER_DEVICE_EXAMPLE = `// Computes a real, stable per-device fingerprint on Android/iOS via device_info_plus.
-final identify = await protegey.device.identify(
-  externalCustomerId: 'cust-9981',
-  phoneNumber: '+22890000001', // optional
-);`;
-
-const SDK_FLUTTER_TRANSACTIONS_EXAMPLE = `final result = await protegey.transactions.report(TransactionInput(
-  externalTransactionId: 'tx-00234',
-  externalCustomerId: 'cust-9981',
-  direction: TransactionDirection.debit,
-  amount: 250000,
-  currency: 'XOF',
-  transactionType: 'cashout',
-  isCash: true,
-  visitorId: identify.visitorId, // fold the device signal above into this transaction's decision
-));`;
-
-const SDK_FLUTTER_KYC_EXAMPLE = `// Starts the session and hands back the link — no manual API call needed
-final session = await protegey.kyc.startSession(externalUserId: 'cust-9981');`;
 
 const BEHAVIORAL_EVENT_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/behavioral-events \\
   -H "Content-Type: application/json" \\
@@ -161,6 +101,34 @@ const SHARED_SIGNAL_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api
 
 # Response — a match (never reveals which partner reported it, or their case details)
 { "flagged": true, "category": "confirmed_fraud", "reportedDaysAgo": 12 }`;
+
+const WEBHOOK_PAYLOAD_EXAMPLE = `POST https://your-endpoint.example.com/webhooks/protegey
+Content-Type: application/json
+X-Signature: 08fa142f2349cd86b4c4c3a46ce53afe5c63c4a587d7ff3cf52023f201c1526d
+X-Timestamp: 1789905404
+
+{
+  "eventId": "d0d61d39-88c5-4bfb-89eb-08bb1d407c5a",
+  "externalUserId": "cust-9981",
+  "status": "Approved",
+  "sessionId": "sess_...",
+  "decision": { "id_verifications": [ { "status": "Approved", ... } ], ... }
+}`;
+
+const WEBHOOK_VERIFY_EXAMPLE = `// Node.js — verify a delivery is genuinely from Protegey and hasn't been replayed
+import { createHmac, timingSafeEqual } from "node:crypto";
+
+function isValidProtegeyWebhook(rawBody, signatureHeader, timestampHeader, webhookSecret) {
+  // Reject anything older than 5 minutes — the timestamp is signed together with the body,
+  // so a captured request can't be replayed later even with a technically-valid signature.
+  if (Math.abs(Date.now() / 1000 - Number(timestampHeader)) > 300) return false;
+
+  const expected = createHmac("sha256", webhookSecret)
+    .update(\`\${timestampHeader}.\${rawBody}\`, "utf8")
+    .digest("hex");
+
+  return timingSafeEqual(Buffer.from(expected), Buffer.from(signatureHeader));
+}`;
 
 function Section({
   id,
@@ -224,67 +192,20 @@ export default async function DocumentationPage() {
         <Section id="auth" icon={KeyRound} title={t(lang, "docsAuthTitle")} body={t(lang, "docsAuthBody")} />
 
         <Section id="sdks" icon={Package} title={t(lang, "docsSdksTitle")} body={t(lang, "docsSdksBody")}>
-          {/* JavaScript / TypeScript */}
-          <div className="mt-5 flex items-center justify-between gap-2">
-            <p className="text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksJsLabel")}</p>
-            <a
-              href="https://github.com/protegey/protegey_js_sdk"
-              target="_blank"
-              rel="noreferrer"
-              className="text-xs font-medium text-primary hover:underline"
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link
+              href="/sdks/js"
+              className="flex items-center gap-1.5 rounded-md border border-border px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
             >
-              {t(lang, "docsSdksSourceLink")}
-            </a>
-          </div>
-
-          <p className="mt-3 text-xs font-medium text-foreground">{t(lang, "docsSdksInstallGithub")}</p>
-          <CodeBlock code={SDK_JS_INSTALL_GITHUB} className="mt-1.5" />
-          <p className="mt-2 text-xs font-medium text-muted-foreground">{t(lang, "docsSdksInstallFuture")}</p>
-          <CodeBlock code={SDK_JS_INSTALL_NPM} className="mt-1.5 opacity-60" />
-
-          <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksInitLabel")}</p>
-          <CodeBlock code={SDK_JS_INIT} className="mt-1.5" />
-
-          <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksCapabilityDevice")}</p>
-          <CodeBlock code={SDK_JS_DEVICE_EXAMPLE} className="mt-1.5" />
-
-          <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksCapabilityTransactions")}</p>
-          <CodeBlock code={SDK_JS_TRANSACTIONS_EXAMPLE} className="mt-1.5" />
-
-          <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksCapabilityKyc")}</p>
-          <CodeBlock code={SDK_JS_KYC_EXAMPLE} className="mt-1.5" />
-
-          {/* Flutter */}
-          <div className="mt-8 flex items-center justify-between gap-2 border-t border-border pt-6">
-            <p className="text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksFlutterLabel")}</p>
-            <a
-              href="https://github.com/protegey/protegey_flutter_sdk"
-              target="_blank"
-              rel="noreferrer"
-              className="text-xs font-medium text-primary hover:underline"
+              {t(lang, "navSdkJs")}
+            </Link>
+            <Link
+              href="/sdks/flutter"
+              className="flex items-center gap-1.5 rounded-md border border-border px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
             >
-              {t(lang, "docsSdksSourceLink")}
-            </a>
+              {t(lang, "navSdkFlutter")}
+            </Link>
           </div>
-
-          <p className="mt-3 text-xs font-medium text-foreground">{t(lang, "docsSdksInstallGithub")}</p>
-          <CodeBlock code={SDK_FLUTTER_INSTALL_GITHUB} className="mt-1.5" />
-          <p className="mt-2 text-xs font-medium text-muted-foreground">{t(lang, "docsSdksInstallFuture")}</p>
-          <CodeBlock code={SDK_FLUTTER_INSTALL_PUBDEV} className="mt-1.5 opacity-60" />
-
-          <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksInitLabel")}</p>
-          <CodeBlock code={SDK_FLUTTER_INIT} className="mt-1.5" />
-
-          <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksCapabilityDevice")}</p>
-          <CodeBlock code={SDK_FLUTTER_DEVICE_EXAMPLE} className="mt-1.5" />
-
-          <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksCapabilityTransactions")}</p>
-          <CodeBlock code={SDK_FLUTTER_TRANSACTIONS_EXAMPLE} className="mt-1.5" />
-
-          <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksCapabilityKyc")}</p>
-          <CodeBlock code={SDK_FLUTTER_KYC_EXAMPLE} className="mt-1.5" />
-
-          <p className="mt-5 text-xs text-muted-foreground">{t(lang, "docsSdksNote")}</p>
         </Section>
 
         <Section id="transactions" icon={ArrowRightLeft} title={t(lang, "docsTransactionsTitle")} body={t(lang, "docsTransactionsBody")}>
@@ -296,6 +217,9 @@ export default async function DocumentationPage() {
         <Section id="kyc" icon={IdCard} title={t(lang, "docsKycTitle")} body={t(lang, "docsKycBody")}>
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
           <CodeBlock code={KYC_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKycPollLabel")}</p>
+          <CodeBlock code={KYC_POLL_EXAMPLE} />
+          <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsKycPollNote")}</p>
         </Section>
 
         <Section id="sanctions" icon={ShieldCheck} title={t(lang, "docsSanctionsTitle")} body={t(lang, "docsSanctionsBody")}>
@@ -330,7 +254,62 @@ export default async function DocumentationPage() {
           <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsSharedSignalOptInNote")}</p>
         </Section>
 
-        <Section id="webhooks" icon={Webhook} title={t(lang, "docsWebhooksTitle")} body={t(lang, "docsWebhooksBody")} />
+        <Section id="webhooks" icon={Webhook} title={t(lang, "docsWebhooksTitle")} body={t(lang, "docsWebhooksBody")}>
+          <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{t(lang, "docsWebhooksSyncNote")}</p>
+
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsWebhooksEventsTitle")}</p>
+          <div className="overflow-hidden rounded-md border border-border">
+            <table className="w-full text-left text-sm">
+              <thead className="bg-muted text-muted-foreground">
+                <tr>
+                  <th className="px-3 py-2 font-medium">{t(lang, "docsWebhooksColTrigger")}</th>
+                  <th className="px-3 py-2 font-medium">{t(lang, "docsWebhooksColStatusValues")}</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                <tr>
+                  <td className="px-3 py-2 text-foreground">{t(lang, "docsWebhooksKycTrigger")}</td>
+                  <td className="px-3 py-2 font-mono text-xs text-muted-foreground">
+                    Not Started, In Progress, Awaiting User, In Review, Approved, Declined, Resubmitted, Abandoned, Expired, Kyc Expired
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="mt-2 text-xs text-muted-foreground">{t(lang, "docsWebhooksOnlyKycNote")}</p>
+
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsWebhooksPayloadTitle")}</p>
+          <CodeBlock code={WEBHOOK_PAYLOAD_EXAMPLE} />
+
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsWebhooksHeadersTitle")}</p>
+          <div className="overflow-hidden rounded-md border border-border">
+            <table className="w-full text-left text-sm">
+              <tbody className="divide-y divide-border">
+                <tr>
+                  <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-foreground">X-Signature</td>
+                  <td className="px-3 py-2 text-xs text-muted-foreground">{t(lang, "docsWebhooksHeaderSignature")}</td>
+                </tr>
+                <tr>
+                  <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-foreground">X-Timestamp</td>
+                  <td className="px-3 py-2 text-xs text-muted-foreground">{t(lang, "docsWebhooksHeaderTimestamp")}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsWebhooksVerifyTitle")}</p>
+          <p className="mb-1.5 text-sm text-muted-foreground">{t(lang, "docsWebhooksVerifyBody")}</p>
+          <CodeBlock code={WEBHOOK_VERIFY_EXAMPLE} />
+
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsWebhooksReliabilityTitle")}</p>
+          <p className="text-sm leading-relaxed text-muted-foreground">{t(lang, "docsWebhooksReliabilityBody")}</p>
+
+          <p className="mt-3 text-xs text-muted-foreground">
+            <Link href="/settings/webhooks" className="text-primary hover:underline">
+              {t(lang, "navWebhooks")}
+            </Link>
+          </p>
+        </Section>
 
         <Section id="errors" icon={AlertTriangle} title={t(lang, "docsErrorsTitle")} body={t(lang, "docsErrorsBody")} />
 
