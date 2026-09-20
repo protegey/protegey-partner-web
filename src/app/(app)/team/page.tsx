@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import { getSessionUser } from "@/lib/session";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
-import { getTeamMembers, getPendingInvitations, getAssignableRoles } from "./actions";
+import { getTeamMembers, getPendingInvitations, getAssignableRoles, getPartnerRoles, getPermissionsCatalogue } from "./actions";
 import { InviteAgentDialogButton } from "./InviteAgentDialogButton";
 import { TeamMemberActions } from "./TeamMemberActions";
 import { ResendInvitationButton } from "./ResendInvitationButton";
 import { EditInvitationDialogButton } from "./EditInvitationDialogButton";
+import { RolesSection } from "./RolesSection";
 
 export const metadata: Metadata = {
   title: "Team — Protegey Partner",
@@ -15,11 +16,15 @@ export const metadata: Metadata = {
 export default async function TeamPage() {
   const user = await getSessionUser();
   const canManageTeam = user?.permissions.includes("partners.manage_team") ?? false;
+  const canViewRoles = user?.permissions.includes("roles.view") ?? false;
+  const canManageRoles = user?.permissions.includes("roles.manage") ?? false;
 
-  const [members, invitations, roles, lang] = await Promise.all([
+  const [members, invitations, roles, partnerRoles, permissionsCatalogue, lang] = await Promise.all([
     getTeamMembers(),
     canManageTeam ? getPendingInvitations() : Promise.resolve([]),
     canManageTeam ? getAssignableRoles() : Promise.resolve([]),
+    canViewRoles ? getPartnerRoles() : Promise.resolve([]),
+    canManageRoles ? getPermissionsCatalogue() : Promise.resolve([]),
     getLang(),
   ]);
 
@@ -125,6 +130,10 @@ export default async function TeamPage() {
           </tbody>
         </table>
       </div>
+
+      {canViewRoles ? (
+        <RolesSection roles={partnerRoles} permissions={permissionsCatalogue} canManageRoles={canManageRoles} />
+      ) : null}
     </div>
   );
 }

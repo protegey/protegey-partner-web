@@ -209,6 +209,10 @@ const STRINGS = {
 
   // ── Common / shared across pages ────────────────────────────────────────
   commonAllFieldsRequired: { en: "All fields are required.", fr: "Tous les champs sont obligatoires." },
+  commonForbiddenError: {
+    en: "You don't have permission to do this — ask your administrator to grant you the right role or permission.",
+    fr: "Vous n'avez pas le droit d'effectuer cette action — demandez à votre administrateur de vous accorder le rôle ou la permission nécessaire.",
+  },
   commonGenericError: { en: "Something went wrong.", fr: "Une erreur est survenue." },
   commonGenericErrorTryAgain: {
     en: "Something went wrong. Please try again.",
@@ -725,6 +729,42 @@ const STRINGS = {
   teamSendingInvitation: { en: "Sending invitation…", fr: "Envoi de l'invitation…" },
   teamSelectRoleError: { en: "Select at least one role for this agent.", fr: "Sélectionnez au moins un rôle pour cet agent." },
 
+  // ── Custom roles (team page) ─────────────────────────────────────────────
+  rolesSectionTitle: { en: "Roles", fr: "Rôles" },
+  rolesSectionSubtitle: {
+    en: "Default roles come ready to assign. Create your own to match your organization's structure — pick exactly the permissions it needs.",
+    fr: "Les rôles par défaut sont prêts à être attribués. Créez les vôtres pour coller à la structure de votre organisation — choisissez exactement les permissions dont il a besoin.",
+  },
+  rolesColName: { en: "Role", fr: "Rôle" },
+  rolesColPermissions: { en: "Permissions", fr: "Permissions" },
+  rolesColType: { en: "Type", fr: "Type" },
+  rolesTypeSystem: { en: "Default", fr: "Par défaut" },
+  rolesTypeCustom: { en: "Custom", fr: "Personnalisé" },
+  rolesSystemNotEditable: { en: "Not editable", fr: "Non modifiable" },
+  rolesCreateButton: { en: "New role", fr: "Nouveau rôle" },
+  rolesCreateDialogTitle: { en: "Create a role", fr: "Créer un rôle" },
+  rolesCreateDialogDescription: {
+    en: "Name it, describe it, and pick exactly the permissions it should grant.",
+    fr: "Nommez-le, décrivez-le, et choisissez exactement les permissions qu'il doit accorder.",
+  },
+  rolesEditButton: { en: "Edit role", fr: "Modifier le rôle" },
+  rolesEditDialogDescription: { en: "Update this role's name, description or permissions.", fr: "Modifiez le nom, la description ou les permissions de ce rôle." },
+  rolesDeleteButton: { en: "Delete", fr: "Supprimer" },
+  rolesDeleteDialogTitle: { en: "Delete this role?", fr: "Supprimer ce rôle ?" },
+  rolesDeleteDialogDescription: {
+    en: "This cannot be undone. A role that's still assigned to a team member can't be deleted — reassign them first.",
+    fr: "Cette action est irréversible. Un rôle encore attribué à un membre de l'équipe ne peut pas être supprimé — réattribuez-le d'abord.",
+  },
+  rolesDeleting: { en: "Deleting…", fr: "Suppression en cours…" },
+  rolesNamePlaceholder: { en: "Role name (e.g. Analyst)", fr: "Nom du rôle (ex. Analyste)" },
+  rolesDescriptionPlaceholder: { en: "Description (optional)", fr: "Description (facultatif)" },
+  rolesPermissionsLabel: { en: "Permissions", fr: "Permissions" },
+  rolesPermissionsSelectedSuffix: { en: "permission(s) selected", fr: "permission(s) sélectionnée(s)" },
+  rolesSelectPermissionError: { en: "Select at least one permission for this role.", fr: "Sélectionnez au moins une permission pour ce rôle." },
+  rolesSaveChangesButton: { en: "Save changes", fr: "Enregistrer les changements" },
+  rolesSaving: { en: "Saving…", fr: "Enregistrement…" },
+  rolesSavedSuccess: { en: "Saved.", fr: "Enregistré." },
+
   // ── Integration guide page ───────────────────────────────────────────────
   igPageTitle: { en: "Integration Guide", fr: "Guide d'intégration" },
   igPageSubtitle: { en: "How to use Protegey APIs for KYC verification.", fr: "Comment utiliser les API Protegey pour la vérification KYC." },
@@ -947,6 +987,13 @@ const STRINGS = {
     en: "{actor} shared the case \"{title}\" with the fraud signal network ({category}).",
     fr: "{actor} a partagé le dossier « {title} » avec le réseau de signaux de fraude ({category}).",
   },
+  eventPasswordChanged: { en: "{actor} changed their password.", fr: "{actor} a changé son mot de passe." },
+  eventLogoChanged: { en: "{actor} changed the organization logo.", fr: "{actor} a changé le logo de l'organisation." },
+  eventLogoRemoved: { en: "{actor} removed the organization logo.", fr: "{actor} a supprimé le logo de l'organisation." },
+  eventAgentActivated: { en: "{actor} unblocked {agentEmail}.", fr: "{actor} a débloqué {agentEmail}." },
+  eventAgentDeactivated: { en: "{actor} blocked {agentEmail}.", fr: "{actor} a bloqué {agentEmail}." },
+  eventInvitationUpdated: { en: "{actor} edited the pending invitation for {agentEmail}.", fr: "{actor} a modifié l'invitation en attente de {agentEmail}." },
+  eventPasswordResetSent: { en: "{actor} sent a password reset email to {agentEmail}.", fr: "{actor} a envoyé un e-mail de réinitialisation du mot de passe à {agentEmail}." },
   eventUnknown: { en: "Something happened in your account.", fr: "Quelque chose s'est produit sur votre compte." },
 
   // ── Pan-Guard pages (device/behavioral signals, risk profiles) ──────────
@@ -1090,14 +1137,14 @@ const STRINGS = {
   sharedSignalsCardTitle: { en: "Shared fraud signal network", fr: "Réseau de signaux de fraude partagés" },
   sharedSignalsToggleLabel: { en: "Participate in the shared network", fr: "Participer au réseau partagé" },
   sharedSignalsToggleHint: {
-    en: "A two-way network: when you flag a closed case, every participating partner benefits from knowing about it — and you benefit the same way from what they flag. Never your client's information (no name, no notes, no transactions, nothing about your case) — only a one-way hash of a phone number or email, plus a category, ever leaves your account. Off by default.",
-    fr: "Un réseau à double sens : quand vous signalez un dossier clos, chaque partenaire participant en profite — et vous profitez de la même façon de ce qu'ils signalent. Jamais les informations de votre client (ni nom, ni notes, ni transactions, rien de votre dossier) — seul un hash à sens unique d'un numéro de téléphone ou d'un email, plus une catégorie, sort de votre compte. Désactivé par défaut.",
+    en: "A two-way network: when you flag a closed case, every participating partner benefits from knowing about it — and you benefit the same way from what they flag. Never your client's information (no name, no notes, no transactions, nothing about your case) — only a one-way hash of a phone number or email, plus a category, ever leaves your account. On by default — you can turn it off anytime, but doing so also switches off your own access to what other partners share: you can't benefit from the network without contributing to it.",
+    fr: "Un réseau à double sens : quand vous signalez un dossier clos, chaque partenaire participant en profite — et vous profitez de la même façon de ce qu'ils signalent. Jamais les informations de votre client (ni nom, ni notes, ni transactions, rien de votre dossier) — seul un hash à sens unique d'un numéro de téléphone ou d'un email, plus une catégorie, sort de votre compte. Activé par défaut — vous pouvez le désactiver à tout moment, mais cela coupe aussi votre propre accès à ce que les autres partenaires partagent : on ne peut pas profiter du réseau sans y contribuer.",
   },
   caseShareSignalButton: { en: "Share with network", fr: "Partager avec le réseau" },
   caseShareSignalDone: { en: "Shared", fr: "Partagé" },
   caseShareSignalDisabledHint: {
-    en: "Enable the shared fraud signal network in Organization Profile to share this case.",
-    fr: "Activez le réseau de signaux de fraude partagés dans le Profil de l'organisation pour partager ce dossier.",
+    en: "You've turned off the shared fraud signal network, so you can't share this case — and you're also not benefiting from what other partners share. Re-enable it in Organization Profile.",
+    fr: "Vous avez désactivé le réseau de signaux de fraude partagés, vous ne pouvez donc pas partager ce dossier — et vous ne profitez pas non plus de ce que les autres partenaires partagent. Réactivez-le dans le Profil de l'organisation.",
   },
   caseShareSignalDialogTitle: { en: "Share this signal with the network", fr: "Partager ce signal avec le réseau" },
   caseShareSignalDialogHint: {
@@ -1256,8 +1303,8 @@ const STRINGS = {
     fr: "Vérifiez le numéro de téléphone ou l'email d'un client par rapport aux signaux de fraude partagés par d'autres partenaires participants — par exemple à l'onboarding — et profitez de ce que tout le réseau a signalé, comme les autres profitent de ce que vous signalez. La valeur est hachée à l'arrivée et jamais stockée ou journalisée en clair ; une correspondance ne révèle jamais quel partenaire l'a signalé ni aucune information sur son client, seulement une catégorie et depuis combien de temps.",
   },
   docsSharedSignalOptInNote: {
-    en: "Both checking and reporting require your organization to opt in first, in Organization Profile — off by default.",
-    fr: "Vérifier comme signaler nécessitent d'abord d'activer l'option dans le Profil de l'organisation — désactivé par défaut.",
+    en: "Both checking and reporting require the shared fraud signal network to be enabled in Organization Profile — on by default. Turning it off disables both at once: an organization that doesn't report into the network can't query it either.",
+    fr: "Vérifier comme signaler nécessitent que le réseau de signaux de fraude partagés soit activé dans le Profil de l'organisation — activé par défaut. Le désactiver coupe les deux à la fois : une organisation qui ne signale pas dans le réseau ne peut pas non plus l'interroger.",
   },
   // ── First-login onboarding tour ──────────────────────────────────────────
   tourWelcomeTitle: { en: "Welcome to Protegey", fr: "Bienvenue sur Protegey" },

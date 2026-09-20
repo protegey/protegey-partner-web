@@ -22,6 +22,24 @@ export interface AssignableRole {
   displayName: string;
 }
 
+export interface PermissionOption {
+  id: string;
+  name: string;
+  displayName: string;
+  description: string | null;
+  group: string;
+}
+
+export interface PartnerRole {
+  id: string;
+  name: string;
+  displayName: string;
+  description: string | null;
+  partnerId: string | null;
+  isSystem: boolean;
+  permissions: { id: string; name: string; displayName: string }[];
+}
+
 export interface PendingInvitation {
   id: string;
   email: string;
@@ -52,6 +70,82 @@ export async function getPendingInvitations(): Promise<PendingInvitation[]> {
 
 export async function getAssignableRoles(): Promise<AssignableRole[]> {
   return apiFetch<AssignableRole[]>("/roles?scope=partner");
+}
+
+export async function getPartnerRoles(): Promise<PartnerRole[]> {
+  return apiFetch<PartnerRole[]>("/roles?scope=partner");
+}
+
+export async function getPermissionsCatalogue(): Promise<PermissionOption[]> {
+  return apiFetch<PermissionOption[]>("/partners/me/roles/permissions");
+}
+
+export interface RoleFormState {
+  error?: string;
+  success?: boolean;
+}
+
+export async function createRoleAction(_prevState: RoleFormState, formData: FormData): Promise<RoleFormState> {
+  const displayName = String(formData.get("displayName") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const permissionIds = formData.getAll("permissionIds").map(String);
+  const lang = await getLang();
+
+  if (!displayName) {
+    return { error: t(lang, "commonAllFieldsRequired") };
+  }
+  if (permissionIds.length === 0) {
+    return { error: t(lang, "rolesSelectPermissionError") };
+  }
+
+  try {
+    await apiFetch("/partners/me/roles", {
+      method: "POST",
+      body: { displayName, description: description || undefined, permissionIds },
+    });
+  } catch (error) {
+    return { error: error instanceof ApiError ? error.message : t(lang, "commonGenericErrorTryAgain") };
+  }
+  revalidatePath("/team");
+  return { success: true };
+}
+
+/** Bound with the role id (see updateInvitationAction for the same pattern) so it fits useActionState's (prevState, formData) shape. */
+export async function updateRoleAction(roleId: string, _prevState: RoleFormState, formData: FormData): Promise<RoleFormState> {
+  const displayName = String(formData.get("displayName") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim();
+  const permissionIds = formData.getAll("permissionIds").map(String);
+  const lang = await getLang();
+
+  if (!displayName) {
+    return { error: t(lang, "commonAllFieldsRequired") };
+  }
+  if (permissionIds.length === 0) {
+    return { error: t(lang, "rolesSelectPermissionError") };
+  }
+
+  try {
+    await apiFetch(`/partners/me/roles/${roleId}`, {
+      method: "PATCH",
+      body: { displayName, description: description || null, permissionIds },
+    });
+  } catch (error) {
+    return { error: error instanceof ApiError ? error.message : t(lang, "commonGenericErrorTryAgain") };
+  }
+  revalidatePath("/team");
+  return { success: true };
+}
+
+export async function deleteRoleAction(roleId: string): Promise<ActionResult | AuthExpired> {
+  const lang = await getLang();
+  try {
+    await apiFetch(`/partners/me/roles/${roleId}`, { method: "DELETE" });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return { authExpired: true };
+    return { error: error instanceof ApiError ? error.message : t(lang, "commonGenericError") };
+  }
+  revalidatePath("/team");
+  return { success: true };
 }
 
 export async function resendAgentInvitationAction(invitationId: string): Promise<ActionResult | AuthExpired> {

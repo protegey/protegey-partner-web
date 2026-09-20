@@ -1,5 +1,7 @@
 import "server-only";
 import { getAccessToken } from "./session";
+import { getLang } from "./i18n/lang";
+import { t } from "./i18n/strings";
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL ?? "http://localhost:3000";
 
@@ -10,6 +12,21 @@ export class ApiError extends Error {
   ) {
     super(message);
   }
+}
+
+/**
+ * PermissionsGuard on the backend throws the same generic "Insufficient permissions" message for
+ * every role/permission check across the whole API — replaced here, in one place, with a clear,
+ * translated, actionable message so every action file gets it automatically. A 403 thrown for a
+ * different reason (e.g. "This account is not associated with a partner organization") already
+ * carries its own specific message and is left untouched.
+ */
+async function resolveErrorMessage(status: number, backendMessage: string): Promise<string> {
+  if (status === 403 && backendMessage === "Insufficient permissions") {
+    const lang = await getLang();
+    return t(lang, "commonForbiddenError");
+  }
+  return backendMessage;
 }
 
 export interface RequestOptions {
@@ -39,8 +56,9 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const message = (data && (data.message as string)) || response.statusText;
-    throw new ApiError(response.status, Array.isArray(message) ? message.join(", ") : message);
+    const rawMessage = (data && (data.message as string)) || response.statusText;
+    const message = Array.isArray(rawMessage) ? rawMessage.join(", ") : rawMessage;
+    throw new ApiError(response.status, await resolveErrorMessage(response.status, message));
   }
 
   return data as T;
@@ -100,8 +118,9 @@ export async function apiUpload<T>(path: string, formData: FormData, options: { 
   const data = await response.json().catch(() => null);
 
   if (!response.ok) {
-    const message = (data && (data.message as string)) || response.statusText;
-    throw new ApiError(response.status, Array.isArray(message) ? message.join(", ") : message);
+    const rawMessage = (data && (data.message as string)) || response.statusText;
+    const message = Array.isArray(rawMessage) ? rawMessage.join(", ") : rawMessage;
+    throw new ApiError(response.status, await resolveErrorMessage(response.status, message));
   }
 
   return data as T;

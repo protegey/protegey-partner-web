@@ -112,6 +112,20 @@ export function describeEvent(lang: Lang, event: NotificationEvent): string {
       const categoryLabel = key ? t(lang, key) : str("category");
       return interpolate(t(lang, "eventSharedSignalReported"), { actor, title: str("title"), category: categoryLabel });
     }
+    case "settings.password_changed":
+      return interpolate(t(lang, "eventPasswordChanged"), { actor });
+    case "settings.logo_changed":
+      return interpolate(t(lang, "eventLogoChanged"), { actor });
+    case "settings.logo_removed":
+      return interpolate(t(lang, "eventLogoRemoved"), { actor });
+    case "team.agent_activated":
+      return interpolate(t(lang, "eventAgentActivated"), { actor, agentEmail: str("agentEmail") });
+    case "team.agent_deactivated":
+      return interpolate(t(lang, "eventAgentDeactivated"), { actor, agentEmail: str("agentEmail") });
+    case "team.invitation_updated":
+      return interpolate(t(lang, "eventInvitationUpdated"), { actor, agentEmail: str("agentEmail") });
+    case "team.password_reset_sent":
+      return interpolate(t(lang, "eventPasswordResetSent"), { actor, agentEmail: str("agentEmail") });
     default:
       return t(lang, "eventUnknown");
   }
