@@ -3,6 +3,7 @@ import Link from "next/link";
 import { KeyRound, ArrowRightLeft, IdCard, ShieldCheck, Webhook, AlertTriangle, Smartphone, Activity, Share2, Package } from "lucide-react";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
+import { CodeBlock } from "@/components/CodeBlock";
 
 export const metadata: Metadata = {
   title: "Documentation — Protegey Partner",
@@ -64,26 +65,23 @@ const DEVICE_EVENT_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/
 # Response
 { "recorded": true, "action": "allow", "riskScore": 5 }`;
 
-const SDK_JS_INSTALL_GITHUB = `# Not yet on npm — install straight from GitHub for now
-npm install git+https://github.com/protegey/protegey_js_sdk.git`;
+const SDK_JS_INSTALL_GITHUB = `npm install git+https://github.com/protegey/protegey_js_sdk.git`;
+const SDK_JS_INSTALL_NPM = `npm install @protegey/sdk`;
 
-const SDK_JS_INSTALL_NPM = `# Once published:
-npm install @protegey/sdk`;
-
-const SDK_JS_EXAMPLE = `// Works in Node.js, the browser, React, Angular, and React Native — one package.
+const SDK_JS_INIT = `// Works in Node.js, the browser, React, Angular, and React Native — one package.
 import { Protegey } from "@protegey/sdk";
 
 // baseUrl has no default on purpose — confirm the current value with Protegey, it can
 // change independently of this package (e.g. between staging and production).
-const protegey = new Protegey({ apiKey: "YOUR_API_KEY", baseUrl: "https://api.protegey.com" });
+const protegey = new Protegey({ apiKey: "YOUR_API_KEY", baseUrl: "https://api.protegey.com" });`;
 
-// Device intelligence — call on login/session start
+const SDK_JS_DEVICE_EXAMPLE = `// Call on login/session start — in a browser this computes a real device fingerprint automatically.
 const { visitorId, action, riskScore } = await protegey.device.identify({
   externalCustomerId: "cust-9981",
   phoneNumber: "+22890000001", // optional — you already have it, we never read it off the device
-});
+});`;
 
-// Transactions — no need to hand-build the curl call yourself
+const SDK_JS_TRANSACTIONS_EXAMPLE = `// No need to hand-build the curl call yourself
 const result = await protegey.transactions.report({
   externalTransactionId: "tx-00234",
   externalCustomerId: "cust-9981",
@@ -92,29 +90,35 @@ const result = await protegey.transactions.report({
   currency: "XOF",
   transactionType: "cashout",
   isCash: true,
+  visitorId, // fold the device signal above into this transaction's decision
   occurredAt: new Date().toISOString(),
 });`;
 
-const SDK_FLUTTER_INSTALL_GITHUB = `# pubspec.yaml — not yet on pub.dev, install straight from GitHub for now
+const SDK_JS_KYC_EXAMPLE = `// Starts the session and hands back the link — no curl needed
+const { sessionId, url } = await protegey.kyc.startSession({
+  externalUserId: "cust-9981",
+});`;
+
+const SDK_FLUTTER_INSTALL_GITHUB = `# pubspec.yaml
 dependencies:
   protegey_sdk:
     git:
       url: https://github.com/protegey/protegey_flutter_sdk.git
       ref: main`;
 
-const SDK_FLUTTER_INSTALL_PUBDEV = `# Once published:
-flutter pub add protegey_sdk`;
+const SDK_FLUTTER_INSTALL_PUBDEV = `flutter pub add protegey_sdk`;
 
-const SDK_FLUTTER_EXAMPLE = `// baseUrl has no default on purpose — confirm the current value with Protegey, it can
+const SDK_FLUTTER_INIT = `// baseUrl has no default on purpose — confirm the current value with Protegey, it can
 // change independently of this package (e.g. between staging and production).
-final protegey = Protegey(apiKey: 'YOUR_API_KEY', baseUrl: 'https://api.protegey.com');
+final protegey = Protegey(apiKey: 'YOUR_API_KEY', baseUrl: 'https://api.protegey.com');`;
 
+const SDK_FLUTTER_DEVICE_EXAMPLE = `// Computes a real, stable per-device fingerprint on Android/iOS via device_info_plus.
 final identify = await protegey.device.identify(
   externalCustomerId: 'cust-9981',
   phoneNumber: '+22890000001', // optional
-);
+);`;
 
-final result = await protegey.transactions.report(TransactionInput(
+const SDK_FLUTTER_TRANSACTIONS_EXAMPLE = `final result = await protegey.transactions.report(TransactionInput(
   externalTransactionId: 'tx-00234',
   externalCustomerId: 'cust-9981',
   direction: TransactionDirection.debit,
@@ -122,8 +126,11 @@ final result = await protegey.transactions.report(TransactionInput(
   currency: 'XOF',
   transactionType: 'cashout',
   isCash: true,
-  occurredAt: DateTime.now().toIso8601String(),
+  visitorId: identify.visitorId, // fold the device signal above into this transaction's decision
 ));`;
+
+const SDK_FLUTTER_KYC_EXAMPLE = `// Starts the session and hands back the link — no manual API call needed
+final session = await protegey.kyc.startSession(externalUserId: 'cust-9981');`;
 
 const BEHAVIORAL_EVENT_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/behavioral-events \\
   -H "Content-Type: application/json" \\
@@ -217,7 +224,8 @@ export default async function DocumentationPage() {
         <Section id="auth" icon={KeyRound} title={t(lang, "docsAuthTitle")} body={t(lang, "docsAuthBody")} />
 
         <Section id="sdks" icon={Package} title={t(lang, "docsSdksTitle")} body={t(lang, "docsSdksBody")}>
-          <div className="mt-4 flex items-center justify-between gap-2">
+          {/* JavaScript / TypeScript */}
+          <div className="mt-5 flex items-center justify-between gap-2">
             <p className="text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksJsLabel")}</p>
             <a
               href="https://github.com/protegey/protegey_js_sdk"
@@ -228,18 +236,26 @@ export default async function DocumentationPage() {
               {t(lang, "docsSdksSourceLink")}
             </a>
           </div>
-          <p className="mb-1.5 text-xs text-muted-foreground">{t(lang, "docsSdksNotPublishedYet")}</p>
-          <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
-            <code>{SDK_JS_INSTALL_GITHUB}</code>
-          </pre>
-          <pre className="mt-2 overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-muted-foreground">
-            <code>{SDK_JS_INSTALL_NPM}</code>
-          </pre>
-          <pre className="mt-2 overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
-            <code>{SDK_JS_EXAMPLE}</code>
-          </pre>
 
-          <div className="mt-6 flex items-center justify-between gap-2">
+          <p className="mt-3 text-xs font-medium text-foreground">{t(lang, "docsSdksInstallGithub")}</p>
+          <CodeBlock code={SDK_JS_INSTALL_GITHUB} className="mt-1.5" />
+          <p className="mt-2 text-xs font-medium text-muted-foreground">{t(lang, "docsSdksInstallFuture")}</p>
+          <CodeBlock code={SDK_JS_INSTALL_NPM} className="mt-1.5 opacity-60" />
+
+          <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksInitLabel")}</p>
+          <CodeBlock code={SDK_JS_INIT} className="mt-1.5" />
+
+          <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksCapabilityDevice")}</p>
+          <CodeBlock code={SDK_JS_DEVICE_EXAMPLE} className="mt-1.5" />
+
+          <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksCapabilityTransactions")}</p>
+          <CodeBlock code={SDK_JS_TRANSACTIONS_EXAMPLE} className="mt-1.5" />
+
+          <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksCapabilityKyc")}</p>
+          <CodeBlock code={SDK_JS_KYC_EXAMPLE} className="mt-1.5" />
+
+          {/* Flutter */}
+          <div className="mt-8 flex items-center justify-between gap-2 border-t border-border pt-6">
             <p className="text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksFlutterLabel")}</p>
             <a
               href="https://github.com/protegey/protegey_flutter_sdk"
@@ -250,47 +266,46 @@ export default async function DocumentationPage() {
               {t(lang, "docsSdksSourceLink")}
             </a>
           </div>
-          <p className="mb-1.5 text-xs text-muted-foreground">{t(lang, "docsSdksNotPublishedYet")}</p>
-          <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
-            <code>{SDK_FLUTTER_INSTALL_GITHUB}</code>
-          </pre>
-          <pre className="mt-2 overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-muted-foreground">
-            <code>{SDK_FLUTTER_INSTALL_PUBDEV}</code>
-          </pre>
-          <pre className="mt-2 overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
-            <code>{SDK_FLUTTER_EXAMPLE}</code>
-          </pre>
 
-          <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsSdksNote")}</p>
+          <p className="mt-3 text-xs font-medium text-foreground">{t(lang, "docsSdksInstallGithub")}</p>
+          <CodeBlock code={SDK_FLUTTER_INSTALL_GITHUB} className="mt-1.5" />
+          <p className="mt-2 text-xs font-medium text-muted-foreground">{t(lang, "docsSdksInstallFuture")}</p>
+          <CodeBlock code={SDK_FLUTTER_INSTALL_PUBDEV} className="mt-1.5 opacity-60" />
+
+          <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksInitLabel")}</p>
+          <CodeBlock code={SDK_FLUTTER_INIT} className="mt-1.5" />
+
+          <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksCapabilityDevice")}</p>
+          <CodeBlock code={SDK_FLUTTER_DEVICE_EXAMPLE} className="mt-1.5" />
+
+          <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksCapabilityTransactions")}</p>
+          <CodeBlock code={SDK_FLUTTER_TRANSACTIONS_EXAMPLE} className="mt-1.5" />
+
+          <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksCapabilityKyc")}</p>
+          <CodeBlock code={SDK_FLUTTER_KYC_EXAMPLE} className="mt-1.5" />
+
+          <p className="mt-5 text-xs text-muted-foreground">{t(lang, "docsSdksNote")}</p>
         </Section>
 
         <Section id="transactions" icon={ArrowRightLeft} title={t(lang, "docsTransactionsTitle")} body={t(lang, "docsTransactionsBody")}>
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
-          <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
-            <code>{TRANSACTION_EXAMPLE}</code>
-          </pre>
+          <CodeBlock code={TRANSACTION_EXAMPLE} />
           <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsSeeAlsoRules")}</p>
         </Section>
 
         <Section id="kyc" icon={IdCard} title={t(lang, "docsKycTitle")} body={t(lang, "docsKycBody")}>
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
-          <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
-            <code>{KYC_EXAMPLE}</code>
-          </pre>
+          <CodeBlock code={KYC_EXAMPLE} />
         </Section>
 
         <Section id="sanctions" icon={ShieldCheck} title={t(lang, "docsSanctionsTitle")} body={t(lang, "docsSanctionsBody")}>
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
-          <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
-            <code>{SANCTIONS_EXAMPLE}</code>
-          </pre>
+          <CodeBlock code={SANCTIONS_EXAMPLE} />
         </Section>
 
         <Section id="device-events" icon={Smartphone} title={t(lang, "docsDeviceEventsTitle")} body={t(lang, "docsDeviceEventsBody")}>
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
-          <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
-            <code>{DEVICE_EVENT_EXAMPLE}</code>
-          </pre>
+          <CodeBlock code={DEVICE_EVENT_EXAMPLE} />
           <p className="mt-3 text-xs text-muted-foreground">
             <Link href="/pan-guard/device-signals" className="text-primary hover:underline">
               {t(lang, "docsSeeAlsoDeviceSignals")}
@@ -300,9 +315,7 @@ export default async function DocumentationPage() {
 
         <Section id="behavioral-events" icon={Activity} title={t(lang, "docsBehavioralEventsTitle")} body={t(lang, "docsBehavioralEventsBody")}>
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
-          <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
-            <code>{BEHAVIORAL_EVENT_EXAMPLE}</code>
-          </pre>
+          <CodeBlock code={BEHAVIORAL_EVENT_EXAMPLE} />
           <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsBehavioralEventsStepUpNote")}</p>
           <p className="mt-3 text-xs text-muted-foreground">
             <Link href="/pan-guard/behavioral-signals" className="text-primary hover:underline">
@@ -313,9 +326,7 @@ export default async function DocumentationPage() {
 
         <Section id="shared-signal" icon={Share2} title={t(lang, "docsSharedSignalTitle")} body={t(lang, "docsSharedSignalBody")}>
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
-          <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
-            <code>{SHARED_SIGNAL_EXAMPLE}</code>
-          </pre>
+          <CodeBlock code={SHARED_SIGNAL_EXAMPLE} />
           <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsSharedSignalOptInNote")}</p>
         </Section>
 
