@@ -391,6 +391,9 @@ const STRINGS = {
 
   // ── Shared loading spinner ───────────────────────────────────────────────
   commonLoading: { en: "Loading...", fr: "Chargement..." },
+  networkOffline: { en: "You're offline — check your connection.", fr: "Vous êtes hors ligne — vérifiez votre connexion." },
+  networkRestored: { en: "Connection restored.", fr: "Connexion rétablie." },
+  networkSlow: { en: "Your connection seems slow right now — pages may take longer to load.", fr: "Votre connexion semble lente en ce moment — les pages peuvent mettre plus de temps à charger." },
   commonCancel: { en: "Cancel", fr: "Annuler" },
 
   // ── Shared components: dialogs, drawer, role select, sign out, session guard ──
