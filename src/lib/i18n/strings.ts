@@ -1170,6 +1170,45 @@ const STRINGS = {
   sharedSignalCategoryMoneyLaundering: { en: "Money laundering", fr: "Blanchiment de capitaux" },
   sharedSignalCategoryOther: { en: "Other", fr: "Autre" },
 
+  navSharedSignalNetwork: { en: "Shared Signal Network", fr: "Réseau de signaux partagés" },
+  sharedSignalNetworkPageTitle: { en: "Shared signal network", fr: "Réseau de signaux partagés" },
+  sharedSignalNetworkPageSubtitle: {
+    en: "Look up an identity against every partner's shared reports, and browse what your own organization has contributed.",
+    fr: "Vérifiez une identité par rapport aux signalements de tous les partenaires, et parcourez ce que votre organisation a contribué.",
+  },
+  sharedSignalCheckTitle: { en: "Check an identity", fr: "Vérifier une identité" },
+  sharedSignalCheckHint: {
+    en: "Enter a phone number, email, or device to see whether another partner has flagged it — nothing you type here is stored.",
+    fr: "Saisissez un numéro de téléphone, un email ou un appareil pour voir si un autre partenaire l'a signalé — rien de ce que vous saisissez ici n'est stocké.",
+  },
+  sharedSignalCheckButton: { en: "Check", fr: "Vérifier" },
+  sharedSignalCheckFlagged: { en: "Flagged by another partner", fr: "Signalé par un autre partenaire" },
+  sharedSignalCheckClean: { en: "No match found in the network", fr: "Aucune correspondance trouvée dans le réseau" },
+  sharedSignalCheckReportedDaysAgo: { en: "reported {n} day(s) ago", fr: "signalé il y a {n} jour(s)" },
+  sharedSignalReportsTitle: { en: "Signals reported by your organization", fr: "Signaux signalés par votre organisation" },
+  sharedSignalReportsHint: {
+    en: "Every signal your organization has shared with the network, most recent first.",
+    fr: "Chaque signal que votre organisation a partagé avec le réseau, du plus récent au plus ancien.",
+  },
+  sharedSignalReportsEmpty: {
+    en: "You haven't shared any signal with the network yet — do it from a closed case.",
+    fr: "Vous n'avez encore partagé aucun signal avec le réseau — faites-le depuis un dossier clos.",
+  },
+  sharedSignalFilterCategoryLabel: { en: "Category", fr: "Catégorie" },
+  sharedSignalColIdentityType: { en: "Identity type", fr: "Type d'identité" },
+  sharedSignalColCategory: { en: "Category", fr: "Catégorie" },
+  sharedSignalIdentityTypePhone: { en: "Phone number", fr: "Numéro de téléphone" },
+  sharedSignalIdentityTypeEmail: { en: "Email", fr: "Email" },
+  sharedSignalIdentityTypeDevice: { en: "Device", fr: "Appareil" },
+  sharedSignalViewDetail: { en: "View", fr: "Voir" },
+  sharedSignalBackToList: { en: "← Back to shared signal network", fr: "← Retour au réseau de signaux partagés" },
+  sharedSignalReportedOn: { en: "Reported on", fr: "Signalé le" },
+  sharedSignalSourceCaseTitle: { en: "Source case", fr: "Dossier source" },
+  sharedSignalSourceCaseHint: {
+    en: "The closed case this signal was shared from — only visible to you, never to other partners.",
+    fr: "Le dossier clos depuis lequel ce signal a été partagé — visible uniquement par vous, jamais par les autres partenaires.",
+  },
+
   // ── Notifications page ───────────────────────────────────────────────────
   notificationsPageTitle: { en: "Notifications", fr: "Notifications" },
   notificationsPageSubtitle: {
