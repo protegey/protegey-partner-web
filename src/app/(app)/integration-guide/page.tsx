@@ -44,13 +44,18 @@ export default async function IntegrationGuidePage() {
           <p className="text-sm font-semibold text-foreground">{t(lang, "igStep1Title")}</p>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">{t(lang, "igStep1Body")}</p>
-        <Link
-          href="/settings/api-keys"
-          className="mt-3 inline-flex items-center gap-1.5 rounded-md bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
-        >
-          <KeyRound className="size-4" />
-          {t(lang, "igStep1Button")}
-        </Link>
+        <div className="mt-3 flex flex-wrap items-center gap-3">
+          <Link
+            href="/settings/api-keys"
+            className="inline-flex items-center gap-1.5 rounded-md bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+          >
+            <KeyRound className="size-4" />
+            {t(lang, "igStep1Button")}
+          </Link>
+          <Link href="/documentation#sdks" className="text-sm font-medium text-primary hover:underline">
+            {t(lang, "igStep1SdkLink")}
+          </Link>
+        </div>
       </div>
 
       <div>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KeyRound, ArrowRightLeft, IdCard, ShieldCheck, Webhook, AlertTriangle, Smartphone, Activity, Share2 } from "lucide-react";
+import { KeyRound, ArrowRightLeft, IdCard, ShieldCheck, Webhook, AlertTriangle, Smartphone, Activity, Share2, Package } from "lucide-react";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 
@@ -54,10 +54,61 @@ const SANCTIONS_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/san
 const DEVICE_EVENT_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/device-events \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: YOUR_API_KEY" \\
-  -d '{ "eventId": "evt_from_your_device_signal_provider", "externalCustomerId": "cust-9981" }'
+  -d '{
+    "eventId": "your-own-idempotency-key",
+    "externalCustomerId": "cust-9981",
+    "visitorId": "computed-by-the-sdk",
+    "deviceAttributes": { "platform": "Web", "isRooted": false }
+  }'
 
 # Response
 { "recorded": true, "action": "allow", "riskScore": 5 }`;
+
+const SDK_JS_EXAMPLE = `npm install @protegey/sdk
+// or: yarn add @protegey/sdk / pnpm add @protegey/sdk
+// Works in Node.js, the browser, React, Angular, and React Native — one package.
+
+import { Protegey } from "@protegey/sdk";
+
+const protegey = new Protegey({ apiKey: "YOUR_API_KEY" });
+
+// Device intelligence — call on login/session start
+const { visitorId, action, riskScore } = await protegey.device.identify({
+  externalCustomerId: "cust-9981",
+  phoneNumber: "+22890000001", // optional — you already have it, we never read it off the device
+});
+
+// Transactions — no need to hand-build the curl call yourself
+const result = await protegey.transactions.report({
+  externalTransactionId: "tx-00234",
+  externalCustomerId: "cust-9981",
+  direction: "DEBIT",
+  amount: 250000,
+  currency: "XOF",
+  transactionType: "cashout",
+  isCash: true,
+  occurredAt: new Date().toISOString(),
+});`;
+
+const SDK_FLUTTER_EXAMPLE = `flutter pub add protegey_sdk
+
+final protegey = Protegey(apiKey: 'YOUR_API_KEY');
+
+final identify = await protegey.device.identify(
+  externalCustomerId: 'cust-9981',
+  phoneNumber: '+22890000001', // optional
+);
+
+final result = await protegey.transactions.report(TransactionInput(
+  externalTransactionId: 'tx-00234',
+  externalCustomerId: 'cust-9981',
+  direction: TransactionDirection.debit,
+  amount: 250000,
+  currency: 'XOF',
+  transactionType: 'cashout',
+  isCash: true,
+  occurredAt: DateTime.now().toIso8601String(),
+));`;
 
 const BEHAVIORAL_EVENT_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/behavioral-events \\
   -H "Content-Type: application/json" \\
@@ -80,8 +131,8 @@ const BEHAVIORAL_EVENT_EXAMPLE = `curl -X POST https://api.protegey.com/partner-
 const SHARED_SIGNAL_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/shared-signal/check \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: YOUR_API_KEY" \\
-  -d '{ "phoneNumber": "+22890123456", "email": "jane@example.com", "externalCustomerId": "cust-9981" }'
-  # phoneNumber and email are both optional — send whichever you have, or both
+  -d '{ "phoneNumber": "+22890123456", "email": "jane@example.com", "deviceFingerprint": "visitor-id-from-the-sdk", "externalCustomerId": "cust-9981" }'
+  # phoneNumber, email and deviceFingerprint are all optional — send whichever you have, any combination
 
 # Response — no match
 { "flagged": false, "category": null, "reportedDaysAgo": null }
@@ -121,6 +172,7 @@ export default async function DocumentationPage() {
 
   const nav = [
     { id: "auth", label: t(lang, "docsNavAuth") },
+    { id: "sdks", label: t(lang, "docsNavSdks") },
     { id: "transactions", label: t(lang, "docsNavTransactions") },
     { id: "kyc", label: t(lang, "docsNavKyc") },
     { id: "sanctions", label: t(lang, "docsNavSanctions") },
@@ -148,6 +200,18 @@ export default async function DocumentationPage() {
         </div>
 
         <Section id="auth" icon={KeyRound} title={t(lang, "docsAuthTitle")} body={t(lang, "docsAuthBody")} />
+
+        <Section id="sdks" icon={Package} title={t(lang, "docsSdksTitle")} body={t(lang, "docsSdksBody")}>
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksJsLabel")}</p>
+          <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
+            <code>{SDK_JS_EXAMPLE}</code>
+          </pre>
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksFlutterLabel")}</p>
+          <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
+            <code>{SDK_FLUTTER_EXAMPLE}</code>
+          </pre>
+          <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsSdksNote")}</p>
+        </Section>
 
         <Section id="transactions" icon={ArrowRightLeft} title={t(lang, "docsTransactionsTitle")} body={t(lang, "docsTransactionsBody")}>
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>

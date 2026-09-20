@@ -1004,8 +1004,8 @@ const STRINGS = {
 
   deviceSignalsPageTitle: { en: "Device Signals", fr: "Signaux d'appareil" },
   deviceSignalsPageSubtitle: {
-    en: "Device/session verdicts from Keverd — both linked to a transaction and reported standalone.",
-    fr: "Verdicts d'appareil/session de Keverd — rattachés à une transaction ou signalés de façon autonome.",
+    en: "Device/session risk verdicts — both linked to a transaction and reported standalone.",
+    fr: "Verdicts de risque d'appareil/session — rattachés à une transaction ou signalés de façon autonome.",
   },
   deviceSignalsFilterActionLabel: { en: "Action", fr: "Action" },
   deviceSignalsEmpty: { en: "No device signals yet.", fr: "Aucun signal d'appareil pour l'instant." },
@@ -1153,9 +1153,10 @@ const STRINGS = {
   },
   caseShareSignalPhonePlaceholder: { en: "Phone number", fr: "Numéro de téléphone" },
   caseShareSignalEmailPlaceholder: { en: "Email (optional)", fr: "Email (optionnel)" },
+  caseShareSignalDevicePlaceholder: { en: "Device (optional)", fr: "Appareil (optionnel)" },
   caseShareSignalAtLeastOneHint: {
-    en: "Provide at least a phone number or an email.",
-    fr: "Fournissez au moins un numéro de téléphone ou un email.",
+    en: "Provide at least a phone number, an email, or a device.",
+    fr: "Fournissez au moins un numéro de téléphone, un email, ou un appareil.",
   },
   caseShareSignalConfirm: { en: "Share signal", fr: "Partager le signal" },
   sharedSignalCategoryConfirmedFraud: { en: "Confirmed fraud", fr: "Fraude confirmée" },
@@ -1261,6 +1262,7 @@ const STRINGS = {
     fr: "Tout ce dont vous avez besoin pour intégrer Protegey à vos propres systèmes.",
   },
   docsNavAuth: { en: "Authentication", fr: "Authentification" },
+  docsNavSdks: { en: "SDKs", fr: "SDKs" },
   docsNavTransactions: { en: "Sending transactions", fr: "Envoyer des transactions" },
   docsNavKyc: { en: "Identity verification (KYC)", fr: "Vérification d'identité (KYC)" },
   docsNavWebhooks: { en: "Webhooks", fr: "Webhooks" },
@@ -1273,10 +1275,21 @@ const STRINGS = {
     en: "Every server-to-server request is authenticated with an API key, sent as the x-api-key header. Generate or rotate your key from Settings — the raw value is only ever shown once, right after you generate it, so store it somewhere safe immediately.",
     fr: "Chaque requête serveur à serveur est authentifiée avec une clé API, envoyée dans l'en-tête x-api-key. Générez ou renouvelez votre clé depuis les Paramètres — la valeur brute n'est affichée qu'une seule fois, juste après sa génération, alors conservez-la immédiatement dans un endroit sûr.",
   },
+  docsSdksTitle: { en: "Protegey SDKs — the recommended way to integrate", fr: "SDKs Protegey — la méthode d'intégration recommandée" },
+  docsSdksBody: {
+    en: "One Protegey-branded package instead of hand-built API calls — for web/Node/React/Angular/React Native, and for Flutter. Both call Protegey directly from your app with your own x-api-key, and cover device intelligence and transactions today, with more of the API surface added over time.",
+    fr: "Un seul package Protegey plutôt que des appels API construits à la main — pour web/Node/React/Angular/React Native, et pour Flutter. Les deux appellent Protegey directement depuis votre application avec votre propre x-api-key, et couvrent dès aujourd'hui l'intelligence d'appareil et les transactions, avec le reste de la surface d'API ajouté progressivement.",
+  },
+  docsSdksJsLabel: { en: "JavaScript / TypeScript", fr: "JavaScript / TypeScript" },
+  docsSdksFlutterLabel: { en: "Flutter", fr: "Flutter" },
+  docsSdksNote: {
+    en: "Your x-api-key is passed to the SDK and used directly from your app — keep it out of source control and public bundles the same way you would any other secret.",
+    fr: "Votre x-api-key est transmise au SDK et utilisée directement depuis votre application — gardez-la hors du contrôle de version et des bundles publics, comme tout autre secret.",
+  },
   docsTransactionsTitle: { en: "Sending transactions for monitoring", fr: "Envoyer des transactions pour surveillance" },
   docsTransactionsBody: {
-    en: "POST each transaction to /partner-api/transactions as it happens. Protegey runs it against your active alert rules immediately and responds with a decision (clear, review or blocked), a 0-100 risk score, and the list of any rules that matched. The optional deviceEventId field lets you pass in a device/session signal (e.g. from a device-intelligence provider on your side) — when present, Protegey factors it into the same decision automatically.",
-    fr: "Envoyez chaque transaction par POST à /partner-api/transactions au moment où elle a lieu. Protegey l'évalue immédiatement selon vos règles d'alerte actives et répond avec une décision (clear, review ou blocked), un score de risque de 0 à 100, et la liste des règles éventuellement déclenchées. Le champ optionnel deviceEventId permet de transmettre un signal d'appareil/de session (par ex. issu d'un fournisseur de renseignement sur l'appareil de votre côté) — s'il est présent, Protegey l'intègre automatiquement à la même décision.",
+    en: "POST each transaction to /partner-api/transactions as it happens (or use protegey.transactions.report() from an SDK). Protegey runs it against your active alert rules immediately and responds with a decision (clear, review or blocked), a 0-100 risk score, and the list of any rules that matched. The optional visitorId/deviceAttributes fields let you pass in a device/session signal from a Protegey SDK — when present, Protegey factors it into the same decision automatically.",
+    fr: "Envoyez chaque transaction par POST à /partner-api/transactions au moment où elle a lieu (ou utilisez protegey.transactions.report() depuis un SDK). Protegey l'évalue immédiatement selon vos règles d'alerte actives et répond avec une décision (clear, review ou blocked), un score de risque de 0 à 100, et la liste des règles éventuellement déclenchées. Les champs optionnels visitorId/deviceAttributes permettent de transmettre un signal d'appareil/de session issu d'un SDK Protegey — s'il est présent, Protegey l'intègre automatiquement à la même décision.",
   },
   docsKycTitle: { en: "Starting an identity verification session", fr: "Démarrer une session de vérification d'identité" },
   docsKycBody: {
@@ -1285,8 +1298,8 @@ const STRINGS = {
   },
   docsDeviceEventsTitle: { en: "Reporting a device signal outside a transaction", fr: "Signaler un signal d'appareil hors transaction" },
   docsDeviceEventsBody: {
-    en: "For a device/session signal that isn't tied to a transaction — a login, a session start — POST the event id from your device-intelligence provider to /partner-api/device-events along with the customer it belongs to. Protegey verifies it and stores it as a standalone signal, so you build up a device/session history per customer over time, not just at the moment of a purchase.",
-    fr: "Pour un signal d'appareil/de session qui n'est pas rattaché à une transaction — une connexion, un début de session — envoyez par POST l'identifiant d'événement de votre fournisseur de renseignement sur l'appareil à /partner-api/device-events, avec le client concerné. Protegey le vérifie et le stocke comme signal autonome, ce qui constitue un historique d'appareil/de session par client dans le temps, pas seulement au moment d'un achat.",
+    en: "For a device/session signal that isn't tied to a transaction — a login, a session start — POST to /partner-api/device-events along with the customer it belongs to (or use protegey.device.identify() from an SDK, which computes visitorId/deviceAttributes for you). Protegey scores it and stores it as a standalone signal, so you build up a device/session history per customer over time, not just at the moment of a purchase.",
+    fr: "Pour un signal d'appareil/de session qui n'est pas rattaché à une transaction — une connexion, un début de session — envoyez par POST à /partner-api/device-events, avec le client concerné (ou utilisez protegey.device.identify() depuis un SDK, qui calcule visitorId/deviceAttributes pour vous). Protegey le score et le stocke comme signal autonome, ce qui constitue un historique d'appareil/de session par client dans le temps, pas seulement au moment d'un achat.",
   },
   docsBehavioralEventsTitle: { en: "Reporting behavioral signals (keystroke, touch, navigation)", fr: "Signaler des signaux comportementaux (frappe, tactile, navigation)" },
   docsBehavioralEventsBody: {
@@ -1299,8 +1312,8 @@ const STRINGS = {
   },
   docsSharedSignalTitle: { en: "Checking the shared fraud signal network", fr: "Vérifier le réseau de signaux de fraude partagés" },
   docsSharedSignalBody: {
-    en: "Check a customer's phone number or email against fraud signals other participating partners have shared — e.g. at onboarding — and benefit from what the whole network has flagged, the same way they benefit from what you flag. The value is hashed on arrival and never stored or logged in readable form; a match never reveals which partner reported it or any of their client's information, only a category and how long ago.",
-    fr: "Vérifiez le numéro de téléphone ou l'email d'un client par rapport aux signaux de fraude partagés par d'autres partenaires participants — par exemple à l'onboarding — et profitez de ce que tout le réseau a signalé, comme les autres profitent de ce que vous signalez. La valeur est hachée à l'arrivée et jamais stockée ou journalisée en clair ; une correspondance ne révèle jamais quel partenaire l'a signalé ni aucune information sur son client, seulement une catégorie et depuis combien de temps.",
+    en: "Check a customer's phone number, email or device fingerprint against fraud signals other participating partners have shared — e.g. at onboarding — and benefit from what the whole network has flagged, the same way they benefit from what you flag. Every value is hashed on arrival and never stored or logged in readable form; a match never reveals which partner reported it or any of their client's information, only a category and how long ago.",
+    fr: "Vérifiez le numéro de téléphone, l'email ou l'empreinte d'appareil d'un client par rapport aux signaux de fraude partagés par d'autres partenaires participants — par exemple à l'onboarding — et profitez de ce que tout le réseau a signalé, comme les autres profitent de ce que vous signalez. Chaque valeur est hachée à l'arrivée et jamais stockée ou journalisée en clair ; une correspondance ne révèle jamais quel partenaire l'a signalé ni aucune information sur son client, seulement une catégorie et depuis combien de temps.",
   },
   docsSharedSignalOptInNote: {
     en: "Both checking and reporting require the shared fraud signal network to be enabled in Organization Profile — on by default. Turning it off disables both at once: an organization that doesn't report into the network can't query it either.",
@@ -1421,6 +1434,7 @@ const STRINGS = {
     fr: "Générez une clé depuis Paramètres — Accès API. Envoyez-la sur chaque requête dans l'en-tête x-api-key.",
   },
   igStep1Button: { en: "Go to Settings", fr: "Aller aux Paramètres" },
+  igStep1SdkLink: { en: "Or skip the raw API — use a Protegey SDK", fr: "Ou passez l'API brute — utilisez un SDK Protegey" },
   igStep2Title: { en: "2. Pick what you need", fr: "2. Choisissez ce dont vous avez besoin" },
   igStep2Subtitle: { en: "Most partners use one or both of these:", fr: "La plupart des partenaires utilisent l'un ou l'autre (ou les deux) :" },
   igCardKycTitle: { en: "Identity verification (KYC)", fr: "Vérification d'identité (KYC)" },

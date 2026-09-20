@@ -91,7 +91,7 @@ export async function getCaseSignalStatus(id: string): Promise<{ shared: boolean
 
 export async function shareCaseSignalAction(
   id: string,
-  identifiers: { phoneNumber?: string; email?: string },
+  identifiers: { phoneNumber?: string; email?: string; deviceFingerprint?: string },
   category: SharedSignalCategory,
 ): Promise<MutationResult<SharedSignalReceipt[]>> {
   try {

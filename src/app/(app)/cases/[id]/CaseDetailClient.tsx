@@ -32,12 +32,14 @@ export function CaseDetailClient({
   sharedSignalsEnabled,
   canShareSignal,
   initialAlreadyShared,
+  knownVisitorIds,
 }: {
   kase: CaseWithNotes;
   teamMembers: TeamMember[];
   sharedSignalsEnabled: boolean;
   canShareSignal: boolean;
   initialAlreadyShared: boolean;
+  knownVisitorIds: string[];
 }) {
   const router = useRouter();
   const guard = useSessionGuard();
@@ -55,6 +57,7 @@ export function CaseDetailClient({
   const [alreadyShared, setAlreadyShared] = useState(initialAlreadyShared);
   const [sharePhone, setSharePhone] = useState("");
   const [shareEmail, setShareEmail] = useState("");
+  const [shareDeviceFingerprint, setShareDeviceFingerprint] = useState("");
   const [shareCategory, setShareCategory] = useState<SharedSignalCategory>("confirmed_fraud");
 
   const statusLabel: Record<string, string> = {
@@ -135,12 +138,18 @@ export function CaseDetailClient({
     }
   }
 
+  const hasShareIdentifier = Boolean(sharePhone.trim() || shareEmail.trim() || shareDeviceFingerprint);
+
   async function handleShareSignal() {
-    if (!sharePhone.trim() && !shareEmail.trim()) return;
+    if (!hasShareIdentifier) return;
     setSharingBusy(true);
     setShareError(null);
     try {
-      const identifiers = { phoneNumber: sharePhone.trim() || undefined, email: shareEmail.trim() || undefined };
+      const identifiers = {
+        phoneNumber: sharePhone.trim() || undefined,
+        email: shareEmail.trim() || undefined,
+        deviceFingerprint: shareDeviceFingerprint || undefined,
+      };
       const result = await guard(() => shareCaseSignalAction(kase.id, identifiers, shareCategory));
       if (result === null) return;
       if (isError(result)) {
@@ -151,6 +160,7 @@ export function CaseDetailClient({
       setSharing(false);
       setSharePhone("");
       setShareEmail("");
+      setShareDeviceFingerprint("");
     } finally {
       setSharingBusy(false);
     }
@@ -279,7 +289,21 @@ export function CaseDetailClient({
             placeholder={t("caseShareSignalEmailPlaceholder")}
             className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
           />
-          {!sharePhone.trim() && !shareEmail.trim() ? <p className="text-xs text-muted-foreground">{t("caseShareSignalAtLeastOneHint")}</p> : null}
+          {knownVisitorIds.length > 0 ? (
+            <select
+              value={shareDeviceFingerprint}
+              onChange={(e) => setShareDeviceFingerprint(e.target.value)}
+              className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="">{t("caseShareSignalDevicePlaceholder")}</option>
+              {knownVisitorIds.map((visitorId) => (
+                <option key={visitorId} value={visitorId}>
+                  {visitorId}
+                </option>
+              ))}
+            </select>
+          ) : null}
+          {!hasShareIdentifier ? <p className="text-xs text-muted-foreground">{t("caseShareSignalAtLeastOneHint")}</p> : null}
           <select
             value={shareCategory}
             onChange={(e) => setShareCategory(e.target.value as SharedSignalCategory)}
@@ -294,7 +318,7 @@ export function CaseDetailClient({
           <div className="flex gap-2">
             <button
               type="button"
-              disabled={sharingBusy || (!sharePhone.trim() && !shareEmail.trim())}
+              disabled={sharingBusy || !hasShareIdentifier}
               onClick={handleShareSignal}
               className="flex items-center gap-2 rounded-md bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
             >
