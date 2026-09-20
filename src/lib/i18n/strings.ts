@@ -1282,6 +1282,11 @@ const STRINGS = {
   },
   docsSdksJsLabel: { en: "JavaScript / TypeScript", fr: "JavaScript / TypeScript" },
   docsSdksFlutterLabel: { en: "Flutter", fr: "Flutter" },
+  docsSdksSourceLink: { en: "View source on GitHub ↗", fr: "Voir le code source sur GitHub ↗" },
+  docsSdksNotPublishedYet: {
+    en: "Not yet published to a package registry — install directly from GitHub for now.",
+    fr: "Pas encore publié sur un registre de paquets — installez directement depuis GitHub pour l'instant.",
+  },
   docsSdksNote: {
     en: "Your x-api-key is passed to the SDK and used directly from your app — keep it out of source control and public bundles the same way you would any other secret.",
     fr: "Votre x-api-key est transmise au SDK et utilisée directement depuis votre application — gardez-la hors du contrôle de version et des bundles publics, comme tout autre secret.",

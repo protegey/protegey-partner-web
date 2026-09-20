@@ -64,13 +64,18 @@ const DEVICE_EVENT_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/
 # Response
 { "recorded": true, "action": "allow", "riskScore": 5 }`;
 
-const SDK_JS_EXAMPLE = `npm install @protegey/sdk
-// or: yarn add @protegey/sdk / pnpm add @protegey/sdk
-// Works in Node.js, the browser, React, Angular, and React Native — one package.
+const SDK_JS_INSTALL_GITHUB = `# Not yet on npm — install straight from GitHub for now
+npm install git+https://github.com/protegey/protegey_js_sdk.git`;
 
+const SDK_JS_INSTALL_NPM = `# Once published:
+npm install @protegey/sdk`;
+
+const SDK_JS_EXAMPLE = `// Works in Node.js, the browser, React, Angular, and React Native — one package.
 import { Protegey } from "@protegey/sdk";
 
-const protegey = new Protegey({ apiKey: "YOUR_API_KEY" });
+// baseUrl has no default on purpose — confirm the current value with Protegey, it can
+// change independently of this package (e.g. between staging and production).
+const protegey = new Protegey({ apiKey: "YOUR_API_KEY", baseUrl: "https://api.protegey.com" });
 
 // Device intelligence — call on login/session start
 const { visitorId, action, riskScore } = await protegey.device.identify({
@@ -90,9 +95,19 @@ const result = await protegey.transactions.report({
   occurredAt: new Date().toISOString(),
 });`;
 
-const SDK_FLUTTER_EXAMPLE = `flutter pub add protegey_sdk
+const SDK_FLUTTER_INSTALL_GITHUB = `# pubspec.yaml — not yet on pub.dev, install straight from GitHub for now
+dependencies:
+  protegey_sdk:
+    git:
+      url: https://github.com/protegey/protegey_flutter_sdk.git
+      ref: main`;
 
-final protegey = Protegey(apiKey: 'YOUR_API_KEY');
+const SDK_FLUTTER_INSTALL_PUBDEV = `# Once published:
+flutter pub add protegey_sdk`;
+
+const SDK_FLUTTER_EXAMPLE = `// baseUrl has no default on purpose — confirm the current value with Protegey, it can
+// change independently of this package (e.g. between staging and production).
+final protegey = Protegey(apiKey: 'YOUR_API_KEY', baseUrl: 'https://api.protegey.com');
 
 final identify = await protegey.device.identify(
   externalCustomerId: 'cust-9981',
@@ -202,14 +217,50 @@ export default async function DocumentationPage() {
         <Section id="auth" icon={KeyRound} title={t(lang, "docsAuthTitle")} body={t(lang, "docsAuthBody")} />
 
         <Section id="sdks" icon={Package} title={t(lang, "docsSdksTitle")} body={t(lang, "docsSdksBody")}>
-          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksJsLabel")}</p>
+          <div className="mt-4 flex items-center justify-between gap-2">
+            <p className="text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksJsLabel")}</p>
+            <a
+              href="https://github.com/protegey/protegey_js_sdk"
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              {t(lang, "docsSdksSourceLink")}
+            </a>
+          </div>
+          <p className="mb-1.5 text-xs text-muted-foreground">{t(lang, "docsSdksNotPublishedYet")}</p>
           <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
+            <code>{SDK_JS_INSTALL_GITHUB}</code>
+          </pre>
+          <pre className="mt-2 overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-muted-foreground">
+            <code>{SDK_JS_INSTALL_NPM}</code>
+          </pre>
+          <pre className="mt-2 overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
             <code>{SDK_JS_EXAMPLE}</code>
           </pre>
-          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksFlutterLabel")}</p>
+
+          <div className="mt-6 flex items-center justify-between gap-2">
+            <p className="text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksFlutterLabel")}</p>
+            <a
+              href="https://github.com/protegey/protegey_flutter_sdk"
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs font-medium text-primary hover:underline"
+            >
+              {t(lang, "docsSdksSourceLink")}
+            </a>
+          </div>
+          <p className="mb-1.5 text-xs text-muted-foreground">{t(lang, "docsSdksNotPublishedYet")}</p>
           <pre className="overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
+            <code>{SDK_FLUTTER_INSTALL_GITHUB}</code>
+          </pre>
+          <pre className="mt-2 overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-muted-foreground">
+            <code>{SDK_FLUTTER_INSTALL_PUBDEV}</code>
+          </pre>
+          <pre className="mt-2 overflow-x-auto rounded-md bg-foreground/5 p-3 text-xs text-foreground">
             <code>{SDK_FLUTTER_EXAMPLE}</code>
           </pre>
+
           <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsSdksNote")}</p>
         </Section>
 
