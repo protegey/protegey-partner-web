@@ -118,6 +118,9 @@ export function AlertsClient({
                     <p className="mt-0.5 text-xs text-muted-foreground">
                       {new Date(alert.triggeredAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")} · {alert.externalCustomerId}
                     </p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">
+                      {alert.ruleCode} · {alert.ruleSeverity === "block" ? t("alertsSeverityBlock") : t("alertsSeverityReview")} · {t("alertsColTransaction")}: {alert.transactionId ?? "—"}
+                    </p>
                     {alert.transaction ? (
                       <p className="mt-0.5 text-xs text-muted-foreground">
                         {Number(alert.transaction.amount).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")} {alert.transaction.currency} —{" "}

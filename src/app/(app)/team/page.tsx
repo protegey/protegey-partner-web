@@ -47,6 +47,7 @@ export default async function TeamPage() {
               <tr>
                 <th className="px-4 py-2.5 font-medium">{t(lang, "teamColPendingInvitation")}</th>
                 <th className="px-4 py-2.5 font-medium">{t(lang, "teamColRole")}</th>
+                <th className="px-4 py-2.5 font-medium">{t(lang, "teamColExpires")}</th>
                 <th className="px-4 py-2.5 font-medium text-right">{t(lang, "teamColActions")}</th>
               </tr>
             </thead>
@@ -65,6 +66,7 @@ export default async function TeamPage() {
                   <td className="px-4 py-2.5 text-muted-foreground">
                     {invitation.roles.map((role) => role.displayName).join(", ") || "—"}
                   </td>
+                  <td className="px-4 py-2.5 text-xs text-muted-foreground">{new Date(invitation.expiresAt).toLocaleDateString()}</td>
                   <td className="px-4 py-2.5">
                     <div className="flex justify-end gap-2">
                       <EditInvitationDialogButton invitation={invitation} roles={roles} />
@@ -86,6 +88,7 @@ export default async function TeamPage() {
               <th className="px-4 py-2.5 font-medium">{t(lang, "teamColEmail")}</th>
               <th className="px-4 py-2.5 font-medium">{t(lang, "teamColRole")}</th>
               <th className="px-4 py-2.5 font-medium">{t(lang, "teamColStatus")}</th>
+              <th className="px-4 py-2.5 font-medium">{t(lang, "teamColJoined")}</th>
               {canManageTeam ? <th className="px-4 py-2.5 font-medium text-right">{t(lang, "teamColActions")}</th> : null}
             </tr>
           </thead>
@@ -111,6 +114,7 @@ export default async function TeamPage() {
                     {member.isActive ? t(lang, "clientStatusActive") : t(lang, "teamStatusBlocked")}
                   </span>
                 </td>
+                <td className="px-4 py-2.5 text-xs text-muted-foreground">{new Date(member.createdAt).toLocaleDateString()}</td>
                 {canManageTeam ? (
                   <td className="px-4 py-2.5">
                     <div className="flex justify-end">

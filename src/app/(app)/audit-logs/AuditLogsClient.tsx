@@ -29,7 +29,10 @@ export function AuditLogsClient({ result, page }: { result: PaginatedResult<Noti
               <tr>
                 <th className="px-4 py-2.5 font-medium">{t("auditLogsColWhen")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("auditLogsColEvent")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("auditLogsColType")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("auditLogsColId")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("auditLogsColActor")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("auditLogsColMetadata")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -39,9 +42,12 @@ export function AuditLogsClient({ result, page }: { result: PaginatedResult<Noti
                     {new Date(event.createdAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
                   </td>
                   <td className="px-4 py-2.5 text-foreground">{describeEvent(lang, event)}</td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{event.type}</td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{event.id}</td>
                   <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">
                     {event.actorLabel ?? t("eventSystemActor")}
                   </td>
+                  <td className="px-4 py-2.5 text-xs text-muted-foreground">{event.metadata ? Object.keys(event.metadata).length : 0}</td>
                 </tr>
               ))}
             </tbody>

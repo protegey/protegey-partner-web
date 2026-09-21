@@ -79,20 +79,28 @@ export function SarStrClient({
             <thead className="bg-muted text-muted-foreground">
               <tr>
                 <th className="px-4 py-2.5 font-medium">{t("sarColReference")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("sarColCase")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("sarColTemplate")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("casesColStatus")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("signalsColWhen")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("sarColSubmitted")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("sarColUpdated")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {result.data.map((report) => (
                 <tr key={report.id} onClick={() => router.push(`/sar-str/${report.id}`)} className="cursor-pointer hover:bg-muted/50">
                   <td className="px-4 py-2.5 font-mono text-xs text-foreground">{report.id}</td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{report.caseId}</td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{report.templateId}</td>
                   <td className="px-4 py-2.5">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLOR[report.status]}`}>{statusLabel[report.status]}</span>
                   </td>
                   <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">
                     {new Date(report.createdAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
                   </td>
+                  <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">{report.submittedAt ? new Date(report.submittedAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US") : "—"}</td>
+                  <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">{new Date(report.updatedAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}</td>
                 </tr>
               ))}
             </tbody>

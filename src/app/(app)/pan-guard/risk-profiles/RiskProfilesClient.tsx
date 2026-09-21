@@ -79,6 +79,7 @@ export function RiskProfilesClient({
               <tr>
                 <th className="w-8 px-4 py-2.5" />
                 <th className="px-4 py-2.5 font-medium">{t("signalsColCustomer")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("riskProfilesColId")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("riskProfilesColScore")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("riskProfilesColContributions")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("riskProfilesColLastUpdated")}</th>
@@ -97,6 +98,7 @@ export function RiskProfilesClient({
                         {expanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
                       </td>
                       <td className="px-4 py-2.5 text-foreground">{profile.externalCustomerId}</td>
+                      <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{profile.id}</td>
                       <td className={`px-4 py-2.5 font-semibold ${scoreColor(profile.cumulativeScore)}`}>{profile.cumulativeScore}</td>
                       <td className="px-4 py-2.5 text-xs text-muted-foreground">{profile.contributions.length}</td>
                       <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">

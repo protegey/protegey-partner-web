@@ -102,6 +102,9 @@ export default async function ClientsPage({
                 <tr>
                   <th className="px-4 py-2.5 font-medium">{t(lang, "clientsColBusiness")}</th>
                   <th className="px-4 py-2.5 font-medium">{t(lang, "clientsColStatus")}</th>
+                  <th className="px-4 py-2.5 font-medium">{t(lang, "clientsColCountry")}</th>
+                  <th className="px-4 py-2.5 font-medium">{t(lang, "clientsColActivatedDate")}</th>
+                  <th className="px-4 py-2.5 font-medium">{t(lang, "clientsColRejectedDate")}</th>
                   <th className="px-4 py-2.5 font-medium">
                     {t(lang, activeTab === "invited" ? "clientsColInvitedDate" : "clientsColSubmittedDate")}
                   </th>
@@ -122,6 +125,9 @@ export default async function ClientsPage({
                         {t(lang, STATUS_LABEL_KEYS[client.status])}
                       </span>
                     </td>
+                    <td className="px-4 py-2.5 text-muted-foreground">{client.submission?.generalInfo?.country ?? "—"}</td>
+                    <td className="px-4 py-2.5 text-muted-foreground">{client.activatedAt ? new Date(client.activatedAt).toLocaleDateString() : "—"}</td>
+                    <td className="px-4 py-2.5 text-muted-foreground">{client.rejectedAt ? new Date(client.rejectedAt).toLocaleDateString() : "—"}</td>
                     <td className="px-4 py-2.5 text-muted-foreground">
                       {activeTab === "invited"
                         ? new Date(client.createdAt).toLocaleDateString()
@@ -149,7 +155,7 @@ export default async function ClientsPage({
                 ))}
                 {result?.data.length === 0 ? (
                   <tr>
-                    <td colSpan={4} className="px-4 py-6 text-center text-muted-foreground">
+                     <td colSpan={7} className="px-4 py-6 text-center text-muted-foreground">
                       {t(lang, activeTab === "invited" ? "clientsEmptyInvited" : "clientsEmptyResponded")}
                     </td>
                   </tr>

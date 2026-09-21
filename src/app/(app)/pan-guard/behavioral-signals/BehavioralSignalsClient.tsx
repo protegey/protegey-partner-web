@@ -105,6 +105,7 @@ export function BehavioralSignalsClient({
               <tr>
                 <th className="px-4 py-2.5 font-medium">{t("signalsColWhen")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("signalsColCustomer")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("behavioralColId")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("behavioralColSession")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("behavioralColDeviationScore")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("behavioralColConfidence")}</th>
@@ -118,6 +119,7 @@ export function BehavioralSignalsClient({
                     {new Date(signal.createdAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
                   </td>
                   <td className="px-4 py-2.5 text-foreground">{signal.externalCustomerId}</td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{signal.id}</td>
                   <td className="px-4 py-2.5 text-xs text-muted-foreground">{signal.sessionId}</td>
                   <td className="px-4 py-2.5 text-foreground">{signal.deviationScore}</td>
                   <td className="px-4 py-2.5">

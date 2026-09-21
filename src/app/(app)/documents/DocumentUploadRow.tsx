@@ -98,6 +98,11 @@ export function DocumentUploadRow({ document }: { document: PartnerDocument }) {
         </p>
       ) : null}
 
+      <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
+        <span>{t("docSubmittedDate")}: {document.submittedAt ? new Date(document.submittedAt).toLocaleDateString() : "—"}</span>
+        <span>{t("docReviewedDate")}: {document.reviewedAt ? new Date(document.reviewedAt).toLocaleDateString() : "—"}</span>
+      </div>
+
       {canUpload ? (
         <form ref={formRef} action={formAction} className="mt-3">
           <input

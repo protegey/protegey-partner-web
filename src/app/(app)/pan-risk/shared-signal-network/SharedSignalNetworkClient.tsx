@@ -189,6 +189,8 @@ export function SharedSignalNetworkClient({
                   <th className="px-4 py-2.5 font-medium">{t("signalsColWhen")}</th>
                   <th className="px-4 py-2.5 font-medium">{t("sharedSignalColIdentityType")}</th>
                   <th className="px-4 py-2.5 font-medium">{t("sharedSignalColCategory")}</th>
+                  <th className="px-4 py-2.5 font-medium">{t("sharedSignalColReportId")}</th>
+                  <th className="px-4 py-2.5 font-medium">{t("sharedSignalColSourceCase")}</th>
                   <th className="px-4 py-2.5 font-medium" />
                 </tr>
               </thead>
@@ -200,6 +202,8 @@ export function SharedSignalNetworkClient({
                     </td>
                     <td className="px-4 py-2.5 text-foreground">{identityTypeLabel(report.identityType)}</td>
                     <td className="px-4 py-2.5 text-foreground">{categoryLabel(report.category)}</td>
+                    <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{report.id}</td>
+                    <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{report.sourceCaseId}</td>
                     <td className="px-4 py-2.5 text-right">
                       <Link
                         href={`/pan-risk/shared-signal-network/${report.id}`}

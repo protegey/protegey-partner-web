@@ -99,6 +99,7 @@ export function DeviceSignalsClient({
               <tr>
                 <th className="px-4 py-2.5 font-medium">{t("signalsColWhen")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("signalsColCustomer")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColEventId")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColSource")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColAction")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColRiskScore")}</th>
@@ -112,6 +113,7 @@ export function DeviceSignalsClient({
                     {new Date(signal.createdAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
                   </td>
                   <td className="px-4 py-2.5 text-foreground">{signal.externalCustomerId ?? "—"}</td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{signal.eventId}</td>
                   <td className="px-4 py-2.5 text-xs text-muted-foreground">
                     {signal.source === "webhook" ? t("deviceSignalsSourceWebhook") : t("deviceSignalsSourceDeviceEvent")}
                   </td>

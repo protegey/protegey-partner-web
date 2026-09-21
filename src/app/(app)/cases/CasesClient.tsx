@@ -107,7 +107,12 @@ export function CasesClient({
                 <th className="px-4 py-2.5 font-medium">{t("casesColTitle")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("signalsColCustomer")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("casesColStatus")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("casesColAssignee")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("casesColAlerts")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("casesColOutcome")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("signalsColWhen")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("casesColUpdated")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("casesColClosed")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -118,9 +123,14 @@ export function CasesClient({
                   <td className="px-4 py-2.5">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLOR[kase.status]}`}>{statusLabel[kase.status]}</span>
                   </td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{kase.assignedToUserId ?? "—"}</td>
+                  <td className="px-4 py-2.5 text-center text-muted-foreground">{kase.linkedAlertIds.length}</td>
+                  <td className="px-4 py-2.5 text-xs text-muted-foreground">{kase.outcome ? (kase.outcome === "no_action" ? t("caseOutcomeNoAction") : kase.outcome === "false_positive" ? t("caseOutcomeFalsePositive") : t("caseOutcomeSarFiled")) : "—"}</td>
                   <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">
                     {new Date(kase.createdAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
                   </td>
+                  <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">{new Date(kase.updatedAt).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US")}</td>
+                  <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">{kase.closedAt ? new Date(kase.closedAt).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US") : "—"}</td>
                 </tr>
               ))}
             </tbody>

@@ -150,7 +150,9 @@ export function TransactionsClient({
             <thead className="bg-muted text-muted-foreground">
               <tr>
                 <th className="px-4 py-2.5 font-medium">{t("txColDate")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("txColExternalId")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("txColCustomer")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("txColCounterparty")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("txColDirection")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("txColAmount")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("txColType")}</th>
@@ -165,7 +167,9 @@ export function TransactionsClient({
                   <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">
                     {new Date(tx.occurredAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
                   </td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{tx.externalTransactionId}</td>
                   <td className="px-4 py-2.5 font-mono text-xs text-foreground">{tx.externalCustomerId}</td>
+                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{tx.counterpartyExternalId ?? "—"}</td>
                   <td className="px-4 py-2.5">
                     <span className="inline-flex items-center gap-1 text-xs text-foreground">
                       {tx.direction === "CREDIT" ? (
