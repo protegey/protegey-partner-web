@@ -79,12 +79,11 @@ function buildNavItems(lang: Lang): NavItem[] {
         { href: "/sanctions", label: tt("navSanctionsList") },
         { href: "/screening-provider", label: tt("navScreeningProvider") },
         { href: "/pan-risk/shared-signal-network", label: tt("navSharedSignalNetwork") },
-        { href: "/alert-rules", label: tt("navAlertRules") },
+        { href: "/alert-rules", label: tt("navPanStudio") },
         { href: "/pep", label: tt("navPepControl") },
         { href: "/edd", label: tt("navEdd") },
          { href: "/sar-str", label: tt("navSarStr") },
          { href: "/ctr", label: tt("navCtr") },
-        { label: tt("navComplianceCalendar"), disabled: true },
       ],
     },
     {
@@ -94,7 +93,7 @@ function buildNavItems(lang: Lang): NavItem[] {
         { href: "/transactions", label: tt("navTransactions") },
         { href: "/transactions/analytics", label: tt("navTransactionAnalytics") },
         { href: "/alerts", label: tt("navAlerts") },
-        { href: "/alert-rules", label: tt("navAlertRules") },
+        { href: "/alert-rules", label: tt("navPanStudio") },
         ],
     },
     {
