@@ -123,7 +123,7 @@ export function CasesClient({
                   <td className="px-4 py-2.5">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLOR[kase.status]}`}>{statusLabel[kase.status]}</span>
                   </td>
-                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{kase.assignedToUserId ?? "—"}</td>
+                  <td className="px-4 py-2.5 text-xs text-muted-foreground">{kase.assignedToUserName ?? "—"}</td>
                   <td className="px-4 py-2.5 text-center text-muted-foreground">{kase.linkedAlertIds.length}</td>
                   <td className="px-4 py-2.5 text-xs text-muted-foreground">{kase.outcome ? (kase.outcome === "no_action" ? t("caseOutcomeNoAction") : kase.outcome === "false_positive" ? t("caseOutcomeFalsePositive") : t("caseOutcomeSarFiled")) : "—"}</td>
                   <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">

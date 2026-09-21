@@ -14,6 +14,7 @@ export interface Case {
   title: string;
   status: CaseStatus;
   assignedToUserId: string | null;
+  assignedToUserName: string | null;
   linkedAlertIds: string[];
   outcome: CaseOutcome | null;
   closedByUserId: string | null;

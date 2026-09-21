@@ -106,12 +106,12 @@ export function PageTransitionOverlay() {
   return (
     <div
       aria-hidden="true"
-      className={`fixed inset-0 z-[100] flex items-center justify-center bg-background/50 backdrop-blur-sm transition-opacity duration-200 ${
+      className={`fixed inset-0 z-[100] flex items-start justify-center bg-background/50 px-4 pt-6 backdrop-blur-sm transition-opacity duration-200 ${
         entered ? "opacity-100" : "opacity-0"
       }`}
     >
-      <div className="flex flex-col items-center gap-3 rounded-lg bg-card/90 px-6 py-5 shadow-lg">
-        <div className="size-8 animate-spin rounded-full border-4 border-muted border-t-primary" />
+      <div className="flex min-w-56 items-center justify-center gap-3 rounded-lg border border-border bg-card/95 px-6 py-4 shadow-lg">
+        <div className="size-5 animate-spin rounded-full border-3 border-muted border-t-primary" />
       </div>
     </div>
   );

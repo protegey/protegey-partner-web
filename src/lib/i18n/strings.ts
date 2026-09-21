@@ -1643,6 +1643,7 @@ const STRINGS = {
   dashboardKpiOpenAlerts: { en: "Open alerts", fr: "Alertes ouvertes" },
   dashboardKpiAvgRisk: { en: "Average risk score", fr: "Score de risque moyen" },
   dashboardKpiPendingKyb: { en: "Pending reviews", fr: "En attente d'examen" },
+  dashboardKpiClients: { en: "Total clients", fr: "Total des clients" },
   dashboardChartVolumeTitle: { en: "Transaction volume", fr: "Volume de transactions" },
   dashboardChartDecisionTitle: { en: "Decisions", fr: "Décisions" },
   dashboardRecentActivityTitle: { en: "Recent activity", fr: "Activité récente" },
