@@ -100,6 +100,11 @@ export interface ScreeningResultSnapshot {
   business: ScreeningResultEntry;
   owners: OwnerScreeningResult[];
   screenedAt: string;
+  provider?: "protegey" | "dow_jones";
+  providers?: Array<"protegey" | "dow_jones">;
+  defaultListChecked?: boolean;
+  degraded?: boolean;
+  fallbackReason?: string;
 }
 
 export interface ClientKybSubmission {

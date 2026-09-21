@@ -12,6 +12,7 @@ export default async function SarReportDetailPage({ params }: { params: Promise<
   const [report, sessionUser] = await Promise.all([getSarReport(id), getSessionUser()]);
   const template = await getSarTemplate(report.templateId);
   const canSubmit = sessionUser?.permissions.includes("partners.submit_sar") ?? false;
+  const canManage = sessionUser?.permissions.includes("partners.manage_compliance_cases") ?? false;
 
-  return <SarReportDetailClient report={report} template={template} canSubmit={canSubmit} />;
+  return <SarReportDetailClient report={report} template={template} canSubmit={canSubmit} canManage={canManage} />;
 }

@@ -10,6 +10,10 @@ import type { PaginatedResult } from "../transactions/actions";
 const STATUS_COLOR: Record<string, string> = {
   draft: "bg-amber-500/15 text-amber-600",
   submitted: "bg-emerald-500/15 text-emerald-600",
+  mlro_review: "bg-blue-500/15 text-blue-600",
+  filing_pending: "bg-purple-500/15 text-purple-600",
+  filed: "bg-emerald-500/15 text-emerald-600",
+  rejected: "bg-red-500/15 text-red-600",
 };
 
 export function SarStrClient({
@@ -29,6 +33,10 @@ export function SarStrClient({
   const statusLabel: Record<string, string> = {
     draft: t("sarStatusDraft"),
     submitted: t("sarStatusSubmitted"),
+    mlro_review: t("sarStatusMlroReview"),
+    filing_pending: t("sarStatusFilingPending"),
+    filed: t("sarStatusFiled"),
+    rejected: t("sarStatusRejected"),
   };
 
   function applyFilters(newPage: number = 1) {
@@ -63,6 +71,10 @@ export function SarStrClient({
             <option value="all">{t("txFilterAllOption")}</option>
             <option value="draft">{t("sarStatusDraft")}</option>
             <option value="submitted">{t("sarStatusSubmitted")}</option>
+            <option value="mlro_review">{t("sarStatusMlroReview")}</option>
+            <option value="filing_pending">{t("sarStatusFilingPending")}</option>
+            <option value="filed">{t("sarStatusFiled")}</option>
+            <option value="rejected">{t("sarStatusRejected")}</option>
           </select>
         </div>
       </div>
@@ -79,29 +91,34 @@ export function SarStrClient({
             <thead className="bg-muted text-muted-foreground">
               <tr>
                 <th className="px-4 py-2.5 font-medium">{t("sarColReference")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("sarColType")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("sarColCase")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("sarColTemplate")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("casesColStatus")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("signalsColWhen")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("sarColSubmitted")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("sarColRegulatorReference")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("sarColUpdated")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
               {result.data.map((report) => (
-                <tr key={report.id} onClick={() => router.push(`/sar-str/${report.id}`)} className="cursor-pointer hover:bg-muted/50">
-                  <td className="px-4 py-2.5 font-mono text-xs text-foreground">{report.id}</td>
+                (() => {
+                  const filingStatus = report.filingStatus ?? (report.status === "submitted" ? "filing_pending" : "draft");
+                  return <tr key={report.id} onClick={() => router.push(`/sar-str/${report.id}`)} className="cursor-pointer hover:bg-muted/50">
+                    <td className="px-4 py-2.5 font-mono text-xs text-foreground">{report.id}</td>
+                    <td className="px-4 py-2.5 uppercase text-xs text-muted-foreground">{report.reportType}</td>
                   <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{report.caseId}</td>
                   <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{report.templateId}</td>
                   <td className="px-4 py-2.5">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLOR[report.status]}`}>{statusLabel[report.status]}</span>
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLOR[filingStatus]}`}>{statusLabel[filingStatus] ?? statusLabel[report.status]}</span>
                   </td>
                   <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">
                     {new Date(report.createdAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
                   </td>
-                  <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">{report.submittedAt ? new Date(report.submittedAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US") : "—"}</td>
+                   <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">{report.regulatorReference ?? "—"}</td>
                   <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">{new Date(report.updatedAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}</td>
-                </tr>
+                  </tr>;
+                })()
               ))}
             </tbody>
           </table>

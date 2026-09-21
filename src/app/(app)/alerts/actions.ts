@@ -5,6 +5,7 @@ import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api
 import type { PaginatedResult } from "../transactions/actions";
 
 export type AlertStatus = "open" | "confirmed" | "more_info_requested" | "dismissed";
+export type AlertDisposition = "confirmed_fraud" | "false_positive" | "no_action" | "sar_filed" | "escalated";
 
 export interface AlertWithContext {
   id: string;
@@ -16,6 +17,11 @@ export interface AlertWithContext {
   triggeredAt: string;
   matchedValues: Record<string, unknown> | null;
   status: AlertStatus;
+  assignedToUserId: string | null;
+  disposition: AlertDisposition | null;
+  investigationNotes: string | null;
+  dueAt: string | null;
+  resolvedAt: string | null;
   createdAt: string;
   ruleName: string;
   ruleNameFr: string | null;
@@ -52,8 +58,20 @@ export async function getAlerts(query: AlertsQuery = {}): Promise<PaginatedResul
 export type MutationResult<T> = T | { error: string } | AuthExpired;
 
 export async function updateAlertStatus(id: string, status: AlertStatus): Promise<MutationResult<AlertWithContext>> {
+  return updateAlert(id, { status });
+}
+
+export interface AlertUpdatePayload {
+  status?: AlertStatus;
+  assignedToUserId?: string | null;
+  disposition?: AlertDisposition | null;
+  investigationNotes?: string | null;
+  dueAt?: string | null;
+}
+
+export async function updateAlert(id: string, payload: AlertUpdatePayload): Promise<MutationResult<AlertWithContext>> {
   try {
-    const result = await apiFetchGuarded<AlertWithContext>(`/alerts/me/${id}`, { method: "PATCH", body: { status } });
+    const result = await apiFetchGuarded<AlertWithContext>(`/alerts/me/${id}`, { method: "PATCH", body: payload });
     if (!("error" in result) && !("authExpired" in result)) revalidatePath("/alerts");
     return result;
   } catch (error) {

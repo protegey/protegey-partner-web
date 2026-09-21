@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, CheckCircle2 } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
-import { updateSarReportAction, submitSarReportAction, type SarReport, type SarTemplate, type SarFieldDef } from "../actions";
+import { updateSarReportAction, reviewSarReportAction, approveSarReportAction, recordSarFilingResultAction, type MutationResult, type SarReport, type SarTemplate, type SarFieldDef } from "../actions";
 
 function isError(value: unknown): value is { error: string } {
   return Boolean(value) && typeof value === "object" && "error" in (value as object);
@@ -25,7 +25,7 @@ function sourceBadge(field: SarFieldDef, lang: "en" | "fr"): string | null {
   return labels[prefix]?.[lang] ?? null;
 }
 
-export function SarReportDetailClient({ report: initialReport, template, canSubmit }: { report: SarReport; template: SarTemplate; canSubmit: boolean }) {
+export function SarReportDetailClient({ report: initialReport, template, canSubmit, canManage }: { report: SarReport; template: SarTemplate; canSubmit: boolean; canManage: boolean }) {
   const router = useRouter();
   const guard = useSessionGuard();
   const { t, lang } = useLang();
@@ -44,10 +44,11 @@ export function SarReportDetailClient({ report: initialReport, template, canSubm
   });
   const [narrative, setNarrative] = useState(initialReport.narrative);
   const [saving, setSaving] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [transitioning, setTransitioning] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const isDraft = report.status === "draft";
+  const filingStatus = report.filingStatus ?? (report.status === "submitted" ? "filing_pending" : "draft");
+  const isDraft = filingStatus === "draft";
 
   async function handleSave() {
     setSaving(true);
@@ -65,12 +66,11 @@ export function SarReportDetailClient({ report: initialReport, template, canSubm
     }
   }
 
-  async function handleSubmit() {
-    setSubmitting(true);
+  async function handleTransition(action: () => Promise<MutationResult<SarReport>>) {
+    setTransitioning(true);
     setError(null);
     try {
-      await handleSave();
-      const result = await guard(() => submitSarReportAction(report.id));
+      const result = await guard(action);
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
@@ -78,8 +78,14 @@ export function SarReportDetailClient({ report: initialReport, template, canSubm
       }
       setReport(result);
     } finally {
-      setSubmitting(false);
+      setTransitioning(false);
     }
+  }
+
+  async function handleFilingResult(status: "filed" | "rejected") {
+    const regulatorReference = status === "filed" ? window.prompt(t("sarReferencePrompt")) ?? "" : undefined;
+    const filingNotes = window.prompt(t("sarFilingNotesPrompt")) ?? "";
+    await handleTransition(() => recordSarFilingResultAction(report.id, { status, regulatorReference, filingNotes }));
   }
 
   return (
@@ -92,19 +98,22 @@ export function SarReportDetailClient({ report: initialReport, template, canSubm
           <h1 className="text-xl font-semibold text-foreground">{template.regulatorName}</h1>
           <span
             className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-              report.status === "submitted" ? "bg-emerald-500/15 text-emerald-600" : "bg-amber-500/15 text-amber-600"
+               STATUS_COLOR[filingStatus]
             }`}
           >
-            {report.status === "submitted" ? t("sarStatusSubmitted") : t("sarStatusDraft")}
+            {STATUS_LABEL(t, filingStatus)}
           </span>
         </div>
+        <p className="mt-1 text-xs text-muted-foreground">
+          {report.reportType.toUpperCase()} · {t("sarColRegulatorReference")}: {report.regulatorReference ?? "—"}
+        </p>
         <p className="font-mono text-xs text-muted-foreground">{report.id}</p>
       </div>
 
-      {report.status === "submitted" ? (
+      {filingStatus !== "draft" ? (
         <div className="flex items-center gap-2 rounded-md border border-emerald-500/30 bg-emerald-500/10 p-3 text-sm text-emerald-700 dark:text-emerald-400">
           <CheckCircle2 className="size-4 shrink-0" />
-          {t("sarSubmittedNote")}
+          {filingStatus === "filed" ? `${t("sarSubmittedNote")} ${report.regulatorReference ?? ""}` : STATUS_LABEL(t, filingStatus)}
         </div>
       ) : null}
 
@@ -178,28 +187,60 @@ export function SarReportDetailClient({ report: initialReport, template, canSubm
         <div className="flex flex-wrap items-center gap-3">
           <button
             type="button"
-            disabled={saving || submitting}
+             disabled={saving || transitioning}
             onClick={handleSave}
             className="flex items-center gap-2 rounded-md border border-border px-4 py-2 text-sm font-semibold text-foreground transition-colors hover:bg-muted disabled:opacity-60"
           >
             {saving ? <Loader2 className="size-4 animate-spin" /> : null}
             {t("sarSaveButton")}
           </button>
-          {canSubmit ? (
+          {canManage && isDraft ? (
             <button
               type="button"
-              disabled={saving || submitting || !narrative.trim()}
-              onClick={handleSubmit}
+              disabled={saving || transitioning || !narrative.trim()}
+              onClick={() => handleTransition(() => reviewSarReportAction(report.id))}
               className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
             >
-              {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
-              {t("sarSubmitButton")}
+              {transitioning ? <Loader2 className="size-4 animate-spin" /> : null}
+              {t("sarReviewButton")}
             </button>
-          ) : (
-            <p className="text-xs text-muted-foreground">{t("sarSubmitNoPermission")}</p>
-          )}
+          ) : null}
+        </div>
+      ) : null}
+
+      {canSubmit && filingStatus === "mlro_review" ? (
+        <div className="flex flex-wrap gap-3">
+          <button type="button" disabled={transitioning} onClick={() => handleTransition(() => approveSarReportAction(report.id))} className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60">
+            {t("sarApproveButton")}
+          </button>
+        </div>
+      ) : null}
+
+      {canManage && filingStatus === "filing_pending" ? (
+        <div className="flex flex-wrap gap-3 rounded-md border border-border bg-card p-4">
+          <button type="button" disabled={transitioning} onClick={() => handleFilingResult("filed")} className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60">{t("sarMarkFiledButton")}</button>
+          <button type="button" disabled={transitioning} onClick={() => handleFilingResult("rejected")} className="rounded-md border border-destructive/40 px-4 py-2 text-sm font-semibold text-destructive disabled:opacity-60">{t("sarMarkRejectedButton")}</button>
         </div>
       ) : null}
     </div>
   );
+}
+
+const STATUS_COLOR: Record<string, string> = {
+  draft: "bg-amber-500/15 text-amber-600",
+  mlro_review: "bg-blue-500/15 text-blue-600",
+  filing_pending: "bg-purple-500/15 text-purple-600",
+  filed: "bg-emerald-500/15 text-emerald-600",
+  rejected: "bg-red-500/15 text-red-600",
+};
+
+function STATUS_LABEL(t: (key: "sarStatusDraft" | "sarStatusMlroReview" | "sarStatusFilingPending" | "sarStatusFiled" | "sarStatusRejected" | "sarStatusSubmitted") => string, status: string): string {
+  const labels: Record<string, string> = {
+    draft: "sarStatusDraft",
+    mlro_review: "sarStatusMlroReview",
+    filing_pending: "sarStatusFilingPending",
+    filed: "sarStatusFiled",
+    rejected: "sarStatusRejected",
+  };
+  return t((labels[status] ?? "sarStatusSubmitted") as Parameters<typeof t>[0]);
 }

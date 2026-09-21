@@ -16,6 +16,7 @@ export function NewSarReportClient({ caseId }: { caseId: string }) {
   const guard = useSessionGuard();
   const { t } = useLang();
   const [countryCode, setCountryCode] = useState("TG");
+  const [reportType, setReportType] = useState<"sar" | "str">("sar");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -24,7 +25,7 @@ export function NewSarReportClient({ caseId }: { caseId: string }) {
     setSubmitting(true);
     setError(null);
     try {
-      const result = await guard(() => generateSarReportAction(caseId, countryCode));
+      const result = await guard(() => generateSarReportAction(caseId, countryCode, reportType));
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
@@ -48,6 +49,17 @@ export function NewSarReportClient({ caseId }: { caseId: string }) {
       </div>
 
       <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-md border border-border bg-card p-5">
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-foreground">{t("sarNewTypeLabel")}</label>
+          <select
+            value={reportType}
+            onChange={(e) => setReportType(e.target.value as "sar" | "str")}
+            className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="sar">SAR</option>
+            <option value="str">STR</option>
+          </select>
+        </div>
         <div className="flex flex-col gap-1.5">
           <label className="text-sm font-medium text-foreground">{t("sarNewCountryLabel")}</label>
           <select

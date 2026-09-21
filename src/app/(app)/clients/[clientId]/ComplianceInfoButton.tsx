@@ -40,6 +40,11 @@ interface ScreeningResultSnapshot {
   business: ScreeningResultEntry;
   owners: OwnerScreeningResult[];
   screenedAt: string;
+  provider?: "protegey" | "dow_jones";
+  providers?: Array<"protegey" | "dow_jones">;
+  defaultListChecked?: boolean;
+  degraded?: boolean;
+  fallbackReason?: string;
 }
 
 const DECISION_CONFIG: Record<string, { key: StringKey; color: string; icon: typeof ShieldCheck }> = {
@@ -214,6 +219,11 @@ export function ComplianceInfoButton({
             <p className="text-xs text-muted-foreground">
               {t("clientsComplianceScreenedOnPrefix")} {new Date(screeningResult.screenedAt).toLocaleString()}
             </p>
+            <div className={`rounded-md border p-2.5 text-xs ${screeningResult.degraded ? "border-amber-500/30 bg-amber-500/10 text-amber-700" : "border-border bg-muted/30 text-muted-foreground"}`}>
+              {screeningResult.degraded
+                ? `${t("clientsComplianceFallbackWarning")} ${screeningResult.fallbackReason ?? ""}`
+                : `${t("clientsComplianceProviderLabel")}: ${screeningResult.providers?.map((provider) => provider === "dow_jones" ? "Dow Jones" : "Protegey").join(" + ") ?? (screeningResult.provider === "dow_jones" ? "Dow Jones" : "Protegey")}`}
+            </div>
 
             <ScreeningSection title={t("clientsComplianceBusinessLabel")} result={screeningResult.business} t={t} />
 

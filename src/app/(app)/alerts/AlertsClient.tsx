@@ -3,10 +3,11 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, Briefcase } from "lucide-react";
+import { Loader2, Briefcase, CalendarClock } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
-import { updateAlertStatus, type AlertStatus, type AlertWithContext } from "./actions";
+import { updateAlert, updateAlertStatus, type AlertDisposition, type AlertStatus, type AlertWithContext } from "./actions";
+import type { TeamMember } from "../team/actions";
 import type { PaginatedResult } from "../transactions/actions";
 
 function isError(value: unknown): value is { error: string } {
@@ -24,10 +25,12 @@ export function AlertsClient({
   result,
   page,
   initialStatus,
+  teamMembers,
 }: {
   result: PaginatedResult<AlertWithContext>;
   page: number;
   initialStatus: string;
+  teamMembers: TeamMember[];
 }) {
   const router = useRouter();
   const guard = useSessionGuard();
@@ -38,6 +41,16 @@ export function AlertsClient({
   const [updatingId, setUpdatingId] = useState<string | null>(null);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [savingLifecycleId, setSavingLifecycleId] = useState<string | null>(null);
+
+  const dispositionLabel: Record<AlertDisposition, string> = {
+    confirmed_fraud: t("alertsDispositionConfirmedFraud"),
+    false_positive: t("alertsDispositionFalsePositive"),
+    no_action: t("alertsDispositionNoAction"),
+    sar_filed: t("alertsDispositionSarFiled"),
+    escalated: t("alertsDispositionEscalated"),
+  };
 
   const statusLabel: Record<AlertStatus, string> = {
     open: t("alertsStatusOpen"),
@@ -67,6 +80,37 @@ export function AlertsClient({
     } finally {
       setUpdatingId(null);
     }
+  }
+
+  async function handleLifecycleUpdate(id: string, form: HTMLFormElement) {
+    const data = new FormData(form);
+    setSavingLifecycleId(id);
+    setError(null);
+    try {
+      const updated = await guard(() => updateAlert(id, {
+        assignedToUserId: String(data.get("assignedToUserId") || "") || null,
+        disposition: (String(data.get("disposition") || "") || null) as AlertDisposition | null,
+        investigationNotes: String(data.get("investigationNotes") || "") || null,
+        dueAt: String(data.get("dueAt") || "") ? new Date(String(data.get("dueAt"))).toISOString() : null,
+      }));
+      if (updated === null) return;
+      if (isError(updated)) {
+        setError(updated.error);
+        return;
+      }
+      setAlerts((prev) => prev.map((a) => (a.id === id ? updated : a)));
+      setEditingId(null);
+    } finally {
+      setSavingLifecycleId(null);
+    }
+  }
+
+  function inputDateValue(value: string | null) {
+    if (!value) return "";
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return "";
+    const offset = date.getTimezoneOffset() * 60000;
+    return new Date(date.getTime() - offset).toISOString().slice(0, 16);
   }
 
   return (
@@ -103,6 +147,8 @@ export function AlertsClient({
             const ruleName = (lang === "fr" && alert.ruleNameFr) || alert.ruleName;
             const explanation = lang === "fr" ? alert.ruleExplanationFr || alert.ruleExplanation : alert.ruleExplanation;
             const isBusy = updatingId === alert.id;
+            const isSavingLifecycle = savingLifecycleId === alert.id;
+            const assignee = teamMembers.find((member) => member.id === alert.assignedToUserId);
 
             return (
               <div key={alert.id} className="rounded-md border border-border bg-card p-4">
@@ -138,6 +184,52 @@ export function AlertsClient({
                 {expandedId === alert.id && explanation ? (
                   <p className="mt-2 rounded-md bg-muted/50 p-2.5 text-xs text-foreground">{explanation}</p>
                 ) : null}
+
+                <div className="mt-3 rounded-md border border-border bg-muted/20 p-3">
+                  <div className="grid gap-2 text-xs text-muted-foreground sm:grid-cols-4">
+                    <span>{t("alertsAssignedTo")}: <strong className="font-medium text-foreground">{assignee ? `${assignee.firstName} ${assignee.lastName}` : t("alertsUnassigned")}</strong></span>
+                    <span>{t("alertsDisposition")}: <strong className="font-medium text-foreground">{alert.disposition ? dispositionLabel[alert.disposition] : "—"}</strong></span>
+                    <span>{t("alertsDueAt")}: <strong className="font-medium text-foreground">{alert.dueAt ? new Date(alert.dueAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US") : "—"}</strong></span>
+                    <span>{t("alertsResolvedAt")}: <strong className="font-medium text-foreground">{alert.resolvedAt ? new Date(alert.resolvedAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US") : "—"}</strong></span>
+                  </div>
+                  {alert.investigationNotes ? <p className="mt-2 whitespace-pre-wrap text-xs text-foreground">{alert.investigationNotes}</p> : null}
+                  {editingId === alert.id ? (
+                    <form className="mt-3 grid gap-3 sm:grid-cols-2" onSubmit={(event) => { event.preventDefault(); void handleLifecycleUpdate(alert.id, event.currentTarget); }}>
+                      <label className="flex flex-col gap-1 text-xs font-medium text-foreground">
+                        {t("alertsAssignedTo")}
+                        <select name="assignedToUserId" defaultValue={alert.assignedToUserId ?? ""} className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm font-normal outline-none focus:ring-2 focus:ring-ring">
+                          <option value="">{t("alertsUnassigned")}</option>
+                          {teamMembers.filter((member) => member.isActive).map((member) => <option key={member.id} value={member.id}>{member.firstName} {member.lastName}</option>)}
+                        </select>
+                      </label>
+                      <label className="flex flex-col gap-1 text-xs font-medium text-foreground">
+                        {t("alertsDisposition")}
+                        <select name="disposition" defaultValue={alert.disposition ?? ""} className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm font-normal outline-none focus:ring-2 focus:ring-ring">
+                          <option value="">{t("alertsNoDisposition")}</option>
+                          {Object.entries(dispositionLabel).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+                        </select>
+                      </label>
+                      <label className="flex flex-col gap-1 text-xs font-medium text-foreground sm:col-span-2">
+                        {t("alertsInvestigationNotes")}
+                        <textarea name="investigationNotes" defaultValue={alert.investigationNotes ?? ""} rows={3} className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm font-normal outline-none focus:ring-2 focus:ring-ring" />
+                      </label>
+                      <label className="flex flex-col gap-1 text-xs font-medium text-foreground">
+                        {t("alertsDueAt")}
+                        <input type="datetime-local" name="dueAt" defaultValue={inputDateValue(alert.dueAt)} className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm font-normal outline-none focus:ring-2 focus:ring-ring" />
+                      </label>
+                      <div className="flex items-end justify-end gap-2">
+                        <button type="button" onClick={() => setEditingId(null)} className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted">{t("commonCancel")}</button>
+                        <button type="submit" disabled={isSavingLifecycle} className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground hover:opacity-90 disabled:opacity-50">
+                          {isSavingLifecycle ? <Loader2 className="size-3.5 animate-spin" /> : null}{t("alertsSaveLifecycle")}
+                        </button>
+                      </div>
+                    </form>
+                  ) : (
+                    <button type="button" onClick={() => setEditingId(alert.id)} className="mt-2 flex items-center gap-1.5 text-xs font-medium text-primary hover:underline">
+                      <CalendarClock className="size-3.5" />{t("alertsEditLifecycle")}
+                    </button>
+                  )}
+                </div>
 
                 <div className="mt-3 flex flex-wrap items-center gap-2">
                   {alert.status === "open" || alert.status === "more_info_requested" ? (
