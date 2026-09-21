@@ -28,6 +28,7 @@ import { SessionExpiredProvider } from "@/components/SessionExpiredProvider";
 import { getLang } from "@/lib/i18n/lang";
 import { t, type Lang } from "@/lib/i18n/strings";
 import { getUnreadNotificationsCount } from "./notifications/actions";
+import { RefreshButton } from "@/components/RefreshButton";
 
 interface PartnerSummary {
   name: string;
@@ -178,7 +179,12 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             </div>
           }
         />
-        <main className="relative flex-1 overflow-y-auto px-8 py-8">{children}</main>
+        <main className="relative flex-1 overflow-y-auto px-8 py-8">
+          <div className="mb-4 flex justify-end">
+            <RefreshButton />
+          </div>
+          {children}
+        </main>
       </div>
       <OnboardingTour />
       <PageTransitionOverlay />

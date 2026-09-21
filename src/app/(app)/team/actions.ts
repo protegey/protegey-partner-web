@@ -50,6 +50,14 @@ export interface PendingInvitation {
   roles: { name: string; displayName: string }[];
 }
 
+export interface PaginatedResult<T> {
+  data: T[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
 export interface InviteAgentState {
   error?: string;
   success?: boolean;
@@ -60,20 +68,24 @@ export interface ActionResult {
   success?: boolean;
 }
 
-export async function getTeamMembers(): Promise<TeamMember[]> {
-  return apiFetch<TeamMember[]>("/partners/me/team");
+export async function getPaginatedTeamMembers(page = 1): Promise<PaginatedResult<TeamMember>> {
+  return apiFetch<PaginatedResult<TeamMember>>(`/partners/me/team?page=${page}&limit=20`);
 }
 
-export async function getPendingInvitations(): Promise<PendingInvitation[]> {
-  return apiFetch<PendingInvitation[]>("/partners/me/team/invitations");
+export async function getTeamMembers(): Promise<TeamMember[]> {
+  return (await getPaginatedTeamMembers()).data;
+}
+
+export async function getPendingInvitations(page = 1): Promise<PaginatedResult<PendingInvitation>> {
+  return apiFetch<PaginatedResult<PendingInvitation>>(`/partners/me/team/invitations?page=${page}&limit=20`);
 }
 
 export async function getAssignableRoles(): Promise<AssignableRole[]> {
   return apiFetch<AssignableRole[]>("/roles?scope=partner");
 }
 
-export async function getPartnerRoles(): Promise<PartnerRole[]> {
-  return apiFetch<PartnerRole[]>("/roles?scope=partner");
+export async function getPartnerRoles(page = 1): Promise<PaginatedResult<PartnerRole>> {
+  return apiFetch<PaginatedResult<PartnerRole>>(`/partners/me/roles?page=${page}&limit=20`);
 }
 
 export async function getPermissionsCatalogue(): Promise<PermissionOption[]> {

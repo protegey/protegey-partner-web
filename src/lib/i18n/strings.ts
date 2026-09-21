@@ -8,6 +8,7 @@ export type Lang = "en" | "fr";
  * added here instead of duplicating this pattern per page.
  */
 const STRINGS = {
+  refreshButton: { en: "Refresh", fr: "Actualiser" },
   // ── Language & misc chrome ──────────────────────────────────────────────
   languageToggleAria: { en: "Switch language", fr: "Changer de langue" },
   soonBadge: { en: "Soon", fr: "Bientôt" },
