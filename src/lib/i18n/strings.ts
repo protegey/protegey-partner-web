@@ -18,7 +18,7 @@ const STRINGS = {
 
   // ── Sidebar navigation ──────────────────────────────────────────────────
   navDashboard: { en: "Dashboard", fr: "Tableau de bord" },
-  navPanGuard: { en: "Pan-Guard™", fr: "Pan-Guard™" },
+  navIntelligence: { en: "Intelligence", fr: "Intelligence" },
   navDeviceSignals: { en: "Device Signals", fr: "Signaux d'appareil" },
   navBehavioralSignals: { en: "Behavioral Signals", fr: "Signaux comportementaux" },
   navRiskProfiles: { en: "Risk Profiles", fr: "Profils de risque" },

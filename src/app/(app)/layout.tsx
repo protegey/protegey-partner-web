@@ -54,7 +54,7 @@ function buildNavItems(lang: Lang): NavItem[] {
   return [
     { href: "/dashboard", label: tt("navDashboard"), icon: <LayoutDashboard className="size-4" /> },
     {
-      label: tt("navPanGuard"),
+      label: tt("navIntelligence"),
       icon: <Fingerprint className="size-4" />,
       children: [
         { href: "/pan-guard/device-signals", label: tt("navDeviceSignals") },
@@ -79,7 +79,6 @@ function buildNavItems(lang: Lang): NavItem[] {
         { href: "/sanctions", label: tt("navSanctionsList") },
         { href: "/screening-provider", label: tt("navScreeningProvider") },
         { href: "/pan-risk/shared-signal-network", label: tt("navSharedSignalNetwork") },
-        { href: "/alert-rules", label: tt("navPanStudio") },
         { href: "/pep", label: tt("navPepControl") },
         { href: "/edd", label: tt("navEdd") },
          { href: "/sar-str", label: tt("navSarStr") },
