@@ -122,7 +122,7 @@ const STRINGS = {
   navTransactions: { en: "Transactions", fr: "Transactions" },
   navTransactionAnalytics: { en: "Transaction Analytics", fr: "Analyse des transactions" },
   navAlerts: { en: "Alerts", fr: "Alertes" },
-  navPanStudio: { en: "Pan Studio", fr: "Pan Studio" },
+  
   navCases: { en: "Cases", fr: "Dossiers" },
   navPartnerIntegrations: { en: "Partner Integrations", fr: "Intégrations partenaire" },
   navApiKeys: { en: "API Keys", fr: "Clés API" },

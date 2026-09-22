@@ -92,8 +92,9 @@ function buildNavItems(lang: Lang): NavItem[] {
         { href: "/transactions", label: tt("navTransactions") },
         { href: "/transactions/analytics", label: tt("navTransactionAnalytics") },
         { href: "/alerts", label: tt("navAlerts") },
-        { href: "/alert-rules", label: tt("navPanStudio") },
-        ],
+        { href: "/alert-rules", label: tt("navAlertRules") },
+        { href: "/cases", label: tt("navCases") },
+      ],
     },
     {
       label: tt("navPartnerIntegrations"),
