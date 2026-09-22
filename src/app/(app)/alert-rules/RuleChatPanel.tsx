@@ -70,14 +70,20 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
             <p className="text-sm text-muted-foreground">{t("chatEmptyState")}</p>
             <div className="mt-1 rounded-md border border-dashed border-border bg-muted/40 p-3 text-left">
               <p className="text-[11px] font-semibold uppercase text-muted-foreground">{t("chatExampleLabel")}</p>
-              <p className="mt-1 text-sm text-foreground">{t("chatExampleText")}</p>
-              <button
-                type="button"
-                onClick={() => send(t("chatExampleText"))}
-                className="mt-2 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-primary transition-colors hover:bg-muted"
-              >
-                {t("chatUseExample")}
-              </button>
+              <div className="mt-1 flex flex-col gap-2">
+                {[t("chatExampleText"), t("chatExampleText2"), t("chatExampleText3"), t("chatExampleText4"), t("chatExampleText5"), t("chatExampleText6")].map((example, idx) => (
+                  <div key={idx} className="flex items-start gap-2">
+                    <p className="text-sm text-foreground">{example}</p>
+                    <button
+                      type="button"
+                      onClick={() => send(example)}
+                      className="shrink-0 rounded-md border border-primary px-2 py-0.5 text-[10px] font-medium text-primary transition-colors hover:bg-primary/10"
+                    >
+                      {t("chatUseExample")}
+                    </button>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         ) : (

@@ -167,6 +167,26 @@ const STRINGS = {
     en: "Flag any customer who receives more than 5 payments from 5 different people within 2 days, totaling more than 1,000,000 XOF.",
     fr: "Signale tout client qui reçoit plus de 5 paiements de 5 personnes différentes en 2 jours, pour un total de plus de 1 000 000 XOF.",
   },
+  chatExampleText2: {
+    en: "Flag any customer who sends more than 10 transactions to different recipients within a single hour.",
+    fr: "Signale tout client qui envoie plus de 10 transactions à différents destinataires dans une seule heure.",
+  },
+  chatExampleText3: {
+    en: "Flag any customer whose total transaction volume exceeds 10,000,000 XOF in a single day.",
+    fr: "Signale tout client dont le volume total des transactions dépasse 10 000 000 XOF en une seule journée.",
+  },
+  chatExampleText4: {
+    en: "Flag any customer who receives a payment originating from a sanctioned country.",
+    fr: "Signale tout client qui reçoit un paiement provenant d'un pays sous sanctions.",
+  },
+  chatExampleText5: {
+    en: "Flag any customer who has 5 or more transactions above 500,000 XOF within 30 minutes.",
+    fr: "Signale tout client qui effectue 5 transactions ou plus dépassant 500 000 XOF en moins de 30 minutes.",
+  },
+  chatExampleText6: {
+    en: "Flag any transaction from a customer whose account was created less than 1 hour ago and exceeds 100,000 XOF.",
+    fr: "Signale toute transaction provenant d'un client dont le compte a été créé depuis moins d'une heure et dépasse 100 000 XOF.",
+  },
   chatUseExample: { en: "Use this example", fr: "Utiliser cet exemple" },
   chatInputPlaceholder: { en: "Describe the rule you want…", fr: "Décrivez la règle que vous voulez…" },
   chatSend: { en: "Send", fr: "Envoyer" },
