@@ -4,6 +4,7 @@ import { apiFetch } from "@/lib/api";
 
 export type TransactionDirection = "DEBIT" | "CREDIT";
 export type TransactionDecision = "clear" | "review" | "blocked";
+export type DeviceAction = "allow" | "soft_challenge" | "hard_challenge" | "block";
 
 export interface MonitoringTransaction {
   id: string;
@@ -20,6 +21,13 @@ export interface MonitoringTransaction {
   decision: TransactionDecision;
   riskScore: number;
   createdAt: string;
+  deviceRiskScore: number | null;
+  deviceAction: DeviceAction | null;
+  deviceReasons: string[] | null;
+  deviceVisitorId: string | null;
+  deviceAttributes: Record<string, unknown> | null;
+  ipCountry: string | null;
+  ipHash: string | null;
 }
 
 export interface PaginatedResult<T> {

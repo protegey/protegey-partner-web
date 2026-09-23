@@ -16,6 +16,9 @@ export interface DeviceSignal {
   reasons: string[] | null;
   source: "webhook" | "device_event";
   createdAt: string;
+  deviceAttributes: Record<string, unknown> | null;
+  ipCountry: string | null;
+  ipHash: string | null;
 }
 
 export interface DeviceSignalsQuery {

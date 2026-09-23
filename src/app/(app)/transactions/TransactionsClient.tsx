@@ -1,17 +1,25 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { Fragment, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowDownLeft, ArrowUpRight } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, ChevronDown, ChevronRight } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
-import type { MonitoringTransaction, PaginatedResult } from "./actions";
+import { DeviceAttributesDetails } from "@/components/DeviceAttributesSummary";
+import type { DeviceAction, MonitoringTransaction, PaginatedResult } from "./actions";
 
 function riskColor(score: number): string {
   if (score >= 50) return "text-destructive";
   if (score >= 20) return "text-amber-600";
   return "text-muted-foreground";
 }
+
+const DEVICE_ACTION_COLOR: Record<DeviceAction, string> = {
+  allow: "bg-emerald-500/15 text-emerald-600",
+  soft_challenge: "bg-amber-500/15 text-amber-600",
+  hard_challenge: "bg-orange-500/15 text-orange-600",
+  block: "bg-destructive/15 text-destructive",
+};
 
 export function TransactionsClient({
   result,
@@ -38,6 +46,7 @@ export function TransactionsClient({
   const [customer, setCustomer] = useState(initialCustomer);
   const [dateFrom, setDateFrom] = useState(initialDateFrom);
   const [dateTo, setDateTo] = useState(initialDateTo);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   function applyFilters(newPage: number = 1) {
     const params = new URLSearchParams();
@@ -63,6 +72,13 @@ export function TransactionsClient({
     clear: t("txDecisionClear"),
     review: t("txDecisionReview"),
     blocked: t("txDecisionBlocked"),
+  };
+
+  const deviceActionLabel: Record<DeviceAction, string> = {
+    allow: t("deviceActionAllow"),
+    soft_challenge: t("deviceActionSoftChallenge"),
+    hard_challenge: t("deviceActionHardChallenge"),
+    block: t("deviceActionBlock"),
   };
 
   return (
@@ -150,6 +166,7 @@ export function TransactionsClient({
           <table className="w-full text-left text-sm">
             <thead className="bg-muted text-muted-foreground">
               <tr>
+                <th className="w-8 px-4 py-2.5" />
                 <th className="px-4 py-2.5 font-medium">{t("txColDate")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("txColExternalId")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("txColCustomer")}</th>
@@ -163,33 +180,81 @@ export function TransactionsClient({
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {result.data.map((tx) => (
-                <tr key={tx.id}>
-                  <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">
-                    {new Date(tx.occurredAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
-                  </td>
-                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{tx.externalTransactionId}</td>
-                  <td className="px-4 py-2.5 font-mono text-xs text-foreground">{tx.externalCustomerId}</td>
-                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{tx.counterpartyExternalId ?? "—"}</td>
-                  <td className="px-4 py-2.5">
-                    <span className="inline-flex items-center gap-1 text-xs text-foreground">
-                      {tx.direction === "CREDIT" ? (
-                        <ArrowDownLeft className="size-3.5 text-primary" />
-                      ) : (
-                        <ArrowUpRight className="size-3.5 text-muted-foreground" />
-                      )}
-                      {tx.direction === "CREDIT" ? t("txDirectionIn") : t("txDirectionOut")}
-                    </span>
-                  </td>
-                  <td className="whitespace-nowrap px-4 py-2.5 font-medium text-foreground">
-                    {Number(tx.amount).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")} {tx.currency}
-                  </td>
-                  <td className="px-4 py-2.5 text-xs text-muted-foreground">{tx.transactionType}</td>
-                  <td className="px-4 py-2.5 text-xs text-muted-foreground">{tx.isCash ? t("txCashYes") : t("txCashNo")}</td>
-                  <td className="whitespace-nowrap px-4 py-2.5 text-xs font-medium">{decisionLabel[tx.decision]}</td>
-                  <td className={`px-4 py-2.5 text-xs font-semibold ${riskColor(tx.riskScore)}`}>{tx.riskScore}</td>
-                </tr>
-              ))}
+              {result.data.map((tx) => {
+                const expanded = expandedId === tx.id;
+                const hasDeviceSignal = tx.deviceAction != null || tx.deviceRiskScore != null || tx.deviceAttributes != null || tx.ipCountry != null;
+                return (
+                  <Fragment key={tx.id}>
+                    <tr onClick={() => setExpandedId(expanded ? null : tx.id)} className="cursor-pointer hover:bg-muted/50">
+                      <td className="px-4 py-2.5 text-muted-foreground">
+                        {expanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">
+                        {new Date(tx.occurredAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
+                      </td>
+                      <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{tx.externalTransactionId}</td>
+                      <td className="px-4 py-2.5 font-mono text-xs text-foreground">{tx.externalCustomerId}</td>
+                      <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{tx.counterpartyExternalId ?? "—"}</td>
+                      <td className="px-4 py-2.5">
+                        <span className="inline-flex items-center gap-1 text-xs text-foreground">
+                          {tx.direction === "CREDIT" ? (
+                            <ArrowDownLeft className="size-3.5 text-primary" />
+                          ) : (
+                            <ArrowUpRight className="size-3.5 text-muted-foreground" />
+                          )}
+                          {tx.direction === "CREDIT" ? t("txDirectionIn") : t("txDirectionOut")}
+                        </span>
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-2.5 font-medium text-foreground">
+                        {Number(tx.amount).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")} {tx.currency}
+                      </td>
+                      <td className="px-4 py-2.5 text-xs text-muted-foreground">{tx.transactionType}</td>
+                      <td className="px-4 py-2.5 text-xs text-muted-foreground">{tx.isCash ? t("txCashYes") : t("txCashNo")}</td>
+                      <td className="whitespace-nowrap px-4 py-2.5 text-xs font-medium">{decisionLabel[tx.decision]}</td>
+                      <td className={`px-4 py-2.5 text-xs font-semibold ${riskColor(tx.riskScore)}`}>{tx.riskScore}</td>
+                    </tr>
+                    {expanded ? (
+                      <tr className="bg-muted/30">
+                        <td colSpan={11} className="px-4 py-4">
+                          <div className="flex flex-col gap-3">
+                            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                              {t("deviceSignalDetailSectionTitle")}
+                            </p>
+                            {hasDeviceSignal ? (
+                              <div className="flex flex-col gap-3">
+                                <div className="flex flex-wrap items-center gap-2">
+                                  {tx.deviceAction ? (
+                                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${DEVICE_ACTION_COLOR[tx.deviceAction]}`}>
+                                      {deviceActionLabel[tx.deviceAction]}
+                                    </span>
+                                  ) : null}
+                                  {tx.deviceRiskScore != null ? (
+                                    <span className={`text-xs font-semibold ${riskColor(tx.deviceRiskScore)}`}>
+                                      {t("deviceSignalsColRiskScore")}: {tx.deviceRiskScore}
+                                    </span>
+                                  ) : null}
+                                </div>
+                                {tx.deviceReasons && tx.deviceReasons.length > 0 ? (
+                                  <div className="flex flex-wrap gap-1">
+                                    {tx.deviceReasons.map((reason) => (
+                                      <span key={reason} className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                                        {reason}
+                                      </span>
+                                    ))}
+                                  </div>
+                                ) : null}
+                                <DeviceAttributesDetails attributes={tx.deviceAttributes} ipCountry={tx.ipCountry} ipHash={tx.ipHash} />
+                              </div>
+                            ) : (
+                              <p className="text-xs text-muted-foreground">{t("deviceSignalsNoEnrichedData")}</p>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>

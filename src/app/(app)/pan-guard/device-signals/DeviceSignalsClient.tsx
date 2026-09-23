@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { Fragment, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Fingerprint } from "lucide-react";
+import { ChevronDown, ChevronRight, Fingerprint } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
+import { CountryBadge, DeviceAttributesDetails, DeviceSummaryCell } from "@/components/DeviceAttributesSummary";
 import type { DeviceSignal } from "./actions";
 import type { PaginatedResult } from "../../transactions/actions";
 
@@ -31,6 +32,7 @@ export function DeviceSignalsClient({
   const [, startTransition] = useTransition();
   const [customer, setCustomer] = useState(initialCustomer);
   const [action, setAction] = useState(initialAction);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
 
   const actionLabel: Record<string, string> = {
     allow: t("deviceActionAllow"),
@@ -98,35 +100,65 @@ export function DeviceSignalsClient({
           <table className="w-full text-left text-sm">
             <thead className="bg-muted text-muted-foreground">
               <tr>
+                <th className="w-8 px-4 py-2.5" />
                 <th className="px-4 py-2.5 font-medium">{t("signalsColWhen")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("signalsColCustomer")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColEventId")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColSource")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColAction")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColRiskScore")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColReasons")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColDevice")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColCountry")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {result.data.map((signal) => (
-                <tr key={signal.id}>
-                  <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">
-                    {new Date(signal.createdAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
-                  </td>
-                  <td className="px-4 py-2.5 text-foreground">{signal.externalCustomerId ?? "—"}</td>
-                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{signal.eventId}</td>
-                  <td className="px-4 py-2.5 text-xs text-muted-foreground">
-                    {signal.source === "webhook" ? t("deviceSignalsSourceWebhook") : t("deviceSignalsSourceDeviceEvent")}
-                  </td>
-                  <td className="px-4 py-2.5">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${ACTION_COLOR[signal.action] ?? "bg-muted text-muted-foreground"}`}>
-                      {actionLabel[signal.action] ?? signal.action}
-                    </span>
-                  </td>
-                  <td className="px-4 py-2.5 text-foreground">{signal.riskScore}</td>
-                  <td className="px-4 py-2.5 text-xs text-muted-foreground">{signal.reasons?.join(", ") || "—"}</td>
-                </tr>
-              ))}
+              {result.data.map((signal) => {
+                const expanded = expandedId === signal.id;
+                return (
+                  <Fragment key={signal.id}>
+                    <tr onClick={() => setExpandedId(expanded ? null : signal.id)} className="cursor-pointer hover:bg-muted/50">
+                      <td className="px-4 py-2.5 text-muted-foreground">
+                        {expanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+                      </td>
+                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">
+                        {new Date(signal.createdAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
+                      </td>
+                      <td className="px-4 py-2.5 text-foreground">{signal.externalCustomerId ?? "—"}</td>
+                      <td className="px-4 py-2.5 text-xs text-muted-foreground">
+                        {signal.source === "webhook" ? t("deviceSignalsSourceWebhook") : t("deviceSignalsSourceDeviceEvent")}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${ACTION_COLOR[signal.action] ?? "bg-muted text-muted-foreground"}`}>
+                          {actionLabel[signal.action] ?? signal.action}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5 text-foreground">{signal.riskScore}</td>
+                      <td className="px-4 py-2.5">
+                        <DeviceSummaryCell attributes={signal.deviceAttributes} />
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <CountryBadge ipCountry={signal.ipCountry} />
+                      </td>
+                    </tr>
+                    {expanded ? (
+                      <tr className="bg-muted/30">
+                        <td colSpan={8} className="px-4 py-4">
+                          <div className="flex flex-col gap-3">
+                            <div className="grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">
+                              <span className="text-muted-foreground">
+                                {t("deviceSignalsColEventId")}: <span className="font-mono text-foreground">{signal.eventId}</span>
+                              </span>
+                              <span className="text-muted-foreground">
+                                {t("deviceSignalsColReasons")}: <span className="text-foreground">{signal.reasons?.join(", ") || "—"}</span>
+                              </span>
+                            </div>
+                            <DeviceAttributesDetails attributes={signal.deviceAttributes} ipHash={signal.ipHash} />
+                          </div>
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
+                );
+              })}
             </tbody>
           </table>
         </div>
