@@ -122,7 +122,7 @@ const STRINGS = {
   navTransactions: { en: "Transactions", fr: "Transactions" },
   navTransactionAnalytics: { en: "Transaction Analytics", fr: "Analyse des transactions" },
   navAlerts: { en: "Alerts", fr: "Alertes" },
-  
+  navAlertRules: { en: "Alert Rules", fr: "Règles d'alerte" },
   navCases: { en: "Cases", fr: "Dossiers" },
   navPartnerIntegrations: { en: "Partner Integrations", fr: "Intégrations partenaire" },
   navApiKeys: { en: "API Keys", fr: "Clés API" },
@@ -694,6 +694,11 @@ const STRINGS = {
     en: "Could not start a verification session. Please try again.",
     fr: "Impossible de démarrer une session de vérification. Veuillez réessayer.",
   },
+  kycFaceTecRedirecting: {
+    en: "Redirecting you to identity capture…",
+    fr: "Redirection vers la capture d'identité…",
+  },
+  kycFaceTecRedirectFallback: { en: "Click here if you're not redirected", fr: "Cliquez ici si vous n'êtes pas redirigé" },
 
   // ── Sanctions page ───────────────────────────────────────────────────────
   sanctionsColName: { en: "Name", fr: "Nom" },
@@ -722,6 +727,20 @@ const STRINGS = {
   sanctionsSourceCustom: { en: "Custom", fr: "Personnalisé" },
   sanctionsIncludeDelisted: { en: "Include delisted", fr: "Inclure les radiés" },
   sanctionsApplyButton: { en: "Apply", fr: "Appliquer" },
+  sanctionsSearchToolLink: { en: "Sanctions & PEP lookup", fr: "Recherche Sanctions & PPE" },
+  sanctionsSearchPageTitle: { en: "Sanctions & PEP Lookup", fr: "Recherche Sanctions & PPE" },
+  sanctionsSearchPageSubtitle: {
+    en: "Type a name and check it against sanctions lists and PEP status — no existing customer record required.",
+    fr: "Saisissez un nom et vérifiez-le par rapport aux listes de sanctions et au statut PPE — aucun dossier client existant requis.",
+  },
+  sanctionsSearchNameLabel: { en: "Name", fr: "Nom" },
+  sanctionsSearchNamePlaceholder: { en: "Full name to screen", fr: "Nom complet à vérifier" },
+  sanctionsSearchButton: { en: "Search", fr: "Rechercher" },
+  sanctionsSearchError: { en: "Search failed. Please try again.", fr: "La recherche a échoué. Veuillez réessayer." },
+  sanctionsSearchResultsForPrefix: { en: "Results for", fr: "Résultats pour" },
+  sanctionsSearchPepBadge: { en: "PEP", fr: "PPE" },
+  sanctionsSearchPepMatchFound: { en: "PEP match found", fr: "Correspondance PPE trouvée" },
+  sanctionsSearchNoPepMatch: { en: "No PEP match", fr: "Aucune correspondance PPE" },
 
   // ── Settings page ────────────────────────────────────────────────────────
   settingsPageTitle: { en: "Settings", fr: "Paramètres" },
@@ -1184,6 +1203,37 @@ const STRINGS = {
   riskProfilesColId: { en: "Profile ID", fr: "ID du profil" },
   riskProfileSourceDevice: { en: "Device", fr: "Appareil" },
   riskProfileSourceBehavioral: { en: "Behavioral", fr: "Comportemental" },
+  riskProfilesColWeighted: { en: "Weighted Score", fr: "Score pondéré" },
+  riskProfilesColDecayed: { en: "Decayed Score", fr: "Score dégressif" },
+  riskProfilesColTopCategory: { en: "Top Driver", fr: "Facteur principal" },
+  riskProfileScoreWeightedHint: {
+    en: "Composite score weighted by fusion importance (Behavioral 35%, Device 25%, Network 15%, Identity 15%, Compliance 10%) — the most informative single number.",
+    fr: "Score composite pondéré par l'importance de fusion (Comportemental 35 %, Appareil 25 %, Réseau 15 %, Identité 15 %, Conformité 10 %) — le chiffre le plus informatif à lui seul.",
+  },
+  riskProfileScoreDecayedHint: {
+    en: "Cumulative score with old contributions aged out (30-day half-life) — how risky this customer is right now.",
+    fr: "Score cumulé avec dépréciation des anciennes contributions (demi-vie de 30 jours) — le risque actuel de ce client.",
+  },
+  riskProfileScoreCumulativeHint: {
+    en: "Flat additive total of every contribution ever recorded — never decreases.",
+    fr: "Total additif brut de toutes les contributions jamais enregistrées — ne diminue jamais.",
+  },
+  riskProfileCategoryBehavioral: { en: "Behavioral", fr: "Comportemental" },
+  riskProfileCategoryDevice: { en: "Device", fr: "Appareil" },
+  riskProfileCategoryNetwork: { en: "Network", fr: "Réseau" },
+  riskProfileCategoryIdentity: { en: "Identity", fr: "Identité" },
+  riskProfileCategoryCompliance: { en: "Compliance", fr: "Conformité" },
+  riskProfileCategoryOther: { en: "Other", fr: "Autre" },
+  riskProfilesBreakdownTitle: { en: "Risk breakdown by category", fr: "Répartition du risque par catégorie" },
+  riskProfilesBreakdownPoints: { en: "pts", fr: "pts" },
+  riskProfilesBreakdownCount: { en: "signals", fr: "signaux" },
+  riskProfilesBreakdownWeight: { en: "fusion weight", fr: "poids de fusion" },
+  riskProfilesViewDetail: { en: "View full profile", fr: "Voir le profil complet" },
+  riskProfileDetailBackToList: { en: "Back to risk profiles", fr: "Retour aux profils de risque" },
+  riskProfileDetailTitle: { en: "Risk profile", fr: "Profil de risque" },
+  riskProfileDetailNotFound: { en: "No risk profile found for this customer.", fr: "Aucun profil de risque trouvé pour ce client." },
+  riskProfileDetailContributionsTitle: { en: "Contribution history", fr: "Historique des contributions" },
+  riskProfileDetailNoContributions: { en: "No contributions recorded yet.", fr: "Aucune contribution enregistrée pour l'instant." },
 
   // ── Cases (Pan-Monitor) ──────────────────────────────────────────────────
   casesPageTitle: { en: "Cases", fr: "Dossiers" },
@@ -1231,6 +1281,12 @@ const STRINGS = {
   caseNotePlaceholder: { en: "What did you check? What did you decide?", fr: "Qu'avez-vous vérifié ? Qu'avez-vous décidé ?" },
   caseAddNoteButton: { en: "Add note", fr: "Ajouter la note" },
   alertsOpenCase: { en: "Open a case", fr: "Ouvrir un dossier" },
+  alertsConvertToCase: { en: "Convert to case", fr: "Convertir en dossier" },
+  alertsConvertToCaseHint: {
+    en: "One click: creates a case from this alert and escalates it.",
+    fr: "En un clic : crée un dossier à partir de cette alerte et l'escalade.",
+  },
+  alertsConvertToCaseSuccess: { en: "Case created — opening it now.", fr: "Dossier créé — ouverture en cours." },
 
   // ── SAR/STR declarations (Pan-Risk) ──────────────────────────────────────
   sarStrPageTitle: { en: "SAR/STR Declarations", fr: "Déclarations SAR/STR" },

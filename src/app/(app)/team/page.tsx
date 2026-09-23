@@ -34,7 +34,7 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
   ]);
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6">
+    <div className="flex w-full flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-foreground">{t(lang, "teamPageTitle")}</h1>

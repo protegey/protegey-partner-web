@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Briefcase, Plus } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
+import { Pagination } from "@/components/Pagination";
 import type { Case } from "./actions";
 import type { PaginatedResult } from "../transactions/actions";
 
@@ -46,7 +47,7 @@ export function CasesClient({
   }
 
   return (
-    <div className="mx-auto flex max-w-5xl flex-col gap-6">
+    <div className="flex w-full flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-foreground">{t("casesPageTitle")}</h1>
@@ -138,29 +139,7 @@ export function CasesClient({
         </div>
       )}
 
-      {result.totalPages > 1 ? (
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => applyFilters(page - 1)}
-            disabled={page <= 1}
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {t("paginationPrevious")}
-          </button>
-          <span className="text-sm text-muted-foreground">
-            {t("paginationPagePrefix")} {page} {t("paginationOf")} {result.totalPages}
-          </span>
-          <button
-            type="button"
-            onClick={() => applyFilters(page + 1)}
-            disabled={page >= result.totalPages}
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {t("paginationNext")}
-          </button>
-        </div>
-      ) : null}
+      <Pagination page={page} totalPages={result.totalPages} total={result.total} onPageChange={applyFilters} />
     </div>
   );
 }

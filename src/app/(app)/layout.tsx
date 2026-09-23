@@ -77,6 +77,7 @@ function buildNavItems(lang: Lang): NavItem[] {
       icon: <ShieldCheck className="size-4" />,
       children: [
         { href: "/sanctions", label: tt("navSanctionsList") },
+        { href: "/sanctions/search", label: tt("sanctionsSearchToolLink") },
         { href: "/screening-provider", label: tt("navScreeningProvider") },
         { href: "/pan-risk/shared-signal-network", label: tt("navSharedSignalNetwork") },
         { href: "/pep", label: tt("navPepControl") },

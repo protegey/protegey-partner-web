@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { ScrollText } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
+import { Pagination } from "@/components/Pagination";
 import { describeEvent, type NotificationEvent } from "@/lib/events";
 import type { PaginatedResult } from "../transactions/actions";
 
@@ -11,7 +12,7 @@ export function AuditLogsClient({ result, page }: { result: PaginatedResult<Noti
   const { t, lang } = useLang();
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6">
+    <div className="flex w-full flex-col gap-6">
       <div>
         <h1 className="text-xl font-semibold text-foreground">{t("auditLogsPageTitle")}</h1>
         <p className="text-sm text-muted-foreground">{t("auditLogsPageSubtitle")}</p>
@@ -55,29 +56,7 @@ export function AuditLogsClient({ result, page }: { result: PaginatedResult<Noti
         </div>
       )}
 
-      {result.totalPages > 1 ? (
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => router.push(`/audit-logs?page=${page - 1}`)}
-            disabled={page <= 1}
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {t("paginationPrevious")}
-          </button>
-          <span className="text-sm text-muted-foreground">
-            {t("paginationPagePrefix")} {page} {t("paginationOf")} {result.totalPages}
-          </span>
-          <button
-            type="button"
-            onClick={() => router.push(`/audit-logs?page=${page + 1}`)}
-            disabled={page >= result.totalPages}
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {t("paginationNext")}
-          </button>
-        </div>
-      ) : null}
+      <Pagination page={page} totalPages={result.totalPages} total={result.total} onPageChange={(next) => router.push(`/audit-logs?page=${next}`)} />
     </div>
   );
 }

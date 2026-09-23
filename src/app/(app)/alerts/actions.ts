@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api";
 import type { PaginatedResult } from "../transactions/actions";
+import type { Case } from "../cases/actions";
 
 export type AlertStatus = "open" | "confirmed" | "more_info_requested" | "dismissed";
 export type AlertDisposition = "confirmed_fraud" | "false_positive" | "no_action" | "sar_filed" | "escalated";
@@ -73,6 +74,26 @@ export async function updateAlert(id: string, payload: AlertUpdatePayload): Prom
   try {
     const result = await apiFetchGuarded<AlertWithContext>(`/alerts/me/${id}`, { method: "PATCH", body: payload });
     if (!("error" in result) && !("authExpired" in result)) revalidatePath("/alerts");
+    return result;
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
+}
+
+export interface ConvertAlertToCaseResult {
+  alert: AlertWithContext;
+  case: Case;
+}
+
+/** One-click path: escalates the alert and creates a pre-filled case from it, atomically. */
+export async function convertAlertToCaseAction(id: string): Promise<MutationResult<ConvertAlertToCaseResult>> {
+  try {
+    const result = await apiFetchGuarded<ConvertAlertToCaseResult>(`/alerts/me/${id}/convert-to-case`, { method: "POST" });
+    if (!("error" in result) && !("authExpired" in result)) {
+      revalidatePath("/alerts");
+      revalidatePath("/cases");
+    }
     return result;
   } catch (error) {
     if (error instanceof ApiError) return { error: error.message };

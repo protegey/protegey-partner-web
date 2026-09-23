@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
+import { Pagination } from "@/components/Pagination";
 import { describeEvent } from "@/lib/events";
 import type { NotificationsPage } from "./actions";
 
@@ -33,29 +34,7 @@ export function NotificationsClient({ result, page }: { result: NotificationsPag
         </div>
       )}
 
-      {result.totalPages > 1 ? (
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => router.push(`/notifications?page=${page - 1}`)}
-            disabled={page <= 1}
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {t("paginationPrevious")}
-          </button>
-          <span className="text-sm text-muted-foreground">
-            {t("paginationPagePrefix")} {page} {t("paginationOf")} {result.totalPages}
-          </span>
-          <button
-            type="button"
-            onClick={() => router.push(`/notifications?page=${page + 1}`)}
-            disabled={page >= result.totalPages}
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {t("paginationNext")}
-          </button>
-        </div>
-      ) : null}
+      <Pagination page={page} totalPages={result.totalPages} total={result.total} onPageChange={(next) => router.push(`/notifications?page=${next}`)} />
     </div>
   );
 }

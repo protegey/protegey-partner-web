@@ -1,6 +1,6 @@
 "use server";
 
-import { apiFetch } from "@/lib/api";
+import { apiFetch, apiFetchGuarded, type AuthExpired } from "@/lib/api";
 
 export interface SanctionsEntity {
   id: string;
@@ -50,4 +50,38 @@ export async function getSanctions(params: {
 
 export async function getSanctionsStats(): Promise<SanctionsStats> {
   return apiFetch<SanctionsStats>("/sanctions/stats");
+}
+
+export interface SanctionsSearchMatch {
+  id: string;
+  name: string;
+  type: string;
+  source: string;
+  sourceId: string | null;
+  aliases: string[];
+  dateOfBirth: string | null;
+  nationality: string | null;
+  listingDate: string | null;
+  notes: string | null;
+  score: number;
+  matchedOn: string;
+  isPep: boolean;
+}
+
+export interface SanctionsSearchResult {
+  decision: "blocked" | "review" | "clear";
+  score: number;
+  pepMatch: boolean;
+  matches: SanctionsSearchMatch[];
+}
+
+/**
+ * Standalone name lookup — sanctions + PEP status in one call, independent of any existing
+ * client/customer record. This is the "type a name, check if this person is at risk" tool;
+ * previously the only screening path (`ComplianceInfoButton`) required an already-created KYB
+ * client.
+ */
+export async function searchSanctionsAction(name: string, type: "person" | "business"): Promise<SanctionsSearchResult | AuthExpired> {
+  const params = new URLSearchParams({ name, type });
+  return apiFetchGuarded<SanctionsSearchResult>(`/sanctions/search?${params.toString()}`);
 }

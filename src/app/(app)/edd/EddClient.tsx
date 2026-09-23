@@ -109,7 +109,7 @@ export function EddClient({ result, initialStatus, teamMembers }: { result: { da
     );
   };
 
-  return <div className="mx-auto flex max-w-6xl flex-col gap-6">
+  return <div className="flex w-full flex-col gap-6">
     <div><h1 className="text-xl font-semibold text-foreground">{t("eddPageTitle")}</h1><p className="text-sm text-muted-foreground">{t("eddPageSubtitle")}</p></div>
     <div className="flex items-end gap-3"><label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">{t("eddStatus")}<select value={filter} onChange={(event) => changeFilter(event.target.value)} className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground"><option value="all">{t("eddAllStatuses")}</option>{statuses.map((status) => <option key={status} value={status}>{t(`eddStatus_${status}` as never)}</option>)}</select></label></div>
     {error ? <p className="text-sm text-destructive">{error}</p> : null}

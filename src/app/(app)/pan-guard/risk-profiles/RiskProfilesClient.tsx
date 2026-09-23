@@ -2,9 +2,13 @@
 
 import { Fragment, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ChevronDown, ChevronRight, ShieldAlert } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
-import type { EntityRiskProfile } from "./actions";
+import { Pagination } from "@/components/Pagination";
+import { RiskBreakdown } from "./RiskBreakdown";
+import type { StringKey } from "@/lib/i18n/strings";
+import type { EntityRiskProfile, RiskProfileCategory } from "./actions";
 import type { PaginatedResult } from "../../transactions/actions";
 
 function scoreColor(score: number): string {
@@ -12,6 +16,15 @@ function scoreColor(score: number): string {
   if (score >= 30) return "text-amber-600";
   return "text-muted-foreground";
 }
+
+const CATEGORY_LABEL_KEY: Record<RiskProfileCategory, StringKey> = {
+  behavioral: "riskProfileCategoryBehavioral",
+  device: "riskProfileCategoryDevice",
+  network: "riskProfileCategoryNetwork",
+  identity: "riskProfileCategoryIdentity",
+  compliance: "riskProfileCategoryCompliance",
+  other: "riskProfileCategoryOther",
+};
 
 export function RiskProfilesClient({
   result,
@@ -41,7 +54,7 @@ export function RiskProfilesClient({
   }
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6">
+    <div className="flex w-full flex-col gap-6">
       <div>
         <h1 className="text-xl font-semibold text-foreground">{t("riskProfilesPageTitle")}</h1>
         <p className="text-sm text-muted-foreground">{t("riskProfilesPageSubtitle")}</p>
@@ -73,16 +86,25 @@ export function RiskProfilesClient({
           <p className="text-sm text-muted-foreground">{t("riskProfilesEmpty")}</p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-md border border-border">
+        <div className="overflow-x-auto rounded-md border border-border">
           <table className="w-full text-left text-sm">
             <thead className="bg-muted text-muted-foreground">
               <tr>
                 <th className="w-8 px-4 py-2.5" />
                 <th className="px-4 py-2.5 font-medium">{t("signalsColCustomer")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("riskProfilesColId")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("riskProfilesColScore")}</th>
+                <th className="px-4 py-2.5 font-medium" title={t("riskProfileScoreWeightedHint")}>
+                  {t("riskProfilesColWeighted")}
+                </th>
+                <th className="px-4 py-2.5 font-medium" title={t("riskProfileScoreDecayedHint")}>
+                  {t("riskProfilesColDecayed")}
+                </th>
+                <th className="px-4 py-2.5 font-medium" title={t("riskProfileScoreCumulativeHint")}>
+                  {t("riskProfilesColScore")}
+                </th>
+                <th className="px-4 py-2.5 font-medium">{t("riskProfilesColTopCategory")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("riskProfilesColContributions")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("riskProfilesColLastUpdated")}</th>
+                <th className="px-4 py-2.5 font-medium" />
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -98,30 +120,51 @@ export function RiskProfilesClient({
                         {expanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
                       </td>
                       <td className="px-4 py-2.5 text-foreground">{profile.externalCustomerId}</td>
-                      <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{profile.id}</td>
-                      <td className={`px-4 py-2.5 font-semibold ${scoreColor(profile.cumulativeScore)}`}>{profile.cumulativeScore}</td>
+                      <td className={`px-4 py-2.5 text-base font-bold ${scoreColor(profile.weightedScore)}`}>{profile.weightedScore.toFixed(1)}</td>
+                      <td className={`px-4 py-2.5 font-semibold ${scoreColor(profile.decayedScore)}`}>{profile.decayedScore.toFixed(1)}</td>
+                      <td className={`px-4 py-2.5 text-xs ${scoreColor(profile.cumulativeScore)}`}>{profile.cumulativeScore}</td>
+                      <td className="px-4 py-2.5 text-xs text-muted-foreground">
+                        {profile.topCategory ? t(CATEGORY_LABEL_KEY[profile.topCategory]) : "—"}
+                      </td>
                       <td className="px-4 py-2.5 text-xs text-muted-foreground">{profile.contributions.length}</td>
                       <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">
                         {new Date(profile.updatedAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
                       </td>
+                      <td className="px-4 py-2.5 text-right">
+                        <Link
+                          href={`/pan-guard/risk-profiles/${encodeURIComponent(profile.externalCustomerId)}`}
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-xs font-medium text-primary hover:underline"
+                        >
+                          {t("riskProfilesViewDetail")}
+                        </Link>
+                      </td>
                     </tr>
                     {expanded ? (
                       <tr className="bg-muted/30">
-                        <td colSpan={5} className="px-4 py-3">
-                          <ul className="flex flex-col gap-1.5">
-                            {[...profile.contributions].reverse().map((c, i) => (
-                              <li key={i} className="flex items-center justify-between gap-3 text-xs">
-                                <span className="text-muted-foreground">
-                                  <span className="font-medium text-foreground">{sourceLabel[c.source] ?? c.source}</span>{" "}
-                                  &mdash; {c.reason}
-                                </span>
-                                <span className="flex shrink-0 items-center gap-2">
-                                  <span className="text-muted-foreground">{new Date(c.at).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}</span>
-                                  <span className="font-semibold text-foreground">+{c.points}</span>
-                                </span>
-                              </li>
-                            ))}
-                          </ul>
+                        <td colSpan={9} className="px-4 py-4">
+                          <div className="flex flex-col gap-4">
+                            <div>
+                              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                                {t("riskProfilesBreakdownTitle")}
+                              </p>
+                              <RiskBreakdown breakdown={profile.breakdown} />
+                            </div>
+                            <ul className="flex flex-col gap-1.5 border-t border-border pt-3">
+                              {[...profile.contributions].reverse().slice(0, 8).map((c, i) => (
+                                <li key={i} className="flex items-center justify-between gap-3 text-xs">
+                                  <span className="text-muted-foreground">
+                                    <span className="font-medium text-foreground">{sourceLabel[c.source] ?? c.source}</span>{" "}
+                                    &mdash; {c.reason}
+                                  </span>
+                                  <span className="flex shrink-0 items-center gap-2">
+                                    <span className="text-muted-foreground">{new Date(c.at).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}</span>
+                                    <span className="font-semibold text-foreground">+{c.points}</span>
+                                  </span>
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         </td>
                       </tr>
                     ) : null}
@@ -133,29 +176,7 @@ export function RiskProfilesClient({
         </div>
       )}
 
-      {result.totalPages > 1 ? (
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => applyFilters(page - 1)}
-            disabled={page <= 1}
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {t("paginationPrevious")}
-          </button>
-          <span className="text-sm text-muted-foreground">
-            {t("paginationPagePrefix")} {page} {t("paginationOf")} {result.totalPages}
-          </span>
-          <button
-            type="button"
-            onClick={() => applyFilters(page + 1)}
-            disabled={page >= result.totalPages}
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {t("paginationNext")}
-          </button>
-        </div>
-      ) : null}
+      <Pagination page={page} totalPages={result.totalPages} total={result.total} onPageChange={applyFilters} />
     </div>
   );
 }

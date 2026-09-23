@@ -22,6 +22,8 @@ export interface KycEnrollment {
   fullName: string | null;
   status: DiditSessionStatus;
   sessionUrl: string | null;
+  /** FaceTec only — full URL at the standalone facetec-web app with enrollmentId/token/apiBase embedded. */
+  captureUrl?: string | null;
   country: string | null;
   livenessScore: number | null;
   faceMatchScore: number | null;
@@ -57,9 +59,25 @@ export async function getKycEnrollmentDetail(id: string): Promise<KycEnrollmentD
 
 export interface StartKycSessionState {
   error?: string;
+  /** Didit (or any other hosted-redirect provider): a link to send the customer to. */
   url?: string;
+  /**
+   * FaceTec: a full URL at the standalone `protegey-facetec-web` app (own origin — e.g. Vercel +
+   * Cloudflare, deliberately kept off our servers since it's the SDK-heavy capture flow) with
+   * `enrollmentId`, a one-time `token`, and `apiBase` already embedded as query params.
+   * facetec-web posts the capture result straight to the backend using that token
+   * (`POST {apiBase}/kyc/sessions/:id/facetec-result?token=...`, no partner JWT involved) — this
+   * app never receives or relays the result, it only sends the customer there and back.
+   */
+  captureUrl?: string;
 }
 
+/**
+ * `POST /kyc/me/sessions` branches server-side on the partner's `kycProvider` setting
+ * (`partners/me`). Didit responds with `sessionUrl`/`sessionId`; FaceTec responds with
+ * `captureUrl` instead (no Didit-specific fields) — the UI below picks the right presentation
+ * from whichever is present.
+ */
 export async function startKycSessionAction(
   _prevState: StartKycSessionState,
   formData: FormData,
@@ -72,11 +90,14 @@ export async function startKycSessionAction(
       method: "POST",
       body: fullName ? { fullName } : {},
     });
-    if (!enrollment.sessionUrl) {
-      return { error: t(lang, "kycNoLinkError") };
-    }
     revalidatePath("/kyc");
-    return { url: enrollment.sessionUrl };
+    if (enrollment.sessionUrl) {
+      return { url: enrollment.sessionUrl };
+    }
+    if (enrollment.captureUrl) {
+      return { captureUrl: enrollment.captureUrl };
+    }
+    return { error: t(lang, "kycStartFailedError") };
   } catch {
     return { error: t(lang, "kycStartFailedError") };
   }

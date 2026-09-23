@@ -3,10 +3,11 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Loader2, Briefcase, CalendarClock } from "lucide-react";
+import { Loader2, Briefcase, CalendarClock, Zap } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
-import { updateAlert, updateAlertStatus, type AlertDisposition, type AlertStatus, type AlertWithContext } from "./actions";
+import { Pagination } from "@/components/Pagination";
+import { updateAlert, updateAlertStatus, convertAlertToCaseAction, type AlertDisposition, type AlertStatus, type AlertWithContext } from "./actions";
 import type { TeamMember } from "../team/actions";
 import type { PaginatedResult } from "../transactions/actions";
 
@@ -43,6 +44,7 @@ export function AlertsClient({
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [savingLifecycleId, setSavingLifecycleId] = useState<string | null>(null);
+  const [convertingId, setConvertingId] = useState<string | null>(null);
 
   const dispositionLabel: Record<AlertDisposition, string> = {
     confirmed_fraud: t("alertsDispositionConfirmedFraud"),
@@ -105,6 +107,23 @@ export function AlertsClient({
     }
   }
 
+  async function handleConvertToCase(id: string) {
+    setConvertingId(id);
+    setError(null);
+    try {
+      const result = await guard(() => convertAlertToCaseAction(id));
+      if (result === null) return;
+      if (isError(result)) {
+        setError(result.error);
+        return;
+      }
+      setAlerts((prev) => prev.map((a) => (a.id === id ? result.alert : a)));
+      router.push(`/cases/${result.case.id}`);
+    } finally {
+      setConvertingId(null);
+    }
+  }
+
   function inputDateValue(value: string | null) {
     if (!value) return "";
     const date = new Date(value);
@@ -114,7 +133,7 @@ export function AlertsClient({
   }
 
   return (
-    <div className="mx-auto flex max-w-6xl flex-col gap-6">
+    <div className="flex w-full flex-col gap-6">
       <div>
         <h1 className="text-xl font-semibold text-foreground">{t("alertsPageTitle")}</h1>
         <p className="text-sm text-muted-foreground">{t("alertsPageSubtitle")}</p>
@@ -272,6 +291,16 @@ export function AlertsClient({
                       {t("alertsActionReopen")}
                     </button>
                   )}
+                  <button
+                    type="button"
+                    disabled={convertingId === alert.id}
+                    title={t("alertsConvertToCaseHint")}
+                    onClick={() => handleConvertToCase(alert.id)}
+                    className="flex items-center gap-1.5 rounded-md border border-primary/40 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
+                  >
+                    {convertingId === alert.id ? <Loader2 className="size-3.5 animate-spin" /> : <Zap className="size-3.5" />}
+                    {t("alertsConvertToCase")}
+                  </button>
                   <Link
                     href={`/cases/new?customer=${encodeURIComponent(alert.externalCustomerId)}&alertId=${alert.id}`}
                     className={`flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted ${explanation ? "" : "ml-auto"}`}
@@ -295,39 +324,17 @@ export function AlertsClient({
         </div>
       )}
 
-      {result.totalPages > 1 ? (
-        <div className="flex items-center justify-between">
-          <button
-            type="button"
-            onClick={() => {
-              const params = new URLSearchParams();
-              if (status !== "all") params.set("status", status);
-              params.set("page", String(page - 1));
-              startTransition(() => router.push(`/alerts?${params.toString()}`));
-            }}
-            disabled={page <= 1}
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {t("paginationPrevious")}
-          </button>
-          <span className="text-sm text-muted-foreground">
-            {t("paginationPagePrefix")} {page} {t("paginationOf")} {result.totalPages}
-          </span>
-          <button
-            type="button"
-            onClick={() => {
-              const params = new URLSearchParams();
-              if (status !== "all") params.set("status", status);
-              params.set("page", String(page + 1));
-              startTransition(() => router.push(`/alerts?${params.toString()}`));
-            }}
-            disabled={page >= result.totalPages}
-            className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
-          >
-            {t("paginationNext")}
-          </button>
-        </div>
-      ) : null}
+      <Pagination
+        page={page}
+        totalPages={result.totalPages}
+        total={result.total}
+        onPageChange={(nextPage) => {
+          const params = new URLSearchParams();
+          if (status !== "all") params.set("status", status);
+          params.set("page", String(nextPage));
+          startTransition(() => router.push(`/alerts?${params.toString()}`));
+        }}
+      />
     </div>
   );
 }

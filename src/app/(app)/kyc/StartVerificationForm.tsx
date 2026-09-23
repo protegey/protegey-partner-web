@@ -1,8 +1,8 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { Check, Copy } from "lucide-react";
+import { Check, Copy, Loader2 } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { startKycSessionAction, type StartKycSessionState } from "./actions";
 
@@ -69,12 +69,47 @@ function CopyLinkField({ url }: { url: string }) {
   );
 }
 
+/**
+ * FaceTec: `protegey-facetec-web` is a standalone app on its own origin (kept off our servers —
+ * it owns the SDK-heavy capture flow) that talks to the backend directly using a one-time token
+ * embedded in `captureUrl`. This app's only job is to send the customer there, with a
+ * `returnUrl` back to this page, and to persist nothing — facetec-web posts the result straight
+ * to the backend on its own, so a normal reload of the enrollments table below picks it up.
+ */
+function FaceTecRedirect({ captureUrl }: { captureUrl: string }) {
+  const { t } = useLang();
+
+  useEffect(() => {
+    // captureUrl is a full URL on the standalone facetec-web app's own origin (not an internal
+    // Next.js route), so next/navigation's router can't take us there — a real cross-origin nav is required.
+    const returnUrl = window.location.href;
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+    window.location.href = `${captureUrl}&returnUrl=${encodeURIComponent(returnUrl)}`;
+  }, [captureUrl]);
+
+  return (
+    <div className="flex flex-col items-center gap-3 py-6 text-center">
+      <Loader2 className="size-6 animate-spin text-muted-foreground" />
+      <p className="text-sm text-muted-foreground">{t("kycFaceTecRedirecting")}</p>
+      <a href={captureUrl} className="text-sm font-medium text-primary hover:underline">
+        {t("kycFaceTecRedirectFallback")}
+      </a>
+    </div>
+  );
+}
+
 export function StartVerificationForm() {
   const { t } = useLang();
   const [state, formAction] = useActionState(startKycSessionAction, initialState);
 
   if (state.url) {
     return <CopyLinkField url={state.url} />;
+  }
+
+  // No sessionUrl came back — this partner is on FaceTec. Send the customer to the standalone
+  // capture app instead of the Didit copy-link UI.
+  if (state.captureUrl) {
+    return <FaceTecRedirect captureUrl={state.captureUrl} />;
   }
 
   return (

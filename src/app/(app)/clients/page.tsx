@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { getSessionUser } from "@/lib/session";
 import { getClientsPage, type ClientStage } from "./actions";
 import { InviteClientDialogButton } from "./InviteClientDialogButton";
 import { ResendClientInvitationButton } from "./ResendClientInvitationButton";
+import { PaginationControls } from "@/components/PaginationControls";
 import { getLang } from "@/lib/i18n/lang";
 import { t, type StringKey } from "@/lib/i18n/strings";
 
@@ -52,7 +52,7 @@ export default async function ClientsPage({
 
   if (!canManageClients) {
     return (
-      <div className="mx-auto flex max-w-4xl flex-col gap-6">
+      <div className="flex w-full flex-col gap-6">
         <h1 className="text-xl font-semibold text-foreground">KYB</h1>
         <p className="text-sm text-muted-foreground">{t(lang, "clientsNoPermission")}</p>
       </div>
@@ -63,7 +63,7 @@ export default async function ClientsPage({
     activeTab !== "questionnaires" ? await getClientsPage({ stage: activeTab as ClientStage, page }) : null;
 
   return (
-    <div className="mx-auto flex max-w-4xl flex-col gap-6">
+    <div className="flex w-full flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <div>
           <h1 className="text-xl font-semibold text-foreground">KYB</h1>
@@ -164,43 +164,13 @@ export default async function ClientsPage({
             </table>
           </div>
 
-          {result && result.totalPages > 1 ? (
-            <div className="flex items-center justify-between text-sm text-muted-foreground">
-              <p>
-                {t(lang, "paginationPagePrefix")} {result.page} {t(lang, "paginationOf")} {result.totalPages} — {result.total}{" "}
-                {t(lang, "paginationTotalSuffix")}
-              </p>
-              <div className="flex gap-2">
-                {result.page > 1 ? (
-                  <Link
-                    href={`/clients?tab=${activeTab}&page=${result.page - 1}`}
-                    className="flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-foreground transition-colors hover:bg-muted"
-                  >
-                    <ChevronLeft className="size-4" />
-                    {t(lang, "paginationPrevious")}
-                  </Link>
-                ) : (
-                  <span className="flex cursor-not-allowed items-center gap-1 rounded-md border border-border px-3 py-1.5 opacity-40">
-                    <ChevronLeft className="size-4" />
-                    {t(lang, "paginationPrevious")}
-                  </span>
-                )}
-                {result.page < result.totalPages ? (
-                  <Link
-                    href={`/clients?tab=${activeTab}&page=${result.page + 1}`}
-                    className="flex items-center gap-1 rounded-md border border-border px-3 py-1.5 text-foreground transition-colors hover:bg-muted"
-                  >
-                    {t(lang, "paginationNext")}
-                    <ChevronRight className="size-4" />
-                  </Link>
-                ) : (
-                  <span className="flex cursor-not-allowed items-center gap-1 rounded-md border border-border px-3 py-1.5 opacity-40">
-                    {t(lang, "paginationNext")}
-                    <ChevronRight className="size-4" />
-                  </span>
-                )}
-              </div>
-            </div>
+          {result ? (
+            <PaginationControls
+              page={result.page}
+              totalPages={result.totalPages}
+              total={result.total}
+              href={(nextPage) => `/clients?tab=${activeTab}&page=${nextPage}`}
+            />
           ) : null}
         </>
       )}

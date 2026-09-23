@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { FileText } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
+import { Pagination } from "@/components/Pagination";
 import { generateCtrAction, updateCtrAction, type CtrReport } from "./actions";
 import type { PaginatedResult } from "../transactions/actions";
 
@@ -13,7 +14,7 @@ export function CtrClient({ result, page }: { result: PaginatedResult<CtrReport>
   const [form, setForm] = useState({ periodStart: "", periodEnd: "", currency: "XOF", thresholdAmount: "" }); const [message, setMessage] = useState("");
   async function generate(event: React.FormEvent) { event.preventDefault(); const response = await generateCtrAction(form); setMessage("error" in response ? response.error : t("ctrGenerated")); if (!("error" in response) && !("authExpired" in response)) router.refresh(); }
   async function transitionReport(report: CtrReport, status: "mlro_review" | "filing_pending" | "filed") { const response = await updateCtrAction(report.id, { status, filingNotes: report.filingNotes ?? "Cash threshold review completed." }); setMessage("error" in response ? response.error : t("ctrUpdated")); if (!("error" in response) && !("authExpired" in response)) router.refresh(); }
-  return <div className="mx-auto flex max-w-6xl flex-col gap-6">
+  return <div className="flex w-full flex-col gap-6">
     <div><h1 className="text-xl font-semibold text-foreground">{t("ctrPageTitle")}</h1><p className="text-sm text-muted-foreground">{t("ctrPageSubtitle")}</p></div>
     <form onSubmit={generate} className="grid gap-3 rounded-md border border-border bg-card p-4 md:grid-cols-5">
       <label className="text-xs text-muted-foreground">{t("ctrPeriodStart")}<input required type="date" value={form.periodStart} onChange={e => setForm({ ...form, periodStart: e.target.value })} className="mt-1 w-full rounded border border-border bg-background p-2 text-sm text-foreground" /></label>
@@ -24,6 +25,6 @@ export function CtrClient({ result, page }: { result: PaginatedResult<CtrReport>
     </form>
     {message && <p className="text-sm text-muted-foreground">{message}</p>}
     {result.data.length === 0 ? <div className="flex flex-col items-center gap-3 rounded-md border border-border p-10 text-center"><FileText className="size-8 text-muted-foreground/40" /><p className="text-sm text-muted-foreground">{t("ctrEmpty")}</p></div> : <div className="overflow-x-auto rounded-md border border-border"><table className="w-full text-left text-sm"><thead className="bg-muted text-muted-foreground"><tr>{["ctrCustomer", "ctrPeriod", "ctrAmount", "ctrCount", "ctrStatus", "ctrReference", "ctrActions"].map(k => <th key={k} className="px-4 py-2.5 font-medium">{t(k as never)}</th>)}</tr></thead><tbody className="divide-y divide-border">{result.data.map(report => <tr key={report.id}><td className="px-4 py-2.5 font-mono text-xs">{report.externalCustomerId}</td><td className="px-4 py-2.5 text-xs">{report.periodStart} – {report.periodEnd}</td><td className="px-4 py-2.5">{report.cashTotalAmount} {report.currency}</td><td className="px-4 py-2.5">{report.cashTransactionCount}</td><td className="px-4 py-2.5"><span className={`rounded-full px-2 py-0.5 text-xs ${colors[report.status]}`}>{t(`ctrStatus_${report.status}` as never)}</span></td><td className="px-4 py-2.5 text-xs">{report.regulatorReference ?? "—"}</td><td className="px-4 py-2.5"><div className="flex gap-2">{report.status === "draft" && <button onClick={() => transitionReport(report, "mlro_review")} className="text-xs text-primary">{t("ctrReview")}</button>}{report.status === "mlro_review" && <button onClick={() => transitionReport(report, "filing_pending")} className="text-xs text-primary">{t("ctrApprove")}</button>}{report.status === "filing_pending" && <button onClick={() => transitionReport(report, "filed")} className="text-xs text-primary">{t("ctrFile")}</button>}</div></td></tr>)}</tbody></table></div>}
-    {result.totalPages > 1 && <div className="flex justify-between"><button disabled={page <= 1} onClick={() => transition(() => router.push(`/ctr?page=${page - 1}`))} className="rounded border px-3 py-1.5 text-sm disabled:opacity-40">{t("paginationPrevious")}</button><span className="text-sm text-muted-foreground">{page} / {result.totalPages}</span><button disabled={page >= result.totalPages} onClick={() => transition(() => router.push(`/ctr?page=${page + 1}`))} className="rounded border px-3 py-1.5 text-sm disabled:opacity-40">{t("paginationNext")}</button></div>}
+    <Pagination page={page} totalPages={result.totalPages} total={result.total} onPageChange={(next) => transition(() => router.push(`/ctr?page=${next}`))} />
   </div>;
 }
