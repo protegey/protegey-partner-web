@@ -7,7 +7,16 @@ import { Loader2, Briefcase, CalendarClock, Zap } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
-import { updateAlert, updateAlertStatus, convertAlertToCaseAction, type AlertDisposition, type AlertStatus, type AlertWithContext } from "./actions";
+import {
+  updateAlert,
+  updateAlertStatus,
+  convertAlertToCaseAction,
+  type AlertDecisionVerdict,
+  type AlertDisposition,
+  type AlertStatus,
+  type AlertWithContext,
+} from "./actions";
+import type { StringKey } from "@/lib/i18n/strings";
 import type { TeamMember } from "../team/actions";
 import type { PaginatedResult } from "../transactions/actions";
 
@@ -20,6 +29,13 @@ const STATUS_COLOR: Record<AlertStatus, string> = {
   confirmed: "bg-destructive/15 text-destructive",
   more_info_requested: "bg-blue-500/15 text-blue-600",
   dismissed: "bg-muted text-muted-foreground",
+};
+
+const DECISION_VERDICT_CONFIG: Record<AlertDecisionVerdict, { key: StringKey; color: string }> = {
+  BLOCK: { key: "alertsVerdictBlock", color: "bg-destructive/15 text-destructive" },
+  ESCALATE: { key: "alertsVerdictEscalate", color: "bg-orange-500/15 text-orange-600" },
+  STEP_UP: { key: "alertsVerdictStepUp", color: "bg-amber-500/15 text-amber-600" },
+  ALERT: { key: "alertsVerdictAlert", color: "bg-blue-500/15 text-blue-600" },
 };
 
 export function AlertsClient({
@@ -195,9 +211,16 @@ export function AlertsClient({
                       <p className="mt-0.5 text-xs text-muted-foreground">{t("alertsNoTransaction")}</p>
                     )}
                   </div>
-                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_COLOR[alert.status]}`}>
-                    {statusLabel[alert.status]}
-                  </span>
+                  <div className="flex shrink-0 items-center gap-2">
+                    {alert.decisionVerdict ? (
+                      <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${DECISION_VERDICT_CONFIG[alert.decisionVerdict].color}`}>
+                        {t(DECISION_VERDICT_CONFIG[alert.decisionVerdict].key)}
+                      </span>
+                    ) : null}
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_COLOR[alert.status]}`}>
+                      {statusLabel[alert.status]}
+                    </span>
+                  </div>
                 </div>
 
                 {expandedId === alert.id && explanation ? (

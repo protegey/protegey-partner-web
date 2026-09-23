@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getRiskProfileDetail, type EntityRiskProfile } from "../actions";
+import { getScreeningMatches } from "../../../sanctions/actions";
 import { RiskProfileDetailClient } from "./RiskProfileDetailClient";
 import { ApiError } from "@/lib/api";
 
@@ -23,7 +24,12 @@ export default async function RiskProfileDetailPage({
 }) {
   const { customerId } = await params;
   const externalCustomerId = decodeURIComponent(customerId);
-  const profile = await loadProfile(externalCustomerId);
+  const [profile, screeningMatchesResult] = await Promise.all([
+    loadProfile(externalCustomerId),
+    getScreeningMatches({ externalCustomerId, limit: 50 }),
+  ]);
 
-  return <RiskProfileDetailClient profile={profile} externalCustomerId={externalCustomerId} />;
+  return (
+    <RiskProfileDetailClient profile={profile} externalCustomerId={externalCustomerId} screeningMatches={screeningMatchesResult.data} />
+  );
 }

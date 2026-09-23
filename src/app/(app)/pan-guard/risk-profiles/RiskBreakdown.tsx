@@ -6,20 +6,16 @@ import type { RiskProfileBreakdownEntry, RiskProfileCategory } from "./actions";
 
 const CATEGORY_LABEL_KEY: Record<RiskProfileCategory, StringKey> = {
   behavioral: "riskProfileCategoryBehavioral",
-  device: "riskProfileCategoryDevice",
   network: "riskProfileCategoryNetwork",
-  identity: "riskProfileCategoryIdentity",
-  compliance: "riskProfileCategoryCompliance",
-  other: "riskProfileCategoryOther",
+  contextual: "riskProfileCategoryContextual",
+  historical: "riskProfileCategoryHistorical",
 };
 
 const CATEGORY_BAR_COLOR: Record<RiskProfileCategory, string> = {
   behavioral: "bg-destructive",
-  device: "bg-amber-500",
   network: "bg-sky-500",
-  identity: "bg-purple-500",
-  compliance: "bg-emerald-500",
-  other: "bg-muted-foreground",
+  contextual: "bg-purple-500",
+  historical: "bg-muted-foreground",
 };
 
 /** One row per risk dimension — a small horizontal bar chart, richest category first (as the API already sorts it). */

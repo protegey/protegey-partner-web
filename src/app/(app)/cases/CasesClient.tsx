@@ -15,6 +15,13 @@ const STATUS_COLOR: Record<string, string> = {
   closed: "bg-muted text-muted-foreground",
 };
 
+const PRIORITY_COLOR: Record<string, string> = {
+  critical: "bg-destructive/15 text-destructive",
+  high: "bg-orange-500/15 text-orange-600",
+  medium: "bg-amber-500/15 text-amber-600",
+  low: "bg-muted text-muted-foreground",
+};
+
 export function CasesClient({
   result,
   page,
@@ -36,6 +43,13 @@ export function CasesClient({
     open: t("caseStatusOpen"),
     investigating: t("caseStatusInvestigating"),
     closed: t("caseStatusClosed"),
+  };
+
+  const priorityLabel: Record<string, string> = {
+    critical: t("casePriorityCritical"),
+    high: t("casePriorityHigh"),
+    medium: t("casePriorityMedium"),
+    low: t("casePriorityLow"),
   };
 
   function applyFilters(newPage: number = 1) {
@@ -108,6 +122,7 @@ export function CasesClient({
                 <th className="px-4 py-2.5 font-medium">{t("casesColTitle")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("signalsColCustomer")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("casesColStatus")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("casesColPriority")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("casesColAssignee")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("casesColAlerts")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("casesColOutcome")}</th>
@@ -123,6 +138,9 @@ export function CasesClient({
                   <td className="px-4 py-2.5 text-foreground">{kase.externalCustomerId}</td>
                   <td className="px-4 py-2.5">
                     <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLOR[kase.status]}`}>{statusLabel[kase.status]}</span>
+                  </td>
+                  <td className="px-4 py-2.5">
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${PRIORITY_COLOR[kase.priority]}`}>{priorityLabel[kase.priority]}</span>
                   </td>
                   <td className="px-4 py-2.5 text-xs text-muted-foreground">{kase.assignedToUserName ?? "—"}</td>
                   <td className="px-4 py-2.5 text-center text-muted-foreground">{kase.linkedAlertIds.length}</td>

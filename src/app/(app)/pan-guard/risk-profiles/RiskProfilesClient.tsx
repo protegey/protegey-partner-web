@@ -19,11 +19,9 @@ function scoreColor(score: number): string {
 
 const CATEGORY_LABEL_KEY: Record<RiskProfileCategory, StringKey> = {
   behavioral: "riskProfileCategoryBehavioral",
-  device: "riskProfileCategoryDevice",
   network: "riskProfileCategoryNetwork",
-  identity: "riskProfileCategoryIdentity",
-  compliance: "riskProfileCategoryCompliance",
-  other: "riskProfileCategoryOther",
+  contextual: "riskProfileCategoryContextual",
+  historical: "riskProfileCategoryHistorical",
 };
 
 export function RiskProfilesClient({

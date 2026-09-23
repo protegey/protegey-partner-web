@@ -90,6 +90,7 @@ export function SanctionsSearchClient() {
   const guard = useSessionGuard();
   const [name, setName] = useState("");
   const [type, setType] = useState<"person" | "business">("person");
+  const [externalCustomerId, setExternalCustomerId] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<SanctionsSearchResult | null>(null);
@@ -102,7 +103,7 @@ export function SanctionsSearchClient() {
     setError(null);
     setResult(null);
     try {
-      const response = await guard(() => searchSanctionsAction(name.trim(), type));
+      const response = await guard(() => searchSanctionsAction(name.trim(), type, externalCustomerId.trim() || undefined));
       if (response === null) return;
       if (isError(response)) {
         setError(response.error);
@@ -151,6 +152,15 @@ export function SanctionsSearchClient() {
             <option value="business">{t("sanctionsTypeBusiness")}</option>
           </select>
         </div>
+        <div className="flex min-w-48 flex-col gap-1">
+          <label className="text-xs font-medium text-muted-foreground">{t("sanctionsSearchCustomerIdLabel")}</label>
+          <input
+            value={externalCustomerId}
+            onChange={(e) => setExternalCustomerId(e.target.value)}
+            placeholder={t("sanctionsSearchCustomerIdPlaceholder")}
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
         <button
           type="submit"
           disabled={loading || !name.trim()}
@@ -160,6 +170,10 @@ export function SanctionsSearchClient() {
           {t("sanctionsSearchButton")}
         </button>
       </form>
+
+      <p className="text-xs text-muted-foreground">
+        {externalCustomerId.trim() ? t("sanctionsSearchCustomerIdHintTied") : t("sanctionsSearchCustomerIdHintTransient")}
+      </p>
 
       {error ? <p className="text-sm text-destructive">{error}</p> : null}
 

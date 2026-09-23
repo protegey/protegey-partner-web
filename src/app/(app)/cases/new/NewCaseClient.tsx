@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
-import { createCaseAction } from "../actions";
+import { createCaseAction, type CasePriority } from "../actions";
 
 function isError(value: unknown): value is { error: string } {
   return Boolean(value) && typeof value === "object" && "error" in (value as object);
@@ -17,6 +17,7 @@ export function NewCaseClient({ initialCustomer, initialAlertId }: { initialCust
   const { t } = useLang();
   const [externalCustomerId, setExternalCustomerId] = useState(initialCustomer);
   const [title, setTitle] = useState("");
+  const [priority, setPriority] = useState<CasePriority>("medium");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -26,7 +27,7 @@ export function NewCaseClient({ initialCustomer, initialAlertId }: { initialCust
     setError(null);
     try {
       const alertIds = initialAlertId ? [initialAlertId] : [];
-      const result = await guard(() => createCaseAction(externalCustomerId, title, alertIds));
+      const result = await guard(() => createCaseAction(externalCustomerId, title, alertIds, priority));
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
@@ -66,6 +67,20 @@ export function NewCaseClient({ initialCustomer, initialAlertId }: { initialCust
             placeholder={t("caseNewTitlePlaceholder")}
             className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
           />
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          <label className="text-sm font-medium text-foreground">{t("casesColPriority")}</label>
+          <select
+            value={priority}
+            onChange={(e) => setPriority(e.target.value as CasePriority)}
+            className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="critical">{t("casePriorityCritical")}</option>
+            <option value="high">{t("casePriorityHigh")}</option>
+            <option value="medium">{t("casePriorityMedium")}</option>
+            <option value="low">{t("casePriorityLow")}</option>
+          </select>
         </div>
 
         {initialAlertId ? (

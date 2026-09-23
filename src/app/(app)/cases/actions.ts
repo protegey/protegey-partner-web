@@ -1,11 +1,13 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api";
+import { apiFetch, apiFetchGuarded, apiUploadGuarded, ApiError, type AuthExpired } from "@/lib/api";
 import type { PaginatedResult } from "../transactions/actions";
 
 export type CaseStatus = "open" | "investigating" | "closed";
 export type CaseOutcome = "no_action" | "false_positive" | "sar_filed";
+export type CasePriority = "critical" | "high" | "medium" | "low";
+export type CaseNoteVisibility = "internal" | "partner_visible";
 
 export interface Case {
   id: string;
@@ -13,6 +15,8 @@ export interface Case {
   externalCustomerId: string;
   title: string;
   status: CaseStatus;
+  /** Cheap, high-value triage field, independent of the workflow-stage `status` — defaults to "medium". */
+  priority: CasePriority;
   assignedToUserId: string | null;
   assignedToUserName: string | null;
   linkedAlertIds: string[];
@@ -29,11 +33,24 @@ export interface CaseNote {
   caseId: string;
   authorUserId: string;
   body: string;
+  /** "internal" = compliance-team only; "partner_visible" = shown to the partner too. Defaults to "internal". */
+  visibility: CaseNoteVisibility;
+  createdAt: string;
+}
+
+export interface CaseEvidence {
+  id: string;
+  fileName: string;
+  mimeType: string;
+  fileSizeBytes: number;
+  description: string | null;
+  uploadedByUserId: string;
   createdAt: string;
 }
 
 export interface CaseWithNotes extends Case {
   notes: CaseNote[];
+  evidence: CaseEvidence[];
 }
 
 export interface CasesQuery {
@@ -56,9 +73,14 @@ export async function getCase(id: string): Promise<CaseWithNotes> {
 
 export type MutationResult<T> = T | { error: string } | AuthExpired;
 
-export async function createCaseAction(externalCustomerId: string, title: string, alertIds: string[]): Promise<MutationResult<Case>> {
+export async function createCaseAction(
+  externalCustomerId: string,
+  title: string,
+  alertIds: string[],
+  priority?: CasePriority,
+): Promise<MutationResult<Case>> {
   try {
-    const result = await apiFetchGuarded<Case>(`/cases/me`, { method: "POST", body: { externalCustomerId, title, alertIds } });
+    const result = await apiFetchGuarded<Case>(`/cases/me`, { method: "POST", body: { externalCustomerId, title, alertIds, priority } });
     if (!("error" in result) && !("authExpired" in result)) revalidatePath("/cases");
     return result;
   } catch (error) {
@@ -67,11 +89,35 @@ export async function createCaseAction(externalCustomerId: string, title: string
   }
 }
 
-export async function addCaseNoteAction(id: string, body: string): Promise<MutationResult<CaseNote>> {
+export async function addCaseNoteAction(id: string, body: string, visibility?: CaseNoteVisibility): Promise<MutationResult<CaseNote>> {
   try {
-    const result = await apiFetchGuarded<CaseNote>(`/cases/me/${id}/notes`, { method: "POST", body: { body } });
+    const result = await apiFetchGuarded<CaseNote>(`/cases/me/${id}/notes`, { method: "POST", body: { body, visibility } });
     if (!("error" in result) && !("authExpired" in result)) revalidatePath(`/cases/${id}`);
     return result;
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
+}
+
+/** Multipart upload — the caller builds the FormData with `file` and optional `description`. */
+export async function addCaseEvidenceAction(id: string, formData: FormData): Promise<MutationResult<CaseEvidence>> {
+  try {
+    const result = await apiUploadGuarded<CaseEvidence>(`/cases/me/${id}/evidence`, formData);
+    if (!("error" in result) && !("authExpired" in result)) revalidatePath(`/cases/${id}`);
+    return result;
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
+}
+
+export async function deleteCaseEvidenceAction(id: string, evidenceId: string): Promise<MutationResult<{ success: true }>> {
+  try {
+    const result = await apiFetchGuarded<unknown>(`/cases/me/${id}/evidence/${evidenceId}`, { method: "DELETE" });
+    if (result && typeof result === "object" && "authExpired" in result) return result as AuthExpired;
+    revalidatePath(`/cases/${id}`);
+    return { success: true };
   } catch (error) {
     if (error instanceof ApiError) return { error: error.message };
     throw error;
@@ -110,7 +156,7 @@ export async function shareCaseSignalAction(
 
 export async function updateCaseAction(
   id: string,
-  patch: { status?: CaseStatus; assignedToUserId?: string; outcome?: CaseOutcome },
+  patch: { status?: CaseStatus; assignedToUserId?: string; outcome?: CaseOutcome; priority?: CasePriority },
 ): Promise<MutationResult<Case>> {
   try {
     const result = await apiFetchGuarded<Case>(`/cases/me/${id}`, { method: "PATCH", body: patch });

@@ -6,11 +6,14 @@ import Link from "next/link";
 import { Loader2, FileText, Share2, CheckCircle2 } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
+import { CaseEvidenceSection } from "./CaseEvidenceSection";
 import {
   addCaseNoteAction,
   updateCaseAction,
   shareCaseSignalAction,
+  type CaseNoteVisibility,
   type CaseOutcome,
+  type CasePriority,
   type CaseWithNotes,
   type SharedSignalCategory,
 } from "../actions";
@@ -24,6 +27,18 @@ const STATUS_COLOR: Record<string, string> = {
   open: "bg-amber-500/15 text-amber-600",
   investigating: "bg-blue-500/15 text-blue-600",
   closed: "bg-muted text-muted-foreground",
+};
+
+const PRIORITY_COLOR: Record<string, string> = {
+  critical: "bg-destructive/15 text-destructive",
+  high: "bg-orange-500/15 text-orange-600",
+  medium: "bg-amber-500/15 text-amber-600",
+  low: "bg-muted text-muted-foreground",
+};
+
+const NOTE_VISIBILITY_COLOR: Record<string, string> = {
+  internal: "bg-muted text-muted-foreground",
+  partner_visible: "bg-sky-500/15 text-sky-600",
 };
 
 export function CaseDetailClient({
@@ -46,6 +61,7 @@ export function CaseDetailClient({
   const { t, lang } = useLang();
   const [kase, setKase] = useState(initialCase);
   const [noteBody, setNoteBody] = useState("");
+  const [noteVisibility, setNoteVisibility] = useState<CaseNoteVisibility>("internal");
   const [addingNote, setAddingNote] = useState(false);
   const [updating, setUpdating] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -70,13 +86,23 @@ export function CaseDetailClient({
     false_positive: t("caseOutcomeFalsePositive"),
     sar_filed: t("caseOutcomeSarFiled"),
   };
+  const priorityLabel: Record<string, string> = {
+    critical: t("casePriorityCritical"),
+    high: t("casePriorityHigh"),
+    medium: t("casePriorityMedium"),
+    low: t("casePriorityLow"),
+  };
+  const noteVisibilityLabel: Record<string, string> = {
+    internal: t("caseNoteVisibilityInternal"),
+    partner_visible: t("caseNoteVisibilityPartnerVisible"),
+  };
 
   async function handleAddNote() {
     if (!noteBody.trim()) return;
     setAddingNote(true);
     setError(null);
     try {
-      const result = await guard(() => addCaseNoteAction(kase.id, noteBody));
+      const result = await guard(() => addCaseNoteAction(kase.id, noteBody, noteVisibility));
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
@@ -86,6 +112,22 @@ export function CaseDetailClient({
       setNoteBody("");
     } finally {
       setAddingNote(false);
+    }
+  }
+
+  async function handlePriorityChange(priority: CasePriority) {
+    setUpdating(true);
+    setError(null);
+    try {
+      const result = await guard(() => updateCaseAction(kase.id, { priority }));
+      if (result === null) return;
+      if (isError(result)) {
+        setError(result.error);
+        return;
+      }
+      setKase((prev) => ({ ...prev, priority: result.priority }));
+    } finally {
+      setUpdating(false);
     }
   }
 
@@ -177,6 +219,7 @@ export function CaseDetailClient({
         <div className="mt-1 flex items-center gap-3">
           <h1 className="text-xl font-semibold text-foreground">{kase.title}</h1>
           <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLOR[kase.status]}`}>{statusLabel[kase.status]}</span>
+          <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${PRIORITY_COLOR[kase.priority]}`}>{priorityLabel[kase.priority]}</span>
         </div>
         <p className="text-sm text-muted-foreground">
           {t("signalsColCustomer")}: {kase.externalCustomerId} · {new Date(kase.createdAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
@@ -213,6 +256,21 @@ export function CaseDetailClient({
                 {member.firstName} {member.lastName}
               </option>
             ))}
+          </select>
+        </div>
+
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-muted-foreground">{t("casesColPriority")}</label>
+          <select
+            value={kase.priority}
+            disabled={isClosed || updating}
+            onChange={(e) => handlePriorityChange(e.target.value as CasePriority)}
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring disabled:opacity-50"
+          >
+            <option value="critical">{t("casePriorityCritical")}</option>
+            <option value="high">{t("casePriorityHigh")}</option>
+            <option value="medium">{t("casePriorityMedium")}</option>
+            <option value="low">{t("casePriorityLow")}</option>
           </select>
         </div>
 
@@ -377,7 +435,12 @@ export function CaseDetailClient({
           <ul className="flex flex-col gap-2">
             {kase.notes.map((note) => (
               <li key={note.id} className="rounded-md border border-border bg-card p-3">
-                <p className="text-sm text-foreground">{note.body}</p>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="text-sm text-foreground">{note.body}</p>
+                  <span className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${NOTE_VISIBILITY_COLOR[note.visibility]}`}>
+                    {noteVisibilityLabel[note.visibility]}
+                  </span>
+                </div>
                 <p className="mt-1 text-xs text-muted-foreground">{new Date(note.createdAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}</p>
               </li>
             ))}
@@ -393,6 +456,19 @@ export function CaseDetailClient({
               rows={3}
               className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
             />
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+                {t("caseNoteVisibilityLabel")}
+                <select
+                  value={noteVisibility}
+                  onChange={(e) => setNoteVisibility(e.target.value as CaseNoteVisibility)}
+                  className="rounded-md border border-border bg-background px-2 py-1 text-xs font-normal text-foreground outline-none focus:ring-2 focus:ring-ring"
+                >
+                  <option value="internal">{t("caseNoteVisibilityInternal")}</option>
+                  <option value="partner_visible">{t("caseNoteVisibilityPartnerVisible")}</option>
+                </select>
+              </label>
+            </div>
             <button
               type="button"
               disabled={addingNote || !noteBody.trim()}
@@ -405,6 +481,8 @@ export function CaseDetailClient({
           </div>
         ) : null}
       </div>
+
+      <CaseEvidenceSection caseId={kase.id} initialEvidence={kase.evidence} disabled={isClosed} />
     </div>
   );
 }

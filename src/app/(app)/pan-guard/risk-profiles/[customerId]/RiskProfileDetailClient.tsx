@@ -4,8 +4,11 @@ import Link from "next/link";
 import { ArrowLeft, ShieldAlert } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { RiskBreakdown } from "../RiskBreakdown";
+import { RiskHistoryTimeline } from "./RiskHistoryTimeline";
+import { ScreeningMatchesSection } from "./ScreeningMatchesSection";
 import type { StringKey } from "@/lib/i18n/strings";
 import type { EntityRiskProfile, RiskProfileCategory } from "../actions";
+import type { ScreeningMatch } from "../../../sanctions/actions";
 
 function scoreColor(score: number): string {
   if (score >= 60) return "text-destructive";
@@ -15,11 +18,9 @@ function scoreColor(score: number): string {
 
 const CATEGORY_LABEL_KEY: Record<RiskProfileCategory, StringKey> = {
   behavioral: "riskProfileCategoryBehavioral",
-  device: "riskProfileCategoryDevice",
   network: "riskProfileCategoryNetwork",
-  identity: "riskProfileCategoryIdentity",
-  compliance: "riskProfileCategoryCompliance",
-  other: "riskProfileCategoryOther",
+  contextual: "riskProfileCategoryContextual",
+  historical: "riskProfileCategoryHistorical",
 };
 
 function ScoreCard({ label, value, hint, emphasize }: { label: string; value: number; hint: string; emphasize?: boolean }) {
@@ -35,9 +36,11 @@ function ScoreCard({ label, value, hint, emphasize }: { label: string; value: nu
 export function RiskProfileDetailClient({
   profile,
   externalCustomerId,
+  screeningMatches,
 }: {
   profile: EntityRiskProfile | null;
   externalCustomerId?: string;
+  screeningMatches: ScreeningMatch[];
 }) {
   const { t, lang } = useLang();
 
@@ -102,6 +105,13 @@ export function RiskProfileDetailClient({
               </ul>
             )}
           </div>
+
+          <div className="rounded-md border border-border bg-card p-4">
+            <p className="mb-3 text-sm font-semibold text-foreground">{t("riskProfileHistoryTitle")}</p>
+            <RiskHistoryTimeline history={profile.history} />
+          </div>
+
+          <ScreeningMatchesSection externalCustomerId={profile.externalCustomerId} initialMatches={screeningMatches} />
         </>
       )}
     </div>

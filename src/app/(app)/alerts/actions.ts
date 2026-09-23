@@ -7,6 +7,9 @@ import type { Case } from "../cases/actions";
 
 export type AlertStatus = "open" | "confirmed" | "more_info_requested" | "dismissed";
 export type AlertDisposition = "confirmed_fraud" | "false_positive" | "no_action" | "sar_filed" | "escalated";
+/** Stamped from the rule that fired it — the old platform's "Decision Outcome" block, attached
+ * directly to the alert instead of requiring a separate lookup. Null for alerts predating this field. */
+export type AlertDecisionVerdict = "BLOCK" | "STEP_UP" | "ESCALATE" | "ALERT";
 
 export interface AlertWithContext {
   id: string;
@@ -18,6 +21,7 @@ export interface AlertWithContext {
   triggeredAt: string;
   matchedValues: Record<string, unknown> | null;
   status: AlertStatus;
+  decisionVerdict: AlertDecisionVerdict | null;
   assignedToUserId: string | null;
   disposition: AlertDisposition | null;
   investigationNotes: string | null;

@@ -10,7 +10,9 @@ export interface RiskProfileContribution {
   at: string;
 }
 
-export type RiskProfileCategory = "behavioral" | "device" | "network" | "identity" | "compliance" | "other";
+/** Canonical 4-dimension fusion taxonomy — matches protegey-core-v2's WeightedRiskFusionEngine
+ * (Behavioral 35%, Network 40%, Contextual 15%, Historical 10%). */
+export type RiskProfileCategory = "behavioral" | "network" | "contextual" | "historical";
 
 export interface RiskProfileBreakdownEntry {
   category: RiskProfileCategory;
@@ -19,6 +21,19 @@ export interface RiskProfileBreakdownEntry {
   points: number;
   count: number;
   weight: number;
+}
+
+/** One contribution re-expressed as a motivated before/after change — "62 → 78 (↑)" instead of
+ * just "+16", reconstructed server-side from the append-only contributions log. Newest first. */
+export interface RiskProfileHistoryEntry {
+  at: string;
+  source: string;
+  category: RiskProfileCategory;
+  reason: string;
+  points: number;
+  scoreBefore: number;
+  scoreAfter: number;
+  direction: "increased" | "decreased" | "unchanged";
 }
 
 export interface EntityRiskProfile {
@@ -34,6 +49,8 @@ export interface EntityRiskProfile {
   topCategory: RiskProfileCategory | null;
   breakdown: RiskProfileBreakdownEntry[];
   contributions: RiskProfileContribution[];
+  /** Newest first — the score immediately before/after each contribution. */
+  history: RiskProfileHistoryEntry[];
   createdAt: string;
   updatedAt: string;
 }
