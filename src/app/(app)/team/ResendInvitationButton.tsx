@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { resendAgentInvitationAction } from "./actions";
@@ -18,7 +19,10 @@ export function ResendInvitationButton({ invitationId }: { invitationId: string 
     const res = await guard(() => resendAgentInvitationAction(invitationId));
     setPending(false);
     setResult(res);
-    if (res?.success) router.refresh();
+    if (res?.success) {
+      toast.success(t("teamInvitationResentToast"));
+      router.refresh();
+    }
   }
 
   return (

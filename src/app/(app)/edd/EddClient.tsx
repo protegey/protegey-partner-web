@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { CalendarClock, Loader2 } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -65,9 +66,10 @@ export function EddClient({ result, initialStatus, teamMembers }: { result: { da
         checklist,
       }));
       if (result === null) return;
-      if (isError(result)) { setError(result.error); return; }
+      if (isError(result)) { setError(result.error); toast.error(result.error); return; }
       setReviews((current) => current.map((item) => item.id === review.id ? result : item));
       setEditingId(null);
+      toast.success(t("eddReviewSavedToast"));
     } finally {
       setSavingId(null);
     }
@@ -100,7 +102,7 @@ export function EddClient({ result, initialStatus, teamMembers }: { result: { da
               </select>
             </label>
             <label className="flex flex-col gap-1 text-xs font-medium text-foreground">{t("eddDueDate")}<input name="dueAt" type="datetime-local" defaultValue={dateInputValue(review.dueAt)} className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm font-normal" /></label>
-            <label className="flex flex-col gap-1 text-xs font-medium text-foreground sm:col-span-2">{t("eddNotes")}<textarea name="notes" rows={3} defaultValue={review.notes ?? ""} className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm font-normal" /></label>
+            <label className="flex flex-col gap-1 text-xs font-medium text-foreground sm:col-span-2">{t("eddNotes")}<textarea name="notes" rows={3} defaultValue={review.notes ?? ""} placeholder={t("eddNotesPlaceholder")} className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm font-normal" /></label>
             <fieldset className="rounded-md border border-border p-3 sm:col-span-2"><legend className="px-1 text-xs font-semibold text-foreground">{t("eddChecklist")}</legend><div className="grid gap-2 sm:grid-cols-2">{checklistKeys.map((key) => <label key={key} className="flex items-center gap-2 text-xs font-normal text-foreground"><input name={`checklist.${key}`} type="checkbox" defaultChecked={checklist[key]} className="size-4 rounded border-border" />{t(`eddChecklist_${key}` as never)}</label>)}</div><p className="mt-2 text-xs text-muted-foreground">{completedChecks}/{checklistKeys.length} {t("eddChecklistComplete")}</p></fieldset>
             <div className="flex justify-end gap-2 sm:col-span-2"><button type="button" onClick={() => setEditingId(null)} className="rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted">{t("commonCancel")}</button><button disabled={savingId === review.id} className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-xs font-semibold text-primary-foreground disabled:opacity-50">{savingId === review.id ? <Loader2 className="size-3.5 animate-spin" /> : null}{t("eddSaveReview")}</button></div>
           </form>

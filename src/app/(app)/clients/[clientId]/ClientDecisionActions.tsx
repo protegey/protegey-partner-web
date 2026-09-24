@@ -2,12 +2,20 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
+import type { StringKey } from "@/lib/i18n/strings";
 import { decideClientSubmissionAction } from "../actions";
 
 type Decision = "approve" | "reject" | "request_more_info" | null;
+
+const DECISION_TOAST_KEY: Record<Exclude<Decision, null>, StringKey> = {
+  approve: "clientsApprovedToast",
+  reject: "clientsRejectedToast",
+  request_more_info: "clientsMoreInfoRequestedToast",
+};
 
 export function ClientDecisionActions({ clientId }: { clientId: string }) {
   const router = useRouter();
@@ -33,10 +41,13 @@ export function ClientDecisionActions({ clientId }: { clientId: string }) {
     if (!result) return; // dialog was cancelled — leave the confirm dialog open as-is
     if (result.error) {
       setError(result.error);
+      toast.error(result.error);
       return;
     }
+    const decidedAs = confirmDecision;
     close();
     router.refresh();
+    toast.success(t(DECISION_TOAST_KEY[decidedAs]));
   }
 
   return (

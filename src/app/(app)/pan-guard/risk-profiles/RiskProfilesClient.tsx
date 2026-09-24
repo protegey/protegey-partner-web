@@ -11,10 +11,25 @@ import type { StringKey } from "@/lib/i18n/strings";
 import type { EntityRiskProfile, RiskProfileCategory } from "./actions";
 import type { PaginatedResult } from "../../transactions/actions";
 
-function scoreColor(score: number): string {
-  if (score >= 60) return "text-destructive";
-  if (score >= 30) return "text-amber-600";
-  return "text-muted-foreground";
+type RiskLevel = EntityRiskProfile["riskLevel"];
+
+/** Semantic, not the app's accent color — a risk level reads the same everywhere it appears. */
+const RISK_LEVEL_STYLES: Record<RiskLevel, string> = {
+  low: "bg-muted text-muted-foreground",
+  medium: "bg-amber-500/15 text-amber-600",
+  high: "bg-orange-500/15 text-orange-600",
+  critical: "bg-destructive/15 text-destructive",
+};
+
+const RISK_LEVEL_LABEL_KEY: Record<RiskLevel, StringKey> = {
+  low: "riskLevelLow",
+  medium: "riskLevelMedium",
+  high: "riskLevelHigh",
+  critical: "riskLevelCritical",
+};
+
+function RiskLevelBadge({ level, t }: { level: RiskLevel; t: (key: StringKey) => string }) {
+  return <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${RISK_LEVEL_STYLES[level]}`}>{t(RISK_LEVEL_LABEL_KEY[level])}</span>;
 }
 
 const CATEGORY_LABEL_KEY: Record<RiskProfileCategory, StringKey> = {
@@ -118,9 +133,14 @@ export function RiskProfilesClient({
                         {expanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
                       </td>
                       <td className="px-4 py-2.5 text-foreground">{profile.externalCustomerId}</td>
-                      <td className={`px-4 py-2.5 text-base font-bold ${scoreColor(profile.weightedScore)}`}>{profile.weightedScore.toFixed(1)}</td>
-                      <td className={`px-4 py-2.5 font-semibold ${scoreColor(profile.decayedScore)}`}>{profile.decayedScore.toFixed(1)}</td>
-                      <td className={`px-4 py-2.5 text-xs ${scoreColor(profile.cumulativeScore)}`}>{profile.cumulativeScore}</td>
+                      <td className="px-4 py-2.5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-base font-bold text-foreground">{profile.weightedScore.toFixed(1)}</span>
+                          <RiskLevelBadge level={profile.riskLevel} t={t} />
+                        </div>
+                      </td>
+                      <td className="px-4 py-2.5 font-semibold text-muted-foreground">{profile.decayedScore.toFixed(1)}</td>
+                      <td className="px-4 py-2.5 text-xs text-muted-foreground">{profile.cumulativeScore}</td>
                       <td className="px-4 py-2.5 text-xs text-muted-foreground">
                         {profile.topCategory ? t(CATEGORY_LABEL_KEY[profile.topCategory]) : "—"}
                       </td>

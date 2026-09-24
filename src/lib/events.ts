@@ -40,6 +40,42 @@ const CASE_OUTCOME_KEY: Record<string, StringKey> = {
   sar_filed: "caseOutcomeSarFiled",
 };
 
+/** Where clicking this notification should navigate — null when no detail page exists for this
+ * event type, in which case the notification renders as plain text instead of a link. Only ever
+ * points at a route that genuinely exists; never a guessed/fabricated deep link. */
+export function eventHref(event: NotificationEvent): string | null {
+  const m = event.metadata ?? {};
+  const str = (key: string) => (m[key] !== undefined ? String(m[key]) : null);
+
+  const caseId = str("caseId");
+  if (event.type.startsWith("case.") && caseId) return `/cases/${caseId}`;
+
+  if (event.type === "sar.submitted") {
+    const reportId = str("reportId");
+    return reportId ? `/sar-str/${reportId}` : null;
+  }
+
+  const clientId = str("clientId");
+  if (event.type.startsWith("kyb.") && clientId) return `/clients/${clientId}`;
+
+  if (event.type === "device.signal_flagged") {
+    const customerLabel = str("customerLabel");
+    return customerLabel && customerLabel !== "unknown" ? `/pan-guard/device-signals?customer=${encodeURIComponent(customerLabel)}` : "/pan-guard/device-signals";
+  }
+
+  if (event.type === "alert.status_changed") return "/alerts";
+  if (event.type.startsWith("rule.")) return "/alert-rules";
+  if (event.type.startsWith("kyc.")) return "/kyc";
+  if (event.type === "shared_signal.reported") return "/pan-risk/shared-signal-network";
+  if (event.type.startsWith("team.")) return "/team";
+  if (event.type === "settings.password_changed") return "/settings/security";
+  if (event.type === "settings.logo_changed" || event.type === "settings.logo_removed") return "/settings/profile";
+  if (event.type === "api_key.generated") return "/settings/api-keys";
+  if (event.type === "webhook.configured") return "/settings/webhooks";
+
+  return null;
+}
+
 /** Turns a stable event `type` + `metadata` into the sentence shown in Notifications/Audit Logs — the one place this translation happens, see NotificationEvent's backend docstring for why. */
 export function describeEvent(lang: Lang, event: NotificationEvent): string {
   const actor = event.actorLabel ?? t(lang, "eventSystemActor");

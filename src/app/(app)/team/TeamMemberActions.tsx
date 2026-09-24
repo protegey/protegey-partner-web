@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -40,10 +41,12 @@ export function TeamMemberActions({
     if (!result) return;
     if (result.error) {
       setStatusError(result.error);
+      toast.error(result.error);
       return;
     }
     setStatusOpen(false);
     router.refresh();
+    toast.success(isActive ? t("teamMemberBlockedToast") : t("teamMemberUnblockedToast"));
   }
 
   async function handleResetConfirm() {
@@ -54,9 +57,11 @@ export function TeamMemberActions({
     if (!result) return;
     if (result.error) {
       setResetError(result.error);
+      toast.error(result.error);
       return;
     }
     setResetSent(true);
+    toast.success(t("teamPasswordResetSentToast"));
   }
 
   return (

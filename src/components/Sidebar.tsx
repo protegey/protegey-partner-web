@@ -27,9 +27,23 @@ function isChildActive(pathname: string, href?: string): boolean {
   return pathname === path || pathname.startsWith(`${path}/`);
 }
 
+/**
+ * Picks the single most specific matching child (longest href) instead of marking every child
+ * whose href happens to be a path prefix of the current route — without this, e.g. "/sanctions"
+ * and "/sanctions/search" both light up while on "/sanctions/search", since the latter starts
+ * with the former.
+ */
+function findActiveChild(pathname: string, children: NavChild[] = []): NavChild | undefined {
+  const matches = children.filter((child) => !child.disabled && isChildActive(pathname, child.href));
+  return matches.reduce<NavChild | undefined>((best, child) => {
+    if (!best) return child;
+    return (child.href?.length ?? 0) > (best.href?.length ?? 0) ? child : best;
+  }, undefined);
+}
+
 function NavGroup({ item, pathname, soonLabel }: { item: NavItem; pathname: string; soonLabel: string }) {
-  const hasActiveChild = item.children?.some((child) => isChildActive(pathname, child.href)) ?? false;
-  const [open, setOpen] = useState(hasActiveChild);
+  const activeChild = findActiveChild(pathname, item.children);
+  const [open, setOpen] = useState(!!activeChild);
 
   return (
     <div>
@@ -45,7 +59,7 @@ function NavGroup({ item, pathname, soonLabel }: { item: NavItem; pathname: stri
       {open ? (
         <div className="ml-3.5 flex flex-col gap-0.5 border-l border-border pl-3.5">
           {item.children?.map((child) => {
-            const active = isChildActive(pathname, child.href);
+            const active = child === activeChild;
             if (child.disabled || !child.href) {
               return (
                 <span

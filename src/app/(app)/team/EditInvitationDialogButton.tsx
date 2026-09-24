@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Pencil } from "lucide-react";
 import { Dialog } from "@/components/Dialog";
 import { RoleMultiSelect } from "@/components/RoleMultiSelect";
@@ -34,6 +35,7 @@ export function EditInvitationDialogButton({ invitation, roles }: { invitation: 
 
   useEffect(() => {
     if (state.success) {
+      toast.success(t("teamInvitationUpdatedToast"));
       router.refresh();
       const timeout = setTimeout(() => setOpen(false), 800);
       return () => clearTimeout(timeout);

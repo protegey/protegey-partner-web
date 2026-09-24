@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -31,6 +32,7 @@ export function NewCaseClient({ initialCustomer, initialAlertId }: { initialCust
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       router.push(`/cases/${result.id}`);

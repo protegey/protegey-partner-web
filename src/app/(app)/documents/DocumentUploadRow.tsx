@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { CheckCircle2, Eye } from "lucide-react";
 import { DocumentPreviewDialog } from "@/components/DocumentPreviewDialog";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -57,6 +58,7 @@ export function DocumentUploadRow({ document }: { document: PartnerDocument }) {
 
   useEffect(() => {
     if (state.success) {
+      toast.success(t("docUploadedToast"));
       formRef.current?.reset();
       router.refresh();
     }

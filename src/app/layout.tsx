@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Script from "next/script";
 import { Inter, IBM_Plex_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import { AppToaster } from "@/components/AppToaster";
 import { LangProvider } from "@/lib/i18n/LangProvider";
 import { getLang } from "@/lib/i18n/lang";
 import "./globals.css";
@@ -42,6 +43,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
           <LangProvider initialLang={lang}>{children}</LangProvider>
+          <AppToaster />
         </ThemeProvider>
         <Script id="tawk-to-widget" strategy="afterInteractive">
           {`

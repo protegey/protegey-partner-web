@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { toast } from "sonner";
 import { Download, File, FileText, Image as ImageIcon, Loader2, Trash2, Upload } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
@@ -49,12 +50,14 @@ export function CaseEvidenceSection({ caseId, initialEvidence, disabled }: { cas
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       setEvidence((prev) => [result, ...prev]);
       setSelectedFile(null);
       setDescription("");
       if (inputRef.current) inputRef.current.value = "";
+      toast.success(t("caseEvidenceUploadedToast"));
     } finally {
       setUploading(false);
     }
@@ -68,9 +71,11 @@ export function CaseEvidenceSection({ caseId, initialEvidence, disabled }: { cas
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       setEvidence((prev) => prev.filter((e) => e.id !== evidenceId));
+      toast.success(t("caseEvidenceDeletedToast"));
     } finally {
       setDeletingId(null);
       setConfirmDeleteId(null);

@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { FileText } from "lucide-react";
+import Link from "next/link";
+import { ChevronRight, FileText } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import type { SarReport } from "./actions";
@@ -99,6 +100,7 @@ export function SarStrClient({
                 <th className="px-4 py-2.5 font-medium">{t("signalsColWhen")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("sarColRegulatorReference")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("sarColUpdated")}</th>
+                <th className="px-4 py-2.5 font-medium text-right">{t("casesColActions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -118,6 +120,16 @@ export function SarStrClient({
                   </td>
                    <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">{report.regulatorReference ?? "—"}</td>
                   <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">{new Date(report.updatedAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}</td>
+                  <td className="px-4 py-2.5 text-right">
+                    <Link
+                      href={`/sar-str/${report.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                    >
+                      {t("commonView")}
+                      <ChevronRight className="size-3.5" />
+                    </Link>
+                  </td>
                   </tr>;
                 })()
               ))}

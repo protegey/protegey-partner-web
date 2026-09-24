@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { OrganizationLogo } from "@/components/OrganizationLogo";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
@@ -43,6 +44,7 @@ export function LogoUploadForm({
     setMessage({ type: "success", text: t("settingsLogoUpdatedSuccess") });
     setLogoVersion((v) => v + 1);
     router.refresh();
+    toast.success(t("logoUploadedToast"));
   }
 
   async function handleRemove() {
@@ -57,6 +59,7 @@ export function LogoUploadForm({
     }
     setLogoVersion((v) => v + 1);
     router.refresh();
+    toast.success(t("logoRemovedToast"));
   }
 
   return (

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -40,12 +41,14 @@ export function SecurityForm() {
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       setSuccess(true);
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
+      toast.success(t("passwordUpdatedToast"));
     } finally {
       setPending(false);
     }
@@ -61,6 +64,7 @@ export function SecurityForm() {
           autoComplete="current-password"
           value={currentPassword}
           onChange={(e) => setCurrentPassword(e.target.value)}
+          placeholder={t("securityCurrentPasswordPlaceholder")}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
@@ -72,6 +76,7 @@ export function SecurityForm() {
           autoComplete="new-password"
           value={newPassword}
           onChange={(e) => setNewPassword(e.target.value)}
+          placeholder={t("securityNewPasswordPlaceholder")}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
@@ -83,6 +88,7 @@ export function SecurityForm() {
           autoComplete="new-password"
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
+          placeholder={t("securityConfirmPasswordPlaceholder")}
           className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
         />
       </div>

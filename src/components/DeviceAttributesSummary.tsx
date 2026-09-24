@@ -150,14 +150,18 @@ export function DeviceAttributesDetails({
   attributes,
   ipCountry,
   ipHash,
+  ip,
+  phoneNumber,
 }: {
   attributes?: DeviceAttributes | null;
   ipCountry?: string | null;
   ipHash?: string | null;
+  ip?: string | null;
+  phoneNumber?: string | null;
 }) {
   const { t, lang } = useLang();
 
-  if (!attributes && !ipCountry && !ipHash) {
+  if (!attributes && !ipCountry && !ipHash && !ip && !phoneNumber) {
     return <p className="text-xs text-muted-foreground">{t("deviceSignalsNoEnrichedData")}</p>;
   }
 
@@ -180,8 +184,13 @@ export function DeviceAttributesDetails({
         <DeviceRiskBadges attributes={attributes} />
       </div>
 
-      {connectionType || batteryLevel !== null || timezone || language || appVersion || (screenWidth && screenHeight) ? (
+      {connectionType || batteryLevel !== null || timezone || language || appVersion || (screenWidth && screenHeight) || phoneNumber ? (
         <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs sm:grid-cols-3">
+          {phoneNumber ? (
+            <span className="text-muted-foreground">
+              {t("deviceAttrPhoneNumber")}: <span className="font-mono text-foreground">{phoneNumber}</span>
+            </span>
+          ) : null}
           {connectionType ? (
             <span className="text-muted-foreground">
               {t("deviceAttrConnectionType")}: <span className="text-foreground">{connectionType}</span>
@@ -231,7 +240,11 @@ export function DeviceAttributesDetails({
         </div>
       ) : null}
 
-      {ipHash ? (
+      {ip ? (
+        <p className="text-[11px] text-muted-foreground">
+          {t("deviceAttrIpLabel")}: <span className="font-mono text-foreground">{ip}</span>
+        </p>
+      ) : ipHash ? (
         <p className="text-[11px] text-muted-foreground">
           {t("deviceAttrIpHashLabel")}: <span className="font-mono">{ipHash.slice(0, 20)}…</span>
         </p>

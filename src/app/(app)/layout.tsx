@@ -27,7 +27,6 @@ import { OrganizationLogo } from "@/components/OrganizationLogo";
 import { SessionExpiredProvider } from "@/components/SessionExpiredProvider";
 import { getLang } from "@/lib/i18n/lang";
 import { t, type Lang } from "@/lib/i18n/strings";
-import { getUnreadNotificationsCount } from "./notifications/actions";
 import { RefreshButton } from "@/components/RefreshButton";
 
 interface PartnerSummary {
@@ -140,12 +139,7 @@ function buildNavItems(lang: Lang): NavItem[] {
 }
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const [user, partner, lang, unreadCount] = await Promise.all([
-    getSessionUser(),
-    loadPartner(),
-    getLang(),
-    getUnreadNotificationsCount(),
-  ]);
+  const [user, partner, lang] = await Promise.all([getSessionUser(), loadPartner(), getLang()]);
   const active = partner?.status === "active";
 
   return (
@@ -166,7 +160,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                 ) : null}
                 <p className="truncate px-1 text-xs text-muted-foreground">{user?.email}</p>
                 <div className="flex items-center gap-2">
-                  <NotificationBellLink unreadCount={unreadCount} ariaLabel={t(lang, "notificationsBellAria")} />
+                  <NotificationBellLink ariaLabel={t(lang, "notificationsBellAria")} />
                   <ThemeToggle />
                   <LangToggle />
                   <SignOutButton className="rounded-md border border-border px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-muted" />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Loader2, UserCog } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -41,6 +42,7 @@ export function ScreeningMatchesSection({
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       setMatches((prev) => prev.map((m) => (m.id === id ? result : m)));

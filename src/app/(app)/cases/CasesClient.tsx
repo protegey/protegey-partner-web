@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Briefcase, Plus } from "lucide-react";
+import { Briefcase, ChevronRight, Plus } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import type { Case } from "./actions";
@@ -129,6 +129,7 @@ export function CasesClient({
                 <th className="px-4 py-2.5 font-medium">{t("signalsColWhen")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("casesColUpdated")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("casesColClosed")}</th>
+                <th className="px-4 py-2.5 font-medium text-right">{t("casesColActions")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -150,6 +151,16 @@ export function CasesClient({
                   </td>
                   <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">{new Date(kase.updatedAt).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US")}</td>
                   <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">{kase.closedAt ? new Date(kase.closedAt).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US") : "—"}</td>
+                  <td className="px-4 py-2.5 text-right">
+                    <Link
+                      href={`/cases/${kase.id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                    >
+                      {t("commonView")}
+                      <ChevronRight className="size-3.5" />
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>

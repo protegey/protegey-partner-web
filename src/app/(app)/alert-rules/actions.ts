@@ -6,6 +6,8 @@ import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api
 export type RuleSegment = "KYC1" | "KYC2" | "AGENT" | "SUPER_AGENT" | "MERCHANT" | "CORPORATE" | "ALL";
 export type AlertRuleStatus = "draft" | "active" | "disabled";
 export type AlertRuleSource = "system" | "manual" | "ai_generated";
+export type AlertRuleSeverity = "review" | "step_up" | "block" | "escalate";
+export type AlertRuleDomain = "transaction" | "identity";
 
 export interface AlertRule {
   id: string;
@@ -21,7 +23,11 @@ export interface AlertRule {
   expression: unknown;
   parameters: Record<string, number>;
   status: AlertRuleStatus;
-  severity: "review" | "block";
+  severity: AlertRuleSeverity;
+  /** Fixed at creation — never sent back in an update. 'transaction' rules evaluate per ingested
+   * transaction; 'identity' rules evaluate once per KYC decision (e.g. a shared ID document
+   * across accounts) and have no meaningful transaction simulator. */
+  domain: AlertRuleDomain;
   source: AlertRuleSource;
   createdAt: string;
   updatedAt: string;
@@ -47,6 +53,7 @@ export interface UpdateAlertRuleInput {
   status?: AlertRuleStatus;
   parameters?: Record<string, number>;
   name?: string;
+  severity?: AlertRuleSeverity;
 }
 
 export async function updateAlertRule(id: string, patch: UpdateAlertRuleInput): Promise<MutationResult<AlertRule>> {

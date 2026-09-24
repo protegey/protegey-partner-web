@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Search, ShieldAlert, ShieldCheck, ChevronRight } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -69,9 +70,11 @@ export function SharedSignalNetworkClient({
       if (outcome === null) return;
       if (isError(outcome)) {
         setCheckError(outcome.error);
+        toast.error(outcome.error);
         return;
       }
       setCheckResult(outcome);
+      toast.success(t("sharedSignalCheckCompleteToast"));
     } finally {
       setChecking(false);
     }

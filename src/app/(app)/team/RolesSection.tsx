@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import { Dialog } from "@/components/Dialog";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
@@ -26,10 +27,12 @@ function RoleActions({ role }: { role: PartnerRole }) {
     if (!result) return;
     if (result.error) {
       setError(result.error);
+      toast.error(result.error);
       return;
     }
     setDeleteOpen(false);
     router.refresh();
+    toast.success(t("roleDeletedToast"));
   }
 
   return (

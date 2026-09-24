@@ -9,6 +9,7 @@ export interface CtrReport { id: string; externalCustomerId: string; periodStart
 export type MutationResult<T> = T | { error: string } | AuthExpired;
 
 export async function getCtrReports(page = 1): Promise<PaginatedResult<CtrReport>> { return apiFetch(`/ctr/me?page=${page}`); }
+export async function getCtrReport(id: string): Promise<CtrReport> { return apiFetch(`/ctr/me/${id}`); }
 
 export async function generateCtrAction(input: { periodStart: string; periodEnd: string; currency: string; thresholdAmount: string }): Promise<MutationResult<CtrReport[]>> {
   try { const result = await apiFetchGuarded<CtrReport[]>("/ctr/me/generate", { method: "POST", body: input }); if (!("error" in result) && !("authExpired" in result)) revalidatePath("/ctr"); return result; }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -26,9 +27,11 @@ export function SharedSignalsToggle({ initialEnabled, canManage }: { initialEnab
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       setEnabled(next);
+      toast.success(next ? t("sharedSignalsEnabledToast") : t("sharedSignalsDisabledToast"));
     } finally {
       setSaving(false);
     }

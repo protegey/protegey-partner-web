@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -29,8 +30,10 @@ export function NewSarReportClient({ caseId }: { caseId: string }) {
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
+      toast.success(t("sarDraftCreatedToast"));
       router.push(`/sar-str/${result.id}`);
     } finally {
       setSubmitting(false);

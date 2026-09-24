@@ -182,7 +182,7 @@ export function TransactionsClient({
             <tbody className="divide-y divide-border">
               {result.data.map((tx) => {
                 const expanded = expandedId === tx.id;
-                const hasDeviceSignal = tx.deviceAction != null || tx.deviceRiskScore != null || tx.deviceAttributes != null || tx.ipCountry != null;
+                const hasDeviceSignal = tx.deviceAction != null || tx.deviceRiskScore != null || tx.deviceAttributes != null || tx.ipCountry != null || tx.ip != null || tx.devicePhoneNumber != null;
                 return (
                   <Fragment key={tx.id}>
                     <tr onClick={() => setExpandedId(expanded ? null : tx.id)} className="cursor-pointer hover:bg-muted/50">
@@ -243,7 +243,13 @@ export function TransactionsClient({
                                     ))}
                                   </div>
                                 ) : null}
-                                <DeviceAttributesDetails attributes={tx.deviceAttributes} ipCountry={tx.ipCountry} ipHash={tx.ipHash} />
+                                <DeviceAttributesDetails
+                                  attributes={tx.deviceAttributes}
+                                  ipCountry={tx.ipCountry}
+                                  ipHash={tx.ipHash}
+                                  ip={tx.ip}
+                                  phoneNumber={tx.devicePhoneNumber}
+                                />
                               </div>
                             ) : (
                               <p className="text-xs text-muted-foreground">{t("deviceSignalsNoEnrichedData")}</p>

@@ -19,6 +19,10 @@ export interface DeviceSignal {
   deviceAttributes: Record<string, unknown> | null;
   ipCountry: string | null;
   ipHash: string | null;
+  /** Decrypted server-side on read (AES-256-GCM at rest) — your own customer's real address. */
+  ip: string | null;
+  /** Decrypted server-side on read — the number you passed in when calling the SDK. */
+  phoneNumber: string | null;
 }
 
 export interface DeviceSignalsQuery {

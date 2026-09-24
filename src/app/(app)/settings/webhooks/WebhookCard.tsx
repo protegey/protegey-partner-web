@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { CopyRevealField } from "@/components/CopyRevealField";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -25,10 +26,12 @@ export function WebhookCard({ credentials, canManage }: { credentials: WebhookSu
     if (!result) return;
     if ("error" in result) {
       setError(result.error);
+      toast.error(result.error);
       return;
     }
     setRevealedSecret(result.webhookSecret);
     router.refresh();
+    toast.success(t("webhookSavedToast"));
   }
 
   if (!canManage) {

@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { PermissionCheckboxGroup } from "@/components/PermissionCheckboxGroup";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { createRoleAction, updateRoleAction, type PermissionOption, type PartnerRole, type RoleFormState } from "./actions";
@@ -40,6 +41,7 @@ export function RoleForm({
 
   useEffect(() => {
     if (state.success) {
+      toast.success(existingRole ? t("roleUpdatedToast") : t("roleCreatedToast"));
       formRef.current?.reset();
       router.refresh();
       const timeout = setTimeout(() => onSuccess?.(), 1000);

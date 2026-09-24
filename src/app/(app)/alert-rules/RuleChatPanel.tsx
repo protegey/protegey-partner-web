@@ -1,6 +1,7 @@
 "use client";
 
 import { useId, useState } from "react";
+import { toast } from "sonner";
 import { Loader2, MessageCircle, Send, Sparkles } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -50,6 +51,7 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
       }
       setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "assistant", kind: "success", rule: result }]);
       onGenerated(result);
+      toast.success(t("ruleGeneratedToast"));
     } finally {
       setPending(false);
     }

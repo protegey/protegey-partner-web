@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { CopyRevealField } from "@/components/CopyRevealField";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
@@ -26,10 +27,12 @@ export function ApiKeyCard({ credentials, canManage }: { credentials: ApiKeySumm
     if (!result) return;
     if ("error" in result) {
       setError(result.error);
+      toast.error(result.error);
       return;
     }
     setRevealedKey(result.apiKey);
     router.refresh();
+    toast.success(t("apiKeyGeneratedToast"));
   }
 
   if (!canManage) {

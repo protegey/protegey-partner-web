@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useRef, useState } from "react";
+import { toast } from "sonner";
 import { Loader2, Sparkles, X } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -65,6 +66,9 @@ function RuleCard({
 
       <div className="flex flex-wrap items-center gap-1.5">
         <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{sourceLabel}</span>
+        {rule.domain === "identity" ? (
+          <span className="rounded-full bg-purple-500/15 px-1.5 py-0.5 text-[10px] font-medium text-purple-600 dark:text-purple-300">{t("ruleDomainIdentity")}</span>
+        ) : null}
         <span className="text-[11px] font-medium text-foreground">{rule.severity === "block" ? t("ruleOnMatchBlock") : t("ruleOnMatchReview")}</span>
       </div>
 
@@ -139,9 +143,11 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
       if (result === null) return;
       if (isError(result)) {
         setToggleError(result.error);
+        toast.error(result.error);
         return;
       }
       replaceRule(result);
+      toast.success(nextStatus === "active" ? t("ruleEnabledToast") : t("ruleDisabledToast"));
     } finally {
       setTogglingId(null);
     }

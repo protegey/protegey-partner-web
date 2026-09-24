@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Loader2, Play, Plus, Save, Trash2 } from "lucide-react";
 import { Dialog } from "@/components/Dialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
@@ -9,9 +10,17 @@ import {
   updateAlertRule,
   simulateAlertRule,
   type AlertRule,
+  type AlertRuleSeverity,
   type SimulateTransactionInput,
   type SimulationOutcome,
 } from "./actions";
+
+const SEVERITY_OPTIONS: { value: AlertRuleSeverity; labelKey: "alertsVerdictAlert" | "alertsVerdictStepUp" | "alertsVerdictBlock" | "alertsVerdictEscalate" }[] = [
+  { value: "review", labelKey: "alertsVerdictAlert" },
+  { value: "step_up", labelKey: "alertsVerdictStepUp" },
+  { value: "block", labelKey: "alertsVerdictBlock" },
+  { value: "escalate", labelKey: "alertsVerdictEscalate" },
+];
 import { ruleDescription, ruleName } from "./localize";
 
 function isError(value: unknown): value is { error: string } {
@@ -40,6 +49,7 @@ export function RuleDialog({ rule, onClose, onUpdated }: { rule: AlertRule; onCl
   const guard = useSessionGuard();
   const { lang, t } = useLang();
   const [parameters, setParameters] = useState<Record<string, number>>(rule.parameters);
+  const [severity, setSeverity] = useState<AlertRuleSeverity>(rule.severity);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
@@ -52,13 +62,15 @@ export function RuleDialog({ rule, onClose, onUpdated }: { rule: AlertRule; onCl
     setSaving(true);
     setSaveError(null);
     try {
-      const result = await guard(() => updateAlertRule(rule.id, { parameters }));
+      const result = await guard(() => updateAlertRule(rule.id, { parameters, severity }));
       if (result === null) return;
       if (isError(result)) {
         setSaveError(result.error);
+        toast.error(result.error);
         return;
       }
       onUpdated(result);
+      toast.success(t("ruleParametersSavedToast"));
     } finally {
       setSaving(false);
     }
@@ -77,9 +89,11 @@ export function RuleDialog({ rule, onClose, onUpdated }: { rule: AlertRule; onCl
       if (result === null) return;
       if (isError(result)) {
         setSimError(result.error);
+        toast.error(result.error);
         return;
       }
       setOutcomes(result);
+      toast.success(t("ruleSimulationCompleteToast"));
     } finally {
       setSimulating(false);
     }
@@ -91,6 +105,27 @@ export function RuleDialog({ rule, onClose, onUpdated }: { rule: AlertRule; onCl
         <div>
           <p className="text-xs font-medium uppercase text-muted-foreground">{t("ruleDialogDescriptionLabel")}</p>
           <p className="mt-1 text-sm text-foreground">{ruleDescription(rule, lang)}</p>
+        </div>
+
+        <div>
+          <p className="mb-1 text-sm font-semibold text-foreground">{t("ruleDialogSeverityTitle")}</p>
+          <p className="mb-2 text-xs text-muted-foreground">{t("ruleDialogSeverityHint")}</p>
+          <div className="flex flex-wrap gap-2">
+            {SEVERITY_OPTIONS.map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setSeverity(option.value)}
+                className={`rounded-md border px-3 py-1.5 text-sm font-medium transition-colors ${
+                  severity === option.value
+                    ? "border-primary bg-primary/10 text-primary"
+                    : "border-border text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                {t(option.labelKey)}
+              </button>
+            ))}
+          </div>
         </div>
 
         <div>
@@ -116,7 +151,7 @@ export function RuleDialog({ rule, onClose, onUpdated }: { rule: AlertRule; onCl
           <button
             type="button"
             onClick={handleSaveParameters}
-            disabled={saving || Object.keys(parameters).length === 0}
+            disabled={saving}
             className="mt-3 flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >
             {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
@@ -125,6 +160,7 @@ export function RuleDialog({ rule, onClose, onUpdated }: { rule: AlertRule; onCl
           {rule.partnerId === null ? <p className="mt-2 text-xs text-muted-foreground">{t("ruleDialogForkNotice")}</p> : null}
         </div>
 
+        {rule.domain === "transaction" ? (
         <div className="border-t border-border pt-5">
           <p className="mb-1 text-sm font-semibold text-foreground">{t("ruleDialogSimulateTitle")}</p>
           <p className="mb-3 text-xs text-muted-foreground">{t("ruleDialogSimulateSubtitle")}</p>
@@ -202,6 +238,7 @@ export function RuleDialog({ rule, onClose, onUpdated }: { rule: AlertRule; onCl
           </div>
           {simError ? <p className="mt-2 text-sm text-destructive">{simError}</p> : null}
         </div>
+        ) : null}
       </div>
     </Dialog>
   );

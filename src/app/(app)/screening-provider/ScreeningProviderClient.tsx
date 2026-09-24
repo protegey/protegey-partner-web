@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 import { Loader2, ShieldCheck, AlertTriangle, CheckCircle2 } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -49,6 +50,7 @@ export function ScreeningProviderClient({ initialStatus, canManage }: { initialS
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       setStatus((prev) => ({
@@ -58,6 +60,7 @@ export function ScreeningProviderClient({ initialStatus, canManage }: { initialS
       setEditingKey(false);
       setApiKey("");
       setApiSecret("");
+      toast.success(t("screeningCredentialSavedToast"));
     } finally {
       setSaving(false);
     }
@@ -71,10 +74,12 @@ export function ScreeningProviderClient({ initialStatus, canManage }: { initialS
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       setStatus({ provider: "default", credential: null });
       setEditingKey(true);
+      toast.success(t("screeningCredentialRemovedToast"));
     } finally {
       setSaving(false);
     }
@@ -89,9 +94,11 @@ export function ScreeningProviderClient({ initialStatus, canManage }: { initialS
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       setStatus((prev) => ({ ...prev, provider: next }));
+      toast.success(t("screeningProviderUpdatedToast"));
     } finally {
       setToggling(false);
     }

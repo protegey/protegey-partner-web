@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { inviteClientAction, type InviteClientState } from "./actions";
 import { useLang } from "@/lib/i18n/LangProvider";
 
@@ -30,6 +31,7 @@ export function InviteClientForm({ onSuccess }: { onSuccess?: () => void }) {
 
   useEffect(() => {
     if (state.success) {
+      toast.success(t("clientsInvitedToast"));
       formRef.current?.reset();
       router.refresh();
       const timeout = setTimeout(() => onSuccess?.(), 1000);

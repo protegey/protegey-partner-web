@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Loader2, FileText, Share2, CheckCircle2 } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -106,10 +107,12 @@ export function CaseDetailClient({
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       setKase((prev) => ({ ...prev, notes: [...prev.notes, result] }));
       setNoteBody("");
+      toast.success(t("caseNoteAddedToast"));
     } finally {
       setAddingNote(false);
     }
@@ -123,9 +126,11 @@ export function CaseDetailClient({
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       setKase((prev) => ({ ...prev, priority: result.priority }));
+      toast.success(t("casePriorityUpdatedToast"));
     } finally {
       setUpdating(false);
     }
@@ -139,9 +144,11 @@ export function CaseDetailClient({
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       setKase((prev) => ({ ...prev, assignedToUserId: result.assignedToUserId }));
+      toast.success(userId ? t("caseAssignedToast") : t("caseUnassignedToast"));
     } finally {
       setUpdating(false);
     }
@@ -155,9 +162,11 @@ export function CaseDetailClient({
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       setKase((prev) => ({ ...prev, status: result.status }));
+      if (status === "investigating") toast.success(t("caseMarkedInvestigatingToast"));
     } finally {
       setUpdating(false);
     }
@@ -171,10 +180,12 @@ export function CaseDetailClient({
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       setKase((prev) => ({ ...prev, ...result }));
       setClosing(false);
+      toast.success(t("caseClosedToast"));
     } finally {
       setUpdating(false);
     }
@@ -196,6 +207,7 @@ export function CaseDetailClient({
       if (result === null) return;
       if (isError(result)) {
         setShareError(result.error);
+        toast.error(result.error);
         return;
       }
       setAlreadyShared(true);
@@ -203,6 +215,7 @@ export function CaseDetailClient({
       setSharePhone("");
       setShareEmail("");
       setShareDeviceFingerprint("");
+      toast.success(t("caseShareSignalToast"));
     } finally {
       setSharingBusy(false);
     }

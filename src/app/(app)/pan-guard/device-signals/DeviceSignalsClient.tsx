@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronRight, Fingerprint } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
-import { CountryBadge, DeviceAttributesDetails, DeviceSummaryCell } from "@/components/DeviceAttributesSummary";
+import { CountryBadge, DeviceAttributesDetails, DeviceRiskBadges, DeviceSummaryCell } from "@/components/DeviceAttributesSummary";
 import type { DeviceSignal } from "./actions";
 import type { PaginatedResult } from "../../transactions/actions";
 
@@ -15,6 +15,18 @@ const ACTION_COLOR: Record<string, string> = {
   hard_challenge: "bg-orange-500/15 text-orange-600",
   block: "bg-destructive/15 text-destructive",
 };
+
+function attrStr(attrs: Record<string, unknown> | null, key: string): string | null {
+  const v = attrs?.[key];
+  return typeof v === "string" && v.length > 0 ? v : null;
+}
+function attrNum(attrs: Record<string, unknown> | null, key: string): number | null {
+  const v = attrs?.[key];
+  return typeof v === "number" ? v : null;
+}
+function attrBool(attrs: Record<string, unknown> | null, key: string): boolean {
+  return attrs?.[key] === true;
+}
 
 export function DeviceSignalsClient({
   result,
@@ -107,7 +119,12 @@ export function DeviceSignalsClient({
                 <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColAction")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColRiskScore")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColDevice")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColConnection")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColBattery")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColFlags")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColCountry")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColIp")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("deviceSignalsColPhone")}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -135,13 +152,29 @@ export function DeviceSignalsClient({
                       <td className="px-4 py-2.5">
                         <DeviceSummaryCell attributes={signal.deviceAttributes} />
                       </td>
+                      <td className="px-4 py-2.5 text-xs text-muted-foreground">
+                        {attrStr(signal.deviceAttributes, "connectionType") ?? "—"}
+                        {attrBool(signal.deviceAttributes, "isVpnActive") ? (
+                          <span className="ml-1.5 rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600">VPN</span>
+                        ) : null}
+                      </td>
+                      <td className="px-4 py-2.5 text-xs text-muted-foreground">
+                        {attrNum(signal.deviceAttributes, "batteryLevel") !== null
+                          ? `${attrNum(signal.deviceAttributes, "batteryLevel")}%${attrBool(signal.deviceAttributes, "isCharging") ? " ⚡" : ""}`
+                          : "—"}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <DeviceRiskBadges attributes={signal.deviceAttributes} />
+                      </td>
                       <td className="px-4 py-2.5">
                         <CountryBadge ipCountry={signal.ipCountry} />
                       </td>
+                      <td className="px-4 py-2.5 font-mono text-xs text-foreground">{signal.ip ?? "—"}</td>
+                      <td className="px-4 py-2.5 font-mono text-xs text-foreground">{signal.phoneNumber ?? "—"}</td>
                     </tr>
                     {expanded ? (
                       <tr className="bg-muted/30">
-                        <td colSpan={8} className="px-4 py-4">
+                        <td colSpan={13} className="px-4 py-4">
                           <div className="flex flex-col gap-3">
                             <div className="grid grid-cols-2 gap-3 text-xs sm:grid-cols-4">
                               <span className="text-muted-foreground">
@@ -151,7 +184,13 @@ export function DeviceSignalsClient({
                                 {t("deviceSignalsColReasons")}: <span className="text-foreground">{signal.reasons?.join(", ") || "—"}</span>
                               </span>
                             </div>
-                            <DeviceAttributesDetails attributes={signal.deviceAttributes} ipHash={signal.ipHash} />
+                            <DeviceAttributesDetails
+                              attributes={signal.deviceAttributes}
+                              ipHash={signal.ipHash}
+                              ip={signal.ip}
+                              ipCountry={signal.ipCountry}
+                              phoneNumber={signal.phoneNumber}
+                            />
                           </div>
                         </td>
                       </tr>

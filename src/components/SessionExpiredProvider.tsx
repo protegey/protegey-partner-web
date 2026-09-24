@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
 import { reauthenticateAction } from "@/lib/auth-actions";
 import type { AuthExpired } from "@/lib/api";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -75,6 +76,7 @@ export function SessionExpiredProvider({ children }: { children: React.ReactNode
     const result = await reauthenticateAction(email, password);
     if (result.error) {
       setError(result.error);
+      toast.error(result.error);
       return;
     }
     resolverRef.current?.(true);

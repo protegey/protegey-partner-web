@@ -2,6 +2,7 @@
 
 import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { toast } from "sonner";
 import { Check, Copy, Loader2 } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { startKycSessionAction, type StartKycSessionState } from "./actions";
@@ -101,6 +102,11 @@ function FaceTecRedirect({ captureUrl }: { captureUrl: string }) {
 export function StartVerificationForm() {
   const { t } = useLang();
   const [state, formAction] = useActionState(startKycSessionAction, initialState);
+
+  useEffect(() => {
+    if (state.url) toast.success(t("kycSessionStartedToast"));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [state.url]);
 
   if (state.url) {
     return <CopyLinkField url={state.url} />;

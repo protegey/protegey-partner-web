@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Search, ShieldCheck, ShieldAlert, ShieldX, Loader2, ChevronDown, ChevronRight, UserCog } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -107,6 +108,7 @@ export function SanctionsSearchClient() {
       if (response === null) return;
       if (isError(response)) {
         setError(response.error);
+        toast.error(response.error);
         return;
       }
       setResult(response);

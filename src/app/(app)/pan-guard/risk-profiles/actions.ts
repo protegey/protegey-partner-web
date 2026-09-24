@@ -45,6 +45,9 @@ export interface EntityRiskProfile {
   decayedScore: number;
   /** Composite score with each dimension weighted by fusion importance — the headline number. */
   weightedScore: number;
+  /** weightedScore turned into an actionable label — "high" starts just above what any single
+   * alert could produce alone, so it always reflects a real pattern, not one event. */
+  riskLevel: "low" | "medium" | "high" | "critical";
   /** The single dimension driving the score most right now, or null if there are no contributions. */
   topCategory: RiskProfileCategory | null;
   breakdown: RiskProfileBreakdownEntry[];

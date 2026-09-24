@@ -10,11 +10,21 @@ import type { StringKey } from "@/lib/i18n/strings";
 import type { EntityRiskProfile, RiskProfileCategory } from "../actions";
 import type { ScreeningMatch } from "../../../sanctions/actions";
 
-function scoreColor(score: number): string {
-  if (score >= 60) return "text-destructive";
-  if (score >= 30) return "text-amber-600";
-  return "text-muted-foreground";
-}
+type RiskLevel = EntityRiskProfile["riskLevel"];
+
+const RISK_LEVEL_STYLES: Record<RiskLevel, string> = {
+  low: "bg-muted text-muted-foreground",
+  medium: "bg-amber-500/15 text-amber-600",
+  high: "bg-orange-500/15 text-orange-600",
+  critical: "bg-destructive/15 text-destructive",
+};
+
+const RISK_LEVEL_LABEL_KEY: Record<RiskLevel, StringKey> = {
+  low: "riskLevelLow",
+  medium: "riskLevelMedium",
+  high: "riskLevelHigh",
+  critical: "riskLevelCritical",
+};
 
 const CATEGORY_LABEL_KEY: Record<RiskProfileCategory, StringKey> = {
   behavioral: "riskProfileCategoryBehavioral",
@@ -23,11 +33,32 @@ const CATEGORY_LABEL_KEY: Record<RiskProfileCategory, StringKey> = {
   historical: "riskProfileCategoryHistorical",
 };
 
-function ScoreCard({ label, value, hint, emphasize }: { label: string; value: number; hint: string; emphasize?: boolean }) {
+function ScoreCard({
+  label,
+  value,
+  hint,
+  emphasize,
+  riskLevel,
+  t,
+}: {
+  label: string;
+  value: number;
+  hint: string;
+  emphasize?: boolean;
+  riskLevel?: RiskLevel;
+  t: (key: StringKey) => string;
+}) {
   return (
     <div className={`flex flex-col gap-1 rounded-md border p-4 ${emphasize ? "border-primary bg-primary/5" : "border-border bg-card"}`} title={hint}>
       <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</span>
-      <span className={`text-3xl font-bold ${scoreColor(value)}`}>{value.toFixed(1)}</span>
+      <div className="flex items-center gap-2">
+        <span className="text-3xl font-bold text-foreground">{value.toFixed(1)}</span>
+        {riskLevel ? (
+          <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${RISK_LEVEL_STYLES[riskLevel]}`}>
+            {t(RISK_LEVEL_LABEL_KEY[riskLevel])}
+          </span>
+        ) : null}
+      </div>
       <span className="text-xs text-muted-foreground">{hint}</span>
     </div>
   );
@@ -68,10 +99,12 @@ export function RiskProfileDetailClient({
               label={t("riskProfilesColWeighted")}
               value={profile.weightedScore}
               hint={t("riskProfileScoreWeightedHint")}
+              riskLevel={profile.riskLevel}
               emphasize
+              t={t}
             />
-            <ScoreCard label={t("riskProfilesColDecayed")} value={profile.decayedScore} hint={t("riskProfileScoreDecayedHint")} />
-            <ScoreCard label={t("riskProfilesColScore")} value={profile.cumulativeScore} hint={t("riskProfileScoreCumulativeHint")} />
+            <ScoreCard label={t("riskProfilesColDecayed")} value={profile.decayedScore} hint={t("riskProfileScoreDecayedHint")} t={t} />
+            <ScoreCard label={t("riskProfilesColScore")} value={profile.cumulativeScore} hint={t("riskProfileScoreCumulativeHint")} t={t} />
           </div>
 
           {profile.topCategory ? (

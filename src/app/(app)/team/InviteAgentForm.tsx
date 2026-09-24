@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { RoleMultiSelect } from "@/components/RoleMultiSelect";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { inviteAgentAction, type AssignableRole, type InviteAgentState } from "./actions";
@@ -31,6 +32,7 @@ export function InviteAgentForm({ roles, onSuccess }: { roles: AssignableRole[];
 
   useEffect(() => {
     if (state.success) {
+      toast.success(t("teamInvitedToast"));
       formRef.current?.reset();
       router.refresh();
       const timeout = setTimeout(() => onSuccess?.(), 1000);

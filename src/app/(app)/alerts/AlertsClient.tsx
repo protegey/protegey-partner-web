@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Loader2, Briefcase, CalendarClock, Zap } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -36,6 +37,13 @@ const DECISION_VERDICT_CONFIG: Record<AlertDecisionVerdict, { key: StringKey; co
   ESCALATE: { key: "alertsVerdictEscalate", color: "bg-orange-500/15 text-orange-600" },
   STEP_UP: { key: "alertsVerdictStepUp", color: "bg-amber-500/15 text-amber-600" },
   ALERT: { key: "alertsVerdictAlert", color: "bg-blue-500/15 text-blue-600" },
+};
+
+const UPDATE_TOAST_KEY: Record<AlertStatus, StringKey> = {
+  open: "alertReopenedToast",
+  confirmed: "alertConfirmedToast",
+  more_info_requested: "alertMoreInfoRequestedToast",
+  dismissed: "alertDismissedToast",
 };
 
 export function AlertsClient({
@@ -92,9 +100,11 @@ export function AlertsClient({
       if (updated === null) return;
       if (isError(updated)) {
         setError(updated.error);
+        toast.error(updated.error);
         return;
       }
       setAlerts((prev) => prev.map((a) => (a.id === id ? updated : a)));
+      toast.success(t(UPDATE_TOAST_KEY[next]));
     } finally {
       setUpdatingId(null);
     }
@@ -114,10 +124,12 @@ export function AlertsClient({
       if (updated === null) return;
       if (isError(updated)) {
         setError(updated.error);
+        toast.error(updated.error);
         return;
       }
       setAlerts((prev) => prev.map((a) => (a.id === id ? updated : a)));
       setEditingId(null);
+      toast.success(t("alertLifecycleSavedToast"));
     } finally {
       setSavingLifecycleId(null);
     }
@@ -131,9 +143,11 @@ export function AlertsClient({
       if (result === null) return;
       if (isError(result)) {
         setError(result.error);
+        toast.error(result.error);
         return;
       }
       setAlerts((prev) => prev.map((a) => (a.id === id ? result.alert : a)));
+      toast.success(t("alertConvertedToCaseToast"));
       router.push(`/cases/${result.case.id}`);
     } finally {
       setConvertingId(null);
@@ -253,7 +267,7 @@ export function AlertsClient({
                       </label>
                       <label className="flex flex-col gap-1 text-xs font-medium text-foreground sm:col-span-2">
                         {t("alertsInvestigationNotes")}
-                        <textarea name="investigationNotes" defaultValue={alert.investigationNotes ?? ""} rows={3} className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm font-normal outline-none focus:ring-2 focus:ring-ring" />
+                        <textarea name="investigationNotes" defaultValue={alert.investigationNotes ?? ""} placeholder={t("alertsInvestigationNotesPlaceholder")} rows={3} className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm font-normal outline-none focus:ring-2 focus:ring-ring" />
                       </label>
                       <label className="flex flex-col gap-1 text-xs font-medium text-foreground">
                         {t("alertsDueAt")}
