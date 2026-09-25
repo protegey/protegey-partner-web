@@ -159,22 +159,24 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                   </div>
                 ) : null}
                 <p className="truncate px-1 text-xs text-muted-foreground">{user?.email}</p>
-                <div className="flex items-center gap-2">
-                  <NotificationBellLink ariaLabel={t(lang, "notificationsBellAria")} />
-                  <ThemeToggle />
-                  <LangToggle />
-                  <SignOutButton className="rounded-md border border-border px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-muted" />
-                </div>
               </div>
             </div>
           }
         />
-        <main className="relative flex-1 overflow-y-auto px-8 py-8">
-          <div className="mb-4 flex justify-end">
-            <RefreshButton />
-          </div>
-          {children}
-        </main>
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <header className="flex items-center justify-end gap-2 border-b border-border px-8 py-3">
+            <NotificationBellLink ariaLabel={t(lang, "notificationsBellAria")} />
+            <ThemeToggle />
+            <LangToggle />
+            <SignOutButton className="rounded-md border border-border px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-muted" />
+          </header>
+          <main className="relative flex-1 overflow-y-auto px-8 py-8">
+            <div className="mb-4 flex justify-end">
+              <RefreshButton />
+            </div>
+            {children}
+          </main>
+        </div>
       </div>
       <OnboardingTour />
       <PageTransitionOverlay />
