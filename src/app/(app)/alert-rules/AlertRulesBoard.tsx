@@ -3,6 +3,7 @@
 import { useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { Loader2, Sparkles, X } from "lucide-react";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { updateAlertRule, type AlertRule, type AlertRuleStatus, type RuleSegment } from "./actions";
@@ -101,6 +102,7 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [toggleError, setToggleError] = useState<string | null>(null);
   const [editingRule, setEditingRule] = useState<AlertRule | null>(null);
+  const [confirmToggleRule, setConfirmToggleRule] = useState<AlertRule | null>(null);
   const [justAddedRuleId, setJustAddedRuleId] = useState<string | null>(null);
   const rulesListRef = useRef<HTMLDivElement>(null);
   const justAddedRule = rules.find((r) => r.id === justAddedRuleId) ?? null;
@@ -172,7 +174,7 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
                 lang={lang}
                 t={t}
                 toggling={togglingId === justAddedRule.id}
-                onToggle={() => handleToggle(justAddedRule)}
+                onToggle={() => setConfirmToggleRule(justAddedRule)}
                 onOpen={() => setEditingRule(justAddedRule)}
               />
             </div>
@@ -203,7 +205,7 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
                     lang={lang}
                     t={t}
                     toggling={togglingId === rule.id}
-                    onToggle={() => handleToggle(rule)}
+                    onToggle={() => setConfirmToggleRule(rule)}
                     onOpen={() => setEditingRule(rule)}
                   />
                 ))}
@@ -223,6 +225,20 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
           }}
         />
       ) : null}
+
+      <ConfirmActionDialog
+        open={confirmToggleRule !== null}
+        onClose={() => setConfirmToggleRule(null)}
+        onConfirm={async () => {
+          if (!confirmToggleRule) return;
+          await handleToggle(confirmToggleRule);
+          setConfirmToggleRule(null);
+        }}
+        title={confirmToggleRule?.status === "active" ? t("ruleConfirmToggleOffTitle") : t("ruleConfirmToggleOnTitle")}
+        description={confirmToggleRule?.status === "active" ? t("ruleConfirmToggleOffDescription") : t("ruleConfirmToggleOnDescription")}
+        confirmLabel={confirmToggleRule?.status === "active" ? t("ruleToggleOff") : t("ruleToggleOn")}
+        pending={confirmToggleRule ? togglingId === confirmToggleRule.id : false}
+      />
     </div>
   );
 }

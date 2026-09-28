@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { CopyRevealField } from "@/components/CopyRevealField";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -16,9 +17,14 @@ export function WebhookCard({ credentials, canManage }: { credentials: WebhookSu
   const [savingWebhook, setSavingWebhook] = useState(false);
   const [revealedSecret, setRevealedSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
-  async function handleSaveWebhook(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    setConfirmOpen(true);
+  }
+
+  async function handleSaveWebhook() {
     setSavingWebhook(true);
     setError(null);
     const result = await guard(() => configureWebhookAction(webhookUrl));
@@ -32,6 +38,7 @@ export function WebhookCard({ credentials, canManage }: { credentials: WebhookSu
     setRevealedSecret(result.webhookSecret);
     router.refresh();
     toast.success(t("webhookSavedToast"));
+    setConfirmOpen(false);
   }
 
   if (!canManage) {
@@ -46,7 +53,7 @@ export function WebhookCard({ credentials, canManage }: { credentials: WebhookSu
   return (
     <div className="rounded-md border border-border bg-card p-5">
       <p className="mb-2 text-xs font-medium uppercase text-muted-foreground">{t("settingsWebhookLabel")}</p>
-      <form onSubmit={handleSaveWebhook} className="flex items-center gap-2">
+      <form onSubmit={handleSubmit} className="flex items-center gap-2">
         <input
           type="url"
           required
@@ -69,6 +76,18 @@ export function WebhookCard({ credentials, canManage }: { credentials: WebhookSu
       {revealedSecret ? <div className="mt-2"><CopyRevealField label={t("settingsWebhookSecretLabel")} value={revealedSecret} /></div> : null}
 
       {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
+
+      <ConfirmActionDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleSaveWebhook}
+        title={t("settingsWebhookRegenerateDialogTitle")}
+        description={t("settingsWebhookRegenerateDialogDescription")}
+        confirmLabel={t("settingsSaveRegenerateSecret")}
+        pendingLabel={t("settingsSavingWebhook")}
+        pending={savingWebhook}
+        variant="destructive"
+      />
     </div>
   );
 }

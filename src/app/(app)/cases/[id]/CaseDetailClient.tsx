@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Loader2, FileText, Share2, CheckCircle2 } from "lucide-react";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { CaseEvidenceSection } from "./CaseEvidenceSection";
@@ -342,15 +343,23 @@ export function CaseDetailClient({
         <p className="text-xs text-muted-foreground">{t("caseShareSignalDisabledHint")}</p>
       ) : null}
 
-      {sharing ? (
-        <div className="flex flex-col gap-3 rounded-md border border-border bg-card p-4">
-          <p className="text-sm font-semibold text-foreground">{t("caseShareSignalDialogTitle")}</p>
-          <p className="text-xs text-muted-foreground">{t("caseShareSignalDialogHint")}</p>
+      <ConfirmActionDialog
+        open={sharing}
+        onClose={() => setSharing(false)}
+        onConfirm={handleShareSignal}
+        title={t("caseShareSignalDialogTitle")}
+        description={t("caseShareSignalDialogHint")}
+        confirmLabel={t("caseShareSignalConfirm")}
+        pending={sharingBusy}
+        confirmDisabled={!hasShareIdentifier}
+      >
+        <div className="flex flex-col gap-3">
           <input
             type="tel"
             value={sharePhone}
             onChange={(e) => setSharePhone(e.target.value)}
             placeholder={t("caseShareSignalPhonePlaceholder")}
+            autoFocus
             className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
           />
           <input
@@ -386,59 +395,30 @@ export function CaseDetailClient({
             <option value="other">{t("sharedSignalCategoryOther")}</option>
           </select>
           {shareError ? <p className="text-sm text-destructive">{shareError}</p> : null}
-          <div className="flex gap-2">
-            <button
-              type="button"
-              disabled={sharingBusy || !hasShareIdentifier}
-              onClick={handleShareSignal}
-              className="flex items-center gap-2 rounded-md bg-primary px-3.5 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
-            >
-              {sharingBusy ? <Loader2 className="size-4 animate-spin" /> : null}
-              {t("caseShareSignalConfirm")}
-            </button>
-            <button
-              type="button"
-              onClick={() => setSharing(false)}
-              className="rounded-md border border-border px-3.5 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-            >
-              {t("commonCancel")}
-            </button>
-          </div>
         </div>
-      ) : null}
+      </ConfirmActionDialog>
 
-      {closing ? (
-        <div className="flex flex-col gap-3 rounded-md border border-border bg-card p-4">
-          <p className="text-sm font-semibold text-foreground">{t("caseCloseDialogTitle")}</p>
-          <select
-            value={outcome}
-            onChange={(e) => setOutcome(e.target.value as CaseOutcome)}
-            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="no_action">{t("caseOutcomeNoAction")}</option>
-            <option value="false_positive">{t("caseOutcomeFalsePositive")}</option>
-            <option value="sar_filed">{t("caseOutcomeSarFiled")}</option>
-          </select>
-          <div className="flex gap-2">
-            <button
-              type="button"
-              disabled={updating}
-              onClick={handleClose}
-              className="flex items-center gap-2 rounded-md bg-destructive px-3.5 py-1.5 text-sm font-semibold text-destructive-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
-            >
-              {updating ? <Loader2 className="size-4 animate-spin" /> : null}
-              {t("caseConfirmClose")}
-            </button>
-            <button
-              type="button"
-              onClick={() => setClosing(false)}
-              className="rounded-md border border-border px-3.5 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-            >
-              {t("commonCancel")}
-            </button>
-          </div>
-        </div>
-      ) : null}
+      <ConfirmActionDialog
+        open={closing}
+        onClose={() => setClosing(false)}
+        onConfirm={handleClose}
+        title={t("caseCloseDialogTitle")}
+        description={t("caseCloseDialogDescription")}
+        confirmLabel={t("caseConfirmClose")}
+        pending={updating}
+        variant="destructive"
+      >
+        <select
+          value={outcome}
+          onChange={(e) => setOutcome(e.target.value as CaseOutcome)}
+          className="w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+        >
+          <option value="no_action">{t("caseOutcomeNoAction")}</option>
+          <option value="false_positive">{t("caseOutcomeFalsePositive")}</option>
+          <option value="sar_filed">{t("caseOutcomeSarFiled")}</option>
+        </select>
+        {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
+      </ConfirmActionDialog>
 
       <div className="flex flex-col gap-3">
         <p className="text-sm font-semibold text-foreground">{t("caseNotesTitle")}</p>

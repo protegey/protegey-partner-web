@@ -60,6 +60,10 @@ export async function getTransactions(query: TransactionsQuery = {}): Promise<Pa
   return apiFetch<PaginatedResult<MonitoringTransaction>>(`/transactions/me?${params.toString()}`);
 }
 
+export async function getTransaction(id: string): Promise<MonitoringTransaction> {
+  return apiFetch<MonitoringTransaction>(`/transactions/me/${id}`);
+}
+
 export interface TransactionStats {
   windowDays: number;
   totalCount: number;

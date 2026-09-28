@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { RefreshCw, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import { StatsCards } from "./StatsCards";
@@ -33,7 +33,7 @@ export function SanctionsClient({
 }) {
   const router = useRouter();
   const { t } = useLang();
-  const [isPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const [search, setSearch] = useState(initialSearch);
   const [type, setType] = useState(initialType);
   const [source, setSource] = useState(initialSource);
@@ -68,14 +68,6 @@ export function SanctionsClient({
             <Search className="size-4" />
             {t("sanctionsSearchToolLink")}
           </Link>
-          <button
-            type="button"
-            onClick={() => startTransition(() => router.refresh())}
-            className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-          >
-            <RefreshCw className={`size-4 ${isPending ? "animate-spin" : ""}`} />
-            {t("kycRefreshButton")}
-          </button>
         </div>
       </div>
 

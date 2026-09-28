@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { Loader2, Briefcase, CalendarClock, Zap } from "lucide-react";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
@@ -46,6 +47,16 @@ const UPDATE_TOAST_KEY: Record<AlertStatus, StringKey> = {
   dismissed: "alertDismissedToast",
 };
 
+type PendingAlertActionKind = AlertStatus | "convert";
+
+const ALERT_DIALOG_COPY: Record<PendingAlertActionKind, { title: StringKey; description: StringKey; confirmLabel: StringKey }> = {
+  confirmed: { title: "alertsConfirmFraudDialogTitle", description: "alertsConfirmFraudDialogDescription", confirmLabel: "alertsActionConfirm" },
+  dismissed: { title: "alertsDismissDialogTitle", description: "alertsDismissDialogDescription", confirmLabel: "alertsActionDismiss" },
+  more_info_requested: { title: "alertsRequestInfoDialogTitle", description: "alertsRequestInfoDialogDescription", confirmLabel: "alertsActionRequestInfo" },
+  open: { title: "alertsReopenDialogTitle", description: "alertsReopenDialogDescription", confirmLabel: "alertsActionReopen" },
+  convert: { title: "alertsConvertToCaseDialogTitle", description: "alertsConvertToCaseDialogDescription", confirmLabel: "alertsConvertToCase" },
+};
+
 export function AlertsClient({
   result,
   page,
@@ -69,6 +80,7 @@ export function AlertsClient({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [savingLifecycleId, setSavingLifecycleId] = useState<string | null>(null);
   const [convertingId, setConvertingId] = useState<string | null>(null);
+  const [pendingAction, setPendingAction] = useState<{ id: string; kind: PendingAlertActionKind } | null>(null);
 
   const dispositionLabel: Record<AlertDisposition, string> = {
     confirmed_fraud: t("alertsDispositionConfirmedFraud"),
@@ -105,6 +117,7 @@ export function AlertsClient({
       }
       setAlerts((prev) => prev.map((a) => (a.id === id ? updated : a)));
       toast.success(t(UPDATE_TOAST_KEY[next]));
+      setPendingAction(null);
     } finally {
       setUpdatingId(null);
     }
@@ -148,9 +161,19 @@ export function AlertsClient({
       }
       setAlerts((prev) => prev.map((a) => (a.id === id ? result.alert : a)));
       toast.success(t("alertConvertedToCaseToast"));
+      setPendingAction(null);
       router.push(`/cases/${result.case.id}`);
     } finally {
       setConvertingId(null);
+    }
+  }
+
+  async function handleConfirmPendingAction() {
+    if (!pendingAction) return;
+    if (pendingAction.kind === "convert") {
+      await handleConvertToCase(pendingAction.id);
+    } else {
+      await handleUpdate(pendingAction.id, pendingAction.kind);
     }
   }
 
@@ -293,7 +316,7 @@ export function AlertsClient({
                       <button
                         type="button"
                         disabled={isBusy}
-                        onClick={() => handleUpdate(alert.id, "confirmed")}
+                        onClick={() => setPendingAction({ id: alert.id, kind: "confirmed" })}
                         className="flex items-center gap-1.5 rounded-md bg-destructive px-3 py-1.5 text-xs font-semibold text-destructive-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
                       >
                         {isBusy ? <Loader2 className="size-3.5 animate-spin" /> : null}
@@ -302,7 +325,7 @@ export function AlertsClient({
                       <button
                         type="button"
                         disabled={isBusy}
-                        onClick={() => handleUpdate(alert.id, "dismissed")}
+                        onClick={() => setPendingAction({ id: alert.id, kind: "dismissed" })}
                         className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
                       >
                         {t("alertsActionDismiss")}
@@ -311,7 +334,7 @@ export function AlertsClient({
                         <button
                           type="button"
                           disabled={isBusy}
-                          onClick={() => handleUpdate(alert.id, "more_info_requested")}
+                          onClick={() => setPendingAction({ id: alert.id, kind: "more_info_requested" })}
                           className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
                         >
                           {t("alertsActionRequestInfo")}
@@ -322,7 +345,7 @@ export function AlertsClient({
                     <button
                       type="button"
                       disabled={isBusy}
-                      onClick={() => handleUpdate(alert.id, "open")}
+                      onClick={() => setPendingAction({ id: alert.id, kind: "open" })}
                       className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
                     >
                       {t("alertsActionReopen")}
@@ -332,7 +355,7 @@ export function AlertsClient({
                     type="button"
                     disabled={convertingId === alert.id}
                     title={t("alertsConvertToCaseHint")}
-                    onClick={() => handleConvertToCase(alert.id)}
+                    onClick={() => setPendingAction({ id: alert.id, kind: "convert" })}
                     className="flex items-center gap-1.5 rounded-md border border-primary/40 bg-primary/5 px-3 py-1.5 text-xs font-medium text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
                   >
                     {convertingId === alert.id ? <Loader2 className="size-3.5 animate-spin" /> : <Zap className="size-3.5" />}
@@ -371,6 +394,16 @@ export function AlertsClient({
           params.set("page", String(nextPage));
           startTransition(() => router.push(`/alerts?${params.toString()}`));
         }}
+      />
+
+      <ConfirmActionDialog
+        open={pendingAction !== null}
+        onClose={() => setPendingAction(null)}
+        onConfirm={handleConfirmPendingAction}
+        title={pendingAction ? t(ALERT_DIALOG_COPY[pendingAction.kind].title) : ""}
+        description={pendingAction ? t(ALERT_DIALOG_COPY[pendingAction.kind].description) : undefined}
+        confirmLabel={pendingAction ? t(ALERT_DIALOG_COPY[pendingAction.kind].confirmLabel) : ""}
+        pending={pendingAction ? (pendingAction.kind === "convert" ? convertingId === pendingAction.id : updatingId === pendingAction.id) : false}
       />
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { toast } from "sonner";
-import { Loader2 } from "lucide-react";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { changePasswordAction } from "./actions";
@@ -20,8 +20,9 @@ export function SecurityForm() {
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setSuccess(false);
@@ -35,6 +36,10 @@ export function SecurityForm() {
       return;
     }
 
+    setConfirmOpen(true);
+  }
+
+  async function handleConfirm() {
     setPending(true);
     try {
       const result = await guard(() => changePasswordAction(currentPassword, newPassword));
@@ -49,6 +54,7 @@ export function SecurityForm() {
       setNewPassword("");
       setConfirmPassword("");
       toast.success(t("passwordUpdatedToast"));
+      setConfirmOpen(false);
     } finally {
       setPending(false);
     }
@@ -96,12 +102,21 @@ export function SecurityForm() {
       {success ? <p className="text-sm text-primary">{t("securityUpdateSuccess")}</p> : null}
       <button
         type="submit"
-        disabled={pending}
         className="mt-1 flex items-center justify-center gap-1.5 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50"
       >
-        {pending ? <Loader2 className="size-4 animate-spin" /> : null}
-        {pending ? t("securityUpdating") : t("securityUpdateButton")}
+        {t("securityUpdateButton")}
       </button>
+
+      <ConfirmActionDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleConfirm}
+        title={t("securityConfirmDialogTitle")}
+        description={t("securityConfirmDialogDescription")}
+        confirmLabel={t("securityUpdateButton")}
+        pendingLabel={t("securityUpdating")}
+        pending={pending}
+      />
     </form>
   );
 }

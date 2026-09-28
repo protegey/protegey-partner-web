@@ -3,10 +3,19 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Loader2, UserCog } from "lucide-react";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import type { StringKey } from "@/lib/i18n/strings";
 import { reviewScreeningMatchAction, type ScreeningMatch, type ScreeningMatchStatus } from "../../../sanctions/actions";
+
+type PendingReviewStatus = Exclude<ScreeningMatchStatus, "possible_match">;
+
+const REVIEW_DIALOG_COPY: Record<PendingReviewStatus, { title: StringKey; description: StringKey; confirmLabel: StringKey }> = {
+  confirmed: { title: "screeningMatchConfirmDialogTitle", description: "screeningMatchConfirmDialogDescription", confirmLabel: "screeningMatchActionConfirm" },
+  false_positive: { title: "screeningMatchFalsePositiveDialogTitle", description: "screeningMatchFalsePositiveDialogDescription", confirmLabel: "screeningMatchActionFalsePositive" },
+  cleared: { title: "screeningMatchClearDialogTitle", description: "screeningMatchClearDialogDescription", confirmLabel: "screeningMatchActionClear" },
+};
 
 function isError(value: unknown): value is { error: string } {
   return Boolean(value) && typeof value === "object" && "error" in (value as object);
@@ -33,8 +42,9 @@ export function ScreeningMatchesSection({
   const [matches, setMatches] = useState(initialMatches);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [pendingReview, setPendingReview] = useState<{ id: string; status: PendingReviewStatus } | null>(null);
 
-  async function handleReview(id: string, status: Exclude<ScreeningMatchStatus, "possible_match">) {
+  async function handleReview(id: string, status: PendingReviewStatus) {
     setBusyId(id);
     setError(null);
     try {
@@ -46,6 +56,7 @@ export function ScreeningMatchesSection({
         return;
       }
       setMatches((prev) => prev.map((m) => (m.id === id ? result : m)));
+      setPendingReview(null);
     } finally {
       setBusyId(null);
     }
@@ -99,7 +110,7 @@ export function ScreeningMatchesSection({
                   <button
                     type="button"
                     disabled={busy}
-                    onClick={() => handleReview(match.id, "confirmed")}
+                    onClick={() => setPendingReview({ id: match.id, status: "confirmed" })}
                     className="flex items-center gap-1.5 rounded-md bg-destructive px-2.5 py-1 text-xs font-semibold text-destructive-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
                   >
                     {busy ? <Loader2 className="size-3.5 animate-spin" /> : null}
@@ -108,7 +119,7 @@ export function ScreeningMatchesSection({
                   <button
                     type="button"
                     disabled={busy}
-                    onClick={() => handleReview(match.id, "false_positive")}
+                    onClick={() => setPendingReview({ id: match.id, status: "false_positive" })}
                     className="rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
                   >
                     {t("screeningMatchActionFalsePositive")}
@@ -116,7 +127,7 @@ export function ScreeningMatchesSection({
                   <button
                     type="button"
                     disabled={busy}
-                    onClick={() => handleReview(match.id, "cleared")}
+                    onClick={() => setPendingReview({ id: match.id, status: "cleared" })}
                     className="rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
                   >
                     {t("screeningMatchActionClear")}
@@ -127,6 +138,17 @@ export function ScreeningMatchesSection({
           );
         })}
       </ul>
+
+      <ConfirmActionDialog
+        open={pendingReview !== null}
+        onClose={() => setPendingReview(null)}
+        onConfirm={() => (pendingReview ? handleReview(pendingReview.id, pendingReview.status) : undefined)}
+        title={pendingReview ? t(REVIEW_DIALOG_COPY[pendingReview.status].title) : ""}
+        description={pendingReview ? t(REVIEW_DIALOG_COPY[pendingReview.status].description) : undefined}
+        confirmLabel={pendingReview ? t(REVIEW_DIALOG_COPY[pendingReview.status].confirmLabel) : ""}
+        pending={pendingReview ? busyId === pendingReview.id : false}
+        variant={pendingReview?.status === "confirmed" ? "destructive" : "primary"}
+      />
     </div>
   );
 }

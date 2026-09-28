@@ -5,7 +5,6 @@ import { getKycEnrollments, type DiditSessionStatus } from "./actions";
 import { KycDashboardTab } from "./KycDashboardTab";
 import { EnrollmentsTable } from "./EnrollmentsTable";
 import { StartVerificationDialogButton } from "./StartVerificationDialogButton";
-import { RefreshButton } from "./RefreshButton";
 import { PaginationControls } from "@/components/PaginationControls";
 
 export const metadata: Metadata = {
@@ -28,7 +27,6 @@ export default async function KycPage({ searchParams }: { searchParams: Promise<
           </p>
         </div>
         <div className="flex shrink-0 items-center gap-2">
-          <RefreshButton />
           <StartVerificationDialogButton />
         </div>
       </div>

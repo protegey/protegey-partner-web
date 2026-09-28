@@ -48,6 +48,7 @@ export interface AlertsQuery {
   status?: AlertStatus;
   ruleCode?: string;
   externalCustomerId?: string;
+  transactionId?: string;
   dateFrom?: string;
   dateTo?: string;
 }
@@ -58,6 +59,29 @@ export async function getAlerts(query: AlertsQuery = {}): Promise<PaginatedResul
     if (value !== undefined && value !== "") params.set(key, String(value));
   }
   return apiFetch<PaginatedResult<AlertWithContext>>(`/alerts/me?${params.toString()}`);
+}
+
+/** Every alert (if any) already tied to this transaction — a transaction can have more than one
+ * (several rules can each fire their own alert), most recent first. */
+export async function getAlertsForTransaction(transactionId: string): Promise<AlertWithContext[]> {
+  const result = await getAlerts({ transactionId, limit: 20 });
+  return result.data;
+}
+
+/** Manually flags a transaction that no automated rule matched — creates (or reuses, if one is
+ * already open) an Alert on it, so the same assign/confirm/dismiss workflow applies to it too. */
+export async function flagTransactionAction(transactionId: string): Promise<MutationResult<AlertWithContext>> {
+  try {
+    const result = await apiFetchGuarded<AlertWithContext>(`/alerts/me/flag-transaction`, { method: "POST", body: { transactionId } });
+    if (!("error" in result) && !("authExpired" in result)) {
+      revalidatePath("/alerts");
+      revalidatePath(`/transactions/${transactionId}`);
+    }
+    return result;
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }
 
 export type MutationResult<T> = T | { error: string } | AuthExpired;

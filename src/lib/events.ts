@@ -63,7 +63,12 @@ export function eventHref(event: NotificationEvent): string | null {
     return customerLabel && customerLabel !== "unknown" ? `/pan-guard/device-signals?customer=${encodeURIComponent(customerLabel)}` : "/pan-guard/device-signals";
   }
 
-  if (event.type === "alert.status_changed") return "/alerts";
+  if (event.type === "alert.status_changed" || event.type === "alert.created") return "/alerts";
+
+  if (event.type === "transaction.blocked") {
+    const customerLabel = str("customerLabel");
+    return customerLabel ? `/transactions?customer=${encodeURIComponent(customerLabel)}` : "/transactions";
+  }
   if (event.type.startsWith("rule.")) return "/alert-rules";
   if (event.type.startsWith("kyc.")) return "/kyc";
   if (event.type === "shared_signal.reported") return "/pan-risk/shared-signal-network";
@@ -105,6 +110,10 @@ export function describeEvent(lang: Lang, event: NotificationEvent): string {
       return interpolate(t(lang, "eventRuleActivated"), { actor, ruleName: str("ruleName") });
     case "rule.disabled":
       return interpolate(t(lang, "eventRuleDisabled"), { actor, ruleName: str("ruleName") });
+    case "alert.created":
+      return interpolate(t(lang, "eventAlertCreated"), { ruleName: str("ruleName"), customerLabel: str("customerLabel") });
+    case "transaction.blocked":
+      return interpolate(t(lang, "eventTransactionBlocked"), { customerLabel: str("customerLabel"), amount: str("amount"), currency: str("currency") });
     case "alert.status_changed": {
       const statusKey = STATUS_KEY[str("status")];
       const statusLabel = statusKey ? t(lang, statusKey) : str("status");

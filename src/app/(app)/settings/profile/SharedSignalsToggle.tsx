@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { updateSharedSignalsAction } from "./actions";
@@ -17,6 +18,7 @@ export function SharedSignalsToggle({ initialEnabled, canManage }: { initialEnab
   const [enabled, setEnabled] = useState(initialEnabled);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmOpen, setConfirmOpen] = useState(false);
 
   async function handleToggle() {
     const next = !enabled;
@@ -32,6 +34,7 @@ export function SharedSignalsToggle({ initialEnabled, canManage }: { initialEnab
       }
       setEnabled(next);
       toast.success(next ? t("sharedSignalsEnabledToast") : t("sharedSignalsDisabledToast"));
+      setConfirmOpen(false);
     } finally {
       setSaving(false);
     }
@@ -49,7 +52,7 @@ export function SharedSignalsToggle({ initialEnabled, canManage }: { initialEnab
         role="switch"
         aria-checked={enabled}
         disabled={!canManage || saving}
-        onClick={handleToggle}
+        onClick={() => setConfirmOpen(true)}
         className={`relative flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
           enabled ? "bg-primary" : "bg-muted"
         }`}
@@ -60,6 +63,17 @@ export function SharedSignalsToggle({ initialEnabled, canManage }: { initialEnab
           <span className={`inline-block size-4 transform rounded-full bg-background shadow transition-transform ${enabled ? "translate-x-6" : "translate-x-1"}`} />
         )}
       </button>
+
+      <ConfirmActionDialog
+        open={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleToggle}
+        title={enabled ? t("sharedSignalsDisableDialogTitle") : t("sharedSignalsEnableDialogTitle")}
+        description={enabled ? t("sharedSignalsDisableDialogDescription") : t("sharedSignalsEnableDialogDescription")}
+        confirmLabel={enabled ? t("sharedSignalsDisableConfirm") : t("sharedSignalsEnableConfirm")}
+        pending={saving}
+        variant={enabled ? "destructive" : "primary"}
+      />
     </div>
   );
 }

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import type { StringKey } from "@/lib/i18n/strings";
 import { createPepDesignationAction, reviewPepDesignationAction, type PepCategory, type PepDesignation, type PepStatus } from "./actions";
 
@@ -91,5 +92,26 @@ export function PepClient({ designations, initialStatus }: { designations: PepDe
 function PepRow({ designation, onReview, t }: { designation: PepDesignation; onReview: (designation: PepDesignation, status: PepStatus, notes: string) => Promise<void>; t: (key: never) => string }) {
   const [status, setStatus] = useState(designation.status);
   const [notes, setNotes] = useState(designation.notes ?? "");
-  return <tr className="align-top"><td className="px-4 py-3 font-medium text-foreground">{designation.externalCustomerId}</td><td className="px-4 py-3 text-muted-foreground">{t(`pepCategory_${designation.category}` as never)}</td><td className="px-4 py-3 text-muted-foreground">{designation.role ?? "-"}</td><td className="px-4 py-3 text-muted-foreground">{designation.jurisdiction ?? "-"}</td><td className="px-4 py-3 text-muted-foreground">{designation.source}</td><td className="px-4 py-3"><select value={status} onChange={(event) => setStatus(event.target.value as PepStatus)} className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground">{statuses.map((value) => <option key={value} value={value}>{t(`pepStatus_${value}` as never)}</option>)}</select></td><td className="min-w-48 px-4 py-3"><textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder={t("pepNotesPlaceholder" as never)} className="min-h-16 w-full rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground" /></td><td className="px-4 py-3"><button type="button" onClick={() => onReview(designation, status, notes)} className="whitespace-nowrap rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted">{t("pepReviewButton" as never)}</button></td></tr>;
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [pending, setPending] = useState(false);
+
+  async function confirmReview() {
+    setPending(true);
+    await onReview(designation, status, notes);
+    setPending(false);
+    setConfirmOpen(false);
+  }
+
+  return <tr className="align-top"><td className="px-4 py-3 font-medium text-foreground">{designation.externalCustomerId}</td><td className="px-4 py-3 text-muted-foreground">{t(`pepCategory_${designation.category}` as never)}</td><td className="px-4 py-3 text-muted-foreground">{designation.role ?? "-"}</td><td className="px-4 py-3 text-muted-foreground">{designation.jurisdiction ?? "-"}</td><td className="px-4 py-3 text-muted-foreground">{designation.source}</td><td className="px-4 py-3"><select value={status} onChange={(event) => setStatus(event.target.value as PepStatus)} className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground">{statuses.map((value) => <option key={value} value={value}>{t(`pepStatus_${value}` as never)}</option>)}</select></td><td className="min-w-48 px-4 py-3"><textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder={t("pepNotesPlaceholder" as never)} className="min-h-16 w-full rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground" /></td><td className="px-4 py-3">
+    <button type="button" onClick={() => setConfirmOpen(true)} className="whitespace-nowrap rounded-md border border-border px-3 py-1.5 text-xs font-semibold text-foreground hover:bg-muted">{t("pepReviewButton" as never)}</button>
+    <ConfirmActionDialog
+      open={confirmOpen}
+      onClose={() => setConfirmOpen(false)}
+      onConfirm={confirmReview}
+      title={t("pepReviewDialogTitle" as never)}
+      description={t("pepReviewDialogDescription" as never)}
+      confirmLabel={t("pepReviewButton" as never)}
+      pending={pending}
+    />
+  </td></tr>;
 }

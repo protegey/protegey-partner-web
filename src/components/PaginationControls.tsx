@@ -4,7 +4,6 @@ import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 
 export async function PaginationControls({ page, totalPages, total, href }: { page: number; totalPages: number; total: number; href: (page: number) => string }) {
-  if (totalPages <= 1) return null;
   const lang = await getLang();
   return (
     <div className="flex items-center justify-between text-sm text-muted-foreground">

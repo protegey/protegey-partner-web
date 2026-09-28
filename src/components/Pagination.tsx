@@ -21,7 +21,6 @@ export function Pagination({
   onPageChange: (page: number) => void;
 }) {
   const { t } = useLang();
-  if (totalPages <= 1) return null;
 
   return (
     <div className="flex items-center justify-between gap-3 text-sm text-muted-foreground">

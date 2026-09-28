@@ -142,6 +142,25 @@ const WEBHOOK_ALERT_STATUS_EXAMPLE = `{
 // Fires when someone on your team changes an alert's status from the portal — the only way
 // you'd otherwise learn of it is polling GET /alerts.`;
 
+const WEBHOOK_TRANSACTION_BLOCKED_EXAMPLE = `{
+  "type": "transaction.blocked",
+  "eventId": "8a5e6f5a-8b7f-4b51-9df3-2f6c3a1f0c2e",
+  "transactionId": "4d06ad4e-2018-428a-8323-d537da5e19fa",
+  "externalTransactionId": "tx-9981-004",
+  "externalCustomerId": "cust-9981",
+  "amount": 400000,
+  "currency": "XOF",
+  "riskScore": 82,
+  "ruleDecision": "review",
+  "deviceAction": "block",
+  "alertIds": ["27bfd203-d554-418a-bc19-fcaf13164a0e"],
+  "occurredAt": "2026-09-26T09:12:03.000Z"
+}
+// Fires whenever a transaction's FINAL decision is "blocked" — whether that came from a rule
+// (ruleDecision) or from the device signal (deviceAction), or both. This is the only asynchronous
+// signal for a device-only block, since that path never creates an Alert on its own.
+// alertIds cross-references any alert.created events also fired for the same transaction.`;
+
 const WEBHOOK_DISPATCH_EXAMPLE = `// Node.js — dispatch on "type" once you've verified the signature (see below)
 switch (event.type) {
   case "kyc.status_changed":
@@ -152,6 +171,9 @@ switch (event.type) {
     break;
   case "alert.status_changed":
     // event.alertId, event.status
+    break;
+  case "transaction.blocked":
+    // event.transactionId, event.ruleDecision, event.deviceAction, event.alertIds
     break;
   default:
     // Ignore unknown types instead of erroring — new event types get added over time.
@@ -322,6 +344,10 @@ export default async function DocumentationPage() {
                   <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-foreground">alert.status_changed</td>
                   <td className="px-3 py-2 text-xs text-muted-foreground">{t(lang, "docsWebhooksAlertStatusTrigger")}</td>
                 </tr>
+                <tr>
+                  <td className="whitespace-nowrap px-3 py-2 font-mono text-xs text-foreground">transaction.blocked</td>
+                  <td className="px-3 py-2 text-xs text-muted-foreground">{t(lang, "docsWebhooksTransactionBlockedTrigger")}</td>
+                </tr>
               </tbody>
             </table>
           </div>
@@ -341,6 +367,9 @@ export default async function DocumentationPage() {
 
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">alert.status_changed</p>
           <CodeBlock code={WEBHOOK_ALERT_STATUS_EXAMPLE} />
+
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">transaction.blocked</p>
+          <CodeBlock code={WEBHOOK_TRANSACTION_BLOCKED_EXAMPLE} />
 
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsWebhooksDispatchTitle")}</p>
           <CodeBlock code={WEBHOOK_DISPATCH_EXAMPLE} />

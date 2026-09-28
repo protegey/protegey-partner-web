@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { Loader2, ShieldCheck, AlertTriangle, CheckCircle2 } from "lucide-react";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import {
@@ -33,6 +34,8 @@ export function ScreeningProviderClient({ initialStatus, canManage }: { initialS
   const [saving, setSaving] = useState(false);
   const [toggling, setToggling] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
+  const [confirmToggleOpen, setConfirmToggleOpen] = useState(false);
 
   const credentialStatusLabel: Record<string, string> = {
     active: t("screeningProviderStatusActive"),
@@ -80,6 +83,7 @@ export function ScreeningProviderClient({ initialStatus, canManage }: { initialS
       setStatus({ provider: "default", credential: null });
       setEditingKey(true);
       toast.success(t("screeningCredentialRemovedToast"));
+      setConfirmDeleteOpen(false);
     } finally {
       setSaving(false);
     }
@@ -99,6 +103,7 @@ export function ScreeningProviderClient({ initialStatus, canManage }: { initialS
       }
       setStatus((prev) => ({ ...prev, provider: next }));
       toast.success(t("screeningProviderUpdatedToast"));
+      setConfirmToggleOpen(false);
     } finally {
       setToggling(false);
     }
@@ -161,7 +166,7 @@ export function ScreeningProviderClient({ initialStatus, canManage }: { initialS
             role="switch"
             aria-checked={usingDowJones}
             disabled={!canManage || toggling || !status.credential}
-            onClick={handleToggleProvider}
+            onClick={() => setConfirmToggleOpen(true)}
             className={`relative flex h-6 w-11 shrink-0 items-center rounded-full transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${
               usingDowJones ? "bg-primary" : "bg-muted"
             }`}
@@ -195,7 +200,7 @@ export function ScreeningProviderClient({ initialStatus, canManage }: { initialS
               <button
                 type="button"
                 disabled={!canManage || saving}
-                onClick={handleDeleteKey}
+                onClick={() => setConfirmDeleteOpen(true)}
                 className="rounded-md border border-destructive/30 px-3 py-1.5 text-xs font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:opacity-50"
               >
                 {t("screeningProviderRemoveKey")}
@@ -247,6 +252,27 @@ export function ScreeningProviderClient({ initialStatus, canManage }: { initialS
           </div>
         )}
       </div>
+
+      <ConfirmActionDialog
+        open={confirmDeleteOpen}
+        onClose={() => setConfirmDeleteOpen(false)}
+        onConfirm={handleDeleteKey}
+        title={t("screeningProviderDeleteKeyDialogTitle")}
+        description={t("screeningProviderDeleteKeyDialogDescription")}
+        confirmLabel={t("screeningProviderRemoveKey")}
+        pending={saving}
+        variant="destructive"
+      />
+
+      <ConfirmActionDialog
+        open={confirmToggleOpen}
+        onClose={() => setConfirmToggleOpen(false)}
+        onConfirm={handleToggleProvider}
+        title={t("screeningProviderToggleDialogTitle")}
+        description={t("screeningProviderToggleDialogDescription")}
+        confirmLabel={t("screeningProviderToggleConfirm")}
+        pending={toggling}
+      />
     </div>
   );
 }

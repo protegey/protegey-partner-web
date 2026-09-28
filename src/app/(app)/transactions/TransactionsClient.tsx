@@ -2,6 +2,7 @@
 
 import { Fragment, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ArrowDownLeft, ArrowUpRight, ChevronDown, ChevronRight } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
@@ -177,6 +178,7 @@ export function TransactionsClient({
                 <th className="px-4 py-2.5 font-medium">{t("txColCash")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("txColDecision")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("txColRisk")}</th>
+                <th className="px-4 py-2.5 font-medium" />
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
@@ -212,10 +214,16 @@ export function TransactionsClient({
                       <td className="px-4 py-2.5 text-xs text-muted-foreground">{tx.isCash ? t("txCashYes") : t("txCashNo")}</td>
                       <td className="whitespace-nowrap px-4 py-2.5 text-xs font-medium">{decisionLabel[tx.decision]}</td>
                       <td className={`px-4 py-2.5 text-xs font-semibold ${riskColor(tx.riskScore)}`}>{tx.riskScore}</td>
+                      <td className="px-4 py-2.5">
+                        <Link href={`/transactions/${tx.id}`} onClick={(event) => event.stopPropagation()} className="flex items-center gap-1 text-xs text-primary hover:underline">
+                          {t("txViewDetail")}
+                          <ChevronRight className="size-3.5" />
+                        </Link>
+                      </td>
                     </tr>
                     {expanded ? (
                       <tr className="bg-muted/30">
-                        <td colSpan={11} className="px-4 py-4">
+                        <td colSpan={12} className="px-4 py-4">
                           <div className="flex flex-col gap-3">
                             <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                               {t("deviceSignalDetailSectionTitle")}

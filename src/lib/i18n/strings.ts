@@ -71,6 +71,7 @@ const STRINGS = {
   eddAllStatuses: { en: "All statuses", fr: "Tous les statuts" },
   eddAssignedTo: { en: "Assigned to", fr: "Attribué à" },
   eddUnassigned: { en: "Unassigned", fr: "Non attribué" },
+  eddReviewedBy: { en: "Reviewed by", fr: "Examiné par" },
   eddDueDate: { en: "Due date", fr: "Date d'échéance" },
   eddCreatedAt: { en: "Created", fr: "Créé" },
   eddNotes: { en: "Notes", fr: "Notes" },
@@ -80,6 +81,16 @@ const STRINGS = {
   },
   eddReview: { en: "Review case", fr: "Examiner le dossier" },
   eddSaveReview: { en: "Save review", fr: "Enregistrer l'examen" },
+  eddConfirmApproveTitle: { en: "Approve this enhanced due diligence review?", fr: "Approuver cette vigilance renforcée ?" },
+  eddConfirmApproveDescription: {
+    en: "This records your decision that this customer has cleared enhanced due diligence.",
+    fr: "Ceci enregistre votre décision que ce client a satisfait la vigilance renforcée.",
+  },
+  eddConfirmRejectTitle: { en: "Reject this enhanced due diligence review?", fr: "Rejeter cette vigilance renforcée ?" },
+  eddConfirmRejectDescription: {
+    en: "This records your decision that this customer did not clear enhanced due diligence.",
+    fr: "Ceci enregistre votre décision que ce client n'a pas satisfait la vigilance renforcée.",
+  },
   eddChecklist: { en: "EDD checklist", fr: "Liste de contrôle EDD" },
   eddChecklistComplete: { en: "complete", fr: "terminés" },
   eddChecklist_identityVerified: { en: "Identity verified", fr: "Identité vérifiée" },
@@ -121,6 +132,11 @@ const STRINGS = {
   pepAllStatuses: { en: "All statuses", fr: "Tous les statuts" },
   pepReview: { en: "Review", fr: "Examen" },
   pepReviewButton: { en: "Save review", fr: "Enregistrer l'examen" },
+  pepReviewDialogTitle: { en: "Save this PEP review?", fr: "Enregistrer cet examen PPE ?" },
+  pepReviewDialogDescription: {
+    en: "This updates the designation's status and notes for this customer.",
+    fr: "Ceci met à jour le statut et les notes de la désignation pour ce client.",
+  },
   pepEmpty: { en: "No PEP designations found.", fr: "Aucune désignation PPE trouvée." },
   pepStatus_possible_match: { en: "Possible match", fr: "Correspondance possible" },
   pepStatus_confirmed: { en: "Confirmed", fr: "Confirmée" },
@@ -226,6 +242,16 @@ const STRINGS = {
   ruleStatusWaiting: { en: "Waiting for review", fr: "En attente de validation" },
   ruleToggleOn: { en: "Turn on", fr: "Activer" },
   ruleToggleOff: { en: "Turn off", fr: "Désactiver" },
+  ruleConfirmToggleOnTitle: { en: "Enable this rule?", fr: "Activer cette règle ?" },
+  ruleConfirmToggleOnDescription: {
+    en: "This rule will immediately start generating alerts for matching signals.",
+    fr: "Cette règle commencera immédiatement à générer des alertes pour les signaux correspondants.",
+  },
+  ruleConfirmToggleOffTitle: { en: "Disable this rule?", fr: "Désactiver cette règle ?" },
+  ruleConfirmToggleOffDescription: {
+    en: "This rule will stop generating alerts until you turn it back on.",
+    fr: "Cette règle cessera de générer des alertes jusqu'à ce que vous la réactiviez.",
+  },
   ruleEdit: { en: "Open", fr: "Ouvrir" },
   ruleOnMatchBlock: { en: "🛑 Stops the payment", fr: "🛑 Bloque le paiement" },
   ruleOnMatchReview: { en: "🔍 Sends it for a check", fr: "🔍 L'envoie pour vérification" },
@@ -397,6 +423,11 @@ const STRINGS = {
   clientsResendSending: { en: "Sending…", fr: "Envoi…" },
   clientsResendButton: { en: "Resend", fr: "Renvoyer" },
   clientsResendSent: { en: "Sent.", fr: "Envoyé." },
+  resendInvitationDialogTitle: { en: "Resend this invitation?", fr: "Renvoyer cette invitation ?" },
+  resendInvitationDialogDescription: {
+    en: "This sends a new invitation email with a fresh link.",
+    fr: "Ceci envoie un nouvel e-mail d'invitation avec un lien actualisé.",
+  },
 
   // ── Clients (KYB) — detail page ──────────────────────────────────────────
   clientsBackToClients: { en: "Back to clients", fr: "Retour aux clients" },
@@ -519,6 +550,8 @@ const STRINGS = {
 
   // ── Shared components: dialogs, drawer, role select, sign out, session guard ──
   closeDialogAria: { en: "Close dialog", fr: "Fermer la boîte de dialogue" },
+  pageGuideButtonAria: { en: "Explain this page", fr: "Expliquer cette page" },
+  pageGuideDiagramLabel: { en: "How this connects to the rest of Protegey", fr: "Comment ça se connecte au reste de Protegey" },
   commonWorking: { en: "Working…", fr: "Traitement en cours…" },
   zoomOutAria: { en: "Zoom out", fr: "Zoom arrière" },
   zoomInAria: { en: "Zoom in", fr: "Zoom avant" },
@@ -810,6 +843,11 @@ const STRINGS = {
   settingsWebhookPlaceholder: { en: "https://your-app.example.com/webhooks/protegey", fr: "https://votre-app.exemple.com/webhooks/protegey" },
   settingsSavingWebhook: { en: "Saving…", fr: "Enregistrement…" },
   settingsSaveRegenerateSecret: { en: "Save & regenerate secret", fr: "Enregistrer et régénérer le secret" },
+  settingsWebhookRegenerateDialogTitle: { en: "Save webhook & regenerate secret?", fr: "Enregistrer le webhook et régénérer le secret ?" },
+  settingsWebhookRegenerateDialogDescription: {
+    en: "Your current signing secret stops working immediately — you'll need to update any integration that verifies it.",
+    fr: "Votre secret de signature actuel cessera de fonctionner immédiatement — vous devrez mettre à jour toute intégration qui le vérifie.",
+  },
   settingsSecretAlreadyConfigured: { en: "A signing secret is already configured.", fr: "Un secret de signature est déjà configuré." },
   settingsWebhookSecretLabel: { en: "Webhook signing secret", fr: "Secret de signature du webhook" },
   settingsRegenerateDialogTitle: { en: "Regenerate your API key?", fr: "Régénérer votre clé API ?" },
@@ -1041,9 +1079,32 @@ const STRINGS = {
   txDirectionOut: { en: "Money out", fr: "Argent sortant" },
   txDecisionClear: { en: "✅ Clear", fr: "✅ Aucun problème" },
   txDecisionReview: { en: "🔍 Needs a check", fr: "🔍 À vérifier" },
-  txDecisionBlocked: { en: "🛑 Blocked", fr: "🛑 Bloquée" },
+  txDecisionBlocked: { en: "🛑 Should block", fr: "🛑 À bloquer" },
   txCashYes: { en: "Cash", fr: "Espèces" },
   txCashNo: { en: "Digital", fr: "Numérique" },
+  txViewDetail: { en: "View", fr: "Voir" },
+  txDetailMatchedRule: { en: "Matched rule", fr: "Règle déclenchée" },
+  txDetailBackToList: { en: "← Back to transactions", fr: "← Retour aux transactions" },
+  txDetailRiskAssessment: { en: "Risk assessment", fr: "Évaluation du risque" },
+  txDetailTransactionDetails: { en: "Transaction details", fr: "Détails de la transaction" },
+  txDetailLinkedAlerts: { en: "Linked alerts", fr: "Alertes liées" },
+  txDetailNoAlerts: { en: "No alert on this transaction yet — use \"Flag\" to open one for investigation.", fr: "Aucune alerte sur cette transaction pour l'instant — utilisez « Signaler » pour en ouvrir une." },
+  txActionAssign: { en: "Assign", fr: "Assigner" },
+  txActionApprove: { en: "Approve", fr: "Approuver" },
+  txActionDecline: { en: "Decline", fr: "Rejeter" },
+  txActionFlag: { en: "Flag", fr: "Signaler" },
+  txActionsNeedFlagHint: { en: "Flag this transaction first to open an alert on it.", fr: "Signalez d'abord cette transaction pour ouvrir une alerte dessus." },
+  txFlaggedToast: { en: "Transaction flagged.", fr: "Transaction signalée." },
+  txApprovedToast: { en: "Marked as confirmed fraud.", fr: "Marquée comme fraude confirmée." },
+  txDeclinedToast: { en: "Marked as a false positive.", fr: "Marquée comme faux positif." },
+  txAssignedToast: { en: "Assignment saved.", fr: "Assignation enregistrée." },
+  txSaveAssignment: { en: "Save", fr: "Enregistrer" },
+  txConfirmApproveTitle: { en: "Approve this transaction as confirmed fraud?", fr: "Approuver cette transaction comme fraude confirmée ?" },
+  txConfirmApproveDescription: { en: "This records your team's decision that this is a true positive.", fr: "Ceci enregistre la décision de votre équipe : il s'agit d'un vrai positif." },
+  txConfirmDeclineTitle: { en: "Decline this transaction as a false positive?", fr: "Rejeter cette transaction comme faux positif ?" },
+  txConfirmDeclineDescription: { en: "This records your team's decision that this alert was unwarranted.", fr: "Ceci enregistre la décision de votre équipe : cette alerte n'était pas justifiée." },
+  txConfirmFlagTitle: { en: "Flag this transaction for investigation?", fr: "Signaler cette transaction pour investigation ?" },
+  txConfirmFlagDescription: { en: "This opens an alert on this transaction, even though no automated rule matched it, so your team can assign and decide on it.", fr: "Ceci ouvre une alerte sur cette transaction, même si aucune règle automatisée ne l'a détectée, pour que votre équipe puisse l'assigner et statuer dessus." },
   txFilterDirectionLabel: { en: "Direction", fr: "Sens" },
   txFilterDecisionLabel: { en: "Decision", fr: "Décision" },
   txFilterAllOption: { en: "All", fr: "Toutes" },
@@ -1157,6 +1218,14 @@ const STRINGS = {
   eventAlertStatusChanged: {
     en: "{actor} marked an alert on rule \"{ruleName}\" as {status}.",
     fr: "{actor} a marqué une alerte sur la règle « {ruleName} » comme {status}.",
+  },
+  eventAlertCreated: {
+    en: "New alert on rule \"{ruleName}\" for {customerLabel}.",
+    fr: "Nouvelle alerte sur la règle « {ruleName} » pour {customerLabel}.",
+  },
+  eventTransactionBlocked: {
+    en: "A transaction for {customerLabel} was blocked ({amount} {currency}).",
+    fr: "Une transaction de {customerLabel} a été bloquée ({amount} {currency}).",
   },
   eventApiKeyGenerated: { en: "{actor} generated a new API key.", fr: "{actor} a généré une nouvelle clé API." },
   eventWebhookConfigured: { en: "{actor} configured the webhook.", fr: "{actor} a configuré le webhook." },
@@ -1316,6 +1385,21 @@ const STRINGS = {
   screeningMatchActionConfirm: { en: "Confirm", fr: "Confirmer" },
   screeningMatchActionFalsePositive: { en: "False positive", fr: "Faux positif" },
   screeningMatchActionClear: { en: "Clear", fr: "Lever" },
+  screeningMatchConfirmDialogTitle: { en: "Confirm this match?", fr: "Confirmer cette correspondance ?" },
+  screeningMatchConfirmDialogDescription: {
+    en: "This marks the sanctions/PEP match as confirmed for this customer and updates their risk profile.",
+    fr: "Ceci marque la correspondance sanctions/PPE comme confirmée pour ce client et met à jour son profil de risque.",
+  },
+  screeningMatchFalsePositiveDialogTitle: { en: "Mark as false positive?", fr: "Marquer comme faux positif ?" },
+  screeningMatchFalsePositiveDialogDescription: {
+    en: "This records the match as a false positive for this customer.",
+    fr: "Ceci enregistre la correspondance comme un faux positif pour ce client.",
+  },
+  screeningMatchClearDialogTitle: { en: "Clear this match?", fr: "Lever cette correspondance ?" },
+  screeningMatchClearDialogDescription: {
+    en: "This clears the match after review — it will no longer need action.",
+    fr: "Ceci lève la correspondance après examen — elle ne nécessitera plus d'action.",
+  },
 
   // ── Cases (Pan-Monitor) ──────────────────────────────────────────────────
   casesPageTitle: { en: "Cases", fr: "Dossiers" },
@@ -1373,6 +1457,10 @@ const STRINGS = {
   caseDraftSarButton: { en: "Draft SAR/STR", fr: "Rédiger SAR/STR" },
   caseClosedWithOutcome: { en: "Closed with outcome", fr: "Clos avec pour décision" },
   caseCloseDialogTitle: { en: "Close this case", fr: "Clore ce dossier" },
+  caseCloseDialogDescription: {
+    en: "This closes the case with the selected outcome. Closed cases can't be reopened from here.",
+    fr: "Ceci clôture le dossier avec la décision sélectionnée. Les dossiers clos ne peuvent pas être rouverts depuis cet écran.",
+  },
   caseConfirmClose: { en: "Confirm closure", fr: "Confirmer la clôture" },
   caseOutcomeNoAction: { en: "No action needed", fr: "Aucune suite nécessaire" },
   caseOutcomeFalsePositive: { en: "False positive", fr: "Faux positif" },
@@ -1402,6 +1490,31 @@ const STRINGS = {
   alertReopenedToast: { en: "Alert reopened.", fr: "Alerte rouverte." },
   alertLifecycleSavedToast: { en: "Alert updated.", fr: "Alerte mise à jour." },
   alertConvertedToCaseToast: { en: "Case created from alert.", fr: "Dossier créé à partir de l'alerte." },
+  alertsConfirmFraudDialogTitle: { en: "Confirm this alert as fraud?", fr: "Confirmer cette alerte comme fraude ?" },
+  alertsConfirmFraudDialogDescription: {
+    en: "This marks the alert as confirmed fraud and updates the customer's risk history.",
+    fr: "Ceci marque l'alerte comme fraude confirmée et met à jour l'historique de risque du client.",
+  },
+  alertsDismissDialogTitle: { en: "Dismiss this alert?", fr: "Rejeter cette alerte ?" },
+  alertsDismissDialogDescription: {
+    en: "This marks the alert as a false positive. You can reopen it later if needed.",
+    fr: "Ceci marque l'alerte comme un faux positif. Vous pourrez la rouvrir plus tard si nécessaire.",
+  },
+  alertsRequestInfoDialogTitle: { en: "Request more information?", fr: "Demander plus d'informations ?" },
+  alertsRequestInfoDialogDescription: {
+    en: "This flags the alert as pending additional information before a decision is made.",
+    fr: "Ceci marque l'alerte comme en attente d'informations supplémentaires avant toute décision.",
+  },
+  alertsReopenDialogTitle: { en: "Reopen this alert?", fr: "Rouvrir cette alerte ?" },
+  alertsReopenDialogDescription: {
+    en: "This returns the alert to the open queue for a fresh decision.",
+    fr: "Ceci replace l'alerte dans la file des alertes ouvertes pour une nouvelle décision.",
+  },
+  alertsConvertToCaseDialogTitle: { en: "Convert this alert into a case?", fr: "Convertir cette alerte en dossier ?" },
+  alertsConvertToCaseDialogDescription: {
+    en: "This creates a new investigation case linked to this alert.",
+    fr: "Ceci crée un nouveau dossier d'investigation lié à cette alerte.",
+  },
   ruleParametersSavedToast: { en: "Rule parameters saved.", fr: "Paramètres de la règle enregistrés." },
   ruleSimulationCompleteToast: { en: "Simulation complete.", fr: "Simulation terminée." },
   ruleGeneratedToast: { en: "Rule generated.", fr: "Règle générée." },
@@ -1592,6 +1705,18 @@ const STRINGS = {
   // ── Shared fraud signal network (cross-partner) ──────────────────────────
   sharedSignalsCardTitle: { en: "Shared fraud signal network", fr: "Réseau de signaux de fraude partagés" },
   sharedSignalsToggleLabel: { en: "Participate in the shared network", fr: "Participer au réseau partagé" },
+  sharedSignalsEnableDialogTitle: { en: "Join the shared signal network?", fr: "Rejoindre le réseau de signaux partagés ?" },
+  sharedSignalsEnableDialogDescription: {
+    en: "You'll start sharing hashed signals for closed cases with other partners, and benefit from what they share.",
+    fr: "Vous commencerez à partager des signaux hachés pour vos dossiers clos avec les autres partenaires, et à profiter de ce qu'ils partagent.",
+  },
+  sharedSignalsDisableDialogTitle: { en: "Leave the shared signal network?", fr: "Quitter le réseau de signaux partagés ?" },
+  sharedSignalsDisableDialogDescription: {
+    en: "You'll stop sharing signals with other partners, and you'll also lose access to what they share.",
+    fr: "Vous cesserez de partager des signaux avec les autres partenaires, et vous perdrez aussi l'accès à ce qu'ils partagent.",
+  },
+  sharedSignalsEnableConfirm: { en: "Join the network", fr: "Rejoindre le réseau" },
+  sharedSignalsDisableConfirm: { en: "Leave the network", fr: "Quitter le réseau" },
   sharedSignalsToggleHint: {
     en: "A two-way network: when you flag a closed case, every participating partner benefits from knowing about it — and you benefit the same way from what they flag. Never your client's information (no name, no notes, no transactions, nothing about your case) — only a one-way hash of a phone number or email, plus a category, ever leaves your account. On by default — you can turn it off anytime, but doing so also switches off your own access to what other partners share: you can't benefit from the network without contributing to it.",
     fr: "Un réseau à double sens : quand vous signalez un dossier clos, chaque partenaire participant en profite — et vous profitez de la même façon de ce qu'ils signalent. Jamais les informations de votre client (ni nom, ni notes, ni transactions, rien de votre dossier) — seul un hash à sens unique d'un numéro de téléphone ou d'un email, plus une catégorie, sort de votre compte. Activé par défaut — vous pouvez le désactiver à tout moment, mais cela coupe aussi votre propre accès à ce que les autres partenaires partagent : on ne peut pas profiter du réseau sans y contribuer.",
@@ -1760,6 +1885,11 @@ const STRINGS = {
   securityConfirmPasswordLabel: { en: "Confirm new password", fr: "Confirmer le nouveau mot de passe" },
   securityConfirmPasswordPlaceholder: { en: "Re-enter your new password", fr: "Ressaisissez votre nouveau mot de passe" },
   securityUpdateButton: { en: "Update password", fr: "Mettre à jour le mot de passe" },
+  securityConfirmDialogTitle: { en: "Update your password?", fr: "Mettre à jour votre mot de passe ?" },
+  securityConfirmDialogDescription: {
+    en: "You'll need your new password the next time you sign in.",
+    fr: "Vous aurez besoin de votre nouveau mot de passe lors de votre prochaine connexion.",
+  },
   securityUpdating: { en: "Updating…", fr: "Mise à jour…" },
   securityUpdateSuccess: { en: "Your password has been updated.", fr: "Votre mot de passe a été mis à jour." },
   securityPasswordMismatch: { en: "The new password and confirmation don't match.", fr: "Le nouveau mot de passe et la confirmation ne correspondent pas." },
@@ -1968,6 +2098,17 @@ const STRINGS = {
   screeningProviderSaveKey: { en: "Save key", fr: "Enregistrer la clé" },
   screeningProviderReplaceKey: { en: "Replace key", fr: "Remplacer la clé" },
   screeningProviderRemoveKey: { en: "Remove", fr: "Supprimer" },
+  screeningProviderDeleteKeyDialogTitle: { en: "Remove this API key?", fr: "Supprimer cette clé API ?" },
+  screeningProviderDeleteKeyDialogDescription: {
+    en: "Screening will fall back to Protegey's default list until a new key is added.",
+    fr: "Le filtrage retombera sur la liste par défaut de Protegey jusqu'à l'ajout d'une nouvelle clé.",
+  },
+  screeningProviderToggleDialogTitle: { en: "Change screening provider?", fr: "Changer le fournisseur de filtrage ?" },
+  screeningProviderToggleDialogDescription: {
+    en: "This changes which sanctions/PEP list is used for all future screening checks.",
+    fr: "Ceci change la liste sanctions/PPE utilisée pour toutes les futures vérifications de filtrage.",
+  },
+  screeningProviderToggleConfirm: { en: "Switch provider", fr: "Changer de fournisseur" },
   screeningProviderKeySavedPlaceholder: { en: "•••••••• (saved)", fr: "•••••••• (enregistrée)" },
   docsWebhooksTitle: { en: "Webhooks", fr: "Webhooks" },
   docsWebhooksBody: {
@@ -1991,6 +2132,10 @@ const STRINGS = {
   docsWebhooksAlertStatusTrigger: {
     en: "Someone on your team changes an alert's status from the portal (open → confirmed / dismissed / more_info_requested).",
     fr: "Un membre de votre équipe change le statut d'une alerte depuis le portail (open → confirmed / dismissed / more_info_requested).",
+  },
+  docsWebhooksTransactionBlockedTrigger: {
+    en: "A transaction's final decision is \"blocked\" — from a rule, a device signal, or both.",
+    fr: "La décision finale d'une transaction est « bloquée » — venant d'une règle, d'un signal d'appareil, ou des deux.",
   },
   docsWebhooksMoreTypesNote: {
     en: "Filter on \"type\" and ignore anything you don't recognize — more event types will be added over time without breaking this contract.",
