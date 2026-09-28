@@ -6,6 +6,34 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { FileText, FileOutput } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const CTR_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "CTR — Déclarations de transactions en espèces",
+    explanation:
+      "Une CTR n'a rien à voir avec un soupçon de fraude — c'est purement automatique et réglementaire : dès qu'un client dépasse un seuil configuré de transactions en ESPÈCES sur une période donnée, un rapport est généré ici tout seul, sans intervention humaine au départ.\n\nChaque rapport indique la période concernée, le nombre et le montant total des transactions en espèces, la devise, et le seuil qui a été franchi. Il suit ensuite le même circuit qu'une SAR : brouillon → revue MLRO → en attente de dépôt → déposé (avec une référence du régulateur), ou rejeté.\n\nLa version imprimable (« aperçu ») produit le document final à transmettre au régulateur.",
+    diagram: [
+      [{ label: "Transactions en espèces", note: "dépassent le seuil configuré" }],
+      [{ label: "CTR", note: "généré automatiquement", current: true }],
+      [{ label: "Revue MLRO", note: "responsable conformité" }],
+      [{ label: "Déposé", note: "avec référence régulateur" }],
+    ],
+    diagramCaption: "Contrairement à une SAR, aucune décision humaine ne déclenche une CTR — seul le seuil compte.",
+  },
+  en: {
+    title: "CTR — Cash Transaction Reports",
+    explanation:
+      "A CTR has nothing to do with suspicion of fraud — it's purely automatic and regulatory: as soon as a customer crosses a configured threshold of CASH transactions over a given period, a report is generated here on its own, with no human decision to start it.\n\nEach report shows the period covered, the count and total amount of cash transactions, the currency, and the threshold that was crossed. It then follows the same path as a SAR: draft → MLRO review → filing pending → filed (with a regulator reference), or rejected.\n\nThe printable version (\"apercu\") produces the final document to hand to the regulator.",
+    diagram: [
+      [{ label: "Cash transactions", note: "cross the configured threshold" }],
+      [{ label: "CTR", note: "auto-generated", current: true }],
+      [{ label: "MLRO review", note: "compliance officer" }],
+      [{ label: "Filed", note: "with regulator reference" }],
+    ],
+    diagramCaption: "Unlike a SAR, no human decision triggers a CTR — only the threshold does.",
+  },
+};
 import { Pagination } from "@/components/Pagination";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { generateCtrAction, updateCtrAction, type CtrReport, type CtrStatus } from "./actions";
@@ -75,7 +103,7 @@ export function CtrClient({ result, page }: { result: PaginatedResult<CtrReport>
   const actionForStatus: Partial<Record<CtrStatus, PendingTransition>> = { draft: "mlro_review", mlro_review: "filing_pending", filing_pending: "filed" };
 
   return <div className="flex w-full flex-col gap-6">
-    <div><h1 className="text-xl font-semibold text-foreground">{t("ctrPageTitle")}</h1><p className="text-sm text-muted-foreground">{t("ctrPageSubtitle")}</p></div>
+    <div><div className="flex items-center gap-2"><h1 className="text-xl font-semibold text-foreground">{t("ctrPageTitle")}</h1><PageGuideButton content={CTR_GUIDE[lang]} /></div><p className="text-sm text-muted-foreground">{t("ctrPageSubtitle")}</p></div>
     <form onSubmit={generate} className="grid gap-3 rounded-md border border-border bg-card p-4 md:grid-cols-5">
       <label className="text-xs text-muted-foreground">{t("ctrPeriodStart")}<input required type="date" value={form.periodStart} onChange={e => setForm({ ...form, periodStart: e.target.value })} className="mt-1 w-full rounded border border-border bg-background p-2 text-sm text-foreground" /></label>
       <label className="text-xs text-muted-foreground">{t("ctrPeriodEnd")}<input required type="date" value={form.periodEnd} onChange={e => setForm({ ...form, periodEnd: e.target.value })} className="mt-1 w-full rounded border border-border bg-background p-2 text-sm text-foreground" /></label>

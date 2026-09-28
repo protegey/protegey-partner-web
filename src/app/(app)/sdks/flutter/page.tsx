@@ -4,9 +4,19 @@ import { Package, Rocket, Smartphone, ArrowRightLeft, IdCard, Activity, ShieldAl
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import { CodeBlock } from "@/components/CodeBlock";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
-export const metadata: Metadata = {
-  title: "Flutter SDK — Protegey Partner",
+const SDK_FLUTTER_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "SDK Flutter",
+    explanation:
+      "Le paquet `protegey_sdk` s'installe dans une appli Flutter et calcule une empreinte d'appareil réelle et stable sur Android/iOS via `device_info_plus`. Une fois initialisé avec ta clé API, `protegey.device.identify()` te renvoie une recommandation — `allow`, `soft_challenge`, `hard_challenge` ou `block`.\n\nCette recommandation est un conseil, pas un ordre : Protegey ne bloque jamais ton utilisateur à ta place, c'est ton appli qui décide.\n\nCette page ne montre aucune donnée de ton compte — c'est une référence technique avec des exemples de code à copier-coller pour ton projet Flutter.",
+  },
+  en: {
+    title: "Flutter SDK",
+    explanation:
+      "The `protegey_sdk` package installs into a Flutter app and computes a real, stable device fingerprint on Android/iOS via `device_info_plus`. Once initialized with your API key, `protegey.device.identify()` returns a recommendation — `allow`, `soft_challenge`, `hard_challenge`, or `block`.\n\nThat recommendation is advice, not an order: Protegey never blocks your user on your behalf, your app decides.\n\nThis page shows none of your account's data — it's a technical reference with copy-paste code examples for your Flutter project.",
+  },
 };
 
 const INSTALL_GITHUB = `# pubspec.yaml
@@ -122,6 +132,7 @@ export default async function SdkFlutterPage() {
           <div className="flex items-center gap-2.5">
             <Package className="size-5 text-primary" />
             <h1 className="text-xl font-semibold text-foreground">{t(lang, "sdkFlutterPageTitle")}</h1>
+            <PageGuideButton content={SDK_FLUTTER_GUIDE[lang]} />
           </div>
           <p className="mt-1 text-sm text-muted-foreground">{t(lang, "sdkFlutterPageSubtitle")}</p>
           <a

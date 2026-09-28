@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getCase, getCaseSignalStatus } from "../actions";
+import { getCase, getCaseSignalStatus, getCaseTimeline, getCaseCrossModuleEvidence } from "../actions";
 import { getTeamMembers } from "../../team/actions";
 import { getPartnerSettings } from "../../settings/profile/actions";
 import { getDeviceSignals } from "../../pan-guard/device-signals/actions";
@@ -12,12 +12,14 @@ export const metadata: Metadata = {
 
 export default async function CaseDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const [kase, teamMembers, partner, sessionUser, signalStatus] = await Promise.all([
+  const [kase, teamMembers, partner, sessionUser, signalStatus, timeline, crossModuleEvidence] = await Promise.all([
     getCase(id),
     getTeamMembers(),
     getPartnerSettings(),
     getSessionUser(),
     getCaseSignalStatus(id),
+    getCaseTimeline(id),
+    getCaseCrossModuleEvidence(id),
   ]);
   const canShareSignal = sessionUser?.permissions.includes("partners.share_fraud_signal") ?? false;
   const canViewTransactions = sessionUser?.permissions.includes("partners.view_transactions") ?? false;
@@ -36,6 +38,8 @@ export default async function CaseDetailPage({ params }: { params: Promise<{ id:
       canShareSignal={canShareSignal}
       initialAlreadyShared={signalStatus.shared}
       knownVisitorIds={knownVisitorIds}
+      timeline={timeline}
+      crossModuleEvidence={crossModuleEvidence}
     />
   );
 }

@@ -3,6 +3,10 @@
 import { revalidatePath } from "next/cache";
 import { apiFetch, apiFetchGuarded, apiUploadGuarded, ApiError, type AuthExpired } from "@/lib/api";
 import type { PaginatedResult } from "../transactions/actions";
+import type { NotificationEvent } from "@/lib/events";
+import type { EntityRiskProfile } from "../pan-guard/risk-profiles/actions";
+import type { ScreeningMatch } from "../sanctions/actions";
+import type { DeviceSignal } from "../pan-guard/device-signals/actions";
 
 export type CaseStatus = "open" | "investigating" | "closed";
 export type CaseOutcome = "no_action" | "false_positive" | "sar_filed";
@@ -69,6 +73,22 @@ export async function getCases(query: CasesQuery = {}): Promise<PaginatedResult<
 
 export async function getCase(id: string): Promise<CaseWithNotes> {
   return apiFetch<CaseWithNotes>(`/cases/me/${id}`);
+}
+
+export async function getCaseTimeline(id: string): Promise<NotificationEvent[]> {
+  return apiFetch<NotificationEvent[]>(`/cases/me/${id}/timeline`);
+}
+
+export interface CrossModuleEvidence {
+  riskProfile: EntityRiskProfile | null;
+  screeningMatches: ScreeningMatch[];
+  deviceSignals: DeviceSignal[];
+}
+
+/** What other modules already know about this case's customer — pulled in automatically, never
+ * manually re-entered by an analyst. */
+export async function getCaseCrossModuleEvidence(id: string): Promise<CrossModuleEvidence> {
+  return apiFetch<CrossModuleEvidence>(`/cases/me/${id}/cross-module-evidence`);
 }
 
 export type MutationResult<T> = T | { error: string } | AuthExpired;

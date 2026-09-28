@@ -149,12 +149,16 @@ function formatValue(v: unknown, lang: "en" | "fr"): string {
 export function DeviceAttributesDetails({
   attributes,
   ipCountry,
+  ipLatitude,
+  ipLongitude,
   ipHash,
   ip,
   phoneNumber,
 }: {
   attributes?: DeviceAttributes | null;
   ipCountry?: string | null;
+  ipLatitude?: number | null;
+  ipLongitude?: number | null;
   ipHash?: string | null;
   ip?: string | null;
   phoneNumber?: string | null;
@@ -181,6 +185,16 @@ export function DeviceAttributesDetails({
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
         {ipCountry ? <CountryBadge ipCountry={ipCountry} /> : null}
+        {ipLatitude != null && ipLongitude != null ? (
+          <a
+            href={`https://www.openstreetmap.org/?mlat=${ipLatitude}&mlon=${ipLongitude}#map=9/${ipLatitude}/${ipLongitude}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+          >
+            {t("deviceAttrViewOnMap")}
+          </a>
+        ) : null}
         <DeviceRiskBadges attributes={attributes} />
       </div>
 

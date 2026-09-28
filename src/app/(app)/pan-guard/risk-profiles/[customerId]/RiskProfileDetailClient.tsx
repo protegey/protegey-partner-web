@@ -6,9 +6,47 @@ import { useLang } from "@/lib/i18n/LangProvider";
 import { RiskBreakdown } from "../RiskBreakdown";
 import { RiskHistoryTimeline } from "./RiskHistoryTimeline";
 import { ScreeningMatchesSection } from "./ScreeningMatchesSection";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 import type { StringKey } from "@/lib/i18n/strings";
 import type { EntityRiskProfile, RiskProfileCategory } from "../actions";
 import type { ScreeningMatch } from "../../../sanctions/actions";
+
+const RISK_PROFILE_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Profil de risque",
+    explanation:
+      "Cette page répond à une seule question : « est-ce que ce client est risqué, et pourquoi ? »\n\nLe score que tu vois n'est pas inventé au hasard — il additionne des points à chaque fois que quelque chose de suspect arrive à ce client (une grosse transaction, un appareil signalé, une correspondance sur une liste de sanctions…). Plus il y a de points, plus le score monte. Il ne redescend jamais tout seul, mais son poids diminue avec le temps (un incident vieux de 2 mois compte moins qu'un incident d'hier) — c'est la « décroissance ».\n\nLe niveau affiché (Faible/Modéré/Élevé/Critique) traduit ce score en une couleur simple à comprendre d'un coup d'œil, pour savoir s'il faut s'inquiéter ou non.",
+    diagram: [
+      [
+        { label: "Règles de transaction", note: "Pan-Monitor" },
+        { label: "Signaux d'appareil", note: "Pan-Guard" },
+        { label: "KYC / Sanctions / PPE", note: "Pan-ID, Pan-Risk" },
+        { label: "Biométrie comportementale", note: "Pan-Guard" },
+      ],
+      [{ label: "Profil de risque", note: "score cumulé + pondéré", current: true }],
+      [{ label: "Alerte", note: "si le score franchit un seuil" }],
+      [{ label: "Dossier / SAR", note: "si l'alerte est confirmée" }],
+    ],
+    diagramCaption: "Chaque module du produit peut faire monter ce score — c'est le seul endroit où tous les signaux se rejoignent.",
+  },
+  en: {
+    title: "Risk profile",
+    explanation:
+      "This page answers one question: \"is this customer risky, and why?\"\n\nThe score you see isn't made up — it adds points every time something suspicious happens to this customer (a large transaction, a flagged device, a sanctions-list match…). More points, higher score. It never goes down on its own, but each contribution's weight fades over time (an incident from 2 months ago counts less than one from yesterday) — that's the \"decay\".\n\nThe level shown (Low/Medium/High/Critical) turns that score into a color you can understand at a glance, to know whether to worry or not.",
+    diagram: [
+      [
+        { label: "Transaction rules", note: "Pan-Monitor" },
+        { label: "Device signals", note: "Pan-Guard" },
+        { label: "KYC / Sanctions / PEP", note: "Pan-ID, Pan-Risk" },
+        { label: "Behavioral biometrics", note: "Pan-Guard" },
+      ],
+      [{ label: "Risk profile", note: "cumulative + weighted score", current: true }],
+      [{ label: "Alert", note: "if the score crosses a threshold" }],
+      [{ label: "Case / SAR", note: "if the alert is confirmed" }],
+    ],
+    diagramCaption: "Every module in the product can raise this score — it's the one place every signal converges.",
+  },
+};
 
 type RiskLevel = EntityRiskProfile["riskLevel"];
 
@@ -82,9 +120,12 @@ export function RiskProfileDetailClient({
           <ArrowLeft className="size-4" />
           {t("riskProfileDetailBackToList")}
         </Link>
-        <h1 className="text-xl font-semibold text-foreground">
-          {t("riskProfileDetailTitle")} — {profile?.externalCustomerId ?? externalCustomerId}
-        </h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">
+            {t("riskProfileDetailTitle")} — {profile?.externalCustomerId ?? externalCustomerId}
+          </h1>
+          <PageGuideButton content={RISK_PROFILE_GUIDE[lang]} />
+        </div>
       </div>
 
       {!profile ? (

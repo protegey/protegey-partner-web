@@ -10,6 +10,32 @@ import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useLang } from "@/lib/i18n/LangProvider";
 import type { StringKey } from "@/lib/i18n/strings";
 import { updateSarReportAction, reviewSarReportAction, approveSarReportAction, recordSarFilingResultAction, type MutationResult, type SarReport, type SarTemplate, type SarFieldDef } from "../actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const SAR_DETAIL_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Déclaration SAR/STR",
+    explanation:
+      "Tu regardes une déclaration précise, structurée selon le modèle du régulateur du pays du client (ou le modèle générique si aucun modèle national n'existe). La plupart des champs sont déjà pré-remplis depuis les données KYC, les transactions et le criblage — seul le récit narratif doit être rédigé à la main.\n\nSelon le statut, tu peux modifier le brouillon, le soumettre en revue, l'approuver en tant que responsable conformité (MLRO), ou enregistrer le résultat final du dépôt (référence régulateur). Le bouton « Aperçu » ouvre la version imprimable, prête à transmettre.",
+    diagram: [
+      [{ label: "Modèle pays", note: "pré-rempli" }],
+      [{ label: "SAR/STR", note: "brouillon + narratif", current: true }],
+      [{ label: "Revue MLRO", note: "approbation" }],
+      [{ label: "Déposé", note: "aperçu imprimable généré" }],
+    ],
+  },
+  en: {
+    title: "SAR/STR report",
+    explanation:
+      "You're looking at one specific report, structured according to the customer country's regulator template (or the generic template if no country-specific one exists yet). Most fields are already pre-filled from KYC, transaction, and screening data — only the narrative has to be written by hand.\n\nDepending on the status, you can edit the draft, submit it for review, approve it as the compliance officer (MLRO), or record the final filing result (regulator reference). The \"Preview\" button opens the printable version, ready to hand over.",
+    diagram: [
+      [{ label: "Country template", note: "pre-filled" }],
+      [{ label: "SAR/STR", note: "draft + narrative", current: true }],
+      [{ label: "MLRO review", note: "approval" }],
+      [{ label: "Filed", note: "printable preview generated" }],
+    ],
+  },
+};
 
 function isError(value: unknown): value is { error: string } {
   return Boolean(value) && typeof value === "object" && "error" in (value as object);
@@ -192,6 +218,7 @@ export function SarReportDetailClient({ report: initialReport, template, canSubm
         </div>
         <div className="mt-1 flex items-center gap-3">
           <h1 className="text-xl font-semibold text-foreground">{template.regulatorName}</h1>
+          <PageGuideButton content={SAR_DETAIL_GUIDE[lang]} />
           <span
             className={`rounded-full px-2 py-0.5 text-xs font-medium ${
                STATUS_COLOR[filingStatus]

@@ -14,6 +14,42 @@ import { DashboardCharts } from "./DashboardCharts";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import { describeEvent } from "@/lib/events";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const DASHBOARD_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Tableau de bord",
+    explanation:
+      "Cette page ne calcule rien elle-même — c'est un résumé qui pioche un chiffre ou deux dans chacun des autres modules : le nombre de transactions, les alertes ouvertes, le score de risque moyen, les entreprises clientes en attente de revue KYB, et la taille de ton équipe.\n\nEn dessous, tu retrouves l'organisation de ton compte partenaire, l'activité récente (les mêmes événements que la page Notifications, juste les 5 derniers), et un aperçu de ton équipe.\n\nC'est le point de départ : pour agir sur l'un de ces chiffres, il faut aller sur la page correspondante (Transactions, Alertes, Clients…) — rien ne se décide ici.",
+    diagram: [
+      [
+        { label: "Transactions" },
+        { label: "Alertes" },
+        { label: "Clients (KYB)" },
+        { label: "Équipe" },
+        { label: "Notifications" },
+      ],
+      [{ label: "Tableau de bord", note: "résumé agrégé, sans logique propre", current: true }],
+    ],
+    diagramCaption: "Le tableau de bord agrège plusieurs modules — il n'a pas de flux de données qui lui est propre.",
+  },
+  en: {
+    title: "Dashboard",
+    explanation:
+      "This page doesn't calculate anything on its own — it's a summary that pulls a number or two from each of the other modules: transaction count, open alerts, average risk score, business clients pending KYB review, and your team size.\n\nBelow that, you'll find your partner account's organization info, recent activity (the same events as the Notifications page, just the latest 5), and a quick look at your team.\n\nThis is the starting point: to act on any of these numbers, you go to the page that actually owns it (Transactions, Alerts, Clients…) — nothing is decided here.",
+    diagram: [
+      [
+        { label: "Transactions" },
+        { label: "Alerts" },
+        { label: "Clients (KYB)" },
+        { label: "Team" },
+        { label: "Notifications" },
+      ],
+      [{ label: "Dashboard", note: "aggregated summary, no logic of its own", current: true }],
+    ],
+    diagramCaption: "The dashboard aggregates several modules — it has no data pipeline of its own.",
+  },
+};
 
 export const metadata: Metadata = {
   title: "Dashboard — Protegey Partner",
@@ -75,7 +111,10 @@ export default async function DashboardPage() {
   return (
     <div className="mx-auto flex max-w-6xl flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t(lang, "dashboardWelcomeBack")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t(lang, "dashboardWelcomeBack")}</h1>
+          <PageGuideButton content={DASHBOARD_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{user?.email}</p>
       </div>
 

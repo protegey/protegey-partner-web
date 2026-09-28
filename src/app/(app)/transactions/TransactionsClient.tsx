@@ -8,6 +8,38 @@ import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import { DeviceAttributesDetails } from "@/components/DeviceAttributesSummary";
 import type { DeviceAction, MonitoringTransaction, PaginatedResult } from "./actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const TRANSACTIONS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Transactions",
+    explanation:
+      "Chaque transaction que ton système envoie via l'API ou le SDK passe par le moteur de règles configurables (Pan Studio) et par le signal d'appareil associé, puis reçoit une décision : effacée, à revoir, ou bloquée — plus un score de risque numérique.\n\nSi une règle se déclenche, une Alerte est créée automatiquement et apparaît liée à cette transaction. Tu peux filtrer par sens (débit/crédit), décision, ou client pour retrouver rapidement ce qui t'intéresse.\n\nClique sur une transaction pour voir son détail complet et agir directement dessus (assigner, approuver, refuser, signaler).",
+    diagram: [
+      [{ label: "Ton API / SDK", note: "envoie la transaction" }],
+      [
+        { label: "Règles (Pan Studio)" },
+        { label: "Signal d'appareil" },
+      ],
+      [{ label: "Transactions", note: "décision + score de risque", current: true }],
+      [{ label: "Alerte", note: "si une règle se déclenche" }],
+    ],
+  },
+  en: {
+    title: "Transactions",
+    explanation:
+      "Every transaction your system sends via the API or SDK goes through the configurable rule engine (Pan Studio) and its associated device signal, then gets a decision: clear, review, or blocked — plus a numeric risk score.\n\nIf a rule fires, an Alert is automatically created and shows up linked to that transaction. You can filter by direction (debit/credit), decision, or customer to quickly find what you're after.\n\nClick a transaction to see its full detail and act on it directly (assign, approve, decline, flag).",
+    diagram: [
+      [{ label: "Your API / SDK", note: "sends the transaction" }],
+      [
+        { label: "Rules (Pan Studio)" },
+        { label: "Device signal" },
+      ],
+      [{ label: "Transactions", note: "decision + risk score", current: true }],
+      [{ label: "Alert", note: "if a rule fires" }],
+    ],
+  },
+};
 
 function riskColor(score: number): string {
   if (score >= 50) return "text-destructive";
@@ -85,7 +117,10 @@ export function TransactionsClient({
   return (
     <div className="flex w-full flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t("txPageTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t("txPageTitle")}</h1>
+          <PageGuideButton content={TRANSACTIONS_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t("txPageSubtitle")}</p>
       </div>
 
@@ -254,6 +289,8 @@ export function TransactionsClient({
                                 <DeviceAttributesDetails
                                   attributes={tx.deviceAttributes}
                                   ipCountry={tx.ipCountry}
+                                  ipLatitude={tx.ipLatitude}
+                                  ipLongitude={tx.ipLongitude}
                                   ipHash={tx.ipHash}
                                   ip={tx.ip}
                                   phoneNumber={tx.devicePhoneNumber}

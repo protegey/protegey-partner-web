@@ -8,6 +8,32 @@ import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import type { StringKey } from "@/lib/i18n/strings";
 import { createPepDesignationAction, reviewPepDesignationAction, type PepCategory, type PepDesignation, type PepStatus } from "./actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const PEP_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Contrôle PPE",
+    explanation:
+      "Une PPE (Personne Politiquement Exposée) est quelqu'un qui occupe — ou a occupé — une fonction publique importante, un membre de sa famille, ou un proche collaborateur. Cette page te permet de désigner un client comme PPE à la main : sa catégorie (nationale, étrangère, organisation internationale, membre de la famille, proche collaborateur), son rôle et sa juridiction.\n\nUne désignation démarre avec un statut « correspondance possible » et doit être examinée : confirmée, écartée comme faux positif, ou classée. Confirmer une PPE (statut = confirmée) déclenche automatiquement l'ouverture d'une revue de Vigilance renforcée (EDD) — ce n'est jamais une étape manuelle séparée.",
+    diagram: [
+      [{ label: "Désignation manuelle", note: "par un analyste" }],
+      [{ label: "Contrôle PPE", note: "correspondance possible → revue", current: true }],
+      [{ label: "Confirmée", note: "statut = confirmed" }],
+      [{ label: "Vigilance renforcée (EDD)", note: "ouverte automatiquement" }],
+    ],
+  },
+  en: {
+    title: "PEP Control",
+    explanation:
+      "A PEP (Politically Exposed Person) is someone who holds — or held — a prominent public role, a family member of theirs, or a close associate. This page lets you designate a customer as a PEP by hand: their category (domestic, foreign, international organisation, family member, close associate), role, and jurisdiction.\n\nA designation starts with a \"possible match\" status and must be reviewed: confirmed, dismissed as a false positive, or cleared. Confirming a PEP (status = confirmed) automatically opens an Enhanced Due Diligence (EDD) review — it's never a separate manual step.",
+    diagram: [
+      [{ label: "Manual designation", note: "by an analyst" }],
+      [{ label: "PEP Control", note: "possible match → review", current: true }],
+      [{ label: "Confirmed", note: "status = confirmed" }],
+      [{ label: "Enhanced Due Diligence (EDD)", note: "opened automatically" }],
+    ],
+  },
+};
 
 const statuses: PepStatus[] = ["possible_match", "confirmed", "false_positive", "cleared", "expired"];
 const categories: PepCategory[] = ["domestic", "foreign", "international_organisation", "family_member", "close_associate"];
@@ -17,7 +43,7 @@ function isError(value: unknown): value is { error: string } {
 }
 
 export function PepClient({ designations, initialStatus }: { designations: PepDesignation[]; initialStatus: PepStatus | "all" }) {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const guard = useSessionGuard();
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -61,7 +87,10 @@ export function PepClient({ designations, initialStatus }: { designations: PepDe
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t("pepPageTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t("pepPageTitle")}</h1>
+          <PageGuideButton content={PEP_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t("pepPageSubtitle")}</p>
       </div>
 

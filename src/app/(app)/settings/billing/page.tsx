@@ -3,6 +3,20 @@ import { getPlans, getCurrentPlanCode } from "./actions";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import { Check } from "lucide-react";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const BILLING_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Facturation & Plans",
+    explanation:
+      "Cette page montre les différents plans disponibles (Starter, Professional, Business, Enterprise) et met en évidence celui que tu utilises actuellement. Chaque plan débloque des fonctionnalités différentes — par exemple, le criblage/conformité avancé (Risk & Compliance) n'est disponible qu'en Enterprise.\n\nTu ne peux pas changer de plan toi-même ici : il faut contacter Protegey pour passer à un plan supérieur ou inférieur.",
+  },
+  en: {
+    title: "Billing & Plans",
+    explanation:
+      "This page shows the different available plans (Starter, Professional, Business, Enterprise) and highlights the one you're currently on. Each plan unlocks different features — for example, advanced screening/compliance (Risk & Compliance) is only available on Enterprise.\n\nYou can't switch plans yourself here: you need to contact Protegey to move to a higher or lower plan.",
+  },
+};
 
 export const metadata: Metadata = {
   title: "Billing & Plans — Protegey Partner",
@@ -14,7 +28,10 @@ export default async function BillingPage() {
   return (
     <div className="mx-auto flex max-w-5xl flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t(lang, "billingPageTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t(lang, "billingPageTitle")}</h1>
+          <PageGuideButton content={BILLING_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t(lang, "billingPageSubtitle")}</p>
       </div>
 

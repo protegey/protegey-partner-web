@@ -12,6 +12,20 @@ import {
   setScreeningProviderAction,
   type ScreeningProviderStatus,
 } from "./actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const SCREENING_PROVIDER_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Fournisseur de criblage",
+    explanation:
+      "Cette page choisit QUELLE liste alimente les pages Sanctions et Recherche sanctions. Par défaut, c'est le registre intégré de Protegey — gratuit, toujours disponible.\n\nTu peux en plus activer Dow Jones (un fournisseur externe payant, avec ses propres identifiants d'accès à saisir) pour élargir la couverture avec sa base de données propriétaire. Si Dow Jones est indisponible ou en erreur au moment d'une recherche, le système bascule automatiquement sur le registre Protegey — jamais d'interruption du criblage.\n\nLe statut des identifiants (non vérifié, actif, invalide, quota dépassé) t'indique si la connexion à Dow Jones fonctionne réellement.",
+  },
+  en: {
+    title: "Screening provider",
+    explanation:
+      "This page chooses WHICH list powers the Sanctions and Sanctions Search pages. By default, it's Protegey's own built-in registry — free, always available.\n\nYou can additionally enable Dow Jones (a paid external provider, with its own credentials to enter) to widen coverage with its proprietary database. If Dow Jones is unavailable or errors out at search time, the system automatically falls back to Protegey's own registry — screening never stops.\n\nThe credential status (unverified, active, invalid, quota exceeded) tells you whether the Dow Jones connection is actually working.",
+  },
+};
 
 function isError(value: unknown): value is { error: string } {
   return Boolean(value) && typeof value === "object" && "error" in (value as object);
@@ -114,7 +128,10 @@ export function ScreeningProviderClient({ initialStatus, canManage }: { initialS
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t("screeningProviderPageTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t("screeningProviderPageTitle")}</h1>
+          <PageGuideButton content={SCREENING_PROVIDER_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t("screeningProviderPageSubtitle")}</p>
       </div>
 

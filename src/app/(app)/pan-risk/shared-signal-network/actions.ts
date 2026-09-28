@@ -12,10 +12,11 @@ export interface SharedSignalReportSummary {
   category: SharedSignalCategory;
   reportedAt: string;
   sourceCaseId: string;
+  externalCustomerId: string | null;
+  sourceCaseTitle: string | null;
 }
 
 export interface SharedSignalReportDetail extends SharedSignalReportSummary {
-  sourceCaseTitle: string;
   sourceCaseStatus: string;
 }
 

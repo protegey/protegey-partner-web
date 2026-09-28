@@ -3,6 +3,28 @@
 import { AreaChart, Area, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { useLang } from "@/lib/i18n/LangProvider";
 import type { TransactionStats } from "../actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const TX_ANALYTICS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Analytique des transactions",
+    explanation:
+      "Cette page prend les mêmes transactions que la liste Transactions et les transforme en graphiques sur une fenêtre de temps donnée : la répartition des décisions (effacée/à revoir/bloquée), le sens des flux (entrant/sortant), et l'évolution du volume dans le temps.\n\nC'est une vue d'ensemble, pas une liste que tu peux ouvrir ligne par ligne — utile pour repérer une tendance (par exemple une hausse soudaine des transactions bloquées) plutôt que pour agir sur un cas précis.",
+    diagram: [
+      [{ label: "Transactions", note: "mêmes données que la liste" }],
+      [{ label: "Analytique", note: "graphiques agrégés sur une fenêtre de temps", current: true }],
+    ],
+  },
+  en: {
+    title: "Transaction analytics",
+    explanation:
+      "This page takes the same transactions as the Transactions list and turns them into charts over a given time window: the breakdown of decisions (clear/review/blocked), the flow direction (in/out), and how volume changes over time.\n\nIt's a bird's-eye view, not a list you can open row by row — useful for spotting a trend (say, a sudden spike in blocked transactions) rather than acting on one specific case.",
+    diagram: [
+      [{ label: "Transactions", note: "same data as the list" }],
+      [{ label: "Analytics", note: "aggregated charts over a time window", current: true }],
+    ],
+  },
+};
 
 const AXIS_COLOR = "#94a3b8";
 const DECISION_COLORS: Record<string, string> = { clear: "#0CB99E", review: "#FBBF24", blocked: "#EF4444" };
@@ -31,7 +53,10 @@ export function AnalyticsCharts({ stats }: { stats: TransactionStats }) {
   return (
     <div className="flex flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t("txAnalyticsPageTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t("txAnalyticsPageTitle")}</h1>
+          <PageGuideButton content={TX_ANALYTICS_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t("txAnalyticsPageSubtitle")}</p>
         <p className="mt-1 text-xs font-medium uppercase text-muted-foreground">{t("txWindowLabel")}</p>
       </div>

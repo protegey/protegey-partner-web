@@ -7,6 +7,32 @@ import { ClientDocumentPreview } from "./ClientDocumentPreview";
 import { ComplianceInfoButton } from "./ComplianceInfoButton";
 import { getLang } from "@/lib/i18n/lang";
 import { t, type Lang, type StringKey } from "@/lib/i18n/strings";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const CLIENT_DETAIL_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Dossier client (KYB)",
+    explanation:
+      "Tu regardes maintenant le dossier complet d'une seule entreprise cliente : ses informations générales, la description de son activité, les services de paiement qu'elle propose, et la liste de ses propriétaires bénéficiaires.\n\nLe bouton d'informations de conformité te montre les résultats du criblage automatique contre les listes de sanctions et de personnes politiquement exposées (PPE), fait dès la soumission du questionnaire.\n\nC'est ici que tu prends la décision : approuver (l'entreprise passe au statut « active »), rejeter avec un motif, ou demander des informations complémentaires pour que l'entreprise complète son dossier.",
+    diagram: [
+      [{ label: "Soumission du questionnaire", note: "par l'entreprise" }],
+      [{ label: "Criblage sanctions / PPE", note: "automatique" }],
+      [{ label: "Dossier client", note: "vue détaillée d'une soumission", current: true }],
+      [{ label: "Décision du partenaire", note: "actif / rejeté / infos demandées" }],
+    ],
+  },
+  en: {
+    title: "Client application (KYB)",
+    explanation:
+      "You're looking at one business client's full application: their general information, business description, the payment services they offer, and their list of beneficial owners.\n\nThe compliance info button shows the results of the automatic screening against sanctions and Politically Exposed Person (PEP) lists, run as soon as the questionnaire was submitted.\n\nThis is where you make the call: approve (the business moves to \"active\"), reject with a reason, or request more information so the business can complete their application.",
+    diagram: [
+      [{ label: "Questionnaire submission", note: "by the business" }],
+      [{ label: "Sanctions / PEP screening", note: "automatic" }],
+      [{ label: "Client application", note: "detail view of one submission", current: true }],
+      [{ label: "Partner decision", note: "active / rejected / more info requested" }],
+    ],
+  },
+};
 
 export const metadata: Metadata = {
   title: "Client application — Protegey Partner",
@@ -69,6 +95,7 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ c
             <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_STYLES[client.status]}`}>
               {t(lang, STATUS_LABEL_KEYS[client.status])}
             </span>
+            <PageGuideButton content={CLIENT_DETAIL_GUIDE[lang]} />
           </div>
           <p className="text-sm text-muted-foreground">{client.contactEmail}</p>
         </div>

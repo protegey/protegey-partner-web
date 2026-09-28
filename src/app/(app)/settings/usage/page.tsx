@@ -4,6 +4,20 @@ import { Activity, IdCard, Building2, Users } from "lucide-react";
 import { getUsageSummary } from "./actions";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const USAGE_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Utilisation & Quotas",
+    explanation:
+      "Cette page montre combien tu as consommé ce mois-ci sur les métriques qui comptent pour ton plan : transactions évaluées, sessions KYC démarrées, entreprises clientes invitées au total, et taille de ton équipe.\n\nC'est purement informatif — pour voir si tu approches une limite de ton plan actuel, avec un lien direct vers la page Facturation si tu dois passer à un plan supérieur.",
+  },
+  en: {
+    title: "Usage & quotas",
+    explanation:
+      "This page shows how much you've used this month on the metrics that matter for your plan: transactions scored, KYC sessions started, business clients invited in total, and your team size.\n\nIt's purely informational — to see if you're approaching a limit on your current plan, with a direct link to the Billing page if you need to move up a tier.",
+  },
+};
 
 export const metadata: Metadata = {
   title: "Usage & Quotas — Protegey Partner",
@@ -23,7 +37,10 @@ export default async function UsagePage() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t(lang, "usagePageTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t(lang, "usagePageTitle")}</h1>
+          <PageGuideButton content={USAGE_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t(lang, "usagePageSubtitle")}</p>
         <p className="mt-1 text-xs font-medium uppercase text-muted-foreground">{t(lang, "usageWindowLabel")}</p>
       </div>

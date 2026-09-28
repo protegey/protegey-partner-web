@@ -3,6 +3,20 @@ import Link from "next/link";
 import { Mail, BookOpen } from "lucide-react";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const SUPPORT_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Support",
+    explanation:
+      "Cette page te donne un moyen direct de contacter l'équipe Protegey quand quelque chose ne va pas ou que tu as une question — par email — et un lien vers la Documentation si tu cherches d'abord une réponse par toi-même.\n\nElle n'affiche aucune donnée de ton compte, c'est juste une page de contact.",
+  },
+  en: {
+    title: "Support",
+    explanation:
+      "This page gives you a direct way to reach the Protegey team when something's wrong or you have a question — by email — plus a link to the Documentation if you want to try finding an answer yourself first.\n\nIt shows none of your account's data, it's just a contact page.",
+  },
+};
 
 export const metadata: Metadata = {
   title: "Support — Protegey Partner",
@@ -16,7 +30,10 @@ export default async function SupportPage() {
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t(lang, "supportPageTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t(lang, "supportPageTitle")}</h1>
+          <PageGuideButton content={SUPPORT_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t(lang, "supportPageSubtitle")}</p>
       </div>
 

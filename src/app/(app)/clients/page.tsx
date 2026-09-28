@@ -7,6 +7,34 @@ import { ResendClientInvitationButton } from "./ResendClientInvitationButton";
 import { PaginationControls } from "@/components/PaginationControls";
 import { getLang } from "@/lib/i18n/lang";
 import { t, type StringKey } from "@/lib/i18n/strings";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const CLIENTS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "KYB — Clients",
+    explanation:
+      "Ici, « client » veut dire les entreprises que TOI, le partenaire, invites à s'inscrire — pas les utilisateurs finaux de ton produit. C'est le contrôle « connaître son client professionnel » (KYB) : chaque entreprise que tu invites reçoit un lien pour remplir un questionnaire et déposer ses documents.\n\nUne fois répondu, l'entreprise passe par les statuts : invitée → en revue → informations complémentaires demandées → active (approuvée) ou rejetée. Dès qu'une soumission arrive, elle est automatiquement vérifiée contre les listes de sanctions et de personnes politiquement exposées (PPE), avant même que tu ne la regardes.\n\nC'est toi qui prends la décision finale d'approuver, rejeter, ou demander un complément d'information sur chaque dossier.",
+    diagram: [
+      [{ label: "Invitation envoyée", note: "par toi, le partenaire" }],
+      [{ label: "Questionnaire + documents", note: "remplis par l'entreprise" }],
+      [{ label: "Clients (KYB)", note: "liste des soumissions", current: true }],
+      [{ label: "Criblage sanctions / PPE", note: "automatique" }],
+      [{ label: "Décision", note: "actif / rejeté / infos demandées" }],
+    ],
+  },
+  en: {
+    title: "KYB — Clients",
+    explanation:
+      "Here, \"client\" means the businesses YOU, the partner, invite to sign up — not your product's end users. This is \"know your business\" (KYB) screening: every business you invite gets a link to fill out a questionnaire and upload documents.\n\nOnce they respond, the business moves through statuses: invited → pending review → more info required → active (approved) or rejected. As soon as a submission comes in, it's automatically checked against sanctions and Politically Exposed Person (PEP) lists — before you even look at it.\n\nYou make the final call to approve, reject, or ask for more information on each application.",
+    diagram: [
+      [{ label: "Invitation sent", note: "by you, the partner" }],
+      [{ label: "Questionnaire + documents", note: "filled by the business" }],
+      [{ label: "Clients (KYB)", note: "list of submissions", current: true }],
+      [{ label: "Sanctions / PEP screening", note: "automatic" }],
+      [{ label: "Decision", note: "active / rejected / more info requested" }],
+    ],
+  },
+};
 
 export const metadata: Metadata = {
   title: "KYB — Protegey Partner",
@@ -66,7 +94,10 @@ export default async function ClientsPage({
     <div className="flex w-full flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">KYB</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-semibold text-foreground">KYB</h1>
+            <PageGuideButton content={CLIENTS_GUIDE[lang]} />
+          </div>
           <p className="text-sm text-muted-foreground">{t(lang, "clientsSubtitle")}</p>
         </div>
         <InviteClientDialogButton />

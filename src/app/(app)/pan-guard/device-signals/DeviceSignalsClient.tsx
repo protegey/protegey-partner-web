@@ -8,6 +8,36 @@ import { Pagination } from "@/components/Pagination";
 import { CountryBadge, DeviceAttributesDetails, DeviceRiskBadges, DeviceSummaryCell } from "@/components/DeviceAttributesSummary";
 import type { DeviceSignal } from "./actions";
 import type { PaginatedResult } from "../../transactions/actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const DEVICE_SIGNALS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Signaux d'appareil",
+    explanation:
+      "Quand ton SDK (JS ou Flutter) appelle `device.identify()`, Protegey calcule une empreinte de l'appareil du client et lui attribue un score de risque. Chaque ligne ici est un de ces appels : le pays IP, les attributs de l'appareil, et une recommandation — laisser passer, demander une vérification légère, une vérification renforcée, ou bloquer.\n\nAttention : c'est une recommandation, pas une décision automatique — c'est TON application qui choisit quoi en faire (Protegey ne bloque jamais l'utilisateur à ta place).\n\nCe score alimente directement le profil de risque du client, et peut déclencher une notification si l'appareil est jugé suspect, ou peser dans la décision de bloquer une transaction.",
+    diagram: [
+      [{ label: "SDK partenaire", note: "device.identify()" }],
+      [{ label: "Signaux d'appareil", note: "score + recommandation", current: true }],
+      [
+        { label: "Profil de risque", note: "Pan-Guard" },
+        { label: "Décision transaction", note: "si liée à un paiement" },
+      ],
+    ],
+  },
+  en: {
+    title: "Device signals",
+    explanation:
+      "When your SDK (JS or Flutter) calls `device.identify()`, Protegey computes a fingerprint of the customer's device and assigns it a risk score. Each row here is one of those calls: the IP country, device attributes, and a recommendation — allow, soft challenge, hard challenge, or block.\n\nNote: it's a recommendation, not an automatic decision — YOUR app chooses what to do with it (Protegey never blocks the user on your behalf).\n\nThis score feeds directly into the customer's risk profile, and can trigger a notification if the device is judged suspicious, or factor into a transaction's block decision.",
+    diagram: [
+      [{ label: "Partner SDK", note: "device.identify()" }],
+      [{ label: "Device signals", note: "score + recommendation", current: true }],
+      [
+        { label: "Risk profile", note: "Pan-Guard" },
+        { label: "Transaction decision", note: "if tied to a payment" },
+      ],
+    ],
+  },
+};
 
 const ACTION_COLOR: Record<string, string> = {
   allow: "bg-emerald-500/15 text-emerald-600",
@@ -64,7 +94,10 @@ export function DeviceSignalsClient({
   return (
     <div className="flex w-full flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t("deviceSignalsPageTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t("deviceSignalsPageTitle")}</h1>
+          <PageGuideButton content={DEVICE_SIGNALS_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t("deviceSignalsPageSubtitle")}</p>
       </div>
 
@@ -189,6 +222,8 @@ export function DeviceSignalsClient({
                               ipHash={signal.ipHash}
                               ip={signal.ip}
                               ipCountry={signal.ipCountry}
+                              ipLatitude={signal.ipLatitude}
+                              ipLongitude={signal.ipLongitude}
                               phoneNumber={signal.phoneNumber}
                             />
                           </div>

@@ -6,6 +6,38 @@ import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import { describeEvent } from "@/lib/events";
 import type { NotificationsPage } from "./actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const NOTIFICATIONS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Notifications",
+    explanation:
+      "C'est le fil d'actualité de tout ce qui se passe pour ton organisation : un statut KYC qui change, une nouvelle alerte, un dossier qui change de statut, une demande KYB soumise, et plus encore.\n\nClique sur une notification et tu es directement emmené à l'enregistrement concerné (l'alerte, le dossier, le client…) — pas besoin de le chercher toi-même.\n\nC'est le même flux d'événements que les Journaux d'audit, juste présenté différemment : ici pour rester informé au jour le jour, là-bas pour la trace de conformité complète.",
+    diagram: [
+      [
+        { label: "KYC / KYB", note: "changement de statut" },
+        { label: "Alertes" },
+        { label: "Dossiers" },
+      ],
+      [{ label: "Journal d'événements" }],
+      [{ label: "Notifications", note: "fil filtré, cliquable", current: true }],
+    ],
+  },
+  en: {
+    title: "Notifications",
+    explanation:
+      "This is the activity feed for everything happening in your organization: a KYC status change, a new alert, a case changing status, a KYB submission, and more.\n\nClick a notification and you're taken straight to the record it's about (the alert, the case, the client…) — no need to go hunting for it yourself.\n\nIt's the same event stream as Audit Logs, just presented differently: here to stay on top of things day-to-day, there for the full compliance record.",
+    diagram: [
+      [
+        { label: "KYC / KYB", note: "status change" },
+        { label: "Alerts" },
+        { label: "Cases" },
+      ],
+      [{ label: "Event log" }],
+      [{ label: "Notifications", note: "filtered, clickable feed", current: true }],
+    ],
+  },
+};
 
 export function NotificationsClient({ result, page }: { result: NotificationsPage; page: number }) {
   const router = useRouter();
@@ -14,7 +46,10 @@ export function NotificationsClient({ result, page }: { result: NotificationsPag
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t("notificationsPageTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t("notificationsPageTitle")}</h1>
+          <PageGuideButton content={NOTIFICATIONS_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t("notificationsPageSubtitle")}</p>
       </div>
 

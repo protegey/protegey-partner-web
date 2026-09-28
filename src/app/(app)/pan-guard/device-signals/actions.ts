@@ -18,6 +18,8 @@ export interface DeviceSignal {
   createdAt: string;
   deviceAttributes: Record<string, unknown> | null;
   ipCountry: string | null;
+  ipLatitude: number | null;
+  ipLongitude: number | null;
   ipHash: string | null;
   /** Decrypted server-side on read (AES-256-GCM at rest) — your own customer's real address. */
   ip: string | null;

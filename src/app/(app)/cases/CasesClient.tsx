@@ -8,6 +8,44 @@ import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import type { Case } from "./actions";
 import type { PaginatedResult } from "../transactions/actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const CASES_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Dossiers",
+    explanation:
+      "Un dossier regroupe tout ce qu'il faut pour enquêter en profondeur sur un client : les alertes liées, les notes de l'équipe, les pièces jointes (preuves). Il est ouvert soit à la main par un analyste, soit automatiquement quand une alerte de gravité critique est escaladée.\n\nChaque dossier a un statut de traitement (ouvert, en investigation, fermé), une priorité (critique/élevée/moyenne/faible) pour trier ce qui presse, et une fois fermé, un résultat (aucune action, faux positif, ou déclaration de soupçon déposée).\n\nUn dossier fermé n'est pas la fin : il peut ensuite servir à générer une déclaration de soupçon (SAR/STR) ou à partager les identifiants du fraudeur au réseau de signaux partagés entre partenaires.",
+    diagram: [
+      [
+        { label: "Alerte critique", note: "escaladée automatiquement" },
+        { label: "Création manuelle" },
+      ],
+      [{ label: "Dossiers", note: "statut + priorité", current: true }],
+      [
+        { label: "SAR/STR", note: "si fermé avec déclaration" },
+        { label: "Réseau de signaux partagés", note: "si fermé et partagé" },
+      ],
+    ],
+    diagramCaption: "Un dossier fermé peut déclencher deux choses en aval : une déclaration réglementaire ou un partage réseau.",
+  },
+  en: {
+    title: "Cases",
+    explanation:
+      "A case bundles everything needed to investigate a customer in depth: linked alerts, the team's notes, and uploaded evidence. It's opened either by hand by an analyst, or automatically when a critical-severity alert gets escalated.\n\nEvery case has a workflow status (open, investigating, closed), a priority (critical/high/medium/low) to sort what's urgent, and once closed, an outcome (no action, false positive, or SAR filed).\n\nA closed case isn't the end of the line — it can go on to generate a suspicious activity report (SAR/STR), or have the fraudster's identifiers shared to the network other Protegey partners can check against.",
+    diagram: [
+      [
+        { label: "Critical alert", note: "auto-escalated" },
+        { label: "Manual creation" },
+      ],
+      [{ label: "Cases", note: "status + priority", current: true }],
+      [
+        { label: "SAR/STR", note: "if closed with a filing" },
+        { label: "Shared Signal Network", note: "if closed and shared" },
+      ],
+    ],
+    diagramCaption: "A closed case can trigger two downstream things: a regulatory filing or a network share.",
+  },
+};
 
 const STATUS_COLOR: Record<string, string> = {
   open: "bg-amber-500/15 text-amber-600",
@@ -64,7 +102,10 @@ export function CasesClient({
     <div className="flex w-full flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">{t("casesPageTitle")}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-semibold text-foreground">{t("casesPageTitle")}</h1>
+            <PageGuideButton content={CASES_GUIDE[lang]} />
+          </div>
           <p className="text-sm text-muted-foreground">{t("casesPageSubtitle")}</p>
         </div>
         <Link

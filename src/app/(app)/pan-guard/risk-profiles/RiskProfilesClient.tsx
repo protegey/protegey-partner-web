@@ -10,6 +10,40 @@ import { RiskBreakdown } from "./RiskBreakdown";
 import type { StringKey } from "@/lib/i18n/strings";
 import type { EntityRiskProfile, RiskProfileCategory } from "./actions";
 import type { PaginatedResult } from "../../transactions/actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const RISK_PROFILES_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Profils de risque",
+    explanation:
+      "Chaque ligne ici est un client : son score de risque cumulé, décroissant et pondéré, calculé à partir de tout ce qui lui est arrivé — alertes, signaux d'appareil, signaux comportementaux, criblage sanctions/PPE. Plus le score est haut, plus il faut se méfier.\n\nLa pondération suit toujours la même formule : Comportemental 35 %, Réseau 40 %, Contextuel 15 %, Historique 10 %. Le score ne redescend jamais tout seul, mais chaque contribution ancienne pèse de moins en moins avec le temps (décroissance).\n\nClique sur un client pour voir le détail complet : chaque contribution au score, son historique, et les correspondances de criblage. C'est le seul endroit où tous les signaux du produit convergent en un seul chiffre par client.",
+    diagram: [
+      [
+        { label: "Règles de transaction", note: "Pan-Monitor" },
+        { label: "Signaux d'appareil", note: "Pan-Guard" },
+        { label: "KYC / Sanctions / PPE" },
+        { label: "Biométrie comportementale" },
+      ],
+      [{ label: "Profils de risque", note: "liste — un score par client", current: true }],
+      [{ label: "Alerte", note: "si le score franchit un seuil" }],
+    ],
+  },
+  en: {
+    title: "Risk profiles",
+    explanation:
+      "Each row here is a customer: their cumulative, decayed and weighted risk score, built from everything that's happened to them — alerts, device signals, behavioral signals, sanctions/PEP screening. The higher the score, the more caution is warranted.\n\nThe weighting always follows the same formula: Behavioral 35%, Network 40%, Contextual 15%, Historical 10%. The score never goes down on its own, but each past contribution counts for less over time (decay).\n\nClick a customer to see the full detail: every contribution to the score, its history, and screening matches. This is the one place where every signal in the product converges into a single number per customer.",
+    diagram: [
+      [
+        { label: "Transaction rules", note: "Pan-Monitor" },
+        { label: "Device signals", note: "Pan-Guard" },
+        { label: "KYC / Sanctions / PEP" },
+        { label: "Behavioral biometrics" },
+      ],
+      [{ label: "Risk profiles", note: "list — one score per customer", current: true }],
+      [{ label: "Alert", note: "if the score crosses a threshold" }],
+    ],
+  },
+};
 
 type RiskLevel = EntityRiskProfile["riskLevel"];
 
@@ -69,7 +103,10 @@ export function RiskProfilesClient({
   return (
     <div className="flex w-full flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t("riskProfilesPageTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t("riskProfilesPageTitle")}</h1>
+          <PageGuideButton content={RISK_PROFILES_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t("riskProfilesPageSubtitle")}</p>
       </div>
 

@@ -3,6 +3,8 @@ import { ShieldOff, Hourglass } from "lucide-react";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import type { SharedSignalNetworkStatus } from "./actions";
+import { SHARED_SIGNAL_NETWORK_GUIDE } from "./SharedSignalNetworkClient";
+import { PageGuideButton } from "@/components/PageGuideButton";
 
 export async function SharedSignalNetworkGate({ status }: { status: SharedSignalNetworkStatus }) {
   const lang = await getLang();
@@ -10,7 +12,10 @@ export async function SharedSignalNetworkGate({ status }: { status: SharedSignal
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t(lang, "sharedSignalNetworkPageTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t(lang, "sharedSignalNetworkPageTitle")}</h1>
+          <PageGuideButton content={SHARED_SIGNAL_NETWORK_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t(lang, "sharedSignalNetworkPageSubtitle")}</p>
       </div>
 

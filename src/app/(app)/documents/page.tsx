@@ -7,6 +7,30 @@ import { t } from "@/lib/i18n/strings";
 import { getMyDocuments } from "./actions";
 import { DocumentUploadRow } from "./DocumentUploadRow";
 import { DocumentUploadWizard } from "./DocumentUploadWizard";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const DOCUMENTS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Documents de conformité",
+    explanation:
+      "Ces documents sont les tiens — ceux de TON organisation partenaire, pas ceux de tes clients. C'est la vérification que Protegey te demande pour activer ton propre compte : pièces légales, preuves d'enregistrement, etc.\n\nChaque document a un statut : en attente (à déposer), soumis (en cours de revue par Protegey), approuvé, ou rejeté (à renvoyer avec un motif donné). Tant que tout n'est pas approuvé, ton compte reste en onboarding et certaines fonctionnalités restent limitées.\n\nUne fois tous les documents approuvés, ton organisation passe au statut « active » et tu as accès à l'ensemble du produit.",
+    diagram: [
+      [{ label: "Documents de conformité", note: "déposés par toi, le partenaire", current: true }],
+      [{ label: "Revue Protegey", note: "approbation ou rejet" }],
+      [{ label: "Compte partenaire actif", note: "accès complet au produit" }],
+    ],
+  },
+  en: {
+    title: "Compliance documents",
+    explanation:
+      "These documents are yours — your own partner organization's, not your clients'. This is the verification Protegey asks you for to activate your own account: legal papers, registration proof, and the like.\n\nEach document has a status: pending (still to upload), submitted (under review by Protegey), approved, or rejected (send it back with the reason given). Until everything is approved, your account stays in onboarding and some features remain limited.\n\nOnce every document is approved, your organization moves to \"active\" status and you get full access to the product.",
+    diagram: [
+      [{ label: "Compliance documents", note: "uploaded by you, the partner", current: true }],
+      [{ label: "Protegey review", note: "approval or rejection" }],
+      [{ label: "Active partner account", note: "full product access" }],
+    ],
+  },
+};
 
 interface Partner {
   status: string;
@@ -50,9 +74,12 @@ export default async function DocumentsPage() {
         <div className="flex flex-col items-center gap-4 pb-2 text-center">
           <ReviewingIllustration className="h-48 w-48 sm:h-56 sm:w-56" />
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">
-              {allApproved ? t(lang, "documentsReviewedTitleAllApproved") : t(lang, "documentsReviewedTitleDefault")}
-            </h1>
+            <div className="flex items-center justify-center gap-2">
+              <h1 className="text-2xl font-semibold text-foreground">
+                {allApproved ? t(lang, "documentsReviewedTitleAllApproved") : t(lang, "documentsReviewedTitleDefault")}
+              </h1>
+              <PageGuideButton content={DOCUMENTS_GUIDE[lang]} />
+            </div>
             <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
               {allApproved ? t(lang, "documentsReviewedBodyAllApproved") : t(lang, "documentsReviewedBodyDefault")}{" "}
               {t(lang, "documentsReviewedEmailNotice")}
@@ -63,7 +90,10 @@ export default async function DocumentsPage() {
         <div className="flex flex-col items-center gap-4 pb-2 text-center">
           <KybIllustration className="h-48 w-48 sm:h-56 sm:w-56" />
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">{t(lang, "documentsOnboardingTitle")}</h1>
+            <div className="flex items-center justify-center gap-2">
+              <h1 className="text-2xl font-semibold text-foreground">{t(lang, "documentsOnboardingTitle")}</h1>
+              <PageGuideButton content={DOCUMENTS_GUIDE[lang]} />
+            </div>
             <p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">
               {t(lang, "documentsOnboardingBody")}
             </p>
@@ -71,7 +101,10 @@ export default async function DocumentsPage() {
         </div>
       ) : (
         <div>
-          <h1 className="text-xl font-semibold text-foreground">{t(lang, "documentsSectionTitle")}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-semibold text-foreground">{t(lang, "documentsSectionTitle")}</h1>
+            <PageGuideButton content={DOCUMENTS_GUIDE[lang]} />
+          </div>
           <p className="text-sm text-muted-foreground">
             {t(lang, "documentsSectionSubtitle")}
           </p>

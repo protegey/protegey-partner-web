@@ -3,9 +3,19 @@ import Link from "next/link";
 import { KeyRound, IdCard, ArrowRightLeft, Building2, ShieldCheck, Webhook, ArrowRight, BookOpen, Fingerprint } from "lucide-react";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
-export const metadata: Metadata = {
-  title: "Integration Guide — Protegey Partner",
+const INTEGRATION_GUIDE_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Guide d'intégration",
+    explanation:
+      "Cette page est le point de départ pour brancher ton propre système sur Protegey : comment envoyer une transaction à évaluer, démarrer une vérification KYC, cribler un nom contre les sanctions, inviter une entreprise cliente (KYB), ou envoyer un signal d'appareil.\n\nChaque carte pointe vers la page correspondante du produit et montre un exemple d'appel API réel (avec ta clé API dans l'en-tête `x-api-key`) pour que tu puisses copier-coller et tester tout de suite.\n\nC'est une page de référence : elle n'affiche aucune donnée de ton compte, elle explique juste comment t'y brancher.",
+  },
+  en: {
+    title: "Integration guide",
+    explanation:
+      "This page is the starting point for wiring your own system into Protegey: how to send a transaction for scoring, start a KYC verification, screen a name against sanctions, invite a business client (KYB), or send a device signal.\n\nEach card points to the matching product page and shows a real API call example (with your API key in the `x-api-key` header) so you can copy, paste, and test right away.\n\nThis is a reference page: it doesn't show any of your account's data, it just explains how to plug into it.",
+  },
 };
 
 const TRANSACTION_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/transactions \\
@@ -34,7 +44,10 @@ export default async function IntegrationGuidePage() {
   return (
     <div className="mx-auto flex max-w-4xl flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t(lang, "igHeroTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t(lang, "igHeroTitle")}</h1>
+          <PageGuideButton content={INTEGRATION_GUIDE_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t(lang, "igHeroSubtitle")}</p>
       </div>
 

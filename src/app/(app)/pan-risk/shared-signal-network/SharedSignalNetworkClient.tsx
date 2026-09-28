@@ -10,6 +10,32 @@ import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import { checkSharedSignalAction, type CheckSharedSignalResult, type SharedSignalCategory, type SharedSignalReportSummary } from "./actions";
 import type { PaginatedResult } from "../../transactions/actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+export const SHARED_SIGNAL_NETWORK_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Réseau de signaux partagés",
+    explanation:
+      "Quand tu fermes un Dossier en confirmant une fraude, tu peux choisir de partager les identifiants du fraudeur — téléphone, email, empreinte d'appareil — dans un pool commun que les autres partenaires Protegey peuvent interroger. Ton identité et les détails de ton dossier ne sont jamais révélés : seule la catégorie (fraude confirmée, usurpation d'identité, blanchiment, autre) et la date sont visibles.\n\nCette page a deux parties : la liste en bas montre ce que TOI tu as partagé au réseau. L'outil de vérification en haut te permet d'interroger le pool en temps réel avant d'intégrer un nouveau client — utile avant l'onboarding pour voir si son numéro ou son email a déjà été signalé ailleurs.\n\nLe partage est réciproque : tu profites des signalements des autres partenaires, et eux des tiens.",
+    diagram: [
+      [{ label: "Dossier fermé", note: "fraude confirmée, partagé" }],
+      [{ label: "Réseau de signaux partagés", note: "pool anonymisé entre partenaires", current: true }],
+      [{ label: "Vérification", note: "interrogée avant l'onboarding d'un nouveau client" }],
+    ],
+    diagramCaption: "Jamais l'identité du partenaire qui a signalé, ni les détails de son dossier — seulement catégorie + date.",
+  },
+  en: {
+    title: "Shared Signal Network",
+    explanation:
+      "When you close a Case confirming fraud, you can choose to share the fraudster's identifiers — phone, email, device fingerprint — into a shared pool other Protegey partners can query. Your identity and case details are never revealed: only the category (confirmed fraud, identity theft, money laundering, other) and the date are visible.\n\nThis page has two parts: the list below shows what YOU have shared to the network. The check tool above lets you query the pool in real time before onboarding a new customer — useful to see if their phone or email was already flagged elsewhere.\n\nSharing is reciprocal: you benefit from other partners' reports, and they benefit from yours.",
+    diagram: [
+      [{ label: "Case closed", note: "confirmed fraud, shared" }],
+      [{ label: "Shared Signal Network", note: "anonymized cross-partner pool", current: true }],
+      [{ label: "Check tool", note: "queried before onboarding a new customer" }],
+    ],
+    diagramCaption: "Never the reporting partner's identity or case details — only category + date.",
+  },
+};
 
 function isError(value: unknown): value is { error: string } {
   return Boolean(value) && typeof value === "object" && "error" in (value as object);
@@ -90,7 +116,10 @@ export function SharedSignalNetworkClient({
   return (
     <div className="flex w-full flex-col gap-8">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t("sharedSignalNetworkPageTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t("sharedSignalNetworkPageTitle")}</h1>
+          <PageGuideButton content={SHARED_SIGNAL_NETWORK_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t("sharedSignalNetworkPageSubtitle")}</p>
       </div>
 
@@ -207,7 +236,12 @@ export function SharedSignalNetworkClient({
                     <td className="px-4 py-2.5 text-foreground">{identityTypeLabel(report.identityType)}</td>
                     <td className="px-4 py-2.5 text-foreground">{categoryLabel(report.category)}</td>
                     <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{report.id}</td>
-                    <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{report.sourceCaseId}</td>
+                    <td className="px-4 py-2.5 text-xs">
+                      <Link href={`/cases/${report.sourceCaseId}`} className="flex flex-col hover:underline">
+                        <span className="font-mono font-medium text-foreground">{report.externalCustomerId ?? "—"}</span>
+                        {report.sourceCaseTitle ? <span className="text-muted-foreground">{report.sourceCaseTitle}</span> : null}
+                      </Link>
+                    </td>
                     <td className="px-4 py-2.5 text-right">
                       <Link
                         href={`/pan-risk/shared-signal-network/${report.id}`}

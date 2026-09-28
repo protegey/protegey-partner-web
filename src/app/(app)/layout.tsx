@@ -103,7 +103,7 @@ function buildNavItems(lang: Lang): NavItem[] {
         { label: tt("navApiKeys"), href: "/settings/api-keys" },
         { label: tt("navWebhooks"), href: "/settings/webhooks" },
         { label: tt("navIntegrationGuide"), href: "/integration-guide" },
-        { label: tt("navIntegrationHealth"), disabled: true },
+        { href: "/integration-health", label: tt("navIntegrationHealth") },
         { label: tt("navDocumentation"), href: "/documentation" },
       ],
     },

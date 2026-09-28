@@ -9,6 +9,10 @@ import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { CaseEvidenceSection } from "./CaseEvidenceSection";
+import { CaseTimelineSection } from "./CaseTimelineSection";
+import { CaseCrossModuleEvidenceSection } from "./CaseCrossModuleEvidenceSection";
+import type { NotificationEvent } from "@/lib/events";
+import type { CrossModuleEvidence } from "../actions";
 import {
   addCaseNoteAction,
   updateCaseAction,
@@ -20,6 +24,36 @@ import {
   type SharedSignalCategory,
 } from "../actions";
 import type { TeamMember } from "../../team/actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const CASE_DETAIL_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Dossier",
+    explanation:
+      "Tu regardes maintenant un dossier précis : toutes les alertes qui y sont rattachées, les notes de l'équipe (certaines internes seulement, d'autres visibles par le client partenaire) et les preuves téléversées (captures, relevés, documents).\n\nDepuis ici tu peux assigner le dossier, ajouter une note, joindre une preuve, et — une fois l'enquête terminée — le fermer avec un résultat : aucune action, faux positif, ou déclaration de soupçon déposée.\n\nUn dossier fermé peut ensuite être utilisé pour générer une déclaration SAR/STR, ou pour partager les identifiants du fraudeur (téléphone, email, appareil) avec le réseau de signaux partagés — sans jamais révéler qui a partagé ni les détails du dossier.",
+    diagram: [
+      [{ label: "Dossier", note: "alertes liées + notes + preuves", current: true }],
+      [{ label: "Fermeture avec résultat", note: "aucune action / faux positif / SAR déposé" }],
+      [
+        { label: "SAR/STR", note: "si une déclaration est générée" },
+        { label: "Réseau de signaux partagés", note: "si les identifiants sont partagés" },
+      ],
+    ],
+  },
+  en: {
+    title: "Case",
+    explanation:
+      "You're looking at one specific case: every alert linked to it, the team's notes (some internal-only, some visible to the partner client), and uploaded evidence (screenshots, statements, documents).\n\nFrom here you can assign the case, add a note, attach evidence, and — once the investigation is done — close it with an outcome: no action, false positive, or SAR filed.\n\nA closed case can then be used to generate a SAR/STR filing, or to share the fraudster's identifiers (phone, email, device) to the shared signal network — without ever revealing who shared it or the case's details.",
+    diagram: [
+      [{ label: "Case", note: "linked alerts + notes + evidence", current: true }],
+      [{ label: "Closed with outcome", note: "no action / false positive / SAR filed" }],
+      [
+        { label: "SAR/STR", note: "if a filing is generated" },
+        { label: "Shared Signal Network", note: "if identifiers are shared" },
+      ],
+    ],
+  },
+};
 
 function isError(value: unknown): value is { error: string } {
   return Boolean(value) && typeof value === "object" && "error" in (value as object);
@@ -50,6 +84,8 @@ export function CaseDetailClient({
   canShareSignal,
   initialAlreadyShared,
   knownVisitorIds,
+  timeline,
+  crossModuleEvidence,
 }: {
   kase: CaseWithNotes;
   teamMembers: TeamMember[];
@@ -57,6 +93,8 @@ export function CaseDetailClient({
   canShareSignal: boolean;
   initialAlreadyShared: boolean;
   knownVisitorIds: string[];
+  timeline: NotificationEvent[];
+  crossModuleEvidence: CrossModuleEvidence;
 }) {
   const router = useRouter();
   const guard = useSessionGuard();
@@ -234,6 +272,7 @@ export function CaseDetailClient({
           <h1 className="text-xl font-semibold text-foreground">{kase.title}</h1>
           <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLOR[kase.status]}`}>{statusLabel[kase.status]}</span>
           <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${PRIORITY_COLOR[kase.priority]}`}>{priorityLabel[kase.priority]}</span>
+          <PageGuideButton content={CASE_DETAIL_GUIDE[lang]} />
         </div>
         <p className="text-sm text-muted-foreground">
           {t("signalsColCustomer")}: {kase.externalCustomerId} · {new Date(kase.createdAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
@@ -254,6 +293,8 @@ export function CaseDetailClient({
           </div>
         </div>
       ) : null}
+
+      <CaseCrossModuleEvidenceSection evidence={crossModuleEvidence} externalCustomerId={kase.externalCustomerId} />
 
       <div className="flex flex-wrap items-end gap-3 rounded-md border border-border bg-card p-4">
         <div className="flex flex-col gap-1">
@@ -419,6 +460,8 @@ export function CaseDetailClient({
         </select>
         {error ? <p className="mt-2 text-sm text-destructive">{error}</p> : null}
       </ConfirmActionDialog>
+
+      <CaseTimelineSection events={timeline} />
 
       <div className="flex flex-col gap-3">
         <p className="text-sm font-semibold text-foreground">{t("caseNotesTitle")}</p>

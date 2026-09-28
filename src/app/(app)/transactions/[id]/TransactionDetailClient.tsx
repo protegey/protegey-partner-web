@@ -13,6 +13,30 @@ import { useLang } from "@/lib/i18n/LangProvider";
 import type { MonitoringTransaction, DeviceAction } from "../actions";
 import { updateAlert, flagTransactionAction, type AlertWithContext } from "../../alerts/actions";
 import type { TeamMember } from "../../team/actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const TRANSACTION_DETAIL_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Transaction",
+    explanation:
+      "Tu regardes une transaction précise : son montant, son sens (débit/crédit), sa décision (effacée / à revoir / bloquée), son score de risque, et les informations de l'appareil qui l'a initiée (empreinte, pays IP, recommandation).\n\nSi une règle a déclenché une Alerte sur cette transaction, quatre actions sont possibles ici et agissent toutes sur cette alerte liée : Assigner (à un membre de l'équipe), Approuver (confirme que c'était bien une fraude), Refuser (faux positif, rien à signaler), ou Signaler (« Flag ») — qui ouvre une alerte manuellement même si aucune règle ne s'est déclenchée.\n\nC'est le point d'entrée pour agir concrètement sur un paiement suspect, au lieu de rester dans la liste.",
+    diagram: [
+      [{ label: "Règles + signal d'appareil", note: "au moment de la transaction" }],
+      [{ label: "Transaction", note: "décision + score, vue détaillée", current: true }],
+      [{ label: "Alerte liée", note: "assigner / approuver / refuser / signaler" }],
+    ],
+  },
+  en: {
+    title: "Transaction",
+    explanation:
+      "You're looking at one specific transaction: its amount, direction (debit/credit), decision (clear / review / blocked), risk score, and the device that initiated it (fingerprint, IP country, recommendation).\n\nIf a rule triggered an Alert on this transaction, four actions are available here and all act on that linked alert: Assign (to a team member), Approve (confirms it really was fraud), Decline (false positive, nothing to flag), or Flag — which manually opens an alert even if no rule fired.\n\nThis is the entry point to actually act on a suspicious payment, instead of staying in the list.",
+    diagram: [
+      [{ label: "Rules + device signal", note: "at transaction time" }],
+      [{ label: "Transaction", note: "decision + score, detail view", current: true }],
+      [{ label: "Linked alert", note: "assign / approve / decline / flag" }],
+    ],
+  },
+};
 
 function isError(value: unknown): value is { error: string } {
   return Boolean(value) && typeof value === "object" && "error" in (value as object);
@@ -154,7 +178,10 @@ export function TransactionDetailClient({
         </Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h1 className="font-mono text-lg font-semibold text-foreground">{transaction.externalTransactionId}</h1>
+            <div className="flex items-center gap-2">
+              <h1 className="font-mono text-lg font-semibold text-foreground">{transaction.externalTransactionId}</h1>
+              <PageGuideButton content={TRANSACTION_DETAIL_GUIDE[lang]} />
+            </div>
             <p className="mt-0.5 text-xs text-muted-foreground">
               {new Date(transaction.occurredAt).toLocaleString(locale)} · {transaction.transactionType} · {decisionLabel[transaction.decision]}
             </p>
@@ -271,6 +298,8 @@ export function TransactionDetailClient({
             <DeviceAttributesDetails
               attributes={transaction.deviceAttributes}
               ipCountry={transaction.ipCountry}
+              ipLatitude={transaction.ipLatitude}
+              ipLongitude={transaction.ipLongitude}
               ipHash={transaction.ipHash}
               ip={transaction.ip}
               phoneNumber={transaction.devicePhoneNumber}

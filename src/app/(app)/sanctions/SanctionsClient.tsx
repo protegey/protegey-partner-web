@@ -9,6 +9,36 @@ import { Pagination } from "@/components/Pagination";
 import { StatsCards } from "./StatsCards";
 import { SanctionsTable } from "./SanctionsTable";
 import type { SanctionsEntity, SanctionsStats } from "./actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const SANCTIONS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Sanctions",
+    explanation:
+      "Cette page est le registre de toutes les correspondances de criblage déjà trouvées — pendant une vérification KYC, une soumission KYB, ou une recherche manuelle — contre les listes de sanctions et de personnes politiquement exposées (PPE). Ce n'est pas un outil de recherche : c'est l'historique de ce qui a déjà été détecté.\n\nChaque entrée montre le nom, le type (personne/entreprise), la source de la liste, les alias connus, et si l'inscription est active ou levée (« délistée »).\n\nPour chercher un nouveau nom avant d'intégrer quelqu'un, utilise plutôt la page Recherche sanctions.",
+    diagram: [
+      [
+        { label: "Vérification KYC", note: "approuvée" },
+        { label: "Soumission KYB" },
+        { label: "Recherche sanctions", note: "avec client rattaché" },
+      ],
+      [{ label: "Sanctions", note: "registre des correspondances trouvées", current: true }],
+    ],
+  },
+  en: {
+    title: "Sanctions",
+    explanation:
+      "This page is the record of every screening match already found — during a KYC verification, a KYB submission, or a manual search — against sanctions and Politically Exposed Person (PEP) lists. It's not a search tool: it's the history of what's already been detected.\n\nEach entry shows the name, type (person/business), the list source, known aliases, and whether the listing is active or lifted (\"delisted\").\n\nTo look up a new name before onboarding someone, use the Sanctions Search page instead.",
+    diagram: [
+      [
+        { label: "KYC verification", note: "approved" },
+        { label: "KYB submission" },
+        { label: "Sanctions search", note: "with customer attached" },
+      ],
+      [{ label: "Sanctions", note: "record of matches found", current: true }],
+    ],
+  },
+};
 
 export function SanctionsClient({
   sanctions,
@@ -32,7 +62,7 @@ export function SanctionsClient({
   initialIncludeDelisted: boolean;
 }) {
   const router = useRouter();
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const [, startTransition] = useTransition();
   const [search, setSearch] = useState(initialSearch);
   const [type, setType] = useState(initialType);
@@ -55,7 +85,10 @@ export function SanctionsClient({
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">{t("sanctionsPageTitle")}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-semibold text-foreground">{t("sanctionsPageTitle")}</h1>
+            <PageGuideButton content={SANCTIONS_GUIDE[lang]} />
+          </div>
           <p className="text-sm text-muted-foreground">
             {t("sanctionsPageSubtitle")}
           </p>

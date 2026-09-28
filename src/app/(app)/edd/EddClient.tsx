@@ -10,6 +10,40 @@ import { Dialog } from "@/components/Dialog";
 import { useLang } from "@/lib/i18n/LangProvider";
 import type { TeamMember } from "../team/actions";
 import { updateEddReview, type EddChecklist, type EddReview, type EddStatus } from "./actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const EDD_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Vigilance renforcée (EDD)",
+    explanation:
+      "Une revue de vigilance renforcée s'ouvre automatiquement quand un client devient plus risqué qu'à l'ordinaire : une PPE confirmée, un score de risque élevé, des alertes qui se répètent, ou une alerte escaladée. Ce n'est jamais toi qui l'ouvres à la main.\n\nPour approuver une revue, les cinq cases de la checklist doivent toutes être cochées : identité vérifiée, origine des fonds examinée, origine du patrimoine examinée, objet de la relation d'affaires vérifié, et approbation d'un responsable senior. Impossible d'approuver tant qu'il en manque une.\n\nLa décision finale — approuver ou rejeter — est une décision de conformité définitive sur ce client.",
+    diagram: [
+      [
+        { label: "PPE confirmée" },
+        { label: "Score de risque élevé" },
+        { label: "Alertes répétées" },
+        { label: "Alerte escaladée" },
+      ],
+      [{ label: "Vigilance renforcée (EDD)", note: "checklist en 5 points", current: true }],
+      [{ label: "Décision finale", note: "approuvé / rejeté" }],
+    ],
+  },
+  en: {
+    title: "Enhanced Due Diligence (EDD)",
+    explanation:
+      "An enhanced due diligence review opens automatically when a customer becomes riskier than usual: a confirmed PEP, a high risk score, repeated alerts, or an escalated alert. You never open one by hand.\n\nTo approve a review, all five checklist items must be checked: identity verified, source of funds reviewed, source of wealth reviewed, business purpose verified, and senior approval. You can't approve while any of them are missing.\n\nThe final decision — approve or reject — is a final compliance call on that customer.",
+    diagram: [
+      [
+        { label: "PEP confirmed" },
+        { label: "High risk score" },
+        { label: "Repeated alerts" },
+        { label: "Escalated alert" },
+      ],
+      [{ label: "Enhanced Due Diligence (EDD)", note: "5-item checklist", current: true }],
+      [{ label: "Final decision", note: "approved / rejected" }],
+    ],
+  },
+};
 
 const statuses: EddStatus[] = ["pending", "in_review", "approved", "rejected"];
 const statusColors: Record<EddStatus, string> = {
@@ -126,7 +160,7 @@ export function EddClient({ result, initialStatus, teamMembers }: { result: { da
   };
 
   return <div className="flex w-full flex-col gap-6">
-    <div><h1 className="text-xl font-semibold text-foreground">{t("eddPageTitle")}</h1><p className="text-sm text-muted-foreground">{t("eddPageSubtitle")}</p></div>
+    <div><div className="flex items-center gap-2"><h1 className="text-xl font-semibold text-foreground">{t("eddPageTitle")}</h1><PageGuideButton content={EDD_GUIDE[lang]} /></div><p className="text-sm text-muted-foreground">{t("eddPageSubtitle")}</p></div>
     <div className="flex items-end gap-3"><label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">{t("eddStatus")}<select value={filter} onChange={(event) => changeFilter(event.target.value)} className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground"><option value="all">{t("eddAllStatuses")}</option>{statuses.map((status) => <option key={status} value={status}>{t(`eddStatus_${status}` as never)}</option>)}</select></label></div>
     {error ? <p className="text-sm text-destructive">{error}</p> : null}
     <div className="flex flex-col gap-3 md:hidden">{reviews.length === 0 ? <p className="rounded-md border border-border p-6 text-center text-sm text-muted-foreground">{t("eddEmpty")}</p> : reviews.map((review) => <div key={review.id} className="rounded-md border border-border bg-card p-4"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-foreground">{review.externalCustomerId}</p><p className="mt-0.5 text-xs text-muted-foreground">{t(`eddTrigger_${review.trigger}` as never)}</p></div><span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusColors[review.status]}`}>{t(`eddStatus_${review.status}` as never)}</span></div><div className="mt-3 rounded-md border border-border bg-muted/20 p-3">{summary(review, true)}</div></div>)}</div>

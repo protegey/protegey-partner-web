@@ -8,6 +8,32 @@ import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import type { StringKey } from "@/lib/i18n/strings";
 import { searchSanctionsAction, type SanctionsSearchMatch, type SanctionsSearchResult } from "../actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const SANCTIONS_SEARCH_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Recherche sanctions",
+    explanation:
+      "Cet outil interroge en temps réel la liste de criblage configurée (le registre propre à Protegey, ou Dow Jones si activé) pour un nom donné — utile avant d'intégrer quelqu'un de nouveau, sans attendre une vérification KYC complète.\n\nLe résultat est une décision en trois niveaux : « effacé » (rien trouvé), « à revoir » (une correspondance existe, à examiner), ou « bloqué » (correspondance confirmée sur une vraie liste de sanctions). Important : une correspondance PPE seule ne donne jamais « bloqué » — au pire « à revoir », car être une PPE n'est pas en soi une interdiction.\n\nSi tu rattaches un identifiant client à la recherche, une correspondance significative est enregistrée durablement dans la page Sanctions pour être suivie et revue plus tard ; sans identifiant, c'est une vérification ponctuelle qui ne laisse pas de trace.",
+    diagram: [
+      [{ label: "Recherche sanctions", note: "requête en temps réel", current: true }],
+      [{ label: "Fournisseur de criblage", note: "Protegey ou Dow Jones" }],
+      [{ label: "Décision", note: "effacé / à revoir / bloqué" }],
+      [{ label: "Sanctions", note: "si un client est rattaché à la recherche" }],
+    ],
+  },
+  en: {
+    title: "Sanctions search",
+    explanation:
+      "This tool queries the configured screening list (Protegey's own built-in registry, or Dow Jones if enabled) in real time for a given name — useful before onboarding someone new, without waiting for a full KYC verification.\n\nThe result is a three-way decision: \"clear\" (nothing found), \"review\" (a match exists, worth examining), or \"blocked\" (a confirmed hit on a genuine sanctions list). Important: a PEP-only match never returns \"blocked\" — at most \"review\", since being a PEP isn't by itself a prohibition.\n\nIf you attach a customer ID to the search, a meaningful match gets saved durably to the Sanctions page for later tracking and review; without one, it's a one-off check that leaves no trace.",
+    diagram: [
+      [{ label: "Sanctions search", note: "real-time query", current: true }],
+      [{ label: "Screening provider", note: "Protegey or Dow Jones" }],
+      [{ label: "Decision", note: "clear / review / blocked" }],
+      [{ label: "Sanctions", note: "if a customer is attached to the search" }],
+    ],
+  },
+};
 
 function isError(value: unknown): value is { error: string } {
   return Boolean(value) && typeof value === "object" && "error" in (value as object);
@@ -87,7 +113,7 @@ function MatchCard({ match }: { match: SanctionsSearchMatch }) {
 }
 
 export function SanctionsSearchClient() {
-  const { t } = useLang();
+  const { t, lang } = useLang();
   const guard = useSessionGuard();
   const [name, setName] = useState("");
   const [type, setType] = useState<"person" | "business">("person");
@@ -129,7 +155,10 @@ export function SanctionsSearchClient() {
         <Link href="/sanctions" className="mb-2 inline-block text-sm text-muted-foreground hover:text-foreground">
           ← {t("navSanctionsList")}
         </Link>
-        <h1 className="text-xl font-semibold text-foreground">{t("sanctionsSearchPageTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t("sanctionsSearchPageTitle")}</h1>
+          <PageGuideButton content={SANCTIONS_SEARCH_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t("sanctionsSearchPageSubtitle")}</p>
       </div>
 

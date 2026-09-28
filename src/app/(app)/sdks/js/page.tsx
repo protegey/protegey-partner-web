@@ -4,9 +4,19 @@ import { Package, Rocket, Smartphone, ArrowRightLeft, IdCard, Activity, ShieldAl
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import { CodeBlock } from "@/components/CodeBlock";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
-export const metadata: Metadata = {
-  title: "Node.js / JavaScript SDK — Protegey Partner",
+const SDK_JS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "SDK JavaScript / Node.js",
+    explanation:
+      "Le paquet `@protegey/sdk` est le même code pour Node.js, le navigateur, React, Angular et React Native — un seul SDK à apprendre. Une fois initialisé avec ta clé API, tu peux appeler `protegey.device.identify()` au login pour calculer une empreinte d'appareil (uniquement dans un navigateur — ailleurs, il faut fournir l'identifiant toi-même) et récupérer une recommandation.\n\nCette recommandation (`allow`, `soft_challenge`, `hard_challenge`, `block`) n'est qu'un conseil : Protegey ne bloque jamais ton utilisateur à ta place, c'est ton application qui décide quoi en faire.\n\nCette page ne montre aucune donnée de ton compte — c'est une référence technique avec des exemples de code à copier-coller.",
+  },
+  en: {
+    title: "JavaScript / Node.js SDK",
+    explanation:
+      "The `@protegey/sdk` package is the same code for Node.js, the browser, React, Angular, and React Native — one SDK to learn. Once initialized with your API key, you can call `protegey.device.identify()` on login to compute a device fingerprint (only in a browser — elsewhere you supply the identifier yourself) and get back a recommendation.\n\nThat recommendation (`allow`, `soft_challenge`, `hard_challenge`, `block`) is advice only: Protegey never blocks your user on your behalf, your app decides what to do with it.\n\nThis page shows none of your account's data — it's a technical reference with copy-paste code examples.",
+  },
 };
 
 const INSTALL_GITHUB = `npm install git+https://github.com/protegey/protegey_js_sdk.git`;
@@ -120,6 +130,7 @@ export default async function SdkJsPage() {
           <div className="flex items-center gap-2.5">
             <Package className="size-5 text-primary" />
             <h1 className="text-xl font-semibold text-foreground">{t(lang, "sdkJsPageTitle")}</h1>
+            <PageGuideButton content={SDK_JS_GUIDE[lang]} />
           </div>
           <p className="mt-1 text-sm text-muted-foreground">{t(lang, "sdkJsPageSubtitle")}</p>
           <a

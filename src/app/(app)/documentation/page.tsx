@@ -4,6 +4,21 @@ import { KeyRound, ArrowRightLeft, IdCard, ShieldCheck, Webhook, AlertTriangle, 
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import { CodeBlock } from "@/components/CodeBlock";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+import { ApiConsole } from "@/components/ApiConsole";
+
+const DOCUMENTATION_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Documentation",
+    explanation:
+      "Cette page est la référence technique complète de l'API Protegey : authentification par clé API, les SDKs disponibles, comment envoyer une transaction, démarrer une vérification KYC, cribler des sanctions, envoyer un signal d'appareil, configurer un webhook, et plus.\n\nChaque section a un exemple de requête `curl` réel avec les vrais noms de champs attendus — tu peux copier-coller et adapter directement dans ton propre backend.\n\nCertaines sections ont aussi une vraie console « Envoyer » intégrée : colle ta clé API et envoie une vraie requête directement depuis cette page, sans sortir de l'application. Ta clé reste uniquement dans ton navigateur, jamais transmise ailleurs.",
+  },
+  en: {
+    title: "Documentation",
+    explanation:
+      "This page is the full technical reference for the Protegey API: API key authentication, the available SDKs, how to send a transaction, start a KYC verification, screen sanctions, send a device signal, set up a webhook, and more.\n\nEvery section has a real `curl` example with the actual expected field names — you can copy-paste and adapt it directly into your own backend.\n\nSome sections also have a real embedded \"Send\" console: paste your API key and fire a real request straight from this page, without leaving the app. Your key stays in your browser only, never sent anywhere else.",
+  },
+};
 
 export const metadata: Metadata = {
   title: "Documentation — Protegey Partner",
@@ -250,7 +265,10 @@ export default async function DocumentationPage() {
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">{t(lang, "docsPageTitle")}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-semibold text-foreground">{t(lang, "docsPageTitle")}</h1>
+            <PageGuideButton content={DOCUMENTATION_GUIDE[lang]} />
+          </div>
           <p className="text-sm text-muted-foreground">{t(lang, "docsPageSubtitle")}</p>
         </div>
 
@@ -277,6 +295,22 @@ export default async function DocumentationPage() {
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
           <CodeBlock code={TRANSACTION_EXAMPLE} />
           <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsSeeAlsoRules")}</p>
+          <div className="mt-4">
+            <ApiConsole
+              method="POST"
+              path="/partner-api/transactions"
+              fields={[
+                { name: "externalTransactionId", label: "externalTransactionId", type: "text", required: true, placeholder: "tx-0001" },
+                { name: "externalCustomerId", label: "externalCustomerId", type: "text", required: true, placeholder: "cust-0001" },
+                { name: "direction", label: "direction", type: "select", options: ["CREDIT", "DEBIT"], defaultValue: "DEBIT" },
+                { name: "amount", label: "amount", type: "number", required: true, placeholder: "50000" },
+                { name: "currency", label: "currency", type: "text", defaultValue: "XOF" },
+                { name: "transactionType", label: "transactionType", type: "text", required: true, placeholder: "TRANSFER" },
+                { name: "isCash", label: "isCash", type: "boolean", defaultValue: false },
+                { name: "occurredAt", label: "occurredAt", type: "text", required: true, defaultValue: new Date().toISOString() },
+              ]}
+            />
+          </div>
         </Section>
 
         <Section id="kyc" icon={IdCard} title={t(lang, "docsKycTitle")} body={t(lang, "docsKycBody")}>
@@ -285,11 +319,26 @@ export default async function DocumentationPage() {
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKycPollLabel")}</p>
           <CodeBlock code={KYC_POLL_EXAMPLE} />
           <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsKycPollNote")}</p>
+          <div className="mt-4">
+            <p className="mb-1.5 text-xs text-amber-600">{t(lang, "docsKycConsoleRealWarning")}</p>
+            <ApiConsole
+              method="POST"
+              path="/partner-api/kyc/sessions"
+              fields={[{ name: "externalUserId", label: "externalUserId", type: "text", required: true, placeholder: "cust-0001" }]}
+            />
+          </div>
         </Section>
 
         <Section id="sanctions" icon={ShieldCheck} title={t(lang, "docsSanctionsTitle")} body={t(lang, "docsSanctionsBody")}>
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
           <CodeBlock code={SANCTIONS_EXAMPLE} />
+          <div className="mt-4">
+            <ApiConsole
+              method="POST"
+              path="/partner-api/sanctions/screen"
+              fields={[{ name: "name", label: "name", type: "text", required: true, placeholder: "Aïssata Bamba" }]}
+            />
+          </div>
         </Section>
 
         <Section id="device-events" icon={Smartphone} title={t(lang, "docsDeviceEventsTitle")} body={t(lang, "docsDeviceEventsBody")}>
@@ -300,6 +349,17 @@ export default async function DocumentationPage() {
               {t(lang, "docsSeeAlsoDeviceSignals")}
             </Link>
           </p>
+          <div className="mt-4">
+            <ApiConsole
+              method="POST"
+              path="/partner-api/device-events"
+              fields={[
+                { name: "eventId", label: "eventId", type: "text", required: true, placeholder: "evt-0001" },
+                { name: "externalCustomerId", label: "externalCustomerId", type: "text", placeholder: "cust-0001" },
+                { name: "visitorId", label: "visitorId", type: "text", placeholder: "visitor-id-from-the-sdk" },
+              ]}
+            />
+          </div>
         </Section>
 
         <Section id="behavioral-events" icon={Activity} title={t(lang, "docsBehavioralEventsTitle")} body={t(lang, "docsBehavioralEventsBody")}>
@@ -311,12 +371,34 @@ export default async function DocumentationPage() {
               {t(lang, "docsSeeAlsoBehavioralSignals")}
             </Link>
           </p>
+          <div className="mt-4">
+            <p className="mb-1.5 text-xs text-muted-foreground">{t(lang, "docsBehavioralEventsConsoleNote")}</p>
+            <ApiConsole
+              method="POST"
+              path="/partner-api/behavioral-events"
+              fields={[
+                { name: "externalCustomerId", label: "externalCustomerId", type: "text", required: true, placeholder: "cust-0001" },
+                { name: "sessionId", label: "sessionId", type: "text", required: true, placeholder: "session-0001" },
+              ]}
+            />
+          </div>
         </Section>
 
         <Section id="shared-signal" icon={Share2} title={t(lang, "docsSharedSignalTitle")} body={t(lang, "docsSharedSignalBody")}>
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
           <CodeBlock code={SHARED_SIGNAL_EXAMPLE} />
           <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsSharedSignalOptInNote")}</p>
+          <div className="mt-4">
+            <ApiConsole
+              method="POST"
+              path="/partner-api/shared-signal/check"
+              fields={[
+                { name: "phoneNumber", label: "phoneNumber", type: "text", placeholder: "+22890123456" },
+                { name: "email", label: "email", type: "text", placeholder: "jane@example.com" },
+                { name: "deviceFingerprint", label: "deviceFingerprint", type: "text", placeholder: "visitor-id-from-the-sdk" },
+              ]}
+            />
+          </div>
         </Section>
 
         <Section id="webhooks" icon={Webhook} title={t(lang, "docsWebhooksTitle")} body={t(lang, "docsWebhooksBody")}>

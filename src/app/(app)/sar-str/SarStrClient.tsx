@@ -8,6 +8,34 @@ import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import type { SarReport } from "./actions";
 import type { PaginatedResult } from "../transactions/actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const SAR_STR_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "SAR/STR — Déclarations de soupçon",
+    explanation:
+      "Une SAR/STR (déclaration d'activité suspecte) naît toujours d'un Dossier — tu ne pars jamais d'une page blanche. Un modèle spécifique au pays du client pré-remplit automatiquement les champs à partir des données KYC, des transactions et du criblage (ou un modèle générique UEMOA/international si aucun modèle n'existe encore pour ce pays).\n\nL'analyste doit ensuite rédiger le récit obligatoire — la partie qui ne peut jamais être automatisée — avant d'envoyer le rapport en revue au responsable conformité (MLRO). Une fois approuvé, il est marqué comme déposé avec une référence du régulateur.\n\nLes statuts suivent ce circuit dans l'ordre : brouillon → soumis → revue MLRO → dépôt en attente → déposé (ou rejeté à tout moment pour être corrigé).",
+    diagram: [
+      [{ label: "Dossier", note: "fermé ou en cours d'enquête" }],
+      [{ label: "Modèle pays", note: "pré-rempli depuis KYC/transactions/criblage" }],
+      [{ label: "SAR/STR", note: "brouillon + récit de l'analyste", current: true }],
+      [{ label: "Revue MLRO" }],
+      [{ label: "Déposé", note: "avec référence régulateur" }],
+    ],
+  },
+  en: {
+    title: "SAR/STR — Suspicious activity reports",
+    explanation:
+      "A SAR/STR (suspicious activity report) always starts from a Case — you never begin from a blank page. A template specific to the customer's country auto-fills fields from KYC, transaction, and screening data (or falls back to a generic UEMOA/international template if none exists yet for that country).\n\nThe analyst then has to write the mandatory narrative — the one part that can never be automated — before sending the report for review by the compliance officer (MLRO). Once approved, it's marked as filed with a regulator reference.\n\nStatuses follow this path in order: draft → submitted → MLRO review → filing pending → filed (or rejected at any point to be corrected).",
+    diagram: [
+      [{ label: "Case", note: "closed or under investigation" }],
+      [{ label: "Country template", note: "pre-filled from KYC/transactions/screening" }],
+      [{ label: "SAR/STR", note: "draft + analyst narrative", current: true }],
+      [{ label: "MLRO review" }],
+      [{ label: "Filed", note: "with regulator reference" }],
+    ],
+  },
+};
 
 const STATUS_COLOR: Record<string, string> = {
   draft: "bg-amber-500/15 text-amber-600",
@@ -51,7 +79,10 @@ export function SarStrClient({
   return (
     <div className="flex w-full flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t("sarStrPageTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t("sarStrPageTitle")}</h1>
+          <PageGuideButton content={SAR_STR_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t("sarStrPageSubtitle")}</p>
       </div>
 

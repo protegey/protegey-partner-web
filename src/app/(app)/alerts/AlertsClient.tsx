@@ -21,6 +21,40 @@ import {
 import type { StringKey } from "@/lib/i18n/strings";
 import type { TeamMember } from "../team/actions";
 import type { PaginatedResult } from "../transactions/actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const ALERTS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Alertes",
+    explanation:
+      "Une alerte apparaît ici quand quelque chose de suspect a été détecté : une règle de transaction s'est déclenchée (Pan Studio), le moteur comportemental a vu une dérive à haute confiance combinée à un autre signal, ou un analyste a cliqué sur « Signaler » manuellement sur une transaction même sans règle déclenchée.\n\nChaque alerte porte un verdict hérité de la règle qui l'a créée — BLOCK (bloquer), STEP_UP (vérification renforcée), ESCALATE (escalader) ou ALERT (simple signal) — et un statut de traitement : ouverte, confirmée comme fraude, information demandée, ou classée sans suite.\n\nTraiter une alerte ici, c'est l'assigner à quelqu'un, la confirmer ou la classer, ou la convertir en Dossier si elle mérite une enquête plus poussée.",
+    diagram: [
+      [
+        { label: "Règles (Pan Studio)", note: "déclenchement par transaction" },
+        { label: "Moteur comportemental", note: "dérive à haute confiance + un autre signal" },
+        { label: "Signalement manuel", note: "depuis une transaction" },
+      ],
+      [{ label: "Alertes", note: "verdict + statut de traitement", current: true }],
+      [{ label: "Dossier", note: "si escaladée / confirmée" }],
+    ],
+    diagramCaption: "Trois sources différentes peuvent créer une alerte — cette page les traite toutes de la même façon.",
+  },
+  en: {
+    title: "Alerts",
+    explanation:
+      "An alert shows up here when something suspicious was detected: a transaction rule fired (Pan Studio), the behavioral engine saw a high-confidence deviation combined with another signal, or an analyst manually clicked \"Flag\" on a transaction even without a matching rule.\n\nEvery alert carries a verdict inherited from the rule that created it — BLOCK, STEP_UP (extra verification), ESCALATE, or ALERT (a plain notice) — plus a workflow status: open, confirmed fraud, more info requested, or dismissed.\n\nWorking an alert here means assigning it to someone, confirming or dismissing it, or converting it into a Case when it deserves a deeper investigation.",
+    diagram: [
+      [
+        { label: "Rules (Pan Studio)", note: "fires per transaction" },
+        { label: "Behavioral engine", note: "high-confidence deviation + another signal" },
+        { label: "Manual flag", note: "from a transaction" },
+      ],
+      [{ label: "Alerts", note: "verdict + workflow status", current: true }],
+      [{ label: "Case", note: "if escalated / confirmed" }],
+    ],
+    diagramCaption: "Three different sources can create an alert — this page handles them all the same way.",
+  },
+};
 
 function isError(value: unknown): value is { error: string } {
   return Boolean(value) && typeof value === "object" && "error" in (value as object);
@@ -188,7 +222,10 @@ export function AlertsClient({
   return (
     <div className="flex w-full flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t("alertsPageTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t("alertsPageTitle")}</h1>
+          <PageGuideButton content={ALERTS_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t("alertsPageSubtitle")}</p>
       </div>
 

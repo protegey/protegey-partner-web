@@ -8,6 +8,34 @@ import { Pagination } from "@/components/Pagination";
 import type { StringKey } from "@/lib/i18n/strings";
 import type { BehavioralSignal, BehavioralCategory } from "./actions";
 import type { PaginatedResult } from "../../transactions/actions";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const BEHAVIORAL_SIGNALS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Signaux comportementaux",
+    explanation:
+      "Ton SDK envoie en continu des métadonnées de session (rythme de frappe, gestes tactiles, navigation, horaires de connexion, vitesse entre les actions). Protegey apprend d'abord ce qui est « normal » pour chaque client — il faut environ 5 sessions pour construire cette base — puis commence à repérer les écarts.\n\nChaque ligne ici est un écart détecté : un score de déviation, un niveau de confiance (faible/moyen/élevé) et les catégories concernées (frappe, tactile, navigation, horaire de connexion, vitesse de session).\n\nImportant : un signal comportemental isolé ne crée jamais d'alerte à lui seul. Il ne fait remonter une vraie alerte que si la confiance est « élevée » ET qu'un autre signal non-comportemental existe déjà sur ce même client — pour éviter les faux positifs sur un simple changement de téléphone ou de connexion.",
+    diagram: [
+      [{ label: "SDK partenaire", note: "frappe, tactile, navigation, session" }],
+      [{ label: "Base de référence", note: "5 sessions pour apprendre" }],
+      [{ label: "Signaux comportementaux", note: "score de déviation + confiance", current: true }],
+      [{ label: "Alerte", note: "seulement si confiance élevée + autre signal" }],
+    ],
+    diagramCaption: "Un signal comportemental seul ne déclenche jamais rien — il doit se combiner à un autre signal.",
+  },
+  en: {
+    title: "Behavioral signals",
+    explanation:
+      "Your SDK continuously sends session metadata (typing rhythm, touch gestures, navigation, login timing, speed between actions). Protegey first learns what's \"normal\" for each customer — it takes about 5 sessions to build that baseline — then starts spotting deviations.\n\nEach row here is a detected deviation: a deviation score, a confidence tier (low/medium/high), and the categories involved (keystroke, touch, navigation, login time, session velocity).\n\nImportant: an isolated behavioral signal never creates an alert on its own. It only escalates to a real alert when confidence is \"high\" AND another, non-behavioral signal already exists on that same customer — to avoid false positives from something as simple as a new phone or connection.",
+    diagram: [
+      [{ label: "Partner SDK", note: "keystroke, touch, navigation, session" }],
+      [{ label: "Baseline", note: "5 sessions to learn" }],
+      [{ label: "Behavioral signals", note: "deviation score + confidence", current: true }],
+      [{ label: "Alert", note: "only if high confidence + another signal" }],
+    ],
+    diagramCaption: "A behavioral signal alone never triggers anything — it must combine with another signal.",
+  },
+};
 
 const TIER_COLOR: Record<string, string> = {
   low: "bg-muted text-muted-foreground",
@@ -57,7 +85,10 @@ export function BehavioralSignalsClient({
   return (
     <div className="flex w-full flex-col gap-6">
       <div>
-        <h1 className="text-xl font-semibold text-foreground">{t("behavioralSignalsPageTitle")}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-xl font-semibold text-foreground">{t("behavioralSignalsPageTitle")}</h1>
+          <PageGuideButton content={BEHAVIORAL_SIGNALS_GUIDE[lang]} />
+        </div>
         <p className="text-sm text-muted-foreground">{t("behavioralSignalsPageSubtitle")}</p>
       </div>
 

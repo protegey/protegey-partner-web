@@ -9,6 +9,20 @@ import { ResendInvitationButton } from "./ResendInvitationButton";
 import { EditInvitationDialogButton } from "./EditInvitationDialogButton";
 import { RolesSection } from "./RolesSection";
 import { PaginationControls } from "@/components/PaginationControls";
+import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+const TEAM_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+  fr: {
+    title: "Équipe",
+    explanation:
+      "Cette page gère qui a accès à ton organisation et ce que chacun a le droit de faire. Tu invites un collègue par email, tu lui assignes un ou plusieurs rôles, et tu peux revoir ou renvoyer les invitations en attente.\n\nLes rôles eux-mêmes se composent de permissions individuelles (par exemple : gérer l'équipe, approuver une SAR, gérer les alertes) regroupées par thème. Si tu as le droit de gérer les rôles, tu peux créer un rôle sur mesure en cochant exactement les permissions voulues, plutôt que de choisir parmi les rôles standards.\n\nCe qu'un membre de l'équipe voit et peut faire ailleurs dans le produit — approuver une déclaration, gérer les clients KYB, changer les paramètres — dépend entièrement de ce qui est configuré ici.",
+  },
+  en: {
+    title: "Team",
+    explanation:
+      "This page manages who has access to your organization and what each person is allowed to do. You invite a colleague by email, assign them one or more roles, and can review or resend pending invitations.\n\nRoles themselves are built from individual permissions (for example: manage team, approve a SAR, manage alerts) grouped by topic. If you have permission to manage roles, you can build a custom role by checking exactly the permissions you want, instead of picking from the standard ones.\n\nWhat a team member can see and do everywhere else in the product — approving a filing, managing KYB clients, changing settings — depends entirely on what's configured here.",
+  },
+};
 
 export const metadata: Metadata = {
   title: "Team — Protegey Partner",
@@ -37,7 +51,10 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
     <div className="flex w-full flex-col gap-6">
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-semibold text-foreground">{t(lang, "teamPageTitle")}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-xl font-semibold text-foreground">{t(lang, "teamPageTitle")}</h1>
+            <PageGuideButton content={TEAM_GUIDE[lang]} />
+          </div>
           <p className="text-sm text-muted-foreground">
             {t(lang, "teamPageSubtitle")}
           </p>
