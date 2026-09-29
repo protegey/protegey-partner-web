@@ -362,6 +362,11 @@ const STRINGS = {
     en: "You can still view your dashboard and past records, but new actions are blocked until this is resolved.",
     fr: "Vous pouvez toujours consulter votre tableau de bord et vos données passées, mais toute nouvelle action est bloquée tant que ce point n'est pas résolu.",
   },
+  noContractBannerTitle: { en: "No billing contract configured", fr: "Aucun contrat de facturation configuré" },
+  noContractBannerHint: {
+    en: "Your account has no commercial contract yet, so actions (KYC, KYB, transactions) are blocked. Contact your Protegey account manager to activate your account.",
+    fr: "Votre compte n'a pas encore de contrat commercial, les actions (KYC, KYB, transactions) sont donc bloquées. Contactez votre chargé de compte Protegey pour activer votre compte.",
+  },
   activationTitle: { en: "Activation", fr: "Activation" },
   activationStepOnboarded: { en: "Onboarded", fr: "Intégré" },
   activationStepVerification: { en: "Verification", fr: "Vérification" },
@@ -1911,17 +1916,35 @@ const STRINGS = {
   },
   supportDocsButton: { en: "Open documentation", fr: "Ouvrir la documentation" },
 
-  // ── Billing & Plans page ─────────────────────────────────────────────────
-  billingPageTitle: { en: "Billing & Plans", fr: "Facturation et forfaits" },
+  // ── Billing page (partner's own contract) ────────────────────────────────
+  billingPageTitle: { en: "Billing", fr: "Facturation" },
   billingPageSubtitle: {
-    en: "Your current plan and what's included. Plans are informational for now — nothing here limits what you can do yet.",
-    fr: "Votre forfait actuel et ce qu'il inclut. Les forfaits sont indicatifs pour l'instant — rien ici ne limite ce que vous pouvez faire.",
+    en: "Your commercial contract — KYC, KYB and screening are included in this price. You're billed strictly on transaction volume.",
+    fr: "Votre contrat commercial — le KYC, le KYB et le criblage sont inclus dans ce prix. Vous êtes facturé strictement au volume de transactions.",
   },
-  billingCurrentPlanBadge: { en: "Your current plan", fr: "Votre forfait actuel" },
-  billingContactToChange: {
-    en: "To change your plan, contact your Protegey representative or support@protegey.com.",
-    fr: "Pour changer de forfait, contactez votre représentant Protegey ou support@protegey.com.",
+  billingNoContractTitle: { en: "No contract configured yet", fr: "Aucun contrat configuré pour l'instant" },
+  billingNoContractHint: {
+    en: "Your commercial terms haven't been set up yet. Contact your Protegey account manager or support@protegey.com.",
+    fr: "Vos conditions commerciales n'ont pas encore été mises en place. Contactez votre chargé de compte Protegey ou support@protegey.com.",
   },
+  contractFieldStandardMonthlyFee: { en: "Standard monthly fee", fr: "Prix standard mensuel" },
+  contractFieldDiscount: { en: "Discount", fr: "Remise" },
+  contractFieldIncludedTransactions: { en: "Included transactions / month", fr: "Transactions incluses / mois" },
+  contractFieldOverageRate: { en: "Overage rate (per transaction)", fr: "Tarif de dépassement (par transaction)" },
+  contractFieldPaymentTerms: { en: "Payment terms", fr: "Délai de paiement" },
+  contractPaymentTermsDaysSuffix: { en: "days", fr: "jours" },
+  contractNoDiscount: { en: "None", fr: "Aucune" },
+  contractDiscountTypeFixedSuffix: { en: "flat", fr: "montant fixe" },
+  billingUsageSectionTitle: { en: "Current cycle usage", fr: "Consommation du cycle en cours" },
+  billingUsageSectionHint: {
+    en: "Anchored to your organization's own creation date, not a calendar month. Going over your included volume is never blocked — it's simply tracked as overage.",
+    fr: "Calé sur la date de création de votre organisation, pas sur un mois calendaire. Un dépassement du volume inclus n'est jamais bloquant — il est simplement comptabilisé.",
+  },
+  billingUsageIncludedLabel: { en: "Included", fr: "Inclus" },
+  billingUsageConsumedLabel: { en: "Consumed", fr: "Consommé" },
+  billingUsageOverageLabel: { en: "Overage", fr: "Dépassement" },
+  billingUsageCyclePeriodBefore: { en: "Current cycle: ", fr: "Cycle en cours : " },
+  billingUsageCyclePeriodJoiner: { en: " to ", fr: " au " },
 
   // ── Usage & Quotas page ──────────────────────────────────────────────────
   usagePageTitle: { en: "Usage & Quotas", fr: "Utilisation et quotas" },

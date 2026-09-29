@@ -2,29 +2,33 @@
 
 import { apiFetch } from "@/lib/api";
 
-export interface PlanFeature {
-  label: string;
-  labelFr: string;
-}
+export type ContractDiscountType = "percent" | "fixed";
 
-export interface Plan {
+export interface PartnerContract {
   id: string;
-  code: string;
-  name: string;
-  nameFr: string;
-  description: string;
-  descriptionFr: string;
-  priceLabel: string | null;
-  priceLabelFr: string | null;
-  features: PlanFeature[];
-  sortOrder: number;
+  standardMonthlyFee: string;
+  discountType: ContractDiscountType;
+  discountValue: string;
+  includedTransactions: string;
+  overageRate: string;
+  paymentTermsDays: number;
+  taxRate: string;
+  currency: string;
 }
 
-export async function getPlans(): Promise<Plan[]> {
-  return apiFetch<Plan[]>("/plans");
+export interface ContractCycleUsage {
+  cycleStart: string;
+  cycleEnd: string;
+  includedTransactions: string;
+  consumedTransactions: number;
+  overageTransactions: number;
+  percentUsed: number;
 }
 
-export async function getCurrentPlanCode(): Promise<string> {
-  const partner = await apiFetch<{ plan: string }>("/partners/me");
-  return partner.plan;
+export async function getMyContract(): Promise<PartnerContract | null> {
+  return apiFetch<PartnerContract | null>("/partners/me/contract");
+}
+
+export async function getMyContractUsage(): Promise<ContractCycleUsage | null> {
+  return apiFetch<ContractCycleUsage | null>("/partners/me/contract/usage");
 }

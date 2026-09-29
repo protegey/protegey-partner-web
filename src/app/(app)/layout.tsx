@@ -10,6 +10,7 @@ import {
   MoreHorizontal,
   Package,
   ShieldAlert,
+  SlidersHorizontal,
 } from "lucide-react";
 import { Sidebar, type NavItem } from "@/components/Sidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -46,6 +47,16 @@ async function loadPartner(): Promise<PartnerSummary | null> {
   }
 }
 
+async function loadHasContract(): Promise<boolean> {
+  try {
+    const contract = await apiFetch<unknown | null>("/partners/me/contract");
+    return contract !== null;
+  } catch (error) {
+    if (error instanceof ApiError) return true; // Fail open on the banner — never block rendering over this check.
+    throw error;
+  }
+}
+
 // Only "KYC" (UI-only, no backend enrollment data yet), "Applications"/"Invites" (both -> the
 // Clients KYB feature), "Organization Profile" and "Team Management" have real pages today.
 // Everything else here is shown for the navigation structure the product is heading towards,
@@ -61,8 +72,9 @@ function buildNavItems(lang: Lang): NavItem[] {
         { href: "/pan-guard/device-signals", label: tt("navDeviceSignals") },
         { href: "/pan-guard/behavioral-signals", label: tt("navBehavioralSignals") },
         { href: "/pan-guard/risk-profiles", label: tt("navRiskProfiles") },
-        { label: tt("navSignalAnalytics"), disabled: true },
-        { label: tt("navIntelligenceFeed"), disabled: true },
+        // Temporarily hidden — not built yet. Uncomment when ready to ship these as real pages.
+        // { label: tt("navSignalAnalytics"), disabled: true },
+        // { label: tt("navIntelligenceFeed"), disabled: true },
       ],
     },
     {
@@ -94,10 +106,10 @@ function buildNavItems(lang: Lang): NavItem[] {
         { href: "/transactions", label: tt("navTransactions") },
         { href: "/transactions/analytics", label: tt("navTransactionAnalytics") },
         { href: "/alerts", label: tt("navAlerts") },
-        { href: "/alert-rules", label: tt("navAlertRules") },
         { href: "/cases", label: tt("navCases") },
       ],
     },
+    { href: "/alert-rules", label: tt("navAlertRules"), icon: <SlidersHorizontal className="size-4" /> },
     {
       label: tt("navPartnerIntegrations"),
       icon: <KeyRound className="size-4" />,
@@ -141,7 +153,7 @@ function buildNavItems(lang: Lang): NavItem[] {
 }
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const [user, partner, lang] = await Promise.all([getSessionUser(), loadPartner(), getLang()]);
+  const [user, partner, hasContract, lang] = await Promise.all([getSessionUser(), loadPartner(), loadHasContract(), getLang()]);
   const active = partner?.status === "active";
 
   return (
@@ -180,6 +192,14 @@ export default async function AppLayout({ children }: { children: React.ReactNod
                   <p className="text-sm font-semibold text-destructive">{t(lang, "suspendedBannerTitle")}</p>
                   <p className="mt-1 text-sm text-destructive">{partner.suspensionReason || t(lang, "suspendedBannerFallbackReason")}</p>
                   <p className="mt-1 text-xs text-destructive/80">{t(lang, "suspendedBannerHint")}</p>
+                </div>
+              </div>
+            ) : !hasContract ? (
+              <div className="mb-4 flex items-start gap-3 rounded-md border border-destructive/30 bg-destructive/10 p-4">
+                <ShieldAlert className="mt-0.5 size-5 shrink-0 text-destructive" />
+                <div>
+                  <p className="text-sm font-semibold text-destructive">{t(lang, "noContractBannerTitle")}</p>
+                  <p className="mt-1 text-sm text-destructive">{t(lang, "noContractBannerHint")}</p>
                 </div>
               </div>
             ) : null}

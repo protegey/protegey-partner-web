@@ -73,10 +73,10 @@ export interface StartKycSessionState {
 }
 
 /**
- * `POST /kyc/me/sessions` branches server-side on the partner's `kycProvider` setting
- * (`partners/me`). Didit responds with `sessionUrl`/`sessionId`; FaceTec responds with
- * `captureUrl` instead (no Didit-specific fields) — the UI below picks the right presentation
- * from whichever is present.
+ * `POST /kyc/me/sessions` branches server-side on the platform-wide KYC provider setting
+ * (global, not per-partner — configured by PROTEGEY admins). Didit responds with
+ * `sessionUrl`/`sessionId`; FaceTec responds with `captureUrl` instead (no Didit-specific
+ * fields) — the UI below picks the right presentation from whichever is present.
  */
 export async function startKycSessionAction(
   _prevState: StartKycSessionState,
