@@ -83,25 +83,27 @@ export function OnboardingTour() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={finish} aria-hidden="true" />
-      <div className="relative flex w-full max-w-md flex-col gap-4 rounded-md border border-border bg-card p-6 shadow-xl">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
-            <Icon className="size-5" />
+      <div className="absolute inset-0 animate-fade-in bg-black/30 backdrop-blur-sm" onClick={finish} aria-hidden="true" />
+      <div className="relative flex w-full max-w-md animate-scale-in flex-col gap-4 rounded-md border border-border bg-card p-6 shadow-xl">
+        <div key={step} className="flex flex-col gap-4 animate-fade-in-up">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex size-10 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+              <Icon className="size-5" />
+            </div>
+            <button
+              type="button"
+              onClick={finish}
+              className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+              aria-label={t("close")}
+            >
+              <X className="size-4" />
+            </button>
           </div>
-          <button
-            type="button"
-            onClick={finish}
-            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            aria-label={t("close")}
-          >
-            <X className="size-4" />
-          </button>
-        </div>
 
-        <div>
-          <h2 className="text-lg font-semibold text-foreground">{t(current.titleKey)}</h2>
-          <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{t(current.bodyKey)}</p>
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">{t(current.titleKey)}</h2>
+            <p className="mt-1.5 text-sm leading-relaxed text-muted-foreground">{t(current.bodyKey)}</p>
+          </div>
         </div>
 
         <div className="flex items-center justify-center gap-1.5">

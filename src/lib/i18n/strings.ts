@@ -224,10 +224,6 @@ const STRINGS = {
     en: "Flag any customer whose total transaction volume exceeds 10,000,000 XOF in a single day.",
     fr: "Signale tout client dont le volume total des transactions dépasse 10 000 000 XOF en une seule journée.",
   },
-  chatExampleText4: {
-    en: "Flag any customer who receives a payment originating from a sanctioned country.",
-    fr: "Signale tout client qui reçoit un paiement provenant d'un pays sous sanctions.",
-  },
   chatExampleText5: {
     en: "Flag any customer who has 5 or more transactions above 500,000 XOF within 30 minutes.",
     fr: "Signale tout client qui effectue 5 transactions ou plus dépassant 500 000 XOF en moins de 30 minutes.",
@@ -297,6 +293,18 @@ const STRINGS = {
     en: "This rule is shared by every institution. Saving creates your own copy — nobody else is affected.",
     fr: "Cette règle est partagée par toutes les institutions. Enregistrer crée votre propre copie — personne d'autre n'est affecté.",
   },
+  ruleDialogDeleteButton: { en: "Delete this rule", fr: "Supprimer cette règle" },
+  ruleDeleteConfirmTitle: { en: "Delete this rule?", fr: "Supprimer cette règle ?" },
+  ruleDeleteConfirmDescriptionFork: {
+    en: "This removes your customized version — the shared default rule will apply again instead.",
+    fr: "Ceci supprime votre version personnalisée — la règle par défaut partagée s'appliquera à nouveau.",
+  },
+  ruleDeleteConfirmDescriptionCustom: {
+    en: "This rule was created just for your organization. Deleting it is permanent.",
+    fr: "Cette règle a été créée spécifiquement pour votre organisation. La suppression est définitive.",
+  },
+  ruleDeletingEllipsis: { en: "Deleting…", fr: "Suppression…" },
+  ruleDeletedToast: { en: "Rule deleted.", fr: "Règle supprimée." },
   ruleDialogSimulateTitle: { en: "Try it out", fr: "Faire un essai" },
   ruleDialogSimulateSubtitle: {
     en: "Test this rule on a few made-up transactions before trusting it — nothing here touches real data.",
@@ -793,7 +801,15 @@ const STRINGS = {
     en: "Redirecting you to identity capture…",
     fr: "Redirection vers la capture d'identité…",
   },
-  kycFaceTecRedirectFallback: { en: "Click here if you're not redirected", fr: "Cliquez ici si vous n'êtes pas redirigé" },
+  kycFaceTecOpenedInNewTab: {
+    en: "Identity capture opened in a new tab — you can keep working here while your customer completes it.",
+    fr: "La capture d'identité s'est ouverte dans un nouvel onglet — vous pouvez continuer à travailler ici pendant que votre client la complète.",
+  },
+  kycFaceTecPopupBlocked: {
+    en: "Your browser blocked the popup. Use the link below to open identity capture manually.",
+    fr: "Votre navigateur a bloqué la fenêtre. Utilisez le lien ci-dessous pour ouvrir la capture d'identité manuellement.",
+  },
+  kycFaceTecRedirectFallback: { en: "Open identity capture manually", fr: "Ouvrir la capture d'identité manuellement" },
 
   // ── Sanctions page ───────────────────────────────────────────────────────
   sanctionsColName: { en: "Name", fr: "Nom" },
@@ -1118,6 +1134,9 @@ const STRINGS = {
   txColCash: { en: "Cash", fr: "Espèces" },
   txColDecision: { en: "Decision", fr: "Décision" },
   txColRisk: { en: "Risk score", fr: "Score de risque" },
+  txColDevice: { en: "Device", fr: "Appareil" },
+  txColLocation: { en: "Location", fr: "Localisation" },
+  txColIp: { en: "IP address", fr: "Adresse IP" },
   txColExternalId: { en: "Transaction ID", fr: "ID de transaction" },
   txColCounterparty: { en: "Counterparty", fr: "Contrepartie" },
   alertsSeverityReview: { en: "Review", fr: "Vérification" },
@@ -1271,6 +1290,7 @@ const STRINGS = {
   eventRuleCreated: { en: "{actor} created a new alert rule: {ruleName}.", fr: "{actor} a créé une nouvelle règle d'alerte : {ruleName}." },
   eventRuleActivated: { en: "{actor} turned on the rule \"{ruleName}\".", fr: "{actor} a activé la règle « {ruleName} »." },
   eventRuleDisabled: { en: "{actor} turned off the rule \"{ruleName}\".", fr: "{actor} a désactivé la règle « {ruleName} »." },
+  eventRuleDeleted: { en: "{actor} deleted the rule \"{ruleName}\".", fr: "{actor} a supprimé la règle « {ruleName} »." },
   eventAlertStatusChanged: {
     en: "{actor} marked an alert on rule \"{ruleName}\" as {status}.",
     fr: "{actor} a marqué une alerte sur la règle « {ruleName} » comme {status}.",

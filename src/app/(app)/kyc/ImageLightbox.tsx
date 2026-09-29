@@ -72,7 +72,7 @@ export function ImageLightbox({
   if (!current) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col bg-black/95" onClick={onClose}>
+    <div className="fixed inset-0 z-[100] flex animate-fade-in flex-col bg-black/95" onClick={onClose}>
       <div className="flex items-center justify-between px-5 py-3.5" onClick={(e) => e.stopPropagation()}>
         <p className="text-sm font-medium text-white">
           {current.label} <span className="text-white/50">({index + 1}/{images.length})</span>

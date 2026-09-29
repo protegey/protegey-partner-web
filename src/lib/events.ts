@@ -122,6 +122,8 @@ export function describeEvent(lang: Lang, event: NotificationEvent): string {
       return interpolate(t(lang, "eventRuleActivated"), { actor, ruleName: str("ruleName") });
     case "rule.disabled":
       return interpolate(t(lang, "eventRuleDisabled"), { actor, ruleName: str("ruleName") });
+    case "rule.deleted":
+      return interpolate(t(lang, "eventRuleDeleted"), { actor, ruleName: str("ruleName") });
     case "alert.created":
       return interpolate(t(lang, "eventAlertCreated"), { ruleName: str("ruleName"), customerLabel: str("customerLabel") });
     case "transaction.blocked":

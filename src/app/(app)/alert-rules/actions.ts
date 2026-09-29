@@ -62,6 +62,24 @@ export async function updateAlertRule(id: string, patch: UpdateAlertRuleInput): 
   return result;
 }
 
+/**
+ * Deleting a fork of a system rule just reverts the partner back to the shared default (its code
+ * re-appears via the system row); deleting a wholly custom rule removes it outright. The backend
+ * refuses to delete an unforked system default.
+ *
+ * Returns `{ success: true }` on success, deliberately NOT the raw `null` body a 204 response
+ * produces — `useSessionGuard`'s `guard()` wrapper already returns literal `null` to mean "auth
+ * expired, user gave up re-authenticating", so a delete action must never also use `null` as its
+ * own success value, or a real successful delete becomes indistinguishable from that at the
+ * call site.
+ */
+export async function deleteAlertRule(id: string): Promise<MutationResult<{ success: true }>> {
+  const result = await runGuarded<null>(`/alert-rules/me/${id}`, { method: "DELETE" });
+  if (result && typeof result === "object" && ("error" in result || "authExpired" in result)) return result;
+  revalidatePath("/alert-rules");
+  return { success: true };
+}
+
 export async function generateAlertRule(description: string): Promise<MutationResult<AlertRule>> {
   const result = await runGuarded<AlertRule>("/alert-rules/me/generate", { method: "POST", body: { description } });
   if (!("error" in result) && !("authExpired" in result)) revalidatePath("/alert-rules");

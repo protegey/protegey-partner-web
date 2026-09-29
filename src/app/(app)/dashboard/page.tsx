@@ -11,6 +11,7 @@ import { getAlerts } from "../alerts/actions";
 import { getNotifications } from "../notifications/actions";
 import { getUsageSummary } from "../settings/usage/actions";
 import { DashboardCharts } from "./DashboardCharts";
+import { KpiCard } from "./KpiCard";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import { describeEvent } from "@/lib/events";
@@ -83,16 +84,6 @@ async function loadPartner(): Promise<Partner | null> {
   }
 }
 
-function KpiCard({ icon: Icon, label, value }: { icon: typeof Activity; label: string; value: string }) {
-  return (
-    <div className="rounded-md border border-border bg-card p-4">
-      <Icon className="size-4 text-primary" />
-      <p className="mt-2 text-xl font-semibold text-foreground">{value}</p>
-      <p className="text-xs text-muted-foreground">{label}</p>
-    </div>
-  );
-}
-
 export default async function DashboardPage() {
   const [user, partner, team, clients, usage, lang, txStats, openAlerts, notifications] = await Promise.all([
     getSessionUser(),
@@ -142,11 +133,11 @@ export default async function DashboardPage() {
       ) : null}
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-        <KpiCard icon={Activity} label={t(lang, "dashboardKpiTransactions")} value={(txStats?.totalCount ?? 0).toLocaleString(locale)} />
-        <KpiCard icon={ShieldAlert} label={t(lang, "dashboardKpiOpenAlerts")} value={(openAlerts?.total ?? 0).toLocaleString(locale)} />
-        <KpiCard icon={Gauge} label={t(lang, "dashboardKpiAvgRisk")} value={String(txStats?.averageRiskScore ?? 0)} />
-        <KpiCard icon={Building2} label={t(lang, "dashboardKpiPendingKyb")} value={pendingClientReviews.toLocaleString(locale)} />
-        <KpiCard icon={Users} label={t(lang, "dashboardKpiClients")} value={(usage?.clientsInvitedTotal ?? clients.length).toLocaleString(locale)} />
+        <KpiCard icon={Activity} label={t(lang, "dashboardKpiTransactions")} value={txStats?.totalCount ?? 0} locale={locale} delayMs={0} />
+        <KpiCard icon={ShieldAlert} label={t(lang, "dashboardKpiOpenAlerts")} value={openAlerts?.total ?? 0} locale={locale} delayMs={40} />
+        <KpiCard icon={Gauge} label={t(lang, "dashboardKpiAvgRisk")} value={txStats?.averageRiskScore ?? 0} locale={locale} delayMs={80} />
+        <KpiCard icon={Building2} label={t(lang, "dashboardKpiPendingKyb")} value={pendingClientReviews} locale={locale} delayMs={120} />
+        <KpiCard icon={Users} label={t(lang, "dashboardKpiClients")} value={usage?.clientsInvitedTotal ?? clients.length} locale={locale} delayMs={160} />
       </div>
 
       {txStats ? <DashboardCharts stats={txStats} /> : null}

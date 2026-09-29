@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronRight, Fingerprint } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
-import { CountryBadge, DeviceAttributesDetails, DeviceRiskBadges, DeviceSummaryCell } from "@/components/DeviceAttributesSummary";
+import { CountryBadge, DeviceAttributesDetails, DeviceRiskBadges, DeviceSummaryCell, MapLinkBadge } from "@/components/DeviceAttributesSummary";
 import type { DeviceSignal } from "./actions";
 import type { PaginatedResult } from "../../transactions/actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
@@ -200,7 +200,10 @@ export function DeviceSignalsClient({
                         <DeviceRiskBadges attributes={signal.deviceAttributes} />
                       </td>
                       <td className="px-4 py-2.5">
-                        <CountryBadge ipCountry={signal.ipCountry} />
+                        <div className="flex flex-wrap items-center gap-1">
+                          <CountryBadge ipCountry={signal.ipCountry} />
+                          <MapLinkBadge ipLatitude={signal.ipLatitude} ipLongitude={signal.ipLongitude} />
+                        </div>
                       </td>
                       <td className="px-4 py-2.5 font-mono text-xs text-foreground">{signal.ip ?? "—"}</td>
                       <td className="px-4 py-2.5 font-mono text-xs text-foreground">{signal.phoneNumber ?? "—"}</td>

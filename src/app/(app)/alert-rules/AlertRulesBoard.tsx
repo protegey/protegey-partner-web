@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2, Sparkles, X } from "lucide-react";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
@@ -97,8 +98,13 @@ function RuleCard({
 
 export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] }) {
   const guard = useSessionGuard();
+  const router = useRouter();
   const { lang, t } = useLang();
   const [rules, setRules] = useState<AlertRule[]>(initialRules);
+  // Deleting a fork of a system rule should bring the system default back into view — that
+  // original row isn't in local state anymore (forking already replaced it), so re-syncing from
+  // a fresh server fetch (via router.refresh() below) is the only correct way to show it again.
+  useEffect(() => setRules(initialRules), [initialRules]);
   const [togglingId, setTogglingId] = useState<string | null>(null);
   const [toggleError, setToggleError] = useState<string | null>(null);
   const [editingRule, setEditingRule] = useState<AlertRule | null>(null);
@@ -222,6 +228,10 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
           onUpdated={(updated) => {
             replaceRule(updated);
             setEditingRule(updated);
+          }}
+          onDeleted={() => {
+            setEditingRule(null);
+            router.refresh();
           }}
         />
       ) : null}

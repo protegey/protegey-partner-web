@@ -76,23 +76,28 @@ function CopyLinkField({ url }: { url: string }) {
  * embedded in `captureUrl`. This app's only job is to send the customer there, with a
  * `returnUrl` back to this page, and to persist nothing — facetec-web posts the result straight
  * to the backend on its own, so a normal reload of the enrollments table below picks it up.
+ *
+ * Opened in a NEW TAB (`window.open`), never a same-tab redirect — the partner portal must stay
+ * open and usable while the customer completes the capture flow elsewhere, not get replaced by
+ * it. facetec-web itself closes that tab when it's done (see its own `handleReturnToPartner`),
+ * so the user lands back on this exact page, already open, with nothing to reload manually.
  */
 function FaceTecRedirect({ captureUrl }: { captureUrl: string }) {
   const { t } = useLang();
+  const [popupBlocked, setPopupBlocked] = useState(false);
 
   useEffect(() => {
-    // captureUrl is a full URL on the standalone facetec-web app's own origin (not an internal
-    // Next.js route), so next/navigation's router can't take us there — a real cross-origin nav is required.
     const returnUrl = window.location.href;
-    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
-    window.location.href = `${captureUrl}&returnUrl=${encodeURIComponent(returnUrl)}`;
+    const fullUrl = `${captureUrl}&returnUrl=${encodeURIComponent(returnUrl)}`;
+    const win = window.open(fullUrl, "_blank");
+    if (!win) setPopupBlocked(true);
   }, [captureUrl]);
 
   return (
     <div className="flex flex-col items-center gap-3 py-6 text-center">
       <Loader2 className="size-6 animate-spin text-muted-foreground" />
-      <p className="text-sm text-muted-foreground">{t("kycFaceTecRedirecting")}</p>
-      <a href={captureUrl} className="text-sm font-medium text-primary hover:underline">
+      <p className="text-sm text-muted-foreground">{popupBlocked ? t("kycFaceTecPopupBlocked") : t("kycFaceTecOpenedInNewTab")}</p>
+      <a href={captureUrl} target="_blank" rel="noreferrer" className="text-sm font-medium text-primary hover:underline">
         {t("kycFaceTecRedirectFallback")}
       </a>
     </div>

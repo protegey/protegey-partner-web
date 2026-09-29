@@ -4,10 +4,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { Loader2, Play, Plus, Save, Trash2 } from "lucide-react";
 import { Dialog } from "@/components/Dialog";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import {
   updateAlertRule,
+  deleteAlertRule,
   simulateAlertRule,
   type AlertRule,
   type AlertRuleSeverity,
@@ -45,13 +47,25 @@ function emptyTransaction(index: number): SimulateTransactionInput {
  * other edit flow in the app — not a full-screen drawer, so it reads as "adjust this one thing"
  * rather than "go do a separate task".
  */
-export function RuleDialog({ rule, onClose, onUpdated }: { rule: AlertRule; onClose: () => void; onUpdated: (rule: AlertRule) => void }) {
+export function RuleDialog({
+  rule,
+  onClose,
+  onUpdated,
+  onDeleted,
+}: {
+  rule: AlertRule;
+  onClose: () => void;
+  onUpdated: (rule: AlertRule) => void;
+  onDeleted: () => void;
+}) {
   const guard = useSessionGuard();
   const { lang, t } = useLang();
   const [parameters, setParameters] = useState<Record<string, number>>(rule.parameters);
   const [severity, setSeverity] = useState<AlertRuleSeverity>(rule.severity);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   const [transactions, setTransactions] = useState<SimulateTransactionInput[]>([emptyTransaction(0), emptyTransaction(1)]);
   const [outcomes, setOutcomes] = useState<SimulationOutcome[] | null>(null);
@@ -73,6 +87,22 @@ export function RuleDialog({ rule, onClose, onUpdated }: { rule: AlertRule; onCl
       toast.success(t("ruleParametersSavedToast"));
     } finally {
       setSaving(false);
+    }
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      const result = await guard(() => deleteAlertRule(rule.id));
+      if (result === null) return;
+      if (isError(result)) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(t("ruleDeletedToast"));
+      onDeleted();
+    } finally {
+      setDeleting(false);
     }
   }
 
@@ -157,7 +187,18 @@ export function RuleDialog({ rule, onClose, onUpdated }: { rule: AlertRule; onCl
             {saving ? <Loader2 className="size-4 animate-spin" /> : <Save className="size-4" />}
             {saving ? t("ruleDialogSaving") : t("ruleDialogSave")}
           </button>
-          {rule.partnerId === null ? <p className="mt-2 text-xs text-muted-foreground">{t("ruleDialogForkNotice")}</p> : null}
+          {rule.partnerId === null ? (
+            <p className="mt-2 text-xs text-muted-foreground">{t("ruleDialogForkNotice")}</p>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setConfirmDelete(true)}
+              className="mt-3 flex items-center gap-1.5 text-xs font-medium text-destructive transition-colors hover:underline"
+            >
+              <Trash2 className="size-3.5" />
+              {t("ruleDialogDeleteButton")}
+            </button>
+          )}
         </div>
 
         {rule.domain === "transaction" ? (
@@ -240,6 +281,18 @@ export function RuleDialog({ rule, onClose, onUpdated }: { rule: AlertRule; onCl
         </div>
         ) : null}
       </div>
+
+      <ConfirmActionDialog
+        open={confirmDelete}
+        onClose={() => setConfirmDelete(false)}
+        onConfirm={handleDelete}
+        title={t("ruleDeleteConfirmTitle")}
+        description={rule.code.startsWith("CUSTOM-") ? t("ruleDeleteConfirmDescriptionCustom") : t("ruleDeleteConfirmDescriptionFork")}
+        confirmLabel={t("ruleDialogDeleteButton")}
+        pendingLabel={t("ruleDeletingEllipsis")}
+        pending={deleting}
+        variant="destructive"
+      />
     </Dialog>
   );
 }

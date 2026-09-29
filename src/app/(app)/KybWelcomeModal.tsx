@@ -48,8 +48,8 @@ export function KybWelcomeModal() {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={dismiss} aria-hidden="true" />
-      <div className="relative flex w-full max-w-2xl overflow-hidden rounded-md border border-border bg-card shadow-xl">
+      <div className="absolute inset-0 animate-fade-in bg-black/30 backdrop-blur-sm" onClick={dismiss} aria-hidden="true" />
+      <div className="relative flex w-full max-w-2xl animate-scale-in overflow-hidden rounded-md border border-border bg-card shadow-xl">
         <div className="relative hidden w-2/5 shrink-0 bg-[#1DB980] sm:block">
           <Image src="/images/document_illustration.png" alt="" fill className="object-cover" />
         </div>

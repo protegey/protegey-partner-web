@@ -73,7 +73,7 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
             <div className="mt-1 rounded-md border border-dashed border-border bg-muted/40 p-3 text-left">
               <p className="text-[11px] font-semibold uppercase text-muted-foreground">{t("chatExampleLabel")}</p>
               <div className="mt-1 flex flex-col gap-2">
-                {[t("chatExampleText"), t("chatExampleText2"), t("chatExampleText3"), t("chatExampleText4"), t("chatExampleText5"), t("chatExampleText6")].map((example, idx) => (
+                {[t("chatExampleText"), t("chatExampleText2"), t("chatExampleText3"), t("chatExampleText5"), t("chatExampleText6")].map((example, idx) => (
                   <div key={idx} className="flex items-start gap-2">
                     <p className="text-sm text-foreground">{example}</p>
                     <button

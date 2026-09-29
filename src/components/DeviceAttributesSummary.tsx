@@ -80,6 +80,24 @@ export function CountryBadge({ ipCountry }: { ipCountry?: string | null }) {
   );
 }
 
+/** Small "view on map" link for a lat/lon pair — reused directly in table rows (next to the
+ * country badge) and in the fuller expanded detail view below. Renders nothing without
+ * coordinates, so it's always safe to drop in unconditionally. */
+export function MapLinkBadge({ ipLatitude, ipLongitude }: { ipLatitude?: number | null; ipLongitude?: number | null }) {
+  const { t } = useLang();
+  if (ipLatitude == null || ipLongitude == null) return null;
+  return (
+    <a
+      href={`https://www.openstreetmap.org/?mlat=${ipLatitude}&mlon=${ipLongitude}#map=9/${ipLatitude}/${ipLongitude}`}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
+    >
+      {t("deviceAttrViewOnMap")}
+    </a>
+  );
+}
+
 /** e.g. "Android 14 — Samsung Galaxy S23", or null when nothing usable is present. */
 export function deviceSummaryText(attrs: DeviceAttributes | null | undefined): string | null {
   const osLine = [str(attrs, "platform"), str(attrs, "osVersion")].filter(Boolean).join(" ");
@@ -185,16 +203,7 @@ export function DeviceAttributesDetails({
     <div className="flex flex-col gap-3">
       <div className="flex flex-wrap items-center gap-2">
         {ipCountry ? <CountryBadge ipCountry={ipCountry} /> : null}
-        {ipLatitude != null && ipLongitude != null ? (
-          <a
-            href={`https://www.openstreetmap.org/?mlat=${ipLatitude}&mlon=${ipLongitude}#map=9/${ipLatitude}/${ipLongitude}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary"
-          >
-            {t("deviceAttrViewOnMap")}
-          </a>
-        ) : null}
+        <MapLinkBadge ipLatitude={ipLatitude} ipLongitude={ipLongitude} />
         <DeviceRiskBadges attributes={attributes} />
       </div>
 

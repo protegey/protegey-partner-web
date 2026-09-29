@@ -252,7 +252,7 @@ export function AlertsClient({
         <p className="rounded-md border border-border p-6 text-center text-sm text-muted-foreground">{t("alertsEmpty")}</p>
       ) : (
         <div className="flex flex-col gap-3">
-          {alerts.map((alert) => {
+          {alerts.map((alert, idx) => {
             const ruleName = (lang === "fr" && alert.ruleNameFr) || alert.ruleName;
             const explanation = lang === "fr" ? alert.ruleExplanationFr || alert.ruleExplanation : alert.ruleExplanation;
             const isBusy = updatingId === alert.id;
@@ -260,7 +260,11 @@ export function AlertsClient({
             const assignee = teamMembers.find((member) => member.id === alert.assignedToUserId);
 
             return (
-              <div key={alert.id} className="rounded-md border border-border bg-card p-4">
+              <div
+                key={alert.id}
+                className="animate-fade-in-up rounded-md border border-border bg-card p-4"
+                style={{ animationDelay: `${Math.min(idx, 12) * 25}ms` }}
+              >
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <button

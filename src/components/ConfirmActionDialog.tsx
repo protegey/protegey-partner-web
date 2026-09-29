@@ -50,8 +50,8 @@ export function ConfirmActionDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/30 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
-      <div className="relative flex w-full max-w-sm flex-col overflow-hidden rounded-md border border-border bg-card shadow-xl">
+      <div className="absolute inset-0 animate-fade-in bg-black/30 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
+      <div className="relative flex w-full max-w-sm animate-scale-in flex-col overflow-hidden rounded-md border border-border bg-card shadow-xl">
         <div className="flex items-start justify-between border-b border-border px-5 py-4">
           <div>
             <h2 className="text-base font-semibold text-foreground">{title}</h2>

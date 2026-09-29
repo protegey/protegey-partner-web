@@ -30,6 +30,7 @@ import { SessionExpiredProvider } from "@/components/SessionExpiredProvider";
 import { getLang } from "@/lib/i18n/lang";
 import { t, type Lang } from "@/lib/i18n/strings";
 import { RefreshButton } from "@/components/RefreshButton";
+import { RouteFadeIn } from "@/components/RouteFadeIn";
 
 interface PartnerSummary {
   name: string;
@@ -206,7 +207,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <div className="mb-4 flex justify-end">
               <RefreshButton />
             </div>
-            {children}
+            <RouteFadeIn>{children}</RouteFadeIn>
           </main>
         </div>
       </div>

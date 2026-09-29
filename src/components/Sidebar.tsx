@@ -57,7 +57,7 @@ function NavGroup({ item, pathname, soonLabel }: { item: NavItem; pathname: stri
         {open ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
       </button>
       {open ? (
-        <div className="ml-3.5 flex flex-col gap-0.5 border-l border-border pl-3.5">
+        <div className="ml-3.5 flex animate-fade-in-up flex-col gap-0.5 border-l border-border pl-3.5">
           {item.children?.map((child) => {
             const active = child === activeChild;
             if (child.disabled || !child.href) {
@@ -124,8 +124,10 @@ export function Sidebar({ navItems, footer, soonLabel = "Soon" }: { navItems: Na
             <Link
               key={item.label}
               href={item.href}
-              className={`flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-                isActive ? "bg-primary/10 text-primary" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+              className={`relative flex items-center gap-2.5 rounded-md px-3 py-2 text-sm font-medium transition-colors before:absolute before:left-0 before:top-1/2 before:h-4 before:w-0.5 before:-translate-y-1/2 before:rounded-full before:bg-primary before:transition-all before:duration-200 ${
+                isActive
+                  ? "bg-primary/10 text-primary before:opacity-100"
+                  : "text-muted-foreground before:opacity-0 before:scale-y-0 hover:bg-muted hover:text-foreground"
               }`}
             >
               {item.icon}
