@@ -24,7 +24,7 @@ import { OnboardingTour } from "./OnboardingTour";
 import { PageTransitionOverlay } from "@/components/PageTransitionOverlay";
 import { NetworkStatusToast } from "@/components/NetworkStatusToast";
 import { getSessionUser } from "@/lib/session";
-import { apiFetch, ApiError } from "@/lib/api";
+import { apiFetch } from "@/lib/api";
 import { OrganizationLogo } from "@/components/OrganizationLogo";
 import { SessionExpiredProvider } from "@/components/SessionExpiredProvider";
 import { getLang } from "@/lib/i18n/lang";
@@ -42,9 +42,11 @@ interface PartnerSummary {
 async function loadPartner(): Promise<PartnerSummary | null> {
   try {
     return await apiFetch<PartnerSummary>("/partners/me");
-  } catch (error) {
-    if (error instanceof ApiError) return null;
-    throw error;
+  } catch {
+    // Any failure here (a structured 4xx/5xx, or the backend being unreachable entirely — a raw
+    // network TypeError, not an ApiError) must never take down the whole authenticated shell:
+    // every page renders under this layout, so a crash here breaks every page, not just this banner.
+    return null;
   }
 }
 
@@ -52,9 +54,8 @@ async function loadHasContract(): Promise<boolean> {
   try {
     const contract = await apiFetch<unknown | null>("/partners/me/contract");
     return contract !== null;
-  } catch (error) {
-    if (error instanceof ApiError) return true; // Fail open on the banner — never block rendering over this check.
-    throw error;
+  } catch {
+    return true; // Fail open on the banner — never block rendering over this check, for the same reason as loadPartner above.
   }
 }
 
