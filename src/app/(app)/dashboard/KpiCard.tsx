@@ -40,13 +40,16 @@ function useCountUp(value: number, durationMs = 650): number {
 }
 
 export function KpiCard({
-  icon: Icon,
+  icon,
   label,
   value,
   locale,
   delayMs = 0,
 }: {
-  icon: React.ComponentType<{ className?: string }>;
+  /** A rendered icon element (e.g. `<Activity className="size-4 text-primary" />`), not the
+   * component itself — this is a Client Component, and a raw component reference (a function)
+   * can't cross the Server/Client boundary as a prop, only an already-rendered element can. */
+  icon: React.ReactNode;
   label: string;
   value: number;
   locale: string;
@@ -55,7 +58,7 @@ export function KpiCard({
   const display = useCountUp(value);
   return (
     <div className="animate-fade-in-up rounded-md border border-border bg-card p-4" style={{ animationDelay: `${delayMs}ms` }}>
-      <Icon className="size-4 text-primary" />
+      {icon}
       <p className="mt-2 text-xl font-semibold tabular-nums text-foreground">{display.toLocaleString(locale)}</p>
       <p className="text-xs text-muted-foreground">{label}</p>
     </div>

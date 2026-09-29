@@ -133,11 +133,11 @@ export default async function DashboardPage() {
       ) : null}
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-5">
-        <KpiCard icon={Activity} label={t(lang, "dashboardKpiTransactions")} value={txStats?.totalCount ?? 0} locale={locale} delayMs={0} />
-        <KpiCard icon={ShieldAlert} label={t(lang, "dashboardKpiOpenAlerts")} value={openAlerts?.total ?? 0} locale={locale} delayMs={40} />
-        <KpiCard icon={Gauge} label={t(lang, "dashboardKpiAvgRisk")} value={txStats?.averageRiskScore ?? 0} locale={locale} delayMs={80} />
-        <KpiCard icon={Building2} label={t(lang, "dashboardKpiPendingKyb")} value={pendingClientReviews} locale={locale} delayMs={120} />
-        <KpiCard icon={Users} label={t(lang, "dashboardKpiClients")} value={usage?.clientsInvitedTotal ?? clients.length} locale={locale} delayMs={160} />
+        <KpiCard icon={<Activity className="size-4 text-primary" />} label={t(lang, "dashboardKpiTransactions")} value={txStats?.totalCount ?? 0} locale={locale} delayMs={0} />
+        <KpiCard icon={<ShieldAlert className="size-4 text-primary" />} label={t(lang, "dashboardKpiOpenAlerts")} value={openAlerts?.total ?? 0} locale={locale} delayMs={40} />
+        <KpiCard icon={<Gauge className="size-4 text-primary" />} label={t(lang, "dashboardKpiAvgRisk")} value={txStats?.averageRiskScore ?? 0} locale={locale} delayMs={80} />
+        <KpiCard icon={<Building2 className="size-4 text-primary" />} label={t(lang, "dashboardKpiPendingKyb")} value={pendingClientReviews} locale={locale} delayMs={120} />
+        <KpiCard icon={<Users className="size-4 text-primary" />} label={t(lang, "dashboardKpiClients")} value={usage?.clientsInvitedTotal ?? clients.length} locale={locale} delayMs={160} />
       </div>
 
       {txStats ? <DashboardCharts stats={txStats} /> : null}
