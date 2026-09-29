@@ -10,6 +10,8 @@ export interface PartnerSettings {
   name: string;
   logoFileName: string | null;
   sharedSignalsEnabled: boolean;
+  notificationsEmail: string | null;
+  contactEmail: string | null;
 }
 
 export interface ActionResult {
@@ -59,6 +61,18 @@ export async function updateSharedSignalsAction(enabled: boolean): Promise<Actio
   const lang = await getLang();
   try {
     await apiFetch("/partners/me/shared-signals", { method: "PATCH", body: { enabled } });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return { authExpired: true };
+    return { error: error instanceof ApiError ? error.message : t(lang, "commonGenericError") };
+  }
+  revalidatePath("/settings/profile");
+  return { success: true };
+}
+
+export async function updateNotificationsEmailAction(notificationsEmail: string): Promise<ActionResult | AuthExpired> {
+  const lang = await getLang();
+  try {
+    await apiFetch("/partners/me/notifications-email", { method: "PATCH", body: { notificationsEmail } });
   } catch (error) {
     if (error instanceof ApiError && error.status === 401) return { authExpired: true };
     return { error: error instanceof ApiError ? error.message : t(lang, "commonGenericError") };

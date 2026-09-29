@@ -851,6 +851,15 @@ const STRINGS = {
   settingsPageTitle: { en: "Settings", fr: "Paramètres" },
   settingsSubtitlePrefix: { en: "Manage how", fr: "Gérez la façon dont" },
   settingsSubtitleSuffix: { en: "appears to your own clients.", fr: "apparaît auprès de vos propres clients." },
+  notificationsEmailCardTitle: { en: "Notifications", fr: "Notifications" },
+  notificationsEmailLabel: { en: "Routine notifications email", fr: "Email des notifications courantes" },
+  notificationsEmailHint: {
+    en: "Where we send routine, informational emails (e.g. a new KYB application arrived) — one address, not your whole team. Defaults to your organization's admin email.",
+    fr: "L'adresse qui reçoit les emails courants et informatifs (ex. une nouvelle demande KYB) — une seule adresse, pas toute votre équipe. Par défaut, l'email de l'administrateur de votre organisation.",
+  },
+  notificationsEmailSaveButton: { en: "Save", fr: "Enregistrer" },
+  notificationsEmailSavingEllipsis: { en: "Saving…", fr: "Enregistrement…" },
+  notificationsEmailUpdatedToast: { en: "Notifications email updated.", fr: "Email des notifications mis à jour." },
   settingsOrgLogoTitle: { en: "Organization logo", fr: "Logo de l'organisation" },
   settingsLogoDescription: {
     en: "This logo appears on the KYB application pages and emails you send to your own business clients.",
