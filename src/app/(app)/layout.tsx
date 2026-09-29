@@ -9,6 +9,7 @@ import {
   Settings as SettingsIcon,
   MoreHorizontal,
   Package,
+  ShieldAlert,
 } from "lucide-react";
 import { Sidebar, type NavItem } from "@/components/Sidebar";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -33,6 +34,7 @@ interface PartnerSummary {
   name: string;
   status: string;
   logoFileName: string | null;
+  suspensionReason: string | null;
 }
 
 async function loadPartner(): Promise<PartnerSummary | null> {
@@ -171,6 +173,16 @@ export default async function AppLayout({ children }: { children: React.ReactNod
             <SignOutButton className="rounded-md border border-border px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-muted" />
           </header>
           <main className="relative flex-1 overflow-y-auto px-8 py-8">
+            {partner?.status === "suspended" ? (
+              <div className="mb-4 flex items-start gap-3 rounded-md border border-destructive/30 bg-destructive/10 p-4">
+                <ShieldAlert className="mt-0.5 size-5 shrink-0 text-destructive" />
+                <div>
+                  <p className="text-sm font-semibold text-destructive">{t(lang, "suspendedBannerTitle")}</p>
+                  <p className="mt-1 text-sm text-destructive">{partner.suspensionReason || t(lang, "suspendedBannerFallbackReason")}</p>
+                  <p className="mt-1 text-xs text-destructive/80">{t(lang, "suspendedBannerHint")}</p>
+                </div>
+              </div>
+            ) : null}
             <div className="mb-4 flex justify-end">
               <RefreshButton />
             </div>

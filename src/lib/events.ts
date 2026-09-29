@@ -40,6 +40,17 @@ const CASE_OUTCOME_KEY: Record<string, StringKey> = {
   sar_filed: "caseOutcomeSarFiled",
 };
 
+const BILLING_FIELD_KEY: Record<string, StringKey> = {
+  standardMonthlyFee: "billingFieldStandardMonthlyFee",
+  discountType: "billingFieldDiscountType",
+  discountValue: "billingFieldDiscountValue",
+  includedTransactions: "billingFieldIncludedTransactions",
+  overageRate: "billingFieldOverageRate",
+  paymentTermsDays: "billingFieldPaymentTermsDays",
+  taxRate: "billingFieldTaxRate",
+  currency: "billingFieldCurrency",
+};
+
 /** Where clicking this notification should navigate — null when no detail page exists for this
  * event type, in which case the notification renders as plain text instead of a link. Only ever
  * points at a route that genuinely exists; never a guessed/fabricated deep link. */
@@ -77,6 +88,7 @@ export function eventHref(event: NotificationEvent): string | null {
   if (event.type === "settings.logo_changed" || event.type === "settings.logo_removed") return "/settings/profile";
   if (event.type === "api_key.generated") return "/settings/api-keys";
   if (event.type === "webhook.configured") return "/settings/webhooks";
+  if (event.type.startsWith("billing.")) return "/settings/billing";
 
   return null;
 }
@@ -171,6 +183,13 @@ export function describeEvent(lang: Lang, event: NotificationEvent): string {
       return interpolate(t(lang, "eventInvitationUpdated"), { actor, agentEmail: str("agentEmail") });
     case "team.password_reset_sent":
       return interpolate(t(lang, "eventPasswordResetSent"), { actor, agentEmail: str("agentEmail") });
+    case "billing.contract_created":
+      return interpolate(t(lang, "eventBillingContractCreated"), { actor });
+    case "billing.contract_updated": {
+      const fieldKey = BILLING_FIELD_KEY[str("field")];
+      const fieldLabel = fieldKey ? t(lang, fieldKey) : str("field");
+      return interpolate(t(lang, "eventBillingContractUpdated"), { actor, field: fieldLabel, from: str("from"), to: str("to") });
+    }
     default:
       return t(lang, "eventUnknown");
   }

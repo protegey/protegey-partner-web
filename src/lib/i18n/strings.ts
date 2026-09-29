@@ -353,6 +353,15 @@ const STRINGS = {
   dashboardSeverityCritical: { en: "Critical", fr: "Critique" },
 
   // ── App shell: activation progress, KYB welcome modal, error boundary ──────
+  suspendedBannerTitle: { en: "Your account is suspended", fr: "Votre compte est suspendu" },
+  suspendedBannerFallbackReason: {
+    en: "Please contact your account manager to restore access.",
+    fr: "Veuillez contacter votre chargé de compte pour rétablir l'accès.",
+  },
+  suspendedBannerHint: {
+    en: "You can still view your dashboard and past records, but new actions are blocked until this is resolved.",
+    fr: "Vous pouvez toujours consulter votre tableau de bord et vos données passées, mais toute nouvelle action est bloquée tant que ce point n'est pas résolu.",
+  },
   activationTitle: { en: "Activation", fr: "Activation" },
   activationStepOnboarded: { en: "Onboarded", fr: "Intégré" },
   activationStepVerification: { en: "Verification", fr: "Vérification" },
@@ -1287,6 +1296,19 @@ const STRINGS = {
   eventAgentDeactivated: { en: "{actor} blocked {agentEmail}.", fr: "{actor} a bloqué {agentEmail}." },
   eventInvitationUpdated: { en: "{actor} edited the pending invitation for {agentEmail}.", fr: "{actor} a modifié l'invitation en attente de {agentEmail}." },
   eventPasswordResetSent: { en: "{actor} sent a password reset email to {agentEmail}.", fr: "{actor} a envoyé un e-mail de réinitialisation du mot de passe à {agentEmail}." },
+  eventBillingContractCreated: { en: "{actor} configured the billing contract.", fr: "{actor} a configuré le contrat de facturation." },
+  eventBillingContractUpdated: {
+    en: "{actor} changed the {field} from {from} to {to}.",
+    fr: "{actor} a changé {field} de {from} à {to}.",
+  },
+  billingFieldStandardMonthlyFee: { en: "standard monthly fee", fr: "le prix standard mensuel" },
+  billingFieldDiscountType: { en: "discount type", fr: "le type de remise" },
+  billingFieldDiscountValue: { en: "discount", fr: "la remise" },
+  billingFieldIncludedTransactions: { en: "included transaction volume", fr: "le volume de transactions inclus" },
+  billingFieldOverageRate: { en: "overage rate", fr: "le tarif de dépassement" },
+  billingFieldPaymentTermsDays: { en: "payment terms (days)", fr: "le délai de paiement (jours)" },
+  billingFieldTaxRate: { en: "tax rate", fr: "le taux de taxe" },
+  billingFieldCurrency: { en: "currency", fr: "la devise" },
   eventUnknown: { en: "Something happened in your account.", fr: "Quelque chose s'est produit sur votre compte." },
 
   // ── Pan-Guard pages (device/behavioral signals, risk profiles) ──────────
