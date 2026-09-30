@@ -16,6 +16,7 @@ import type { CrossModuleEvidence } from "../actions";
 import {
   addCaseNoteAction,
   updateCaseAction,
+  escalateCaseAction,
   shareCaseSignalAction,
   type CaseNoteVisibility,
   type CaseOutcome,
@@ -230,6 +231,24 @@ export function CaseDetailClient({
     }
   }
 
+  async function handleEscalate() {
+    setUpdating(true);
+    setError(null);
+    try {
+      const result = await guard(() => escalateCaseAction(kase.id));
+      if (result === null) return;
+      if (isError(result)) {
+        setError(result.error);
+        toast.error(result.error);
+        return;
+      }
+      setKase((prev) => ({ ...prev, escalatedAt: result.escalatedAt }));
+      toast.success(t("caseEscalatedToast"));
+    } finally {
+      setUpdating(false);
+    }
+  }
+
   const hasShareIdentifier = Boolean(sharePhone.trim() || shareEmail.trim() || shareDeviceFingerprint);
 
   async function handleShareSignal() {
@@ -272,6 +291,9 @@ export function CaseDetailClient({
           <h1 className="text-xl font-semibold text-foreground">{kase.title}</h1>
           <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLOR[kase.status]}`}>{statusLabel[kase.status]}</span>
           <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${PRIORITY_COLOR[kase.priority]}`}>{priorityLabel[kase.priority]}</span>
+          {kase.escalatedAt ? (
+            <span className="rounded-full bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-600">{t("caseEscalatedBadge")}</span>
+          ) : null}
           <PageGuideButton content={CASE_DETAIL_GUIDE[lang]} />
         </div>
         <p className="text-sm text-muted-foreground">
@@ -347,6 +369,16 @@ export function CaseDetailClient({
             >
               {t("caseCloseButton")}
             </button>
+            {!kase.escalatedAt ? (
+              <button
+                type="button"
+                disabled={updating}
+                onClick={handleEscalate}
+                className="rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                {t("caseEscalateButton")}
+              </button>
+            ) : null}
             <Link
               href={`/sar-str/new?caseId=${kase.id}`}
               className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"

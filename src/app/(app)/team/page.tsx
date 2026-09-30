@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { getSessionUser } from "@/lib/session";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
-import { getPaginatedTeamMembers, getPendingInvitations, getAssignableRoles, getPartnerRoles, getPermissionsCatalogue } from "./actions";
+import { requirePageAccess } from "@/lib/requirePageAccess";
+import { getPaginatedTeamMembers, getPendingInvitations, getAssignableRoles, getPartnerRoles } from "./actions";
 import { InviteAgentDialogButton } from "./InviteAgentDialogButton";
 import { TeamMemberActions } from "./TeamMemberActions";
 import { ResendInvitationButton } from "./ResendInvitationButton";
@@ -15,12 +16,12 @@ const TEAM_GUIDE: Record<"en" | "fr", PageGuideContent> = {
   fr: {
     title: "Équipe",
     explanation:
-      "Cette page gère qui a accès à ton organisation et ce que chacun a le droit de faire. Tu invites un collègue par email, tu lui assignes un ou plusieurs rôles, et tu peux revoir ou renvoyer les invitations en attente.\n\nLes rôles eux-mêmes se composent de permissions individuelles (par exemple : gérer l'équipe, approuver une SAR, gérer les alertes) regroupées par thème. Si tu as le droit de gérer les rôles, tu peux créer un rôle sur mesure en cochant exactement les permissions voulues, plutôt que de choisir parmi les rôles standards.\n\nCe qu'un membre de l'équipe voit et peut faire ailleurs dans le produit — approuver une déclaration, gérer les clients KYB, changer les paramètres — dépend entièrement de ce qui est configuré ici.",
+      "Cette page gère qui a accès à ton organisation et ce que chacun a le droit de faire. Tu invites un collègue par email et lui assignes l'un des 6 rôles fixes de Protegey, et tu peux revoir ou renvoyer les invitations en attente.\n\nLes rôles sont fixes et ne peuvent pas être personnalisés — chacun correspond à une fonction précise (Analyste KYC/KYB, Analyste fraude paiement, Responsable risque & conformité, MLRO, Technique/Intégrations, Administrateur plateforme, Super admin) avec un accès aux modules déjà défini.\n\nCe qu'un membre de l'équipe voit et peut faire ailleurs dans le produit — approuver une déclaration, gérer les clients KYB, changer les paramètres — dépend entièrement du rôle qui lui est assigné ici.",
   },
   en: {
     title: "Team",
     explanation:
-      "This page manages who has access to your organization and what each person is allowed to do. You invite a colleague by email, assign them one or more roles, and can review or resend pending invitations.\n\nRoles themselves are built from individual permissions (for example: manage team, approve a SAR, manage alerts) grouped by topic. If you have permission to manage roles, you can build a custom role by checking exactly the permissions you want, instead of picking from the standard ones.\n\nWhat a team member can see and do everywhere else in the product — approving a filing, managing KYB clients, changing settings — depends entirely on what's configured here.",
+      "This page manages who has access to your organization and what each person is allowed to do. You invite a colleague by email and assign them one of Protegey's 6 fixed roles, and can review or resend pending invitations.\n\nRoles are fixed and cannot be customized — each maps to a precise function (Analyst KYC/KYB, Analyst Payment Fraud, Head of Risk & Compliance, MLRO, Technical/Integrations, Platform Administrator, Super Admin) with its module access already defined.\n\nWhat a team member can see and do everywhere else in the product — approving a filing, managing KYB clients, changing settings — depends entirely on the role assigned to them here.",
   },
 };
 
@@ -29,22 +30,22 @@ export const metadata: Metadata = {
 };
 
 export default async function TeamPage({ searchParams }: { searchParams: Promise<{ membersPage?: string; invitationsPage?: string; rolesPage?: string }> }) {
+  const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
+  const denied = requirePageAccess(user, "partners.manage_team", lang);
+  if (denied) return denied;
+
   const params = await searchParams;
   const membersPage = Math.max(1, Number(params.membersPage) || 1);
   const invitationsPage = Math.max(1, Number(params.invitationsPage) || 1);
   const rolesPage = Math.max(1, Number(params.rolesPage) || 1);
-  const user = await getSessionUser();
   const canManageTeam = user?.permissions.includes("partners.manage_team") ?? false;
   const canViewRoles = user?.permissions.includes("roles.view") ?? false;
-  const canManageRoles = user?.permissions.includes("roles.manage") ?? false;
 
-  const [members, invitations, roles, partnerRoles, permissionsCatalogue, lang] = await Promise.all([
+  const [members, invitations, roles, partnerRoles] = await Promise.all([
     getPaginatedTeamMembers(membersPage),
     canManageTeam ? getPendingInvitations(invitationsPage) : Promise.resolve(null),
     canManageTeam ? getAssignableRoles() : Promise.resolve([]),
     canViewRoles ? getPartnerRoles(rolesPage) : Promise.resolve(null),
-    canManageRoles ? getPermissionsCatalogue() : Promise.resolve([]),
-    getLang(),
   ]);
 
   return (
@@ -161,7 +162,7 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
 
        {canViewRoles ? (
          <>
-           {partnerRoles ? <RolesSection roles={partnerRoles.data} permissions={permissionsCatalogue} canManageRoles={canManageRoles} /> : null}
+           {partnerRoles ? <RolesSection roles={partnerRoles.data} /> : null}
            {partnerRoles ? <PaginationControls page={partnerRoles.page} totalPages={partnerRoles.totalPages} total={partnerRoles.total} href={(page) => `/team?membersPage=${membersPage}&invitationsPage=${invitationsPage}&rolesPage=${page}`} /> : null}
          </>
        ) : null}

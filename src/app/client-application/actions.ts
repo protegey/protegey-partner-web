@@ -5,6 +5,8 @@ import type {
   BusinessDescriptionSection,
   DisclosuresSection,
   GeneralInfoSection,
+  KybFormLayout,
+  KybFormSchema,
   PaymentServicesSection,
 } from "../(app)/clients/actions";
 
@@ -21,6 +23,10 @@ export interface ClientApplicationView {
   paymentServices: PaymentServicesSection | null;
   disclosures: DisclosuresSection | null;
   document: { fileName: string; mimeType: string } | null;
+  /** Present only for an invitation sent through the dynamic form builder. */
+  template: { schema: KybFormSchema; layout: KybFormLayout } | null;
+  answers: Record<string, unknown> | null;
+  documents: Record<string, { fileName: string; mimeType: string }>;
 }
 
 export interface ActionResult {
@@ -45,6 +51,8 @@ export async function saveDraftAction(
     paymentServices?: PaymentServicesSection;
     disclosures?: DisclosuresSection;
     language?: "en" | "fr";
+    /** Dynamic-template path only. */
+    answers?: Record<string, unknown>;
   },
 ): Promise<ActionResult> {
   try {
@@ -66,6 +74,24 @@ export async function uploadApplicationDocumentAction(token: string, formData: F
 
   try {
     await apiUpload(`/client-applications/${token}/document`, uploadForm, { unauthenticated: true });
+  } catch (error) {
+    return { error: error instanceof ApiError ? error.message : "Something went wrong." };
+  }
+  return { success: true };
+}
+
+/** Dynamic-template path — one document per `document`-type field, distinct from the legacy singular upload above. */
+export async function uploadApplicationFieldDocumentAction(token: string, fieldId: string, formData: FormData): Promise<ActionResult> {
+  const file = formData.get("file");
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: "Please choose a file to upload." };
+  }
+
+  const uploadForm = new FormData();
+  uploadForm.append("file", file, file.name);
+
+  try {
+    await apiUpload(`/client-applications/${token}/documents/${fieldId}`, uploadForm, { unauthenticated: true });
   } catch (error) {
     return { error: error instanceof ApiError ? error.message : "Something went wrong." };
   }

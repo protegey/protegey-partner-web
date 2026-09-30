@@ -14,6 +14,15 @@ const STRINGS = {
   soonBadge: { en: "Soon", fr: "Bientôt" },
   signOut: { en: "Sign out", fr: "Se déconnecter" },
   close: { en: "Close", fr: "Fermer" },
+
+  // ── Access denied (fixed-role screen/page guard) ────────────────────────
+  accessDeniedTitle: { en: "You don't have access to this page", fr: "Vous n'avez pas accès à cette page" },
+  accessDeniedReservedFor: {
+    en: "This page is reserved for the following role(s):",
+    fr: "Cette page est réservée au(x) rôle(s) suivant(s) :",
+  },
+  accessDeniedYourRole: { en: "Your current role:", fr: "Votre rôle actuel :" },
+  accessDeniedNoRole: { en: "No role assigned", fr: "Aucun rôle attribué" },
   cancel: { en: "Cancel", fr: "Annuler" },
 
   // ── Sidebar navigation ──────────────────────────────────────────────────
@@ -233,6 +242,7 @@ const STRINGS = {
     fr: "Signale toute transaction provenant d'un client dont le compte a été créé depuis moins d'une heure et dépasse 100 000 XOF.",
   },
   chatUseExample: { en: "Use this example", fr: "Utiliser cet exemple" },
+  chatAnotherExample: { en: "Try another example", fr: "Un autre exemple" },
   chatInputPlaceholder: { en: "Describe the rule you want…", fr: "Décrivez la règle que vous voulez…" },
   chatSend: { en: "Send", fr: "Envoyer" },
   chatSending: { en: "Thinking…", fr: "Réflexion…" },
@@ -456,6 +466,8 @@ const STRINGS = {
   },
   clientsInviteFormNamePlaceholder: { en: "Business or contact name", fr: "Nom de l'entreprise ou du contact" },
   clientsInviteFormEmailPlaceholder: { en: "Contact email address", fr: "Adresse e-mail du contact" },
+  clientsInviteFormTemplateLabel: { en: "Form to send", fr: "Formulaire à envoyer" },
+  clientsInviteFormTemplateDefault: { en: "Standard KYB form", fr: "Formulaire KYB standard" },
   clientsInviteFormSending: { en: "Sending invitation…", fr: "Envoi de l'invitation…" },
   clientsInviteFormSuccess: {
     en: "Invitation sent — they'll receive an email to start their application.",
@@ -1544,6 +1556,8 @@ const STRINGS = {
   caseUnassigned: { en: "Unassigned", fr: "Non assigné" },
   caseMarkInvestigating: { en: "Start investigation", fr: "Démarrer l'investigation" },
   caseCloseButton: { en: "Close case", fr: "Clore le dossier" },
+  caseEscalateButton: { en: "Escalate to MLRO", fr: "Escalader au MLRO" },
+  caseEscalatedBadge: { en: "Escalated", fr: "Escaladé" },
   caseDraftSarButton: { en: "Draft SAR/STR", fr: "Rédiger SAR/STR" },
   caseClosedWithOutcome: { en: "Closed with outcome", fr: "Clos avec pour décision" },
   caseCloseDialogTitle: { en: "Close this case", fr: "Clore ce dossier" },
@@ -1578,6 +1592,7 @@ const STRINGS = {
   caseUnassignedToast: { en: "Case unassigned.", fr: "Dossier désassigné." },
   caseMarkedInvestigatingToast: { en: "Case marked as investigating.", fr: "Dossier marqué en investigation." },
   caseClosedToast: { en: "Case closed.", fr: "Dossier clôturé." },
+  caseEscalatedToast: { en: "Case escalated to the MLRO.", fr: "Dossier escaladé au MLRO." },
   caseShareSignalToast: { en: "Signal shared with the network.", fr: "Signal partagé avec le réseau." },
 
   // ── Toasts — app-wide success feedback ──────────────────────────────────

@@ -7,9 +7,20 @@ import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { generateAlertRule, type AlertRule } from "./actions";
 import { ruleExplanation, ruleName } from "./localize";
+import type { StringKey } from "@/lib/i18n/strings";
 
 function isError(value: unknown): value is { error: string } {
   return Boolean(value) && typeof value === "object" && "error" in (value as object);
+}
+
+const EXAMPLE_KEYS: StringKey[] = ["chatExampleText", "chatExampleText2", "chatExampleText3", "chatExampleText5", "chatExampleText6"];
+
+/** Picks a random example, different from `exclude` when there's more than one to choose from —
+ * shown one at a time so the panel doesn't read as a wall of text, and varied so a partner who
+ * reopens it later doesn't always see the exact same prompt. */
+function pickExampleKey(exclude?: StringKey): StringKey {
+  const candidates = exclude ? EXAMPLE_KEYS.filter((key) => key !== exclude) : EXAMPLE_KEYS;
+  return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
 type ChatMessage =
@@ -31,6 +42,7 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState(false);
   const [tooShort, setTooShort] = useState(false);
+  const [exampleKey, setExampleKey] = useState<StringKey>(() => pickExampleKey());
 
   async function send(text: string) {
     const trimmed = text.trim();
@@ -70,21 +82,26 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
           <div className="flex h-full flex-col items-center justify-center gap-3 text-center">
             <MessageCircle className="size-8 text-muted-foreground/40" />
             <p className="text-sm text-muted-foreground">{t("chatEmptyState")}</p>
-            <div className="mt-1 rounded-md border border-dashed border-border bg-muted/40 p-3 text-left">
-              <p className="text-[11px] font-semibold uppercase text-muted-foreground">{t("chatExampleLabel")}</p>
-              <div className="mt-1 flex flex-col gap-2">
-                {[t("chatExampleText"), t("chatExampleText2"), t("chatExampleText3"), t("chatExampleText5"), t("chatExampleText6")].map((example, idx) => (
-                  <div key={idx} className="flex items-start gap-2">
-                    <p className="text-sm text-foreground">{example}</p>
-                    <button
-                      type="button"
-                      onClick={() => send(example)}
-                      className="shrink-0 rounded-md border border-primary px-2 py-0.5 text-[10px] font-medium text-primary transition-colors hover:bg-primary/10"
-                    >
-                      {t("chatUseExample")}
-                    </button>
-                  </div>
-                ))}
+            <div className="mt-1 w-full max-w-md rounded-md border border-dashed border-border bg-muted/40 p-3 text-left">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[11px] font-semibold uppercase text-muted-foreground">{t("chatExampleLabel")}</p>
+                <button
+                  type="button"
+                  onClick={() => setExampleKey((prev) => pickExampleKey(prev))}
+                  className="shrink-0 text-[11px] font-medium text-primary hover:underline"
+                >
+                  {t("chatAnotherExample")}
+                </button>
+              </div>
+              <div className="mt-1.5 flex items-start gap-2">
+                <p className="text-sm text-foreground">{t(exampleKey)}</p>
+                <button
+                  type="button"
+                  onClick={() => send(t(exampleKey))}
+                  className="shrink-0 rounded-md border border-primary px-2 py-0.5 text-[10px] font-medium text-primary transition-colors hover:bg-primary/10"
+                >
+                  {t("chatUseExample")}
+                </button>
               </div>
             </div>
           </div>

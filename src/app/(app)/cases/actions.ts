@@ -27,6 +27,9 @@ export interface Case {
   outcome: CaseOutcome | null;
   closedByUserId: string | null;
   closedAt: string | null;
+  /** Null = not escalated. Set when the case is handed to the MLRO's "escalated only" queue — see
+   * CasesService.escalate() on the backend. Irreversible: no "un-escalate". */
+  escalatedAt: string | null;
   createdByUserId: string;
   createdAt: string;
   updatedAt: string;
@@ -180,6 +183,22 @@ export async function updateCaseAction(
 ): Promise<MutationResult<Case>> {
   try {
     const result = await apiFetchGuarded<Case>(`/cases/me/${id}`, { method: "PATCH", body: patch });
+    if (!("error" in result) && !("authExpired" in result)) {
+      revalidatePath(`/cases/${id}`);
+      revalidatePath("/cases");
+    }
+    return result;
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
+}
+
+/** Hands the case to the MLRO's "escalated only" queue — idempotent on the backend (re-escalating
+ * an already-escalated case is a no-op), and there is no "un-escalate" action. */
+export async function escalateCaseAction(id: string): Promise<MutationResult<Case>> {
+  try {
+    const result = await apiFetchGuarded<Case>(`/cases/me/${id}/escalate`, { method: "POST" });
     if (!("error" in result) && !("authExpired" in result)) {
       revalidatePath(`/cases/${id}`);
       revalidatePath("/cases");

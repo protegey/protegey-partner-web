@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { inviteClientAction, type InviteClientState } from "./actions";
+import { inviteClientAction, type InviteClientState, type KybFormTemplate } from "./actions";
 import { useLang } from "@/lib/i18n/LangProvider";
 
 const initialState: InviteClientState = {};
@@ -23,7 +23,7 @@ function SubmitButton() {
   );
 }
 
-export function InviteClientForm({ onSuccess }: { onSuccess?: () => void }) {
+export function InviteClientForm({ onSuccess, templates }: { onSuccess?: () => void; templates: KybFormTemplate[] }) {
   const router = useRouter();
   const { t } = useLang();
   const [state, formAction] = useActionState(inviteClientAction, initialState);
@@ -57,6 +57,22 @@ export function InviteClientForm({ onSuccess }: { onSuccess?: () => void }) {
           required
           className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
         />
+        {templates.length > 0 ? (
+          <div>
+            <label className="mb-1 block text-xs font-medium text-muted-foreground">{t("clientsInviteFormTemplateLabel")}</label>
+            <select
+              name="templateId"
+              defaultValue={templates[0]?.id}
+              className="w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+            >
+              {templates.map((template) => (
+                <option key={template.id} value={template.id}>
+                  {template.name}
+                </option>
+              ))}
+            </select>
+          </div>
+        ) : null}
       </div>
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}

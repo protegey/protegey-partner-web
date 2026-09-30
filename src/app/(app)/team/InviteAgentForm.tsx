@@ -4,7 +4,7 @@ import { useActionState, useEffect, useRef } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { RoleMultiSelect } from "@/components/RoleMultiSelect";
+import { RoleSelect } from "@/components/RoleSelect";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { inviteAgentAction, type AssignableRole, type InviteAgentState } from "./actions";
 
@@ -76,7 +76,7 @@ export function InviteAgentForm({ roles, onSuccess }: { roles: AssignableRole[];
 
       <div>
         <p className="mb-1.5 text-xs font-medium text-muted-foreground">{t("teamRolesLabel")}</p>
-        <RoleMultiSelect roles={roles} defaultSelectedNames={["partner_viewer"]} />
+        <RoleSelect roles={roles} />
       </div>
 
       {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}

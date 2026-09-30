@@ -7,6 +7,8 @@ import { EnrollmentsTable } from "./EnrollmentsTable";
 import { StartVerificationDialogButton } from "./StartVerificationDialogButton";
 import { PaginationControls } from "@/components/PaginationControls";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+import { getSessionUser } from "@/lib/session";
+import { requirePageAccess } from "@/lib/requirePageAccess";
 
 const KYC_GUIDE: Record<"en" | "fr", PageGuideContent> = {
   fr: {
@@ -38,10 +40,14 @@ export const metadata: Metadata = {
 };
 
 export default async function KycPage({ searchParams }: { searchParams: Promise<{ page?: string; status?: string }> }) {
+  const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
+  const denied = requirePageAccess(user, "partners.manage_kyc", lang);
+  if (denied) return denied;
+
   const params = await searchParams;
   const page = Math.max(1, Number(params.page) || 1);
   const status = params.status as DiditSessionStatus | undefined;
-  const [result, lang] = await Promise.all([getKycEnrollments({ page, status }), getLang()]);
+  const result = await getKycEnrollments({ page, status });
 
   return (
     <div className="flex w-full flex-col gap-6">

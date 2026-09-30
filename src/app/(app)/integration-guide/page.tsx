@@ -3,6 +3,8 @@ import Link from "next/link";
 import { KeyRound, IdCard, ArrowRightLeft, Building2, ShieldCheck, Webhook, ArrowRight, BookOpen, Fingerprint } from "lucide-react";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
+import { getSessionUser } from "@/lib/session";
+import { requirePageAccess } from "@/lib/requirePageAccess";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
 const INTEGRATION_GUIDE_GUIDE: Record<"en" | "fr", PageGuideContent> = {
@@ -31,7 +33,9 @@ const TRANSACTION_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/t
   }'`;
 
 export default async function IntegrationGuidePage() {
-  const lang = await getLang();
+  const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
+  const denied = requirePageAccess(user, "partners.manage_integrations", lang);
+  if (denied) return denied;
 
   const useCases = [
     { icon: IdCard, title: t(lang, "igCardKycTitle"), body: t(lang, "igCardKycBody"), href: "/kyc" },

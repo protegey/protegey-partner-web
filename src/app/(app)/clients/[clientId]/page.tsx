@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { getClient } from "../actions";
 import { ClientDecisionActions } from "./ClientDecisionActions";
+import { DynamicKybSubmissionView } from "./DynamicKybSubmissionView";
 import { ClientDocumentPreview } from "./ClientDocumentPreview";
 import { ComplianceInfoButton } from "./ComplianceInfoButton";
 import { getLang } from "@/lib/i18n/lang";
@@ -120,6 +121,11 @@ export default async function ClientDetailPage({ params }: { params: Promise<{ c
         <div className="rounded-md border border-border bg-card p-5 text-sm text-muted-foreground">
           {t(lang, "clientsNotStarted")}
         </div>
+      ) : submission.templateId ? (
+        <>
+          <DynamicKybSubmissionView submission={submission} lang={lang} clientId={client.id} />
+          {client.status === "pending_review" ? <ClientDecisionActions clientId={client.id} /> : null}
+        </>
       ) : (
         <>
           <div className="rounded-md border border-border bg-card p-5">

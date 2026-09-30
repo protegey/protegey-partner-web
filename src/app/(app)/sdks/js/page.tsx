@@ -5,6 +5,8 @@ import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import { CodeBlock } from "@/components/CodeBlock";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+import { getSessionUser } from "@/lib/session";
+import { requirePageAccess } from "@/lib/requirePageAccess";
 
 const SDK_JS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
   fr: {
@@ -105,7 +107,9 @@ function Section({
 }
 
 export default async function SdkJsPage() {
-  const lang = await getLang();
+  const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
+  const denied = requirePageAccess(user, "partners.manage_integrations", lang);
+  if (denied) return denied;
 
   const nav = [
     { id: "install", label: t(lang, "docsSdksInstallLabel") },

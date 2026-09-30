@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getSanctions, getSanctionsStats } from "./actions";
 import { SanctionsClient } from "./SanctionsClient";
+import { getLang } from "@/lib/i18n/lang";
+import { getSessionUser } from "@/lib/session";
+import { requirePageAccess } from "@/lib/requirePageAccess";
 
 export const metadata: Metadata = {
   title: "Sanctions — Protegey Partner",
@@ -12,6 +15,10 @@ export default async function SanctionsPage({
 }: {
   searchParams: Promise<{ page?: string; search?: string; type?: string; source?: string; delisted?: string }>;
 }) {
+  const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
+  const denied = requirePageAccess(user, "sanctions.view", lang);
+  if (denied) return denied;
+
   const { page: pageParam, search, type, source, delisted } = await searchParams;
   const page = Math.max(1, Number(pageParam) || 1);
   const includeDelisted = delisted === "true";

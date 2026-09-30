@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 
 export function Dialog({
@@ -36,7 +37,14 @@ export function Dialog({
 
   if (!open) return null;
 
-  return (
+  // Rendered via a portal straight to <body> — deliberately, not for lack of trying to keep it in
+  // the normal tree. A `fixed inset-0` element only ever covers the true viewport when NONE of its
+  // ancestors has a transform/filter/perspective/will-change set — any one of them (present today
+  // or added later, anywhere up the tree, including by code that has nothing to do with dialogs)
+  // silently turns that ancestor into the containing block instead, shrinking the backdrop down to
+  // that ancestor's own box. A portal sidesteps the whole category permanently: this DOM subtree's
+  // parent is always `document.body` itself, never whatever page happens to render the button.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 animate-fade-in bg-black/30 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
       <div
@@ -58,6 +66,7 @@ export function Dialog({
         </div>
         <div className="overflow-y-auto px-5 py-4">{children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

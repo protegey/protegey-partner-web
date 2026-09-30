@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import { getSharedSignalNetworkStatus, getSharedSignalReports, type SharedSignalCategory } from "./actions";
 import { SharedSignalNetworkClient } from "./SharedSignalNetworkClient";
 import { SharedSignalNetworkGate } from "./SharedSignalNetworkGate";
+import { getLang } from "@/lib/i18n/lang";
+import { getSessionUser } from "@/lib/session";
+import { requirePageAccess } from "@/lib/requirePageAccess";
 
 export const metadata: Metadata = {
   title: "Shared Signal Network — Protegey Partner",
@@ -12,6 +15,10 @@ export default async function SharedSignalNetworkPage({
 }: {
   searchParams: Promise<{ page?: string; category?: string }>;
 }) {
+  const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
+  const denied = requirePageAccess(user, "partners.share_fraud_signal", lang);
+  if (denied) return denied;
+
   const { page: pageParam, category } = await searchParams;
   const page = Math.max(1, Number(pageParam) || 1);
 

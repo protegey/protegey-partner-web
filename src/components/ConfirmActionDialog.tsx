@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 
@@ -48,7 +49,9 @@ export function ConfirmActionDialog({
 
   if (!open) return null;
 
-  return (
+  // Portal straight to <body> — see Dialog.tsx's docblock for exactly why a `fixed inset-0`
+  // element can't safely stay inside the normal page tree.
+  return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 animate-fade-in bg-black/30 backdrop-blur-sm" onClick={onClose} aria-hidden="true" />
       <div className="relative flex w-full max-w-sm animate-scale-in flex-col overflow-hidden rounded-md border border-border bg-card shadow-xl">
@@ -88,6 +91,7 @@ export function ConfirmActionDialog({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }

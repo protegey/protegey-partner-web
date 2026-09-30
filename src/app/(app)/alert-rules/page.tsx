@@ -3,6 +3,8 @@ import { getAlertRules } from "./actions";
 import { AlertRulesBoard } from "./AlertRulesBoard";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
+import { getSessionUser } from "@/lib/session";
+import { requirePageAccess } from "@/lib/requirePageAccess";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
 const ALERT_RULES_GUIDE: Record<"en" | "fr", PageGuideContent> = {
@@ -43,7 +45,11 @@ export const metadata: Metadata = {
 };
 
 export default async function AlertRulesPage() {
-  const [rules, lang] = await Promise.all([getAlertRules(), getLang()]);
+  const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
+  const denied = requirePageAccess(user, "partners.manage_alert_rules", lang);
+  if (denied) return denied;
+
+  const rules = await getAlertRules();
 
   return (
     <div className="mx-auto flex min-h-0 max-w-6xl flex-1 flex-col gap-6">

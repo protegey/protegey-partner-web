@@ -4,9 +4,10 @@ import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Dialog } from "@/components/Dialog";
 import { InviteClientForm } from "./InviteClientForm";
+import type { KybFormTemplate } from "./actions";
 import { useLang } from "@/lib/i18n/LangProvider";
 
-export function InviteClientDialogButton() {
+export function InviteClientDialogButton({ templates }: { templates: KybFormTemplate[] }) {
   const [open, setOpen] = useState(false);
   const { t } = useLang();
 
@@ -26,7 +27,7 @@ export function InviteClientDialogButton() {
         title={t("clientsInviteDialogTitle")}
         description={t("clientsInviteDialogDescription")}
       >
-        <InviteClientForm onSuccess={() => setOpen(false)} />
+        <InviteClientForm onSuccess={() => setOpen(false)} templates={templates} />
       </Dialog>
     </>
   );

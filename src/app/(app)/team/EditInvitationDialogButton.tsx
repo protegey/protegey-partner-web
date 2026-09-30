@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Pencil } from "lucide-react";
 import { Dialog } from "@/components/Dialog";
-import { RoleMultiSelect } from "@/components/RoleMultiSelect";
+import { RoleSelect } from "@/components/RoleSelect";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { updateInvitationAction, type AssignableRole, type PendingInvitation, type UpdateInvitationState } from "./actions";
 
@@ -32,6 +32,7 @@ export function EditInvitationDialogButton({ invitation, roles }: { invitation: 
   const { t } = useLang();
   const action = updateInvitationAction.bind(null, invitation.id);
   const [state, formAction] = useActionState(action, initialState);
+  const currentRoleId = roles.find((role) => invitation.roles.some((invited) => invited.name === role.name))?.id;
 
   useEffect(() => {
     if (state.success) {
@@ -93,7 +94,7 @@ export function EditInvitationDialogButton({ invitation, roles }: { invitation: 
 
           <div>
             <p className="mb-1.5 text-xs font-medium text-muted-foreground">{t("teamRolesLabel")}</p>
-            <RoleMultiSelect roles={roles} defaultSelectedNames={invitation.roles.map((role) => role.name)} />
+            <RoleSelect roles={roles} defaultRoleId={currentRoleId} />
           </div>
 
           {state.error ? <p className="text-sm text-destructive">{state.error}</p> : null}

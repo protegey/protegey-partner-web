@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import { getSessionUser } from "@/lib/session";
+import { requirePageAccess } from "@/lib/requirePageAccess";
 import { getApiKeySummary } from "./actions";
 import { ApiKeyCard } from "./ApiKeyCard";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
@@ -24,8 +25,12 @@ export const metadata: Metadata = {
 };
 
 export default async function ApiKeysPage() {
-  const [user, credentials, lang] = await Promise.all([getSessionUser(), getApiKeySummary(), getLang()]);
-  const canManageSettings = user?.permissions.includes("partners.manage_settings") ?? false;
+  const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
+  const denied = requirePageAccess(user, "partners.manage_integrations", lang);
+  if (denied) return denied;
+
+  const credentials = await getApiKeySummary();
+  const canManageSettings = user?.permissions.includes("partners.manage_integrations") ?? false;
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">

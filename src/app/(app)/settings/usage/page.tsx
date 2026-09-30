@@ -4,6 +4,8 @@ import { Activity, IdCard, Building2, Users } from "lucide-react";
 import { getUsageSummary } from "./actions";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
+import { getSessionUser } from "@/lib/session";
+import { requirePageAccess } from "@/lib/requirePageAccess";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
 const USAGE_GUIDE: Record<"en" | "fr", PageGuideContent> = {
@@ -24,7 +26,11 @@ export const metadata: Metadata = {
 };
 
 export default async function UsagePage() {
-  const [usage, lang] = await Promise.all([getUsageSummary(), getLang()]);
+  const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
+  const denied = requirePageAccess(user, "partners.manage_billing", lang);
+  if (denied) return denied;
+
+  const usage = await getUsageSummary();
   const locale = lang === "fr" ? "fr-FR" : "en-US";
 
   const cards = [

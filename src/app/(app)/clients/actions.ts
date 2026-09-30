@@ -107,6 +107,41 @@ export interface ScreeningResultSnapshot {
   fallbackReason?: string;
 }
 
+export type KybFieldType = "text" | "textarea" | "number" | "date" | "checkbox" | "checkbox_group" | "select" | "yes_no" | "document";
+export type KybFieldScreeningRole = "business_name" | "owner_name";
+
+export interface KybFieldDef {
+  id: string;
+  label: string;
+  labelFr: string;
+  fieldType: KybFieldType;
+  required: boolean;
+  options?: string[];
+  screeningRole?: KybFieldScreeningRole;
+}
+
+export interface KybSectionDef {
+  id: string;
+  title: string;
+  titleFr: string;
+  fields: KybFieldDef[];
+}
+
+export type KybFormSchema = KybSectionDef[];
+export type KybFormTemplateStatus = "draft" | "published";
+export type KybFormLayout = "steps" | "single_page";
+
+export interface KybFormTemplate {
+  id: string;
+  partnerId: string | null;
+  name: string;
+  status: KybFormTemplateStatus;
+  layout: KybFormLayout;
+  schema: KybFormSchema;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ClientKybSubmission {
   id: string;
   status: ClientKybSubmissionStatus;
@@ -121,6 +156,10 @@ export interface ClientKybSubmission {
   moreInfoNote: string | null;
   rejectionReason: string | null;
   screeningResult: ScreeningResultSnapshot | null;
+  /** Dynamic-template path — null for a submission created before the form builder, or invited without a template. */
+  templateId: string | null;
+  templateSchemaSnapshot: KybFormSchema | null;
+  answers: Record<string, unknown> | null;
 }
 
 export interface ClientBusiness {
@@ -183,6 +222,7 @@ export async function inviteClientAction(
 ): Promise<InviteClientState> {
   const contactName = String(formData.get("contactName") ?? "").trim();
   const contactEmail = String(formData.get("contactEmail") ?? "").trim();
+  const templateId = String(formData.get("templateId") ?? "").trim();
   const lang = await getLang();
 
   if (!contactName || !contactEmail) {
@@ -190,13 +230,75 @@ export async function inviteClientAction(
   }
 
   try {
-    await apiFetch("/clients/me", { method: "POST", body: { contactName, contactEmail } });
+    await apiFetch("/clients/me", { method: "POST", body: { contactName, contactEmail, ...(templateId ? { templateId } : {}) } });
   } catch (error) {
     return { error: error instanceof ApiError ? error.message : t(lang, "commonGenericErrorTryAgain") };
   }
 
   revalidatePath("/clients");
   return { success: true };
+}
+
+// ── KYB form templates ──────────────────────────────────────────────────────
+
+export async function listKybTemplates(): Promise<KybFormTemplate[]> {
+  return apiFetch<KybFormTemplate[]>("/kyb-templates/me");
+}
+
+/** The invite dialog's own list — published only. */
+export async function listPublishedKybTemplates(): Promise<KybFormTemplate[]> {
+  return apiFetch<KybFormTemplate[]>("/kyb-templates/me/published");
+}
+
+export async function getKybTemplate(id: string): Promise<KybFormTemplate> {
+  return apiFetch<KybFormTemplate>(`/kyb-templates/me/${id}`);
+}
+
+export interface UpsertKybTemplateInput {
+  name: string;
+  status?: KybFormTemplateStatus;
+  layout?: KybFormLayout;
+  schema: KybFormSchema;
+}
+
+export async function createKybTemplate(input: UpsertKybTemplateInput): Promise<KybFormTemplate | { error: string }> {
+  try {
+    const template = await apiFetch<KybFormTemplate>("/kyb-templates/me", { method: "POST", body: input });
+    revalidatePath("/clients/questionnaires");
+    return template;
+  } catch (error) {
+    return { error: error instanceof ApiError ? error.message : t(await getLang(), "commonGenericErrorTryAgain") };
+  }
+}
+
+export async function updateKybTemplate(id: string, input: UpsertKybTemplateInput): Promise<KybFormTemplate | { error: string }> {
+  try {
+    const template = await apiFetch<KybFormTemplate>(`/kyb-templates/me/${id}`, { method: "PATCH", body: input });
+    revalidatePath("/clients/questionnaires");
+    return template;
+  } catch (error) {
+    return { error: error instanceof ApiError ? error.message : t(await getLang(), "commonGenericErrorTryAgain") };
+  }
+}
+
+export async function deleteKybTemplate(id: string): Promise<ActionResult> {
+  try {
+    await apiFetch(`/kyb-templates/me/${id}`, { method: "DELETE" });
+  } catch (error) {
+    return { error: error instanceof ApiError ? error.message : t(await getLang(), "commonGenericErrorTryAgain") };
+  }
+  revalidatePath("/clients/questionnaires");
+  return { success: true };
+}
+
+export async function duplicateKybTemplate(id: string): Promise<KybFormTemplate | { error: string }> {
+  try {
+    const template = await apiFetch<KybFormTemplate>(`/kyb-templates/me/${id}/duplicate`, { method: "POST" });
+    revalidatePath("/clients/questionnaires");
+    return template;
+  } catch (error) {
+    return { error: error instanceof ApiError ? error.message : t(await getLang(), "commonGenericErrorTryAgain") };
+  }
 }
 
 export async function resendClientInvitationAction(clientId: string): Promise<ActionResult | AuthExpired> {

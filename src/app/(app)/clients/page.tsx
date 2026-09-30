@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSessionUser } from "@/lib/session";
-import { getClientsPage, type ClientStage } from "./actions";
+import { getClientsPage, listKybTemplates, listPublishedKybTemplates, type ClientStage } from "./actions";
 import { InviteClientDialogButton } from "./InviteClientDialogButton";
 import { ResendClientInvitationButton } from "./ResendClientInvitationButton";
+import { QuestionnairesListClient } from "./questionnaires/QuestionnairesListClient";
 import { PaginationControls } from "@/components/PaginationControls";
 import { getLang } from "@/lib/i18n/lang";
 import { t, type StringKey } from "@/lib/i18n/strings";
+import { requirePageAccess } from "@/lib/requirePageAccess";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
 const CLIENTS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
@@ -56,9 +58,10 @@ const STATUS_STYLES: Record<string, string> = {
   rejected: "bg-destructive/10 text-destructive",
 };
 
-const TABS: { value: ClientStage; labelKey: StringKey }[] = [
+const TABS: { value: ClientStage | "questionnaires"; labelKey: StringKey }[] = [
   { value: "invited", labelKey: "clientsTabInvited" },
   { value: "responded", labelKey: "clientsTabResponded" },
+  { value: "questionnaires", labelKey: "clientsTabQuestionnaires" },
 ];
 
 function tabHref(tab: string): string {
@@ -76,19 +79,12 @@ export default async function ClientsPage({
   const lang = await getLang();
 
   const user = await getSessionUser();
-  const canManageClients = user?.permissions.includes("partners.manage_clients") ?? false;
+  const denied = requirePageAccess(user, "partners.manage_clients", lang);
+  if (denied) return denied;
 
-  if (!canManageClients) {
-    return (
-      <div className="flex w-full flex-col gap-6">
-        <h1 className="text-xl font-semibold text-foreground">KYB</h1>
-        <p className="text-sm text-muted-foreground">{t(lang, "clientsNoPermission")}</p>
-      </div>
-    );
-  }
-
-  const result =
-    activeTab !== "questionnaires" ? await getClientsPage({ stage: activeTab as ClientStage, page }) : null;
+  const result = activeTab !== "questionnaires" ? await getClientsPage({ stage: activeTab as ClientStage, page }) : null;
+  const templates = activeTab === "questionnaires" ? await listKybTemplates() : null;
+  const publishedTemplates = await listPublishedKybTemplates();
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -100,7 +96,7 @@ export default async function ClientsPage({
           </div>
           <p className="text-sm text-muted-foreground">{t(lang, "clientsSubtitle")}</p>
         </div>
-        <InviteClientDialogButton />
+        <InviteClientDialogButton templates={publishedTemplates} />
       </div>
 
       <div className="flex gap-1 border-b border-border">
@@ -115,16 +111,10 @@ export default async function ClientsPage({
             {t(lang, tab.labelKey)}
           </Link>
         ))}
-        <span className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-muted-foreground/50">
-          {t(lang, "clientsTabQuestionnaires")}
-          <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">{t(lang, "soonBadge")}</span>
-        </span>
       </div>
 
       {activeTab === "questionnaires" ? (
-        <div className="rounded-md border border-border bg-card p-8 text-center text-sm text-muted-foreground">
-          {t(lang, "clientsQuestionnairesComingSoon")}
-        </div>
+        <QuestionnairesListClient initialTemplates={templates ?? []} lang={lang} />
       ) : (
         <>
           <div className="overflow-hidden rounded-md border border-border">

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getSessionUser } from "@/lib/session";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
+import { requirePageAccess } from "@/lib/requirePageAccess";
 import { getPartnerSettings } from "./actions";
 import { LogoUploadForm } from "./LogoUploadForm";
 import { SharedSignalsToggle } from "./SharedSignalsToggle";
@@ -26,8 +27,12 @@ export const metadata: Metadata = {
 };
 
 export default async function OrganizationProfilePage() {
-  const [user, partner, lang] = await Promise.all([getSessionUser(), getPartnerSettings(), getLang()]);
-  const canManageSettings = user?.permissions.includes("partners.manage_settings") ?? false;
+  const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
+  const denied = requirePageAccess(user, "partners.manage_organization", lang);
+  if (denied) return denied;
+
+  const partner = await getPartnerSettings();
+  const canManageSettings = user?.permissions.includes("partners.manage_organization") ?? false;
 
   return (
     <div className="mx-auto flex max-w-2xl flex-col gap-6">

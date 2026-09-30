@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import { getMyContract, getMyContractUsage } from "./actions";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
+import { getSessionUser } from "@/lib/session";
+import { requirePageAccess } from "@/lib/requirePageAccess";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
 const BILLING_GUIDE: Record<"en" | "fr", PageGuideContent> = {
@@ -29,7 +31,11 @@ function formatDiscount(discountType: "percent" | "fixed", discountValue: string
 }
 
 export default async function BillingPage() {
-  const [contract, usage, lang] = await Promise.all([getMyContract(), getMyContractUsage(), getLang()]);
+  const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
+  const denied = requirePageAccess(user, "partners.manage_billing", lang);
+  if (denied) return denied;
+
+  const [contract, usage] = await Promise.all([getMyContract(), getMyContractUsage()]);
   const locale = lang === "fr" ? "fr-FR" : "en-US";
 
   return (

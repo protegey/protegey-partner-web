@@ -6,6 +6,8 @@ import { t } from "@/lib/i18n/strings";
 import { CodeBlock } from "@/components/CodeBlock";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 import { ApiConsole } from "@/components/ApiConsole";
+import { getSessionUser } from "@/lib/session";
+import { requirePageAccess } from "@/lib/requirePageAccess";
 
 const DOCUMENTATION_GUIDE: Record<"en" | "fr", PageGuideContent> = {
   fr: {
@@ -238,7 +240,9 @@ function Section({
 }
 
 export default async function DocumentationPage() {
-  const lang = await getLang();
+  const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
+  const denied = requirePageAccess(user, "partners.manage_integrations", lang);
+  if (denied) return denied;
 
   const nav = [
     { id: "auth", label: t(lang, "docsNavAuth") },

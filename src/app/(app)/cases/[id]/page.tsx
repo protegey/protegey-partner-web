@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { getCase, getCaseSignalStatus, getCaseTimeline, getCaseCrossModuleEvidence } from "../actions";
-import { getTeamMembers } from "../../team/actions";
+import { getAssignableTeamMembers } from "../../team/actions";
 import { getPartnerSettings } from "../../settings/profile/actions";
 import { getDeviceSignals } from "../../pan-guard/device-signals/actions";
 import { getSessionUser } from "@/lib/session";
+import { getLang } from "@/lib/i18n/lang";
+import { requirePageAccess } from "@/lib/requirePageAccess";
 import { CaseDetailClient } from "./CaseDetailClient";
 
 export const metadata: Metadata = {
@@ -11,12 +13,15 @@ export const metadata: Metadata = {
 };
 
 export default async function CaseDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const [sessionUser, lang] = await Promise.all([getSessionUser(), getLang()]);
+  const denied = requirePageAccess(sessionUser, "partners.manage_cases", lang);
+  if (denied) return denied;
+
   const { id } = await params;
-  const [kase, teamMembers, partner, sessionUser, signalStatus, timeline, crossModuleEvidence] = await Promise.all([
+  const [kase, teamMembers, partner, signalStatus, timeline, crossModuleEvidence] = await Promise.all([
     getCase(id),
-    getTeamMembers(),
+    getAssignableTeamMembers("partners.manage_cases"),
     getPartnerSettings(),
-    getSessionUser(),
     getCaseSignalStatus(id),
     getCaseTimeline(id),
     getCaseCrossModuleEvidence(id),

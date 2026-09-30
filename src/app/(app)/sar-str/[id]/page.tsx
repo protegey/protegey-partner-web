@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getSarReport, getSarTemplate } from "../actions";
 import { getSessionUser } from "@/lib/session";
+import { getLang } from "@/lib/i18n/lang";
+import { requirePageAccess } from "@/lib/requirePageAccess";
 import { SarReportDetailClient } from "./SarReportDetailClient";
 
 export const metadata: Metadata = {
@@ -8,8 +10,12 @@ export const metadata: Metadata = {
 };
 
 export default async function SarReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  const [sessionUser, lang] = await Promise.all([getSessionUser(), getLang()]);
+  const denied = requirePageAccess(sessionUser, "partners.manage_compliance_cases", lang);
+  if (denied) return denied;
+
   const { id } = await params;
-  const [report, sessionUser] = await Promise.all([getSarReport(id), getSessionUser()]);
+  const report = await getSarReport(id);
   const template = await getSarTemplate(report.templateId);
   const canSubmit = sessionUser?.permissions.includes("partners.submit_sar") ?? false;
   const canManage = sessionUser?.permissions.includes("partners.manage_compliance_cases") ?? false;
