@@ -203,12 +203,14 @@ export async function getClients(): Promise<ClientBusiness[]> {
 
 const CLIENTS_PAGE_SIZE = 10;
 
-export async function getClientsPage(params: { stage: ClientStage; page?: number }): Promise<PaginatedClients> {
+export async function getClientsPage(params: { stage: ClientStage; page?: number; search?: string; status?: ClientBusinessStatus }): Promise<PaginatedClients> {
   const query = new URLSearchParams({
     stage: params.stage,
     page: String(params.page ?? 1),
     limit: String(CLIENTS_PAGE_SIZE),
   });
+  if (params.search) query.set("search", params.search);
+  if (params.status) query.set("status", params.status);
   return apiFetch<PaginatedClients>(`/clients/me?${query.toString()}`);
 }
 

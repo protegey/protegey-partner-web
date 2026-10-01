@@ -59,16 +59,19 @@ async function loadHasContract(): Promise<boolean> {
   }
 }
 
-type NavChildDef = NavChild & { requiredPermission?: string };
-type NavItemDef = Omit<NavItem, "children"> & { requiredPermission?: string; children?: NavChildDef[] };
+type RequiredPermission = string | string[];
+type NavChildDef = NavChild & { requiredPermission?: RequiredPermission };
+type NavItemDef = Omit<NavItem, "children"> & { requiredPermission?: RequiredPermission; children?: NavChildDef[] };
 
 // Only "KYC" (UI-only, no backend enrollment data yet), "Applications"/"Invites" (both -> the
 // Clients KYB feature), "Organization Profile" and "Team Management" have real pages today.
 // Everything else here is shown for the navigation structure the product is heading towards,
 // but marked disabled ("Soon") rather than faked with a redirect to a page that doesn't exist yet.
 //
-// `requiredPermission` mirrors the fixed 6-role access matrix (protegey_role_access_matrix.pdf) —
-// an item/group with no `requiredPermission` is visible to every signed-in partner user.
+// `requiredPermission` mirrors the fixed 12-role access matrix (protegey_role_access_matrix.pdf
+// v2) — an item/group with no `requiredPermission` is visible to every signed-in partner user. An
+// array means "any of these" — used for pages split into a view/manage permission pair so a
+// read-only role (Tuning/Risk Data Analyst, QA/Quality Control) still sees the page in nav.
 function buildNavItemDefs(lang: Lang): NavItemDef[] {
   const tt = (key: Parameters<typeof t>[1]) => t(lang, key);
   return [
@@ -103,7 +106,7 @@ function buildNavItemDefs(lang: Lang): NavItemDef[] {
         { href: "/pan-risk/shared-signal-network", label: tt("navSharedSignalNetwork"), requiredPermission: "partners.share_fraud_signal" },
         { href: "/pep", label: tt("navPepControl"), requiredPermission: "sanctions.view" },
         { href: "/edd", label: tt("navEdd"), requiredPermission: "sanctions.view" },
-        { href: "/sar-str", label: tt("navSarStr"), requiredPermission: "partners.manage_compliance_cases" },
+        { href: "/sar-str", label: tt("navSarStr"), requiredPermission: ["partners.manage_compliance_cases", "partners.view_compliance_cases"] },
         { href: "/ctr", label: tt("navCtr"), requiredPermission: "partners.manage_compliance_cases" },
       ],
     },
@@ -113,11 +116,11 @@ function buildNavItemDefs(lang: Lang): NavItemDef[] {
       children: [
         { href: "/transactions", label: tt("navTransactions"), requiredPermission: "partners.view_transactions" },
         { href: "/transactions/analytics", label: tt("navTransactionAnalytics"), requiredPermission: "partners.view_transactions" },
-        { href: "/alerts", label: tt("navAlerts"), requiredPermission: "partners.manage_alerts" },
-        { href: "/cases", label: tt("navCases"), requiredPermission: "partners.manage_cases" },
+        { href: "/alerts", label: tt("navAlerts"), requiredPermission: ["partners.manage_alerts", "partners.view_alerts"] },
+        { href: "/cases", label: tt("navCases"), requiredPermission: ["partners.manage_cases", "partners.view_cases"] },
       ],
     },
-    { href: "/alert-rules", label: tt("navAlertRules"), icon: <SlidersHorizontal className="size-4" />, requiredPermission: "partners.manage_alert_rules" },
+    { href: "/alert-rules", label: tt("navAlertRules"), icon: <SlidersHorizontal className="size-4" />, requiredPermission: ["partners.manage_alert_rules", "partners.view_alert_rules"] },
     {
       label: tt("navPartnerIntegrations"),
       icon: <KeyRound className="size-4" />,
@@ -168,7 +171,11 @@ function buildNavItemDefs(lang: Lang): NavItemDef[] {
 /** Filters the nav tree down to what `permissions` allows — an item/group with no
  * `requiredPermission` stays visible to everyone; a group is dropped once every child of it is. */
 function filterNavItems(items: NavItemDef[], permissions: string[]): NavItem[] {
-  const allowed = (requiredPermission?: string) => !requiredPermission || permissions.includes(requiredPermission);
+  const allowed = (requiredPermission?: RequiredPermission) => {
+    if (!requiredPermission) return true;
+    const required = Array.isArray(requiredPermission) ? requiredPermission : [requiredPermission];
+    return required.some((permission) => permissions.includes(permission));
+  };
 
   return items.reduce<NavItem[]>((acc, { requiredPermission, children, ...rest }) => {
     if (children) {

@@ -77,6 +77,16 @@ export async function getSarTemplate(id: string): Promise<SarTemplate> {
   return apiFetch<SarTemplate>(`/sar-templates/me/${id}`);
 }
 
+export interface SarTemplateOption {
+  id: string;
+  countryCode: string;
+  regulatorName: string;
+}
+
+export async function getSarTemplates(): Promise<SarTemplateOption[]> {
+  return apiFetch<SarTemplateOption[]>("/sar-templates/me");
+}
+
 export type MutationResult<T> = T | { error: string } | AuthExpired;
 
 export async function generateSarReportAction(caseId: string, countryCode: string, reportType: SarReportType = "sar"): Promise<MutationResult<SarReport>> {

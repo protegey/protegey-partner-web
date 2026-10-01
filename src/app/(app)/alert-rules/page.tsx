@@ -46,7 +46,7 @@ export const metadata: Metadata = {
 
 export default async function AlertRulesPage() {
   const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
-  const denied = requirePageAccess(user, "partners.manage_alert_rules", lang);
+  const denied = requirePageAccess(user, ["partners.manage_alert_rules", "partners.view_alert_rules"], lang);
   if (denied) return denied;
 
   const rules = await getAlertRules();

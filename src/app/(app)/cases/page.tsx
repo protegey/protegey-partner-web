@@ -15,7 +15,7 @@ export default async function CasesPage({
   searchParams: Promise<{ page?: string; status?: string; customer?: string }>;
 }) {
   const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
-  const denied = requirePageAccess(user, "partners.manage_cases", lang);
+  const denied = requirePageAccess(user, ["partners.manage_cases", "partners.view_cases"], lang);
   if (denied) return denied;
 
   const { page: pageParam, status, customer } = await searchParams;

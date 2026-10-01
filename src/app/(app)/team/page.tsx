@@ -3,7 +3,7 @@ import { getSessionUser } from "@/lib/session";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import { requirePageAccess } from "@/lib/requirePageAccess";
-import { getPaginatedTeamMembers, getPendingInvitations, getAssignableRoles, getPartnerRoles } from "./actions";
+import { getPaginatedTeamMembers, getPendingInvitations, getAssignableRoles, getPartnerRoles, getPermissionsCatalogue } from "./actions";
 import { InviteAgentDialogButton } from "./InviteAgentDialogButton";
 import { TeamMemberActions } from "./TeamMemberActions";
 import { ResendInvitationButton } from "./ResendInvitationButton";
@@ -16,12 +16,12 @@ const TEAM_GUIDE: Record<"en" | "fr", PageGuideContent> = {
   fr: {
     title: "Équipe",
     explanation:
-      "Cette page gère qui a accès à ton organisation et ce que chacun a le droit de faire. Tu invites un collègue par email et lui assignes l'un des 6 rôles fixes de Protegey, et tu peux revoir ou renvoyer les invitations en attente.\n\nLes rôles sont fixes et ne peuvent pas être personnalisés — chacun correspond à une fonction précise (Analyste KYC/KYB, Analyste fraude paiement, Responsable risque & conformité, MLRO, Technique/Intégrations, Administrateur plateforme, Super admin) avec un accès aux modules déjà défini.\n\nCe qu'un membre de l'équipe voit et peut faire ailleurs dans le produit — approuver une déclaration, gérer les clients KYB, changer les paramètres — dépend entièrement du rôle qui lui est assigné ici.",
+      "Cette page gère qui a accès à ton organisation et ce que chacun a le droit de faire. Tu invites un collègue par email et lui assignes un rôle, et tu peux revoir ou renvoyer les invitations en attente.\n\nProtegey fournit 12 rôles fixes prêts à l'emploi (4 rôles d'analyste, 2 rôles technique/optimisation, 3 rôles de direction, et 3 rôles d'administration de la plateforme) — chacun avec un accès aux modules déjà défini et non modifiable. Si ces 12 rôles ne couvrent pas un poste précis de ton organisation, l'Administrateur de la plateforme ou le Super Admin peut créer un rôle personnalisé en choisissant exactement les permissions voulues.\n\nCe qu'un membre de l'équipe voit et peut faire ailleurs dans le produit — approuver une déclaration, gérer les clients KYB, changer les paramètres — dépend entièrement du rôle qui lui est assigné ici.",
   },
   en: {
     title: "Team",
     explanation:
-      "This page manages who has access to your organization and what each person is allowed to do. You invite a colleague by email and assign them one of Protegey's 6 fixed roles, and can review or resend pending invitations.\n\nRoles are fixed and cannot be customized — each maps to a precise function (Analyst KYC/KYB, Analyst Payment Fraud, Head of Risk & Compliance, MLRO, Technical/Integrations, Platform Administrator, Super Admin) with its module access already defined.\n\nWhat a team member can see and do everywhere else in the product — approving a filing, managing KYB clients, changing settings — depends entirely on the role assigned to them here.",
+      "This page manages who has access to your organization and what each person is allowed to do. You invite a colleague by email and assign them a role, and can review or resend pending invitations.\n\nProtegey ships with 12 ready-made fixed roles (4 analyst roles, 2 technical/optimization roles, 3 leadership roles, and 3 platform-administration roles) — each with its module access already defined and non-editable. If those 12 don't cover a specific position in your organization, the Platform Administrator or Super Admin can build a custom role by hand-picking exactly the permissions it needs.\n\nWhat a team member can see and do everywhere else in the product — approving a filing, managing KYB clients, changing settings — depends entirely on the role assigned to them here.",
   },
 };
 
@@ -40,12 +40,14 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
   const rolesPage = Math.max(1, Number(params.rolesPage) || 1);
   const canManageTeam = user?.permissions.includes("partners.manage_team") ?? false;
   const canViewRoles = user?.permissions.includes("roles.view") ?? false;
+  const canManageRoles = user?.permissions.includes("roles.manage") ?? false;
 
-  const [members, invitations, roles, partnerRoles] = await Promise.all([
+  const [members, invitations, roles, partnerRoles, permissionsCatalogue] = await Promise.all([
     getPaginatedTeamMembers(membersPage),
     canManageTeam ? getPendingInvitations(invitationsPage) : Promise.resolve(null),
     canManageTeam ? getAssignableRoles() : Promise.resolve([]),
     canViewRoles ? getPartnerRoles(rolesPage) : Promise.resolve(null),
+    canManageRoles ? getPermissionsCatalogue() : Promise.resolve([]),
   ]);
 
   return (
@@ -162,7 +164,7 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
 
        {canViewRoles ? (
          <>
-           {partnerRoles ? <RolesSection roles={partnerRoles.data} /> : null}
+           {partnerRoles ? <RolesSection roles={partnerRoles.data} permissions={permissionsCatalogue} canManageRoles={canManageRoles} /> : null}
            {partnerRoles ? <PaginationControls page={partnerRoles.page} totalPages={partnerRoles.totalPages} total={partnerRoles.total} href={(page) => `/team?membersPage=${membersPage}&invitationsPage=${invitationsPage}&rolesPage=${page}`} /> : null}
          </>
        ) : null}

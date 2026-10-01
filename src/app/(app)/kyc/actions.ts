@@ -41,9 +41,10 @@ export interface PaginatedKycEnrollments {
   totalPages: number;
 }
 
-export async function getKycEnrollments(params: { page?: number; status?: DiditSessionStatus } = {}) {
+export async function getKycEnrollments(params: { page?: number; status?: DiditSessionStatus; search?: string } = {}) {
   const query = new URLSearchParams({ page: String(params.page ?? 1), limit: "20" });
   if (params.status) query.set("status", params.status);
+  if (params.search) query.set("search", params.search);
   return apiFetch<PaginatedKycEnrollments>(`/kyc/me/sessions?${query.toString()}`);
 }
 

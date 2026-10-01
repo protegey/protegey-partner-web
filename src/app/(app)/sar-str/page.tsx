@@ -15,7 +15,7 @@ export default async function SarStrPage({
   searchParams: Promise<{ page?: string; status?: string }>;
 }) {
   const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
-  const denied = requirePageAccess(user, "partners.manage_compliance_cases", lang);
+  const denied = requirePageAccess(user, ["partners.manage_compliance_cases", "partners.view_compliance_cases"], lang);
   if (denied) return denied;
 
   const { page: pageParam, status } = await searchParams;

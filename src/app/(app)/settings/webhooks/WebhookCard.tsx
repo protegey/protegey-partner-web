@@ -7,7 +7,7 @@ import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { CopyRevealField } from "@/components/CopyRevealField";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
-import { configureWebhookAction, type WebhookSummary } from "./actions";
+import { configureWebhookAction, sendTestWebhookAction, type WebhookSummary } from "./actions";
 
 export function WebhookCard({ credentials, canManage }: { credentials: WebhookSummary; canManage: boolean }) {
   const router = useRouter();
@@ -15,9 +15,23 @@ export function WebhookCard({ credentials, canManage }: { credentials: WebhookSu
   const { t } = useLang();
   const [webhookUrl, setWebhookUrl] = useState(credentials.webhookUrl ?? "");
   const [savingWebhook, setSavingWebhook] = useState(false);
+  const [sendingTest, setSendingTest] = useState(false);
   const [revealedSecret, setRevealedSecret] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+
+  async function handleSendTest() {
+    setSendingTest(true);
+    const result = await guard(() => sendTestWebhookAction());
+    setSendingTest(false);
+    if (!result) return;
+    if ("error" in result) {
+      toast.error(result.error);
+      return;
+    }
+    toast.success(t("webhookTestSentToast"));
+    router.refresh();
+  }
 
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -74,6 +88,17 @@ export function WebhookCard({ credentials, canManage }: { credentials: WebhookSu
         <p className="mt-1.5 text-xs text-muted-foreground">{t("settingsSecretAlreadyConfigured")}</p>
       ) : null}
       {revealedSecret ? <div className="mt-2"><CopyRevealField label={t("settingsWebhookSecretLabel")} value={revealedSecret} /></div> : null}
+
+      {credentials.webhookUrl ? (
+        <button
+          type="button"
+          onClick={handleSendTest}
+          disabled={sendingTest}
+          className="mt-3 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-60"
+        >
+          {sendingTest ? t("webhookSendingTest") : t("webhookSendTestButton")}
+        </button>
+      ) : null}
 
       {error ? <p className="mt-3 text-sm text-destructive">{error}</p> : null}
 

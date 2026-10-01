@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default async function SarReportDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const [sessionUser, lang] = await Promise.all([getSessionUser(), getLang()]);
-  const denied = requirePageAccess(sessionUser, "partners.manage_compliance_cases", lang);
+  const denied = requirePageAccess(sessionUser, ["partners.manage_compliance_cases", "partners.view_compliance_cases"], lang);
   if (denied) return denied;
 
   const { id } = await params;

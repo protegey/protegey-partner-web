@@ -428,6 +428,9 @@ const STRINGS = {
   clientStatusMoreInfoRequired: { en: "More info requested", fr: "Infos supplémentaires demandées" },
   clientStatusActive: { en: "Active", fr: "Actif" },
   clientStatusRejected: { en: "Rejected", fr: "Rejeté" },
+  clientsFilterSearchLabel: { en: "Search", fr: "Rechercher" },
+  clientsFilterSearchPlaceholder: { en: "Business name, contact or email…", fr: "Nom, contact ou email…" },
+  clientsFilterStatusLabel: { en: "Status", fr: "Statut" },
 
   // ── Clients (KYB) — list page ────────────────────────────────────────────
   clientsSubtitle: {
@@ -753,6 +756,9 @@ const STRINGS = {
   kycStatusAbandoned: { en: "Abandoned", fr: "Abandonné" },
   kycStatusExpired: { en: "Expired", fr: "Expiré" },
   kycStatusKycExpired: { en: "KYC expired", fr: "KYC expiré" },
+  kycFilterSearchLabel: { en: "Search", fr: "Rechercher" },
+  kycFilterSearchPlaceholder: { en: "Name or customer ID…", fr: "Nom ou ID client…" },
+  kycFilterStatusLabel: { en: "Status", fr: "Statut" },
   kycAmlClear: { en: "Clear", fr: "Aucun problème" },
   kycAmlHitSingular: { en: "hit", fr: "correspondance" },
   kycAmlHitPlural: { en: "hits", fr: "correspondances" },
@@ -934,6 +940,22 @@ const STRINGS = {
   },
   settingsSecretAlreadyConfigured: { en: "A signing secret is already configured.", fr: "Un secret de signature est déjà configuré." },
   settingsWebhookSecretLabel: { en: "Webhook signing secret", fr: "Secret de signature du webhook" },
+  webhookDeliveriesTitle: { en: "Recent deliveries", fr: "Livraisons récentes" },
+  webhookDeliveriesSubtitle: {
+    en: "Every event Protegey tried to send to your webhook URL — up to 5 attempts spread over ~3h before giving up.",
+    fr: "Chaque événement que Protegey a tenté d'envoyer à votre URL de webhook — jusqu'à 5 tentatives étalées sur ~3h avant d'abandonner.",
+  },
+  webhookDeliveriesEmpty: { en: "No webhook deliveries yet.", fr: "Aucune livraison de webhook pour le moment." },
+  webhookDeliveryColEvent: { en: "Event", fr: "Événement" },
+  webhookDeliveryColStatus: { en: "Status", fr: "Statut" },
+  webhookDeliveryColAttempts: { en: "Attempts", fr: "Tentatives" },
+  webhookDeliveryColDate: { en: "Date", fr: "Date" },
+  webhookDeliveryStatusPending: { en: "Retrying", fr: "Nouvelle tentative" },
+  webhookDeliveryStatusDelivered: { en: "Delivered", fr: "Livré" },
+  webhookDeliveryStatusFailed: { en: "Failed", fr: "Échec" },
+  webhookSendTestButton: { en: "Send a test event", fr: "Envoyer un événement test" },
+  webhookSendingTest: { en: "Sending…", fr: "Envoi…" },
+  webhookTestSentToast: { en: "Test event sent — check the delivery list below.", fr: "Événement test envoyé — regarde la liste des livraisons ci-dessous." },
   settingsRegenerateDialogTitle: { en: "Regenerate your API key?", fr: "Régénérer votre clé API ?" },
   settingsRegenerateDialogDescription: {
     en: "Your current key will stop working immediately — any integration still using it will break until you update it.",

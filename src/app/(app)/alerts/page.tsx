@@ -18,7 +18,7 @@ export default async function AlertsPage({
   searchParams: Promise<{ page?: string; status?: string }>;
 }) {
   const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
-  const denied = requirePageAccess(user, "partners.manage_alerts", lang);
+  const denied = requirePageAccess(user, ["partners.manage_alerts", "partners.view_alerts"], lang);
   if (denied) return denied;
 
   const { page: pageParam, status } = await searchParams;
@@ -31,7 +31,11 @@ export default async function AlertsPage({
 
   return (
     <Suspense>
-      <AlertsClient result={result} page={page} initialStatus={status ?? "all"} teamMembers={teamMembers} />
+      {/* Keyed on page+status: a filter/pagination change pushes a new URL that re-renders this
+          server component with fresh props, but wouldn't otherwise remount the client component
+          below — forcing a remount is what makes its local `alerts`/`status` state (seeded once
+          from props via useState) actually reflect the new filter instead of staying stale. */}
+      <AlertsClient key={`${page}-${status ?? "all"}`} result={result} page={page} initialStatus={status ?? "all"} teamMembers={teamMembers} />
     </Suspense>
   );
 }

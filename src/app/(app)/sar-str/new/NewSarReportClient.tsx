@@ -6,8 +6,29 @@ import { toast } from "sonner";
 import { Loader2 } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
-import { generateSarReportAction } from "../actions";
+import { generateSarReportAction, type SarTemplateOption } from "../actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+
+/** Display name for a template's `countryCode` — purely cosmetic labeling for the picker, not
+ * used anywhere business logic reads from. `*` is the generic/international fallback template. */
+const COUNTRY_NAMES: Record<string, string> = {
+  TG: "Togo",
+  CI: "Côte d'Ivoire",
+  BJ: "Bénin",
+  BF: "Burkina Faso",
+  GW: "Guinée-Bissau",
+  ML: "Mali",
+  NE: "Niger",
+  SN: "Sénégal",
+  CM: "Cameroun",
+  MR: "Mauritanie",
+  "*": "Autre pays",
+};
+
+function templateLabel(template: SarTemplateOption): string {
+  const countryName = COUNTRY_NAMES[template.countryCode] ?? template.countryCode;
+  return `${countryName} — ${template.regulatorName}`;
+}
 
 const NEW_SAR_GUIDE: Record<"en" | "fr", PageGuideContent> = {
   fr: {
@@ -38,11 +59,11 @@ function isError(value: unknown): value is { error: string } {
   return Boolean(value) && typeof value === "object" && "error" in (value as object);
 }
 
-export function NewSarReportClient({ caseId }: { caseId: string }) {
+export function NewSarReportClient({ caseId, templates }: { caseId: string; templates: SarTemplateOption[] }) {
   const router = useRouter();
   const guard = useSessionGuard();
   const { t, lang } = useLang();
-  const [countryCode, setCountryCode] = useState("TG");
+  const [countryCode, setCountryCode] = useState(templates[0]?.countryCode ?? "TG");
   const [reportType, setReportType] = useState<"sar" | "str">("sar");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -99,7 +120,11 @@ export function NewSarReportClient({ caseId }: { caseId: string }) {
             onChange={(e) => setCountryCode(e.target.value)}
             className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
           >
-            <option value="TG">Togo — CENTIF-Togo</option>
+            {templates.map((template) => (
+              <option key={template.countryCode} value={template.countryCode}>
+                {templateLabel(template)}
+              </option>
+            ))}
           </select>
           <p className="text-xs text-muted-foreground">{t("sarNewCountryHint")}</p>
         </div>

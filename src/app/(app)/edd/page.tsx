@@ -18,5 +18,9 @@ export default async function EddPage({ searchParams }: { searchParams: Promise<
   const page = Math.max(1, Number(params.page) || 1);
   const status = params.status as EddStatus | undefined;
   const [result, teamMembers] = await Promise.all([getEddReviews({ page, status }), getAssignableTeamMembers("partners.manage_alerts")]);
-  return <div className="flex flex-col gap-3"><EddClient result={result} initialStatus={status ?? "all"} teamMembers={teamMembers} /><PaginationControls page={result.page} totalPages={result.totalPages} total={result.total} href={(nextPage) => `/edd?page=${nextPage}${status ? `&status=${encodeURIComponent(status)}` : ""}`} /></div>;
+  // Keyed on page+status: a filter/pagination change re-renders this server component with fresh
+  // props but wouldn't otherwise remount EddClient — forcing a remount is what makes its local
+  // `reviews`/`filter` state (seeded once from props via useState) actually reflect the change
+  // instead of staying stale (same issue fixed in /alerts).
+  return <div className="flex flex-col gap-3"><EddClient key={`${page}-${status ?? "all"}`} result={result} initialStatus={status ?? "all"} teamMembers={teamMembers} /><PaginationControls page={result.page} totalPages={result.totalPages} total={result.total} href={(nextPage) => `/edd?page=${nextPage}${status ? `&status=${encodeURIComponent(status)}` : ""}`} /></div>;
 }

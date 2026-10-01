@@ -1,12 +1,13 @@
 import { Lock } from "lucide-react";
 import { t, type Lang } from "@/lib/i18n/strings";
-import { roleLabel, rolesAllowedFor } from "@/lib/roles";
+import { roleLabel, rolesAllowedForAny } from "@/lib/roles";
 
-/** Shown in place of a page's content when the signed-in user's role doesn't grant the permission
- * that page requires — explains *why*, not just a raw 403, per the fixed 6-role access matrix
- * (see `protegey_role_access_matrix.pdf`). Rendered by `requirePageAccess()`. */
-export function AccessDeniedMessage({ permission, userRoles, lang }: { permission: string; userRoles: string[]; lang: Lang }) {
-  const allowedRoleLabels = rolesAllowedFor(permission).map((role) => roleLabel(role, lang));
+/** Shown in place of a page's content when the signed-in user's role doesn't grant any of the
+ * permission(s) that page requires — explains *why*, not just a raw 403, per the fixed 12-role
+ * access matrix (see `protegey_role_access_matrix.pdf` v2). Rendered by `requirePageAccess()`. */
+export function AccessDeniedMessage({ permission, userRoles, lang }: { permission: string | string[]; userRoles: string[]; lang: Lang }) {
+  const permissions = Array.isArray(permission) ? permission : [permission];
+  const allowedRoleLabels = rolesAllowedForAny(permissions).map((role) => roleLabel(role, lang));
   const currentRoleLabels = userRoles.map((role) => roleLabel(role, lang));
 
   return (

@@ -4,6 +4,7 @@ import { t } from "@/lib/i18n/strings";
 import { getKycEnrollments, type DiditSessionStatus } from "./actions";
 import { KycDashboardTab } from "./KycDashboardTab";
 import { EnrollmentsTable } from "./EnrollmentsTable";
+import { KycFilters } from "./KycFilters";
 import { StartVerificationDialogButton } from "./StartVerificationDialogButton";
 import { PaginationControls } from "@/components/PaginationControls";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
@@ -39,7 +40,7 @@ export const metadata: Metadata = {
   title: "KYC — Protegey Partner",
 };
 
-export default async function KycPage({ searchParams }: { searchParams: Promise<{ page?: string; status?: string }> }) {
+export default async function KycPage({ searchParams }: { searchParams: Promise<{ page?: string; status?: string; search?: string }> }) {
   const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
   const denied = requirePageAccess(user, "partners.manage_kyc", lang);
   if (denied) return denied;
@@ -47,7 +48,8 @@ export default async function KycPage({ searchParams }: { searchParams: Promise<
   const params = await searchParams;
   const page = Math.max(1, Number(params.page) || 1);
   const status = params.status as DiditSessionStatus | undefined;
-  const result = await getKycEnrollments({ page, status });
+  const search = params.search ?? "";
+  const result = await getKycEnrollments({ page, status, search: search || undefined });
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -68,8 +70,17 @@ export default async function KycPage({ searchParams }: { searchParams: Promise<
 
       <KycDashboardTab enrollments={result.data} total={result.total} />
 
+      <KycFilters initialStatus={status ?? ""} initialSearch={search} />
+
       <EnrollmentsTable enrollments={result.data} />
-      <PaginationControls page={result.page} totalPages={result.totalPages} total={result.total} href={(nextPage) => `/kyc?page=${nextPage}${status ? `&status=${encodeURIComponent(status)}` : ""}`} />
+      <PaginationControls
+        page={result.page}
+        totalPages={result.totalPages}
+        total={result.total}
+        href={(nextPage) =>
+          `/kyc?page=${nextPage}${status ? `&status=${encodeURIComponent(status)}` : ""}${search ? `&search=${encodeURIComponent(search)}` : ""}`
+        }
+      />
     </div>
   );
 }

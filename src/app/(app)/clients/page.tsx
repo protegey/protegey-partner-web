@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getSessionUser } from "@/lib/session";
-import { getClientsPage, listKybTemplates, listPublishedKybTemplates, type ClientStage } from "./actions";
+import { getClientsPage, listKybTemplates, listPublishedKybTemplates, type ClientStage, type ClientBusinessStatus } from "./actions";
+import { ClientsFilters } from "./ClientsFilters";
 import { InviteClientDialogButton } from "./InviteClientDialogButton";
 import { ResendClientInvitationButton } from "./ResendClientInvitationButton";
 import { QuestionnairesListClient } from "./questionnaires/QuestionnairesListClient";
@@ -71,18 +72,21 @@ function tabHref(tab: string): string {
 export default async function ClientsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; page?: string }>;
+  searchParams: Promise<{ tab?: string; page?: string; search?: string; status?: string }>;
 }) {
-  const { tab, page: pageParam } = await searchParams;
+  const { tab, page: pageParam, search: searchParam, status: statusParam } = await searchParams;
   const activeTab = tab === "responded" ? "responded" : tab === "questionnaires" ? "questionnaires" : "invited";
   const page = Math.max(1, Number(pageParam) || 1);
+  const search = searchParam ?? "";
+  const status = (statusParam as ClientBusinessStatus | undefined) ?? undefined;
   const lang = await getLang();
 
   const user = await getSessionUser();
   const denied = requirePageAccess(user, "partners.manage_clients", lang);
   if (denied) return denied;
 
-  const result = activeTab !== "questionnaires" ? await getClientsPage({ stage: activeTab as ClientStage, page }) : null;
+  const result =
+    activeTab !== "questionnaires" ? await getClientsPage({ stage: activeTab as ClientStage, page, search: search || undefined, status }) : null;
   const templates = activeTab === "questionnaires" ? await listKybTemplates() : null;
   const publishedTemplates = await listPublishedKybTemplates();
 
@@ -117,6 +121,8 @@ export default async function ClientsPage({
         <QuestionnairesListClient initialTemplates={templates ?? []} lang={lang} />
       ) : (
         <>
+          <ClientsFilters activeTab={activeTab} initialSearch={search} initialStatus={status ?? ""} />
+
           <div className="overflow-hidden rounded-md border border-border">
             <table className="w-full text-left text-sm">
               <thead className="bg-muted text-muted-foreground">
@@ -190,7 +196,9 @@ export default async function ClientsPage({
               page={result.page}
               totalPages={result.totalPages}
               total={result.total}
-              href={(nextPage) => `/clients?tab=${activeTab}&page=${nextPage}`}
+              href={(nextPage) =>
+                `/clients?tab=${activeTab}&page=${nextPage}${search ? `&search=${encodeURIComponent(search)}` : ""}${status ? `&status=${encodeURIComponent(status)}` : ""}`
+              }
             />
           ) : null}
         </>
