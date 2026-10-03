@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronRight, FileText } from "lucide-react";
+import { Eye, FileText } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import type { SarReport } from "./actions";
@@ -155,10 +155,10 @@ export function SarStrClient({
                     <Link
                       href={`/sar-str/${report.id}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                      className="flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
                     >
+                      <Eye className="size-3.5" />
                       {t("commonView")}
-                      <ChevronRight className="size-3.5" />
                     </Link>
                   </td>
                   </tr>;

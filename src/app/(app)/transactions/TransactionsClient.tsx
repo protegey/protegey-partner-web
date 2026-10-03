@@ -3,7 +3,7 @@
 import { Fragment, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowDownLeft, ArrowUpRight, ChevronDown, ChevronRight } from "lucide-react";
+import { ArrowDownLeft, ArrowUpRight, ChevronDown, ChevronRight, Eye } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import { CountryBadge, DeviceAttributesDetails, DeviceSummaryCell, MapLinkBadge } from "@/components/DeviceAttributesSummary";
@@ -267,9 +267,13 @@ export function TransactionsClient({
                       </td>
                       <td className="px-4 py-2.5 font-mono text-xs text-foreground">{tx.ip ?? "—"}</td>
                       <td className="px-4 py-2.5">
-                        <Link href={`/transactions/${tx.id}`} onClick={(event) => event.stopPropagation()} className="flex items-center gap-1 text-xs text-primary hover:underline">
+                        <Link
+                          href={`/transactions/${tx.id}`}
+                          onClick={(event) => event.stopPropagation()}
+                          className="flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                        >
+                          <Eye className="size-3.5" />
                           {t("txViewDetail")}
-                          <ChevronRight className="size-3.5" />
                         </Link>
                       </td>
                     </tr>

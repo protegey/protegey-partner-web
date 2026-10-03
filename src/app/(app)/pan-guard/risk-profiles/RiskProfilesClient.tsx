@@ -3,7 +3,7 @@
 import { Fragment, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, ChevronRight, ShieldAlert } from "lucide-react";
+import { ChevronDown, ChevronRight, Eye, ShieldAlert } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import { RiskBreakdown } from "./RiskBreakdown";
@@ -189,8 +189,9 @@ export function RiskProfilesClient({
                         <Link
                           href={`/pan-guard/risk-profiles/${encodeURIComponent(profile.externalCustomerId)}`}
                           onClick={(e) => e.stopPropagation()}
-                          className="text-xs font-medium text-primary hover:underline"
+                          className="flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
                         >
+                          <Eye className="size-3.5" />
                           {t("riskProfilesViewDetail")}
                         </Link>
                       </td>

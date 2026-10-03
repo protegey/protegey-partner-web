@@ -199,8 +199,11 @@ export function DeviceAttributesDetails({
     ? [...KNOWN_KEYS.filter((k) => attributes[k] !== undefined), ...Object.keys(attributes).filter((k) => !KNOWN_KEYS.includes(k))]
     : [];
 
+  const summary = deviceSummaryText(attributes);
+
   return (
     <div className="flex flex-col gap-3">
+      {summary ? <p className="text-sm font-medium text-foreground">{summary}</p> : null}
       <div className="flex flex-wrap items-center gap-2">
         {ipCountry ? <CountryBadge ipCountry={ipCountry} /> : null}
         <MapLinkBadge ipLatitude={ipLatitude} ipLongitude={ipLongitude} />

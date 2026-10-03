@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Briefcase, ChevronRight, Plus } from "lucide-react";
+import { Briefcase, Eye, Plus } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import type { Case } from "./actions";
@@ -196,10 +196,10 @@ export function CasesClient({
                     <Link
                       href={`/cases/${kase.id}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                      className="flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
                     >
+                      <Eye className="size-3.5" />
                       {t("commonView")}
-                      <ChevronRight className="size-3.5" />
                     </Link>
                   </td>
                 </tr>

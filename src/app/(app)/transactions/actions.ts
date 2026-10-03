@@ -1,6 +1,10 @@
 "use server";
 
-import { apiFetch } from "@/lib/api";
+import { revalidatePath } from "next/cache";
+import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api";
+import type { Case } from "../cases/actions";
+
+export type MutationResult<T> = T | { error: string } | AuthExpired;
 
 export type TransactionDirection = "DEBIT" | "CREDIT";
 export type TransactionDecision = "clear" | "review" | "blocked";
@@ -81,4 +85,20 @@ export interface TransactionStats {
 
 export async function getTransactionStats(): Promise<TransactionStats> {
   return apiFetch<TransactionStats>("/transactions/me/stats");
+}
+
+/** Opens a case straight from this transaction, with no alert required first — pulls in whatever
+ * alerts are already linked to it automatically on the backend. */
+export async function openCaseForTransactionAction(transactionId: string, title?: string): Promise<MutationResult<Case>> {
+  try {
+    const result = await apiFetchGuarded<Case>(`/transactions/me/${transactionId}/open-case`, { method: "POST", body: { title } });
+    if (!("error" in result) && !("authExpired" in result)) {
+      revalidatePath(`/transactions/${transactionId}`);
+      revalidatePath("/cases");
+    }
+    return result;
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }

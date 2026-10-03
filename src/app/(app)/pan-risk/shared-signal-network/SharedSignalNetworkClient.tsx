@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { Search, ShieldAlert, ShieldCheck, ChevronRight } from "lucide-react";
+import { Search, ShieldAlert, ShieldCheck, Eye } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
@@ -245,10 +245,10 @@ export function SharedSignalNetworkClient({
                     <td className="px-4 py-2.5 text-right">
                       <Link
                         href={`/pan-risk/shared-signal-network/${report.id}`}
-                        className="inline-flex items-center gap-1 text-xs font-medium text-primary hover:underline"
+                        className="flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
                       >
+                        <Eye className="size-3.5" />
                         {t("sharedSignalViewDetail")}
-                        <ChevronRight className="size-3.5" />
                       </Link>
                     </td>
                   </tr>

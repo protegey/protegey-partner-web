@@ -4,14 +4,15 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, ArrowDownLeft, ArrowUpRight, UserPlus, CircleCheck, CircleX, Flag } from "lucide-react";
+import { ArrowLeft, ArrowDownLeft, ArrowUpRight, Briefcase, UserPlus, CircleCheck, CircleX, Flag, Loader2 } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { Dialog } from "@/components/Dialog";
 import { DeviceAttributesDetails } from "@/components/DeviceAttributesSummary";
 import { useLang } from "@/lib/i18n/LangProvider";
 import type { MonitoringTransaction, DeviceAction } from "../actions";
-import { updateAlert, flagTransactionAction, type AlertWithContext } from "../../alerts/actions";
+import { openCaseForTransactionAction } from "../actions";
+import { updateAlert, flagTransactionAction, type AlertRuleHistory, type AlertWithContext } from "../../alerts/actions";
 import type { TeamMember } from "../../team/actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
@@ -81,13 +82,17 @@ type PendingAction = "approve" | "decline" | "flag" | null;
 export function TransactionDetailClient({
   transaction,
   initialAlerts,
+  ruleHistory,
   teamMembers,
   canManage,
+  canOpenCase,
 }: {
   transaction: MonitoringTransaction;
   initialAlerts: AlertWithContext[];
+  ruleHistory: AlertRuleHistory | null;
   teamMembers: TeamMember[];
   canManage: boolean;
+  canOpenCase: boolean;
 }) {
   const { t, lang } = useLang();
   const guard = useSessionGuard();
@@ -99,6 +104,7 @@ export function TransactionDetailClient({
   const [assignOpen, setAssignOpen] = useState(false);
   const [assignee, setAssignee] = useState("");
   const [pending, setPending] = useState(false);
+  const [openingCase, setOpeningCase] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const alert = alerts[0] ?? null;
@@ -167,6 +173,20 @@ export function TransactionDetailClient({
     }
   }
 
+  async function handleOpenCase() {
+    setOpeningCase(true);
+    setError(null);
+    try {
+      const result = await guard(() => openCaseForTransactionAction(transaction.id));
+      if (result === null) return;
+      if (isError(result)) { setError(result.error); toast.error(result.error); return; }
+      toast.success(t("txCaseOpenedToast"));
+      router.push(`/cases/${result.id}`);
+    } finally {
+      setOpeningCase(false);
+    }
+  }
+
   const assigneeName = alert?.assignedToUserId ? teamMembers.find((member) => member.id === alert.assignedToUserId) : null;
 
   return (
@@ -186,46 +206,61 @@ export function TransactionDetailClient({
               {new Date(transaction.occurredAt).toLocaleString(locale)} · {transaction.transactionType} · {decisionLabel[transaction.decision]}
             </p>
           </div>
-          {canManage ? (
+          {canManage || canOpenCase ? (
             <div className="flex flex-wrap items-center gap-2">
-              <button
-                type="button"
-                onClick={() => setAssignOpen(true)}
-                disabled={!alert}
-                title={!alert ? t("txActionsNeedFlagHint") : undefined}
-                className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <UserPlus className="size-4" />
-                {t("txActionAssign")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setPendingAction("approve")}
-                disabled={!alert}
-                title={!alert ? t("txActionsNeedFlagHint") : undefined}
-                className="flex items-center gap-1.5 rounded-md border border-emerald-500/30 px-3 py-1.5 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <CircleCheck className="size-4" />
-                {t("txActionApprove")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setPendingAction("decline")}
-                disabled={!alert}
-                title={!alert ? t("txActionsNeedFlagHint") : undefined}
-                className="flex items-center gap-1.5 rounded-md border border-destructive/30 px-3 py-1.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-40"
-              >
-                <CircleX className="size-4" />
-                {t("txActionDecline")}
-              </button>
-              <button
-                type="button"
-                onClick={() => setPendingAction("flag")}
-                className="flex items-center gap-1.5 rounded-md border border-amber-500/30 px-3 py-1.5 text-sm font-medium text-amber-600 transition-colors hover:bg-amber-500/10"
-              >
-                <Flag className="size-4" />
-                {t("txActionFlag")}
-              </button>
+              {canManage ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => setAssignOpen(true)}
+                    disabled={!alert}
+                    title={!alert ? t("txActionsNeedFlagHint") : undefined}
+                    className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <UserPlus className="size-4" />
+                    {t("txActionAssign")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPendingAction("approve")}
+                    disabled={!alert}
+                    title={!alert ? t("txActionsNeedFlagHint") : undefined}
+                    className="flex items-center gap-1.5 rounded-md border border-emerald-500/30 px-3 py-1.5 text-sm font-medium text-emerald-600 transition-colors hover:bg-emerald-500/10 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <CircleCheck className="size-4" />
+                    {t("txActionApprove")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPendingAction("decline")}
+                    disabled={!alert}
+                    title={!alert ? t("txActionsNeedFlagHint") : undefined}
+                    className="flex items-center gap-1.5 rounded-md border border-destructive/30 px-3 py-1.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/10 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <CircleX className="size-4" />
+                    {t("txActionDecline")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPendingAction("flag")}
+                    className="flex items-center gap-1.5 rounded-md border border-amber-500/30 px-3 py-1.5 text-sm font-medium text-amber-600 transition-colors hover:bg-amber-500/10"
+                  >
+                    <Flag className="size-4" />
+                    {t("txActionFlag")}
+                  </button>
+                </>
+              ) : null}
+              {canOpenCase ? (
+                <button
+                  type="button"
+                  disabled={openingCase}
+                  onClick={handleOpenCase}
+                  className="flex items-center gap-1.5 rounded-md border border-primary/40 bg-primary/5 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
+                >
+                  {openingCase ? <Loader2 className="size-4 animate-spin" /> : <Briefcase className="size-4" />}
+                  {t("txActionOpenCase")}
+                </button>
+              ) : null}
             </div>
           ) : null}
         </div>
@@ -319,7 +354,11 @@ export function TransactionDetailClient({
             {alerts.map((item) => {
               const itemAssignee = item.assignedToUserId ? teamMembers.find((member) => member.id === item.assignedToUserId) : null;
               return (
-                <div key={item.id} className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border p-3 text-sm">
+                <Link
+                  key={item.id}
+                  href={`/alerts/${item.id}`}
+                  className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border p-3 text-sm transition-colors hover:bg-muted"
+                >
                   <div>
                     <p className="font-medium text-foreground">{lang === "fr" ? item.ruleNameFr ?? item.ruleName : item.ruleName}</p>
                     <p className="text-xs text-muted-foreground">
@@ -327,12 +366,24 @@ export function TransactionDetailClient({
                     </p>
                   </div>
                   <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${ALERT_STATUS_COLOR[item.status]}`}>{t(ALERT_STATUS_LABEL_KEY[item.status])}</span>
-                </div>
+                </Link>
               );
             })}
           </div>
         )}
       </div>
+
+      {ruleHistory ? (
+        <div className="rounded-md border border-border bg-card p-4">
+          <p className="mb-3 text-sm font-semibold text-foreground">{t("txDetailRuleHistoryTitle")}</p>
+          {ruleHistory.count <= 1 ? (
+            <p className="text-xs text-muted-foreground">{t("txDetailRuleHistoryNone")}</p>
+          ) : (
+            <p className="text-sm text-foreground">{t("txDetailRuleHistoryCount").replace("{count}", String(ruleHistory.count))}</p>
+          )}
+          <p className="mt-2 text-[11px] text-muted-foreground">{t("alertsDetailHistoryScopeNote")}</p>
+        </div>
+      ) : null}
 
       {assignOpen ? (
         <Dialog open={assignOpen} onClose={() => setAssignOpen(false)} title={t("txActionAssign")} closeAriaLabel={t("closeDialogAria")}>

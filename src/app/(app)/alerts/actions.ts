@@ -27,6 +27,7 @@ export interface AlertWithContext {
   investigationNotes: string | null;
   dueAt: string | null;
   resolvedAt: string | null;
+  resolvedByUserId: string | null;
   createdAt: string;
   ruleName: string;
   ruleNameFr: string | null;
@@ -59,6 +60,23 @@ export async function getAlerts(query: AlertsQuery = {}): Promise<PaginatedResul
     if (value !== undefined && value !== "") params.set(key, String(value));
   }
   return apiFetch<PaginatedResult<AlertWithContext>>(`/alerts/me?${params.toString()}`);
+}
+
+export async function getAlert(id: string): Promise<AlertWithContext> {
+  return apiFetch<AlertWithContext>(`/alerts/me/${id}`);
+}
+
+export interface AlertRuleHistory {
+  count: number;
+  alerts: AlertWithContext[];
+}
+
+/** Same customer, same rule, any other time it fired — scoped by partnerId like every other
+ * lookup here, since externalCustomerId is only unique within one partner, never globally. */
+export async function getCustomerRuleHistory(externalCustomerId: string, ruleCode: string, excludeAlertId?: string): Promise<AlertRuleHistory> {
+  const params = new URLSearchParams({ externalCustomerId, ruleCode });
+  if (excludeAlertId) params.set("excludeAlertId", excludeAlertId);
+  return apiFetch<AlertRuleHistory>(`/alerts/me/history?${params.toString()}`);
 }
 
 /** Every alert (if any) already tied to this transaction — a transaction can have more than one
