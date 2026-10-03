@@ -196,7 +196,7 @@ export function CasesClient({
                     <Link
                       href={`/cases/${kase.id}`}
                       onClick={(e) => e.stopPropagation()}
-                      className="flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                      className="ml-auto flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
                     >
                       <Eye className="size-3.5" />
                       {t("commonView")}

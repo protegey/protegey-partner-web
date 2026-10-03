@@ -189,7 +189,7 @@ export function RiskProfilesClient({
                         <Link
                           href={`/pan-guard/risk-profiles/${encodeURIComponent(profile.externalCustomerId)}`}
                           onClick={(e) => e.stopPropagation()}
-                          className="flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                          className="ml-auto flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
                         >
                           <Eye className="size-3.5" />
                           {t("riskProfilesViewDetail")}

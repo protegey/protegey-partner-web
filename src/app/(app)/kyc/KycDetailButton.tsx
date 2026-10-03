@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, ShieldAlert, ShieldCheck, ShieldQuestion, ShieldX, ZoomIn } from "lucide-react";
+import { Eye, Loader2, ShieldAlert, ShieldCheck, ShieldQuestion, ShieldX, ZoomIn } from "lucide-react";
 import { Drawer } from "@/components/Drawer";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -141,8 +141,9 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
       <button
         type="button"
         onClick={handleOpen}
-        className="text-xs font-medium text-primary hover:underline"
+        className="flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
       >
+        <Eye className="size-3.5" />
         {t("kycViewDetailsButton")}
       </button>
 

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Eye } from "lucide-react";
 import { getSessionUser } from "@/lib/session";
 import { getClientsPage, listKybTemplates, listPublishedKybTemplates, type ClientStage, type ClientBusinessStatus } from "./actions";
 import { ClientsFilters } from "./ClientsFilters";
@@ -173,7 +174,11 @@ export default async function ClientsPage({
                       ) : client.status === "invited" || client.status === "more_info_required" ? (
                         <ResendClientInvitationButton clientId={client.id} />
                       ) : (
-                        <Link href={`/clients/${client.id}`} className="text-xs text-muted-foreground hover:text-primary hover:underline">
+                        <Link
+                          href={`/clients/${client.id}`}
+                          className="ml-auto flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                        >
+                          <Eye className="size-3.5" />
                           {t(lang, "commonView")}
                         </Link>
                       )}
