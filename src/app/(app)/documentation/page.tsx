@@ -287,10 +287,28 @@ export default async function DocumentationPage() {
               {t(lang, "navSdkJs")}
             </Link>
             <Link
+              href="/sdks/react-native"
+              className="flex items-center gap-1.5 rounded-md border border-border px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              {t(lang, "navSdkReactNative")}
+            </Link>
+            <Link
               href="/sdks/flutter"
               className="flex items-center gap-1.5 rounded-md border border-border px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
             >
               {t(lang, "navSdkFlutter")}
+            </Link>
+            <Link
+              href="/sdks/php"
+              className="flex items-center gap-1.5 rounded-md border border-border px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              {t(lang, "navSdkPhp")}
+            </Link>
+            <Link
+              href="/sdks/java"
+              className="flex items-center gap-1.5 rounded-md border border-border px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              {t(lang, "navSdkJava")}
             </Link>
           </div>
         </Section>

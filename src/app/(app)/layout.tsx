@@ -139,7 +139,10 @@ function buildNavItemDefs(lang: Lang): NavItemDef[] {
       requiredPermission: "partners.manage_integrations",
       children: [
         { label: tt("navSdkJs"), href: "/sdks/js" },
+        { label: tt("navSdkReactNative"), href: "/sdks/react-native" },
         { label: tt("navSdkFlutter"), href: "/sdks/flutter" },
+        { label: tt("navSdkPhp"), href: "/sdks/php" },
+        { label: tt("navSdkJava"), href: "/sdks/java" },
       ],
     },
     {

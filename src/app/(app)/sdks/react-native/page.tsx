@@ -1,4 +1,3 @@
-import type { Metadata } from "next";
 import Link from "next/link";
 import { Package, Rocket, Smartphone, ArrowRightLeft, IdCard, Activity, ShieldAlert } from "lucide-react";
 import { getLang } from "@/lib/i18n/lang";
@@ -8,29 +7,37 @@ import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideBu
 import { getSessionUser } from "@/lib/session";
 import { requirePageAccess } from "@/lib/requirePageAccess";
 
-const SDK_JS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
+const SDK_RN_GUIDE: Record<"en" | "fr", PageGuideContent> = {
   fr: {
-    title: "SDK JavaScript / Node.js",
+    title: "SDK React Native",
     explanation:
-      "Le paquet `@protegey/sdk` est le même code pour Node.js, le navigateur, React, Angular et React Native — un seul SDK à apprendre. Une fois initialisé avec ta clé API, tu peux appeler `protegey.device.identify()` au login pour calculer une empreinte d'appareil (uniquement dans un navigateur — ailleurs, il faut fournir l'identifiant toi-même) et récupérer une recommandation.\n\nCette recommandation (`allow`, `soft_challenge`, `hard_challenge`, `block`) n'est qu'un conseil : Protegey ne bloque jamais ton utilisateur à ta place, c'est ton application qui décide quoi en faire.\n\nCette page ne montre aucune donnée de ton compte — c'est une référence technique avec des exemples de code à copier-coller.",
+      "Le paquet `@protegey/react-native-sdk` réexporte tout le SDK JavaScript de base (intelligence d'appareil, transactions, biométrie comportementale), et ajoute un écran de vérification d'identité intégré à l'app : `ProtegeyKycProvider` + `useProtegeyKyc()`. Un seul appel démarre la session et l'affiche dans un panneau coulissant — ton utilisateur ne quitte jamais l'app.\n\nCette page ne montre aucune donnée de ton compte — c'est une référence technique avec des exemples de code à copier-coller.",
   },
   en: {
-    title: "JavaScript / Node.js SDK",
+    title: "React Native SDK",
     explanation:
-      "The `@protegey/sdk` package is the same code for Node.js, the browser, React, Angular, and React Native — one SDK to learn. Once initialized with your API key, you can call `protegey.device.identify()` on login to compute a device fingerprint (only in a browser — elsewhere you supply the identifier yourself) and get back a recommendation.\n\nThat recommendation (`allow`, `soft_challenge`, `hard_challenge`, `block`) is advice only: Protegey never blocks your user on your behalf, your app decides what to do with it.\n\nThis page shows none of your account's data — it's a technical reference with copy-paste code examples.",
+      "The `@protegey/react-native-sdk` package re-exports the entire base JavaScript SDK (device intelligence, transactions, behavioral biometrics), and adds an in-app identity-verification screen: `ProtegeyKycProvider` + `useProtegeyKyc()`. One call starts the session and shows it in a draggable sheet — your user never leaves the app.\n\nThis page shows none of your account's data — it's a technical reference with copy-paste code examples.",
   },
 };
 
-const INSTALL_GITHUB = `npm install git+https://github.com/protegey/protegey_js_sdk.git`;
+const INSTALL_GITHUB = `npm install git+https://github.com/protegey/protegey_react_native_sdk.git react-native-webview`;
 
-const INIT = `// Works in Node.js, the browser, React, Angular, and React Native — one package.
-import { Protegey } from "@protegey/sdk";
+const INIT = `import { Protegey, ProtegeyKycProvider, useProtegeyKyc } from "@protegey/react-native-sdk";
 
 // baseUrl has no default on purpose — confirm the current value with Protegey, it can
 // change independently of this package (e.g. between staging and production).
-const protegey = new Protegey({ apiKey: "YOUR_API_KEY", baseUrl: "https://api.protegey.com" });`;
+const protegey = new Protegey({ apiKey: "YOUR_API_KEY", baseUrl: "https://api.protegey.com" });
 
-const DEVICE_EXAMPLE = `// Call on login/session start — in a browser this computes a real device fingerprint automatically.
+// Wrap your app once, near the root.
+export default function App() {
+  return (
+    <ProtegeyKycProvider>
+      <Home />
+    </ProtegeyKycProvider>
+  );
+}`;
+
+const DEVICE_EXAMPLE = `// Call on login/session start.
 const { visitorId, action, riskScore } = await protegey.device.identify({
   externalCustomerId: "cust-9981",
   phoneNumber: "+22890000001", // optional — you already have it, we never read it off the device
@@ -38,9 +45,8 @@ const { visitorId, action, riskScore } = await protegey.device.identify({
 // action is a recommendation only ("allow" | "soft_challenge" | "hard_challenge" | "block") —
 // Protegey never blocks your user itself, your app decides what to do with it.`;
 
-const DEVICE_OUTSIDE_BROWSER = `// Outside a browser (Node.js, React Native) there's no DOM to fingerprint, so identify()
-// falls back to a fresh random id on every call. Pass your own stable id if you have one
-// (e.g. one you persist with AsyncStorage on React Native):
+const DEVICE_NO_DOM = `// There's no DOM in React Native, so identify() falls back to a fresh random id on every
+// call. Pass your own stable id if you have one (e.g. one you persist with AsyncStorage):
 await protegey.device.identify({ visitorId: myStoredDeviceId, externalCustomerId: "cust-9981" });`;
 
 const TRANSACTIONS_EXAMPLE = `const result = await protegey.transactions.report({
@@ -52,20 +58,18 @@ const TRANSACTIONS_EXAMPLE = `const result = await protegey.transactions.report(
   transactionType: "cashout",
   isCash: true,
   visitorId, // fold the device signal above into this transaction's decision
-  occurredAt: new Date().toISOString(),
 });
 // result.decision: "clear" | "review" | "blocked" — result.alerts lists any rule that matched.`;
 
-const KYC_START_EXAMPLE = `// Starts the session and hands back the link — no curl needed
-const { sessionId, url } = await protegey.kyc.startSession({
-  externalUserId: "cust-9981",
-});
-// Send "url" to your user however you like (SMS, email, in-app webview).`;
+const KYC_PRESENT_EXAMPLE = `function Home() {
+  const { present } = useProtegeyKyc();
 
-const KYC_POLL_EXAMPLE = `// Polling fallback — webhook delivery is best-effort (one retry, no queue), so use this
-// if you're not sure a delivery ever arrived, or just want to double-check a session's status.
-const current = await protegey.kyc.getSession(sessionId);
-// current.status is the same value the webhook would have sent (e.g. "Approved", "Declined", "In Review", ...).`;
+  async function verifyIdentity() {
+    const status = await present(protegey.kyc, { externalUserId: "cust-9981" });
+    // status?.status — e.g. "Approved", "Declined", "In Review" — or undefined if the user
+    // closed the sheet before one arrived.
+  }
+}`;
 
 const BEHAVIORAL_EXAMPLE = `// Aggregated keystroke/touch/navigation metadata only — never raw content.
 const behavioral = await protegey.behavioral.report({
@@ -105,7 +109,7 @@ function Section({
   );
 }
 
-export default async function SdkJsPage() {
+export default async function SdkReactNativePage() {
   const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
   const denied = requirePageAccess(user, "partners.manage_integrations", lang);
   if (denied) return denied;
@@ -132,13 +136,13 @@ export default async function SdkJsPage() {
         <div>
           <div className="flex items-center gap-2.5">
             <Package className="size-5 text-primary" />
-            <h1 className="text-xl font-semibold text-foreground">{t(lang, "sdkJsPageTitle")}</h1>
-            <PageGuideButton content={SDK_JS_GUIDE[lang]} />
+            <h1 className="text-xl font-semibold text-foreground">{t(lang, "sdkReactNativePageTitle")}</h1>
+            <PageGuideButton content={SDK_RN_GUIDE[lang]} />
           </div>
-          <p className="mt-1 text-sm text-muted-foreground">{t(lang, "sdkJsPageSubtitle")}</p>
+          <p className="mt-1 text-sm text-muted-foreground">{t(lang, "sdkReactNativePageSubtitle")}</p>
           <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
             <a
-              href="https://github.com/protegey/protegey_js_sdk"
+              href="https://github.com/protegey/protegey_react_native_sdk"
               target="_blank"
               rel="noreferrer"
               className="inline-block text-xs font-medium text-primary hover:underline"
@@ -146,20 +150,12 @@ export default async function SdkJsPage() {
               {t(lang, "docsSdksSourceLink")}
             </a>
             <a
-              href="https://github.com/protegey/protegey_example_react"
+              href="https://github.com/protegey/protegey_example_react_native"
               target="_blank"
               rel="noreferrer"
               className="inline-block text-xs font-medium text-primary hover:underline"
             >
-              {t(lang, "sdkExampleLinkReact")}
-            </a>
-            <a
-              href="https://github.com/protegey/protegey_example_angular"
-              target="_blank"
-              rel="noreferrer"
-              className="inline-block text-xs font-medium text-primary hover:underline"
-            >
-              {t(lang, "sdkExampleLinkAngular")}
+              {t(lang, "sdkExampleLink")}
             </a>
           </div>
         </div>
@@ -174,17 +170,16 @@ export default async function SdkJsPage() {
 
         <Section id="device" icon={Smartphone} title={t(lang, "docsSdksCapabilityDevice")} body={t(lang, "sdkDeviceBody")}>
           <CodeBlock code={DEVICE_EXAMPLE} className="mt-4" />
-          <p className="mt-3 text-xs font-medium text-muted-foreground">{t(lang, "sdkDeviceOutsideBrowserLabel")}</p>
-          <CodeBlock code={DEVICE_OUTSIDE_BROWSER} className="mt-1.5" />
+          <p className="mt-3 text-xs font-medium text-muted-foreground">{t(lang, "sdkDeviceOtherPlatformLabel")}</p>
+          <CodeBlock code={DEVICE_NO_DOM} className="mt-1.5" />
         </Section>
 
         <Section id="transactions" icon={ArrowRightLeft} title={t(lang, "docsSdksCapabilityTransactions")} body={t(lang, "sdkTransactionsBody")}>
           <CodeBlock code={TRANSACTIONS_EXAMPLE} className="mt-4" />
         </Section>
 
-        <Section id="kyc" icon={IdCard} title={t(lang, "docsSdksCapabilityKyc")} body={t(lang, "sdkKycBody")}>
-          <CodeBlock code={KYC_START_EXAMPLE} className="mt-4" />
-          <CodeBlock code={KYC_POLL_EXAMPLE} className="mt-2" />
+        <Section id="kyc" icon={IdCard} title={t(lang, "docsSdksCapabilityKyc")} body={t(lang, "sdkKycInAppBody")}>
+          <CodeBlock code={KYC_PRESENT_EXAMPLE} className="mt-4" />
           <p className="mt-3 text-xs text-muted-foreground">
             {t(lang, "sdkKycWebhookNote")}{" "}
             <Link href="/documentation#webhooks" className="text-primary hover:underline">

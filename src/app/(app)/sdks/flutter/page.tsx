@@ -28,7 +28,6 @@ dependencies:
       url: https://github.com/protegey/protegey_flutter_sdk.git
       ref: main`;
 
-const INSTALL_PUBDEV = `flutter pub add protegey_sdk`;
 
 const INIT = `// baseUrl has no default on purpose — confirm the current value with Protegey, it can
 // change independently of this package (e.g. between staging and production).
@@ -139,21 +138,29 @@ export default async function SdkFlutterPage() {
             <PageGuideButton content={SDK_FLUTTER_GUIDE[lang]} />
           </div>
           <p className="mt-1 text-sm text-muted-foreground">{t(lang, "sdkFlutterPageSubtitle")}</p>
-          <a
-            href="https://github.com/protegey/protegey_flutter_sdk"
-            target="_blank"
-            rel="noreferrer"
-            className="mt-2 inline-block text-xs font-medium text-primary hover:underline"
-          >
-            {t(lang, "docsSdksSourceLink")}
-          </a>
+          <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1">
+            <a
+              href="https://github.com/protegey/protegey_flutter_sdk"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block text-xs font-medium text-primary hover:underline"
+            >
+              {t(lang, "docsSdksSourceLink")}
+            </a>
+            <a
+              href="https://github.com/protegey/protegey_example_flutter"
+              target="_blank"
+              rel="noreferrer"
+              className="inline-block text-xs font-medium text-primary hover:underline"
+            >
+              {t(lang, "sdkExampleLink")}
+            </a>
+          </div>
         </div>
 
         <Section id="install" icon={Rocket} title={t(lang, "docsSdksInstallLabel")}>
           <p className="mt-3 text-xs font-medium text-foreground">{t(lang, "docsSdksInstallGithub")}</p>
           <CodeBlock code={INSTALL_GITHUB} className="mt-1.5" />
-          <p className="mt-2 text-xs font-medium text-muted-foreground">{t(lang, "docsSdksInstallFuture")}</p>
-          <CodeBlock code={INSTALL_PUBDEV} className="mt-1.5 opacity-60" />
           <p className="mt-4 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSdksInitLabel")}</p>
           <CodeBlock code={INIT} className="mt-1.5" />
           <p className="mt-3 text-xs text-muted-foreground">{t(lang, "sdkBaseUrlNote")}</p>

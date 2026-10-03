@@ -190,7 +190,10 @@ const STRINGS = {
   navDocumentation: { en: "Documentation", fr: "Documentation" },
   navSdks: { en: "SDKs", fr: "SDKs" },
   navSdkJs: { en: "Node.js / JavaScript", fr: "Node.js / JavaScript" },
+  navSdkReactNative: { en: "React Native", fr: "React Native" },
   navSdkFlutter: { en: "Flutter", fr: "Flutter" },
+  navSdkPhp: { en: "PHP", fr: "PHP" },
+  navSdkJava: { en: "Java", fr: "Java" },
   navPlatformAdministration: { en: "Platform Administration", fr: "Administration de la plateforme" },
   navOrganizationProfile: { en: "Organization Profile", fr: "Profil de l'organisation" },
   navBillingPlans: { en: "Billing & Plans", fr: "Facturation et forfaits" },
@@ -2080,10 +2083,13 @@ const STRINGS = {
   },
   docsSdksTitle: { en: "Protegey SDKs — the recommended way to integrate", fr: "SDKs Protegey — la méthode d'intégration recommandée" },
   docsSdksBody: {
-    en: "One Protegey-branded package instead of hand-built API calls — for web/Node/React/Angular/React Native, and for Flutter. Both call Protegey directly from your app with your own x-api-key, and cover device intelligence, transactions and identity verification today, with more of the API surface added over time.",
-    fr: "Un seul package Protegey plutôt que des appels API construits à la main — pour web/Node/React/Angular/React Native, et pour Flutter. Les deux appellent Protegey directement depuis votre application avec votre propre x-api-key, et couvrent dès aujourd'hui l'intelligence d'appareil, les transactions et la vérification d'identité, avec le reste de la surface d'API ajouté progressivement.",
+    en: "Protegey-branded packages instead of hand-built API calls. Front-end/mobile (JavaScript for web/Node, React Native, Flutter) cover device intelligence, transactions, behavioral biometrics and identity verification — call Protegey directly from your app with your own x-api-key. Back-end-only (PHP, Java) cover transactions, identity verification, and webhook signature verification — device/behavioral are browser or mobile concepts, so they're not part of those two.",
+    fr: "Des packages Protegey plutôt que des appels API construits à la main. Front-end/mobile (JavaScript pour web/Node, React Native, Flutter) couvrent l'intelligence d'appareil, les transactions, la biométrie comportementale et la vérification d'identité — ils appellent Protegey directement depuis votre application avec votre propre x-api-key. Back-end uniquement (PHP, Java) couvrent les transactions, la vérification d'identité et la vérification de signature des webhooks — l'intelligence d'appareil et la biométrie sont des concepts navigateur/mobile, donc absents de ces deux-là.",
   },
   docsSdksSourceLink: { en: "View source on GitHub ↗", fr: "Voir le code source sur GitHub ↗" },
+  sdkExampleLink: { en: "View example app ↗", fr: "Voir l'app d'exemple ↗" },
+  sdkExampleLinkReact: { en: "View React example ↗", fr: "Voir l'exemple React ↗" },
+  sdkExampleLinkAngular: { en: "View Angular example ↗", fr: "Voir l'exemple Angular ↗" },
   docsSdksInstallGithub: { en: "Install — works today", fr: "Installation — fonctionne dès aujourd'hui" },
   docsSdksInstallFuture: { en: "Once published to a package registry", fr: "Une fois publié sur un registre de paquets" },
   docsSdksInitLabel: { en: "Initialize", fr: "Initialisation" },
@@ -2094,13 +2100,28 @@ const STRINGS = {
   // ── Dedicated SDK pages (sidebar → SDKs) ─────────────────────────────────
   sdkJsPageTitle: { en: "Node.js / JavaScript SDK", fr: "SDK Node.js / JavaScript" },
   sdkJsPageSubtitle: {
-    en: "One Protegey-branded package for Node.js, the browser (React, Angular, plain JS) and React Native — everything below works identically in all of them.",
-    fr: "Un seul package Protegey pour Node.js, le navigateur (React, Angular, JS brut) et React Native — tout ce qui suit fonctionne à l'identique partout.",
+    en: "One Protegey-branded package for Node.js and the browser (React, Angular, plain JS) — everything below works identically in all of them. Building a React Native app? Use the dedicated React Native SDK instead — it includes everything here plus an in-app identity-verification sheet.",
+    fr: "Un seul package Protegey pour Node.js et le navigateur (React, Angular, JS brut) — tout ce qui suit fonctionne à l'identique partout. Vous développez une app React Native ? Utilisez plutôt le SDK React Native dédié — il inclut tout ceci, plus un écran de vérification d'identité intégré à l'app.",
+  },
+  sdkReactNativePageTitle: { en: "React Native SDK", fr: "SDK React Native" },
+  sdkReactNativePageSubtitle: {
+    en: "Everything the JavaScript SDK offers, plus an in-app identity-verification sheet — your user never leaves your app to complete KYC.",
+    fr: "Tout ce qu'offre le SDK JavaScript, plus un écran de vérification d'identité intégré à l'app — votre utilisateur ne quitte jamais votre app pour compléter le KYC.",
   },
   sdkFlutterPageTitle: { en: "Flutter SDK", fr: "SDK Flutter" },
   sdkFlutterPageSubtitle: {
     en: "One Protegey-branded package for your Flutter app — everything below is called directly from your app with your own API key.",
     fr: "Un seul package Protegey pour votre application Flutter — tout ce qui suit est appelé directement depuis votre application avec votre propre clé API.",
+  },
+  sdkPhpPageTitle: { en: "PHP SDK", fr: "SDK PHP" },
+  sdkPhpPageSubtitle: {
+    en: "A backend-only package for your PHP server — transactions, identity verification, and webhook signature verification. No device intelligence or behavioral biometrics here; those are browser/mobile concepts, see the JavaScript, React Native, or Flutter SDKs.",
+    fr: "Un package back-end uniquement pour votre serveur PHP — transactions, vérification d'identité et vérification de signature des webhooks. Pas d'intelligence d'appareil ni de biométrie comportementale ici ; ce sont des concepts navigateur/mobile, voir les SDK JavaScript, React Native ou Flutter.",
+  },
+  sdkJavaPageTitle: { en: "Java SDK", fr: "SDK Java" },
+  sdkJavaPageSubtitle: {
+    en: "A backend-only package for your Java server — transactions, identity verification, and webhook signature verification. No device intelligence or behavioral biometrics here; those are browser/mobile concepts, see the JavaScript, React Native, or Flutter SDKs.",
+    fr: "Un package back-end uniquement pour votre serveur Java — transactions, vérification d'identité et vérification de signature des webhooks. Pas d'intelligence d'appareil ni de biométrie comportementale ici ; ce sont des concepts navigateur/mobile, voir les SDK JavaScript, React Native ou Flutter.",
   },
   docsSdksInstallLabel: { en: "Install", fr: "Installation" },
   sdkBaseUrlNote: {
@@ -2129,6 +2150,15 @@ const STRINGS = {
     en: "For the full list of possible status values and the exact webhook payload Protegey sends when a session changes, see",
     fr: "Pour la liste complète des valeurs de statut possibles et le payload exact du webhook envoyé par Protegey lors d'un changement de session, voir",
   },
+  sdkKycInAppBody: {
+    en: "One call starts the session AND shows it in a draggable bottom sheet (drag handle + Close button) — your user never leaves your app, and there's no UI code to write for that on your end.",
+    fr: "Un seul appel démarre la session ET l'affiche dans un panneau coulissant (poignée de glissement + bouton Fermer) — votre utilisateur ne quitte jamais votre app, et il n'y a aucune interface à écrire de votre côté.",
+  },
+  docsSdksCapabilityWebhookVerify: { en: "Verifying webhooks", fr: "Vérification des webhooks" },
+  sdkWebhookVerifyBody: {
+    en: "Protegey signs every outbound webhook with HMAC-SHA256 over \"{timestamp}.{rawBody}\", sent as the X-Signature and X-Timestamp headers. Verify it before trusting the payload — pass the raw request body, not a re-encoded version of it, which produces a different byte sequence and always fails to match.",
+    fr: "Protegey signe chaque webhook sortant en HMAC-SHA256 sur « {timestamp}.{rawBody} », envoyé dans les en-têtes X-Signature et X-Timestamp. Vérifiez-la avant de faire confiance au contenu — passez le corps brut de la requête, pas une version ré-encodée, qui produit une séquence d'octets différente et ne correspondra jamais.",
+  },
   sdkBehavioralBody: {
     en: "Reports one session's aggregated keystroke/touch/navigation metadata. The first few sessions for a customer come back as \"learning\" — expected, not an error.",
     fr: "Signale les métadonnées agrégées de frappe/tactile/navigation d'une session. Les premières sessions d'un client reviennent en statut « apprentissage » — c'est normal, pas une erreur.",
@@ -2137,6 +2167,10 @@ const STRINGS = {
   sdkSecurityBody: {
     en: "Your API key is used directly from your app (browser or mobile) — the same key your backend would otherwise use server-side. Keep it out of source control and public bundles the same way you would any other secret. Protegey does not perform request rate-limiting or origin/bundle-id allowlisting on your behalf today.",
     fr: "Votre clé API est utilisée directement depuis votre application (navigateur ou mobile) — la même clé que votre backend utiliserait autrement côté serveur. Gardez-la hors du contrôle de version et des bundles publics, comme tout autre secret. Protegey n'applique pas de limitation de débit ni de liste blanche d'origine/bundle-id en votre nom aujourd'hui.",
+  },
+  sdkSecurityBodyBackend: {
+    en: "Keep your API key and webhook secret out of source control, the same way you would any other secret — standard server-side credential hygiene, since this package only ever runs on your backend.",
+    fr: "Gardez votre clé API et votre secret de webhook hors du contrôle de version, comme tout autre secret — hygiène standard des identifiants côté serveur, puisque ce package ne tourne que sur votre backend.",
   },
   sdkSeeAlsoApiDocs: { en: "See the full API reference (raw HTTP, webhooks, ...)", fr: "Voir la référence API complète (HTTP brut, webhooks, ...)" },
   docsTransactionsTitle: { en: "Sending transactions for monitoring", fr: "Envoyer des transactions pour surveillance" },
