@@ -3,11 +3,11 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Loader2, Sparkles, X } from "lucide-react";
+import { Loader2, Sparkles, Trash2, X } from "lucide-react";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
-import { updateAlertRule, type AlertRule, type AlertRuleStatus, type RuleSegment } from "./actions";
+import { updateAlertRule, deleteAlertRule, type AlertRule, type AlertRuleStatus, type RuleSegment } from "./actions";
 import { RuleChatPanel } from "./RuleChatPanel";
 import { RuleDialog } from "./RuleDialog";
 import { ruleExplanation, ruleName } from "./localize";
@@ -42,6 +42,7 @@ function RuleCard({
   rule,
   onToggle,
   onOpen,
+  onDelete,
   toggling,
   t,
   lang,
@@ -49,6 +50,7 @@ function RuleCard({
   rule: AlertRule;
   onToggle: () => void;
   onOpen: () => void;
+  onDelete: () => void;
   toggling: boolean;
   t: (key: StringKey) => string;
   lang: "en" | "fr";
@@ -58,11 +60,24 @@ function RuleCard({
   return (
     <div className="flex flex-col gap-2.5 rounded-md border border-border bg-card p-3.5">
       <div className="flex items-start justify-between gap-2">
-        <div className="flex items-center gap-1.5">
-          <span className="rounded-full bg-muted px-1.5 py-0.5 font-mono text-[10px] font-semibold text-muted-foreground">#{rule.ruleNumber}</span>
-          <button type="button" onClick={onOpen} className="text-left text-sm font-semibold text-foreground hover:underline">
-            {ruleName(rule, lang)}
-          </button>
+        <div className="flex items-center gap-2">
+          {rule.partnerId !== null ? (
+            <button
+              type="button"
+              onClick={onDelete}
+              title={t("ruleDialogDeleteButton")}
+              aria-label={t("ruleDialogDeleteButton")}
+              className="flex shrink-0 items-center justify-center rounded-md bg-destructive/10 p-2 text-destructive transition-colors hover:bg-destructive hover:text-destructive-foreground"
+            >
+              <Trash2 className="size-5" />
+            </button>
+          ) : null}
+          <div className="flex items-center gap-1.5">
+            <span className="rounded-full bg-muted px-1.5 py-0.5 font-mono text-[10px] font-semibold text-muted-foreground">#{rule.ruleNumber}</span>
+            <button type="button" onClick={onOpen} className="text-left text-sm font-semibold text-foreground hover:underline">
+              {ruleName(rule, lang)}
+            </button>
+          </div>
         </div>
         <StatusPill rule={rule} t={t} />
       </div>
@@ -91,9 +106,11 @@ function RuleCard({
           {toggling ? <Loader2 className="size-3.5 animate-spin" /> : null}
           {rule.status === "active" ? t("ruleToggleOff") : t("ruleToggleOn")}
         </button>
-        <button type="button" onClick={onOpen} className="text-xs font-medium text-primary hover:underline">
-          {t("ruleEdit")}
-        </button>
+        <div className="flex items-center gap-2">
+          <button type="button" onClick={onOpen} className="text-xs font-medium text-primary hover:underline">
+            {t("ruleEdit")}
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -112,6 +129,8 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
   const [toggleError, setToggleError] = useState<string | null>(null);
   const [editingRule, setEditingRule] = useState<AlertRule | null>(null);
   const [confirmToggleRule, setConfirmToggleRule] = useState<AlertRule | null>(null);
+  const [confirmDeleteRule, setConfirmDeleteRule] = useState<AlertRule | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [justAddedRuleId, setJustAddedRuleId] = useState<string | null>(null);
   const rulesListRef = useRef<HTMLDivElement>(null);
   const justAddedRule = rules.find((r) => r.id === justAddedRuleId) ?? null;
@@ -167,6 +186,26 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
     }
   }
 
+  async function handleDelete(rule: AlertRule) {
+    setDeletingId(rule.id);
+    try {
+      const result = await guard(() => deleteAlertRule(rule.id));
+      if (result === null) return;
+      if (isError(result)) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(t("ruleDeletedToast"));
+      setConfirmDeleteRule(null);
+      // A fork's deletion falls back to the system default, which isn't in local state anymore
+      // (forking already replaced it) — a fresh server fetch is the only correct way to show it
+      // again, same as RuleDialog's onDeleted.
+      router.refresh();
+    } finally {
+      setDeletingId(null);
+    }
+  }
+
   return (
     <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,380px)_1fr]">
       <div id="pan-studio" className="scroll-mt-8 lg:h-[calc(100vh-14rem)] lg:sticky lg:top-8">
@@ -200,6 +239,7 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
                 toggling={togglingId === justAddedRule.id}
                 onToggle={() => setConfirmToggleRule(justAddedRule)}
                 onOpen={() => setEditingRule(justAddedRule)}
+                onDelete={() => setConfirmDeleteRule(justAddedRule)}
               />
             </div>
             <button
@@ -231,6 +271,7 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
                     toggling={togglingId === rule.id}
                     onToggle={() => setConfirmToggleRule(rule)}
                     onOpen={() => setEditingRule(rule)}
+                    onDelete={() => setConfirmDeleteRule(rule)}
                   />
                 ))}
               </div>
@@ -266,6 +307,21 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
         description={confirmToggleRule?.status === "active" ? t("ruleConfirmToggleOffDescription") : t("ruleConfirmToggleOnDescription")}
         confirmLabel={confirmToggleRule?.status === "active" ? t("ruleToggleOff") : t("ruleToggleOn")}
         pending={confirmToggleRule ? togglingId === confirmToggleRule.id : false}
+      />
+
+      <ConfirmActionDialog
+        open={confirmDeleteRule !== null}
+        onClose={() => setConfirmDeleteRule(null)}
+        onConfirm={async () => {
+          if (!confirmDeleteRule) return;
+          await handleDelete(confirmDeleteRule);
+        }}
+        title={t("ruleDeleteConfirmTitle")}
+        description={confirmDeleteRule?.code.startsWith("CUSTOM-") ? t("ruleDeleteConfirmDescriptionCustom") : t("ruleDeleteConfirmDescriptionFork")}
+        confirmLabel={t("ruleDialogDeleteButton")}
+        pendingLabel={t("ruleDeletingEllipsis")}
+        pending={confirmDeleteRule ? deletingId === confirmDeleteRule.id : false}
+        variant="destructive"
       />
     </div>
   );
