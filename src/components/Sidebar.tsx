@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { ChevronDown, ChevronRight } from "lucide-react";
+import { ChevronDown, ChevronRight, Menu, X } from "lucide-react";
 import { Logo } from "./Logo";
 
 export interface NavChild {
@@ -91,14 +91,51 @@ function NavGroup({ item, pathname, soonLabel }: { item: NavItem; pathname: stri
 
 export function Sidebar({ navItems, footer, soonLabel = "Soon" }: { navItems: NavItem[]; footer: React.ReactNode; soonLabel?: string }) {
   const pathname = usePathname();
+  // Off-canvas on mobile (<md), a normal static column from md: up. Closed automatically on every
+  // navigation so it never stays open covering the new page after tapping a link.
+  const [mobileOpen, setMobileOpen] = useState(false);
+  // Closes on every navigation without an effect — "adjusting state when a prop changes" is the
+  // React-recommended pattern here (derived during render, not after it), see
+  // https://react.dev/learn/you-might-not-need-an-effect.
+  const [lastPathname, setLastPathname] = useState(pathname);
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
+    setMobileOpen(false);
+  }
 
   return (
-    <aside className="flex h-svh w-64 shrink-0 flex-col overflow-y-auto border-r border-border bg-card">
-      <div className="px-4 py-5">
-        <Logo className="h-6" />
-      </div>
+    <>
+      <button
+        type="button"
+        onClick={() => setMobileOpen(true)}
+        aria-label="Open navigation"
+        className="fixed left-3 top-3 z-40 flex size-9 items-center justify-center rounded-md border border-border bg-card text-foreground shadow-sm md:hidden"
+      >
+        <Menu className="size-5" />
+      </button>
 
-      <nav className="flex flex-1 flex-col gap-1 px-3">
+      {mobileOpen ? (
+        <div className="fixed inset-0 z-50 bg-black/40 md:hidden" onClick={() => setMobileOpen(false)} aria-hidden="true" />
+      ) : null}
+
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex h-svh w-64 shrink-0 flex-col overflow-y-auto border-r border-border bg-card transition-transform duration-300 ease-out md:static md:z-auto md:translate-x-0 md:transition-none ${
+          mobileOpen ? "translate-x-0" : "-translate-x-full"
+        }`}
+      >
+        <div className="flex items-center justify-between px-4 py-5">
+          <Logo className="h-6" />
+          <button
+            type="button"
+            onClick={() => setMobileOpen(false)}
+            aria-label="Close navigation"
+            className="rounded-md p-1 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground md:hidden"
+          >
+            <X className="size-5" />
+          </button>
+        </div>
+
+        <nav className="flex flex-1 flex-col gap-1 px-3">
         {navItems.map((item) => {
           if (item.children) {
             return <NavGroup key={item.label} item={item} pathname={pathname} soonLabel={soonLabel} />;
@@ -135,9 +172,10 @@ export function Sidebar({ navItems, footer, soonLabel = "Soon" }: { navItems: Na
             </Link>
           );
         })}
-      </nav>
+        </nav>
 
-      <div className="border-t border-border p-3">{footer}</div>
-    </aside>
+        <div className="border-t border-border p-3">{footer}</div>
+      </aside>
+    </>
   );
 }

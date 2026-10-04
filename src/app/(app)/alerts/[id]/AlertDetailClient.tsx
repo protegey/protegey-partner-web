@@ -226,13 +226,15 @@ export function AlertDetailClient({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2">
-              <span className="rounded-full bg-muted px-2 py-0.5 font-mono text-xs font-semibold text-muted-foreground">#{alert.alertNumber}</span>
+              <span className="rounded-md bg-primary/15 px-2.5 py-1 font-mono text-base font-bold text-primary">#{alert.alertNumber}</span>
               <h1 className="text-lg font-semibold text-foreground">{ruleName}</h1>
+              {alert.ruleNumber ? (
+                <span className="rounded-md bg-muted px-2 py-0.5 font-mono text-xs font-bold text-foreground">#{alert.ruleNumber}</span>
+              ) : null}
               <PageGuideButton content={ALERT_DETAIL_GUIDE[lang]} />
             </div>
             <p className="mt-0.5 text-xs text-muted-foreground">
-              {new Date(alert.triggeredAt).toLocaleString(locale)} · {alert.ruleCode}
-              {alert.ruleNumber ? ` (${t("alertsColRuleNumberShort")}${alert.ruleNumber})` : ""} · {alert.externalCustomerId}
+              {new Date(alert.triggeredAt).toLocaleString(locale)} · {alert.ruleCode} · {alert.externalCustomerId}
             </p>
           </div>
           {canManage ? (

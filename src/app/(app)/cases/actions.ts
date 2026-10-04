@@ -77,6 +77,20 @@ export async function getCases(query: CasesQuery = {}): Promise<PaginatedResult<
   return apiFetch<PaginatedResult<Case>>(`/cases/me?${params.toString()}`);
 }
 
+export interface CaseStats {
+  total: number;
+  open: number;
+  investigating: number;
+  closed: number;
+  escalated: number;
+}
+
+/** Current-state snapshot of the case load, not time-windowed, scoped the same way the list
+ * itself is (own/escalated/all) — powers the KPI row at the top of the Cases page. */
+export async function getCaseStats(): Promise<CaseStats> {
+  return apiFetch<CaseStats>("/cases/me/stats");
+}
+
 export async function getCase(id: string): Promise<CaseWithNotes> {
   return apiFetch<CaseWithNotes>(`/cases/me/${id}`);
 }

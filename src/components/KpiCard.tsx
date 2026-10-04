@@ -13,7 +13,11 @@ function easeOutQuad(t: number): number {
  * or when `value` isn't a plain integer (nothing to count through in that case).
  */
 function useCountUp(value: number, durationMs = 650): number {
-  const [display, setDisplay] = useState(() => (typeof window === "undefined" ? value : 0));
+  // Always starts at `value` — identical on the server and on the client's hydration pass, so
+  // there's nothing for React to flag as a mismatch. The animation itself only ever runs from
+  // inside the effect below, which fires after hydration completes; resetting to 0 there and
+  // counting back up is a perfectly normal post-hydration re-render, not a hydration mismatch.
+  const [display, setDisplay] = useState(value);
   const started = useRef(false);
 
   useEffect(() => {
@@ -25,6 +29,7 @@ function useCountUp(value: number, durationMs = 650): number {
       return;
     }
 
+    setDisplay(0);
     let frame: number;
     const start = performance.now();
     const tick = (now: number) => {

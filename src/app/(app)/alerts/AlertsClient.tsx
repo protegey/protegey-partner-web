@@ -3,10 +3,12 @@
 import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { CalendarClock, CircleCheck, CircleX, ShieldAlert, ShieldQuestion } from "lucide-react";
 import { Eye } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
-import type { AlertDecisionVerdict, AlertStatus, AlertWithContext } from "./actions";
+import { KpiCard } from "@/components/KpiCard";
+import type { AlertDecisionVerdict, AlertStats, AlertStatus, AlertWithContext } from "./actions";
 import type { StringKey } from "@/lib/i18n/strings";
 import type { TeamMember } from "../team/actions";
 import type { PaginatedResult } from "../transactions/actions";
@@ -65,12 +67,14 @@ export function AlertsClient({
   initialStatus,
   initialAlertNumber,
   teamMembers,
+  stats,
 }: {
   result: PaginatedResult<AlertWithContext>;
   page: number;
   initialStatus: string;
   initialAlertNumber: string;
   teamMembers: TeamMember[];
+  stats: AlertStats | null;
 }) {
   const router = useRouter();
   const { t, lang } = useLang();
@@ -112,6 +116,28 @@ export function AlertsClient({
         </div>
         <p className="text-sm text-muted-foreground">{t("alertsPageSubtitle")}</p>
       </div>
+
+      {stats ? (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <KpiCard icon={<ShieldAlert className="size-4 text-primary" />} label={t("alertsKpiTotal")} value={stats.total} locale={locale} delayMs={0} />
+          <KpiCard icon={<ShieldQuestion className="size-4 text-amber-600" />} label={t("alertsKpiOpen")} value={stats.open} locale={locale} delayMs={40} />
+          <KpiCard
+            icon={<CircleCheck className="size-4 text-destructive" />}
+            label={t("alertsKpiConfirmed")}
+            value={stats.confirmed}
+            locale={locale}
+            delayMs={80}
+          />
+          <KpiCard icon={<CircleX className="size-4 text-muted-foreground" />} label={t("alertsKpiDismissed")} value={stats.dismissed} locale={locale} delayMs={120} />
+          <KpiCard
+            icon={<CalendarClock className="size-4 text-orange-600" />}
+            label={t("alertsKpiDueToday")}
+            value={stats.dueToday}
+            locale={locale}
+            delayMs={160}
+          />
+        </div>
+      ) : null}
 
       <div className="flex items-end gap-3">
         <div className="flex flex-col gap-1">
@@ -170,15 +196,19 @@ export function AlertsClient({
                     className="animate-fade-in-up cursor-pointer border-t border-border transition-colors hover:bg-muted/40"
                     style={{ animationDelay: `${Math.min(idx, 12) * 25}ms` }}
                   >
-                    <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground">#{alert.alertNumber}</td>
                     <td className="px-3 py-2.5">
-                      <Link href={`/alerts/${alert.id}`} onClick={(e) => e.stopPropagation()} className="font-medium text-foreground hover:underline">
-                        {ruleName}
-                      </Link>
-                      <p className="text-xs text-muted-foreground">
-                        {alert.ruleCode}
-                        {alert.ruleNumber ? ` · ${t("alertsColRuleNumberShort")}${alert.ruleNumber}` : ""}
-                      </p>
+                      <span className="rounded-md bg-primary/15 px-2 py-1 font-mono text-sm font-bold text-primary">#{alert.alertNumber}</span>
+                    </td>
+                    <td className="px-3 py-2.5">
+                      <div className="flex items-center gap-1.5">
+                        {alert.ruleNumber ? (
+                          <span className="rounded-md bg-muted px-1.5 py-0.5 font-mono text-xs font-bold text-foreground">#{alert.ruleNumber}</span>
+                        ) : null}
+                        <Link href={`/alerts/${alert.id}`} onClick={(e) => e.stopPropagation()} className="font-medium text-foreground hover:underline">
+                          {ruleName}
+                        </Link>
+                      </div>
+                      <p className="text-xs text-muted-foreground">{alert.ruleCode}</p>
                     </td>
                     <td className="px-3 py-2.5 font-mono text-xs text-foreground">{alert.externalCustomerId}</td>
                     <td className="px-3 py-2.5 text-xs text-foreground">

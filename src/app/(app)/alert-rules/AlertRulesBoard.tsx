@@ -72,8 +72,8 @@ function RuleCard({
               <Trash2 className="size-5" />
             </button>
           ) : null}
-          <div className="flex items-center gap-1.5">
-            <span className="rounded-full bg-muted px-1.5 py-0.5 font-mono text-[10px] font-semibold text-muted-foreground">#{rule.ruleNumber}</span>
+          <div className="flex items-center gap-2">
+            <span className="rounded-md bg-primary/15 px-2 py-1 font-mono text-sm font-bold text-primary">#{rule.ruleNumber}</span>
             <button type="button" onClick={onOpen} className="text-left text-sm font-semibold text-foreground hover:underline">
               {ruleName(rule, lang)}
             </button>

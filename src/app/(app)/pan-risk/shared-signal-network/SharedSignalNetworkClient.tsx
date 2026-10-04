@@ -229,7 +229,11 @@ export function SharedSignalNetworkClient({
               </thead>
               <tbody className="divide-y divide-border">
                 {result.data.map((report) => (
-                  <tr key={report.id} className="transition-colors hover:bg-muted/50">
+                  <tr
+                    key={report.id}
+                    onClick={() => router.push(`/cases/${report.sourceCaseId}`)}
+                    className="cursor-pointer transition-colors hover:bg-muted/50"
+                  >
                     <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">
                       {new Date(report.reportedAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
                     </td>
@@ -237,14 +241,13 @@ export function SharedSignalNetworkClient({
                     <td className="px-4 py-2.5 text-foreground">{categoryLabel(report.category)}</td>
                     <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{report.id}</td>
                     <td className="px-4 py-2.5 text-xs">
-                      <Link href={`/cases/${report.sourceCaseId}`} className="flex flex-col hover:underline">
-                        <span className="font-mono font-medium text-foreground">{report.externalCustomerId ?? "—"}</span>
-                        {report.sourceCaseTitle ? <span className="text-muted-foreground">{report.sourceCaseTitle}</span> : null}
-                      </Link>
+                      <span className="font-mono font-medium text-foreground">{report.externalCustomerId ?? "—"}</span>
+                      {report.sourceCaseTitle ? <p className="text-muted-foreground">{report.sourceCaseTitle}</p> : null}
                     </td>
                     <td className="px-4 py-2.5 text-right">
                       <Link
-                        href={`/pan-risk/shared-signal-network/${report.id}`}
+                        href={`/cases/${report.sourceCaseId}`}
+                        onClick={(event) => event.stopPropagation()}
                         className="ml-auto flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
                       >
                         <Eye className="size-3.5" />

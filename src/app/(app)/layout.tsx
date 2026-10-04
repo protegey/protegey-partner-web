@@ -223,13 +223,13 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           }
         />
         <div className="flex flex-1 flex-col overflow-hidden">
-          <header className="flex items-center justify-end gap-2 border-b border-border px-8 py-3">
+          <header className="flex items-center justify-end gap-2 border-b border-border py-3 pl-16 pr-4 md:px-6 lg:px-8">
             <NotificationBellLink ariaLabel={t(lang, "notificationsBellAria")} />
             <ThemeToggle />
             <LangToggle />
             <SignOutButton className="rounded-md border border-border px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-muted" />
           </header>
-          <main className="relative flex-1 overflow-y-auto px-8 py-8">
+          <main className="relative flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
             {partner?.status === "suspended" ? (
               <div className="mb-4 flex items-start gap-3 rounded-md border border-destructive/30 bg-destructive/10 p-4">
                 <ShieldAlert className="mt-0.5 size-5 shrink-0 text-destructive" />

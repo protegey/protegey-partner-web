@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { getAlerts } from "./actions";
+import { getAlerts, getAlertStats } from "./actions";
 import type { AlertStatus } from "./actions";
 import { getAssignableTeamMembers } from "../team/actions";
 import { AlertsClient } from "./AlertsClient";
@@ -25,9 +25,10 @@ export default async function AlertsPage({
   const page = Math.max(1, Number(pageParam) || 1);
   const alertNumber = alertNumberParam ? Number(alertNumberParam) : undefined;
 
-  const [result, teamMembers] = await Promise.all([
+  const [result, teamMembers, stats] = await Promise.all([
     getAlerts({ page, status: status as AlertStatus | undefined, alertNumber }),
     getAssignableTeamMembers("partners.manage_alerts"),
+    getAlertStats().catch(() => null),
   ]);
 
   return (
@@ -44,6 +45,7 @@ export default async function AlertsPage({
         initialStatus={status ?? "all"}
         initialAlertNumber={alertNumberParam ?? ""}
         teamMembers={teamMembers}
+        stats={stats}
       />
     </Suspense>
   );

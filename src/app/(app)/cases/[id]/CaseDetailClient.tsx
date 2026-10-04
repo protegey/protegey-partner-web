@@ -288,7 +288,7 @@ export function CaseDetailClient({
           {t("caseBackToList")}
         </button>
         <div className="mt-1 flex items-center gap-3">
-          <span className="rounded-full bg-muted px-2 py-0.5 font-mono text-xs font-semibold text-muted-foreground" title={t("caseDetailCaseNumber")}>
+          <span className="rounded-md bg-primary/15 px-2.5 py-1 font-mono text-base font-bold text-primary" title={t("caseDetailCaseNumber")}>
             #{kase.caseNumber}
           </span>
           <h1 className="text-xl font-semibold text-foreground">{kase.title}</h1>

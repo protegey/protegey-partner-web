@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getCases, type CaseStatus } from "./actions";
+import { getCases, getCaseStats, type CaseStatus } from "./actions";
 import { CasesClient } from "./CasesClient";
 import { getLang } from "@/lib/i18n/lang";
 import { getSessionUser } from "@/lib/session";
@@ -22,7 +22,10 @@ export default async function CasesPage({
   const page = Math.max(1, Number(pageParam) || 1);
   const caseNumber = caseNumberParam ? Number(caseNumberParam) : undefined;
 
-  const result = await getCases({ page, status: status as CaseStatus | undefined, externalCustomerId: customer, caseNumber });
+  const [result, stats] = await Promise.all([
+    getCases({ page, status: status as CaseStatus | undefined, externalCustomerId: customer, caseNumber }),
+    getCaseStats().catch(() => null),
+  ]);
 
   return (
     <CasesClient
@@ -31,6 +34,7 @@ export default async function CasesPage({
       initialStatus={status ?? "all"}
       initialCustomer={customer ?? ""}
       initialCaseNumber={caseNumberParam ?? ""}
+      stats={stats}
     />
   );
 }

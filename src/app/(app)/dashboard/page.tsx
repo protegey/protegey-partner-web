@@ -11,7 +11,7 @@ import { getAlerts } from "../alerts/actions";
 import { getNotifications } from "../notifications/actions";
 import { getUsageSummary } from "../settings/usage/actions";
 import { DashboardCharts } from "./DashboardCharts";
-import { KpiCard } from "./KpiCard";
+import { KpiCard } from "@/components/KpiCard";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import { describeEvent } from "@/lib/events";

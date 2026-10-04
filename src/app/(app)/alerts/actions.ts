@@ -66,6 +66,21 @@ export async function getAlerts(query: AlertsQuery = {}): Promise<PaginatedResul
   return apiFetch<PaginatedResult<AlertWithContext>>(`/alerts/me?${params.toString()}`);
 }
 
+export interface AlertStats {
+  total: number;
+  open: number;
+  moreInfoRequested: number;
+  confirmed: number;
+  dismissed: number;
+  dueToday: number;
+}
+
+/** Current-state snapshot of the whole queue, not time-windowed — powers the KPI row at the top
+ * of the Alerts page so landing there shows what's happening at a glance. */
+export async function getAlertStats(): Promise<AlertStats> {
+  return apiFetch<AlertStats>("/alerts/me/stats");
+}
+
 export async function getAlert(id: string): Promise<AlertWithContext> {
   return apiFetch<AlertWithContext>(`/alerts/me/${id}`);
 }

@@ -3,10 +3,11 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { Briefcase, Eye, Plus } from "lucide-react";
+import { Briefcase, CircleCheck, Eye, FolderOpen, Plus, Search, TrendingUp } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
-import type { Case } from "./actions";
+import { KpiCard } from "@/components/KpiCard";
+import type { Case, CaseStats } from "./actions";
 import type { PaginatedResult } from "../transactions/actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
@@ -66,15 +67,18 @@ export function CasesClient({
   initialStatus,
   initialCustomer,
   initialCaseNumber,
+  stats,
 }: {
   result: PaginatedResult<Case>;
   page: number;
   initialStatus: string;
   initialCustomer: string;
   initialCaseNumber: string;
+  stats: CaseStats | null;
 }) {
   const router = useRouter();
   const { t, lang } = useLang();
+  const locale = lang === "fr" ? "fr-FR" : "en-US";
   const [, startTransition] = useTransition();
   const [status, setStatus] = useState(initialStatus);
   const [customer, setCustomer] = useState(initialCustomer);
@@ -120,6 +124,16 @@ export function CasesClient({
           {t("casesNewButton")}
         </Link>
       </div>
+
+      {stats ? (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+          <KpiCard icon={<Briefcase className="size-4 text-primary" />} label={t("casesKpiTotal")} value={stats.total} locale={locale} delayMs={0} />
+          <KpiCard icon={<FolderOpen className="size-4 text-amber-600" />} label={t("casesKpiOpen")} value={stats.open} locale={locale} delayMs={40} />
+          <KpiCard icon={<Search className="size-4 text-blue-600" />} label={t("casesKpiInvestigating")} value={stats.investigating} locale={locale} delayMs={80} />
+          <KpiCard icon={<CircleCheck className="size-4 text-muted-foreground" />} label={t("casesKpiClosed")} value={stats.closed} locale={locale} delayMs={120} />
+          <KpiCard icon={<TrendingUp className="size-4 text-destructive" />} label={t("casesKpiEscalated")} value={stats.escalated} locale={locale} delayMs={160} />
+        </div>
+      ) : null}
 
       <div className="flex flex-wrap items-end gap-3 rounded-md border border-border bg-card p-4">
         <div className="flex flex-col gap-1">
@@ -193,7 +207,9 @@ export function CasesClient({
             <tbody className="divide-y divide-border">
               {result.data.map((kase) => (
                 <tr key={kase.id} onClick={() => router.push(`/cases/${kase.id}`)} className="cursor-pointer hover:bg-muted/50">
-                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">#{kase.caseNumber}</td>
+                  <td className="px-4 py-2.5">
+                    <span className="rounded-md bg-primary/15 px-2 py-1 font-mono text-sm font-bold text-primary">#{kase.caseNumber}</span>
+                  </td>
                   <td className="px-4 py-2.5 font-medium text-foreground">{kase.title}</td>
                   <td className="px-4 py-2.5 text-foreground">{kase.externalCustomerId}</td>
                   <td className="px-4 py-2.5">
