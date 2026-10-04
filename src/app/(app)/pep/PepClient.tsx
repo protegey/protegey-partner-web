@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { ChevronDown, Loader2, UserSearch } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
@@ -77,10 +78,26 @@ export function PepClient({ designations, initialStatus }: { designations: PepDe
     startTransition(() => router.refresh());
   }
 
+  const baseFieldClass =
+    "w-full rounded-md border border-border bg-background px-3 text-sm text-foreground outline-none transition-colors placeholder:text-muted-foreground/70 focus:border-primary focus:ring-2 focus:ring-ring";
+  const inputClass = `${baseFieldClass} h-10`;
+  const selectClass = `${baseFieldClass} h-10 appearance-none pr-9`;
+  const textareaClass = `${baseFieldClass} min-h-24 resize-y py-2.5`;
+  const labelClass = "flex flex-col gap-1.5 text-sm font-medium text-foreground";
+
   const field = (name: keyof typeof form, label: string, placeholderKey?: StringKey, required = false) => (
-    <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">
-      {label}
-      <input required={required} value={form[name]} onChange={(event) => setForm((current) => ({ ...current, [name]: event.target.value }))} placeholder={placeholderKey ? t(placeholderKey) : undefined} className="rounded-md border border-border bg-background px-3 py-2 text-sm font-normal text-foreground outline-none focus:ring-2 focus:ring-ring" />
+    <label className={labelClass}>
+      <span>
+        {label}
+        {required ? <span className="ml-0.5 text-destructive">*</span> : null}
+      </span>
+      <input
+        required={required}
+        value={form[name]}
+        onChange={(event) => setForm((current) => ({ ...current, [name]: event.target.value }))}
+        placeholder={placeholderKey ? t(placeholderKey) : undefined}
+        className={inputClass}
+      />
     </label>
   );
 
@@ -95,19 +112,73 @@ export function PepClient({ designations, initialStatus }: { designations: PepDe
       </div>
 
       <form onSubmit={create} className="rounded-md border border-border bg-card p-5">
-        <h2 className="mb-4 text-sm font-semibold text-foreground">{t("pepCreateTitle")}</h2>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {field("externalCustomerId", t("pepCustomerId"), "pepCustomerIdPlaceholder", true)}
-          <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">{t("pepStatus")}
-            <select value={form.status} onChange={(event) => setForm((current) => ({ ...current, status: event.target.value as PepStatus }))} className="rounded-md border border-border bg-background px-3 py-2 text-sm font-normal text-foreground">{statuses.map((value) => <option key={value} value={value}>{t(`pepStatus_${value}` as never)}</option>)}</select>
-          </label>
-          <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">{t("pepCategory")}
-            <select value={form.category} onChange={(event) => setForm((current) => ({ ...current, category: event.target.value as PepCategory }))} className="rounded-md border border-border bg-background px-3 py-2 text-sm font-normal text-foreground">{categories.map((value) => <option key={value} value={value}>{t(`pepCategory_${value}` as never)}</option>)}</select>
-          </label>
-          {field("role", t("pepRole"), "pepRolePlaceholder")}{field("jurisdiction", t("pepJurisdiction"), "pepJurisdictionPlaceholder")}{field("source", t("pepSource"), "pepSourcePlaceholder", true)}
-          <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground sm:col-span-2">{t("pepNotes")}<textarea value={form.notes} onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))} placeholder={t("pepNotesPlaceholder")} className="min-h-20 rounded-md border border-border bg-background px-3 py-2 text-sm font-normal text-foreground outline-none focus:ring-2 focus:ring-ring" /></label>
+        <div className="mb-5 flex items-center gap-3">
+          <div className="flex size-9 shrink-0 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <UserSearch className="size-4.5" />
+          </div>
+          <h2 className="text-sm font-semibold text-foreground">{t("pepCreateTitle")}</h2>
         </div>
-        <div className="mt-4 flex items-center justify-between gap-3">{error ? <p className="text-sm text-destructive">{error}</p> : <span />}{<button disabled={isPending} className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground disabled:opacity-60">{t("pepCreateButton")}</button>}</div>
+
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {field("externalCustomerId", t("pepCustomerId"), "pepCustomerIdPlaceholder", true)}
+
+          <label className={labelClass}>
+            <span>{t("pepStatus")}</span>
+            <div className="relative">
+              <select
+                value={form.status}
+                onChange={(event) => setForm((current) => ({ ...current, status: event.target.value as PepStatus }))}
+                className={selectClass}
+              >
+                {statuses.map((value) => (
+                  <option key={value} value={value}>{t(`pepStatus_${value}` as never)}</option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            </div>
+          </label>
+
+          <label className={labelClass}>
+            <span>{t("pepCategory")}</span>
+            <div className="relative">
+              <select
+                value={form.category}
+                onChange={(event) => setForm((current) => ({ ...current, category: event.target.value as PepCategory }))}
+                className={selectClass}
+              >
+                {categories.map((value) => (
+                  <option key={value} value={value}>{t(`pepCategory_${value}` as never)}</option>
+                ))}
+              </select>
+              <ChevronDown className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+            </div>
+          </label>
+
+          {field("source", t("pepSource"), "pepSourcePlaceholder", true)}
+          {field("role", t("pepRole"), "pepRolePlaceholder")}
+          {field("jurisdiction", t("pepJurisdiction"), "pepJurisdictionPlaceholder")}
+
+          <label className={`${labelClass} sm:col-span-2 lg:col-span-3`}>
+            <span>{t("pepNotes")}</span>
+            <textarea
+              value={form.notes}
+              onChange={(event) => setForm((current) => ({ ...current, notes: event.target.value }))}
+              placeholder={t("pepNotesPlaceholder")}
+              className={textareaClass}
+            />
+          </label>
+        </div>
+
+        <div className="mt-5 flex items-center justify-between gap-3 border-t border-border pt-4">
+          {error ? <p className="text-sm text-destructive">{error}</p> : <span />}
+          <button
+            disabled={isPending}
+            className="flex items-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+          >
+            {isPending ? <Loader2 className="size-4 animate-spin" /> : null}
+            {t("pepCreateButton")}
+          </button>
+        </div>
       </form>
 
       <div className="flex items-center justify-between gap-3"><h2 className="text-sm font-semibold text-foreground">{t("pepListTitle")}</h2><select value={statusFilter} onChange={(event) => filterChanged(event.target.value)} className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground"><option value="all">{t("pepAllStatuses")}</option>{statuses.map((value) => <option key={value} value={value}>{t(`pepStatus_${value}` as never)}</option>)}</select></div>
