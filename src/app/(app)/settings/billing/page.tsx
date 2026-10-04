@@ -75,6 +75,16 @@ export default async function BillingPage() {
                   {Number(contract.includedTransactions).toLocaleString(locale)}
                 </dd>
               </div>
+              {contract.bonusRecurrence !== "none" ? (
+                <div>
+                  <dt className="text-xs text-muted-foreground">
+                    {contract.bonusRecurrence === "monthly" ? t(lang, "contractFieldBonusMonthly") : t(lang, "contractFieldBonusOnce")}
+                  </dt>
+                  <dd className="mt-0.5 text-lg font-semibold tabular-nums text-primary">
+                    {Number(contract.bonusTransactions).toLocaleString(locale)}
+                  </dd>
+                </div>
+              ) : null}
               <div>
                 <dt className="text-xs text-muted-foreground">{t(lang, "contractFieldOverageRate")}</dt>
                 <dd className="mt-0.5 text-lg font-semibold text-foreground">
@@ -113,6 +123,32 @@ export default async function BillingPage() {
                   </p>
                 </div>
               </div>
+
+              {usage.bonusRecurrence !== "none" ? (
+                <div className="mt-3 grid grid-cols-2 gap-4 rounded-md border border-primary/20 bg-primary/5 p-3">
+                  <div>
+                    <p className="text-xs text-muted-foreground">
+                      {usage.bonusRecurrence === "monthly" ? t(lang, "billingUsageBonusAppliedMonthlyLabel") : t(lang, "billingUsageBonusAppliedOnceLabel")}
+                    </p>
+                    <p className="text-lg font-semibold tabular-nums text-primary">{usage.bonusApplied.toLocaleString(locale)}</p>
+                  </div>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t(lang, "billingUsageEffectiveOverageLabel")}</p>
+                    <p
+                      className={`text-lg font-semibold tabular-nums ${usage.effectiveOverageTransactions > 0 ? "text-destructive" : "text-foreground"}`}
+                    >
+                      {usage.effectiveOverageTransactions.toLocaleString(locale)}
+                    </p>
+                  </div>
+                  {usage.bonusRecurrence === "once" ? (
+                    <p className="col-span-2 text-[11px] text-muted-foreground">
+                      {t(lang, "billingUsageBonusRemainingBefore")}
+                      {Number(contract.bonusTransactionsRemaining ?? "0").toLocaleString(locale)}
+                      {t(lang, "billingUsageBonusRemainingAfter")}
+                    </p>
+                  ) : null}
+                </div>
+              ) : null}
 
               <div className="mt-3 h-2 w-full overflow-hidden rounded-full bg-muted">
                 <div

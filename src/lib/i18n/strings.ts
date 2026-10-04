@@ -2063,6 +2063,8 @@ const STRINGS = {
   contractFieldStandardMonthlyFee: { en: "Standard monthly fee", fr: "Prix standard mensuel" },
   contractFieldDiscount: { en: "Discount", fr: "Remise" },
   contractFieldIncludedTransactions: { en: "Included transactions / month", fr: "Transactions incluses / mois" },
+  contractFieldBonusOnce: { en: "Welcome bonus (one-time)", fr: "Bonus de bienvenue (unique)" },
+  contractFieldBonusMonthly: { en: "Bonus transactions / month", fr: "Transactions offertes / mois" },
   contractFieldOverageRate: { en: "Overage rate (per transaction)", fr: "Tarif de dépassement (par transaction)" },
   contractFieldPaymentTerms: { en: "Payment terms", fr: "Délai de paiement" },
   contractPaymentTermsDaysSuffix: { en: "days", fr: "jours" },
@@ -2078,6 +2080,11 @@ const STRINGS = {
   billingUsageOverageLabel: { en: "Overage", fr: "Dépassement" },
   billingUsageCyclePeriodBefore: { en: "Current cycle: ", fr: "Cycle en cours : " },
   billingUsageCyclePeriodJoiner: { en: " to ", fr: " au " },
+  billingUsageBonusAppliedOnceLabel: { en: "Welcome bonus applied", fr: "Bonus de bienvenue appliqué" },
+  billingUsageBonusAppliedMonthlyLabel: { en: "Monthly bonus applied", fr: "Bonus mensuel appliqué" },
+  billingUsageEffectiveOverageLabel: { en: "Billable overage", fr: "Dépassement facturable" },
+  billingUsageBonusRemainingBefore: { en: "Welcome bonus remaining: ", fr: "Bonus de bienvenue restant : " },
+  billingUsageBonusRemainingAfter: { en: " transactions.", fr: " transactions." },
 
   // ── Usage & Quotas page ──────────────────────────────────────────────────
   usagePageTitle: { en: "Usage & Quotas", fr: "Utilisation et quotas" },

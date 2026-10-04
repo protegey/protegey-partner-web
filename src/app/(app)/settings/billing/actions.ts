@@ -4,12 +4,18 @@ import { apiFetch } from "@/lib/api";
 
 export type ContractDiscountType = "percent" | "fixed";
 
+/** See ContractBonusRecurrence on the backend entity for the full semantics of each value. */
+export type ContractBonusRecurrence = "none" | "once" | "monthly";
+
 export interface PartnerContract {
   id: string;
   standardMonthlyFee: string;
   discountType: ContractDiscountType;
   discountValue: string;
   includedTransactions: string;
+  bonusTransactions: string;
+  bonusRecurrence: ContractBonusRecurrence;
+  bonusTransactionsRemaining: string | null;
   overageRate: string;
   paymentTermsDays: number;
   taxRate: string;
@@ -22,6 +28,9 @@ export interface ContractCycleUsage {
   includedTransactions: string;
   consumedTransactions: number;
   overageTransactions: number;
+  bonusRecurrence: ContractBonusRecurrence;
+  bonusApplied: number;
+  effectiveOverageTransactions: number;
   percentUsed: number;
 }
 
