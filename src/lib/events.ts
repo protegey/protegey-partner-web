@@ -117,21 +117,32 @@ export function describeEvent(lang: Lang, event: NotificationEvent): string {
     case "kyb.decision_more_info":
       return interpolate(t(lang, "eventKybMoreInfo"), { actor, businessName: str("businessName") });
     case "rule.created":
-      return interpolate(t(lang, "eventRuleCreated"), { actor, ruleName: str("ruleName") });
+      return interpolate(t(lang, "eventRuleCreated"), { actor, ruleName: str("ruleName"), ruleNumber: str("ruleNumber") });
     case "rule.activated":
-      return interpolate(t(lang, "eventRuleActivated"), { actor, ruleName: str("ruleName") });
+      return interpolate(t(lang, "eventRuleActivated"), { actor, ruleName: str("ruleName"), ruleNumber: str("ruleNumber") });
     case "rule.disabled":
-      return interpolate(t(lang, "eventRuleDisabled"), { actor, ruleName: str("ruleName") });
+      return interpolate(t(lang, "eventRuleDisabled"), { actor, ruleName: str("ruleName"), ruleNumber: str("ruleNumber") });
     case "rule.deleted":
-      return interpolate(t(lang, "eventRuleDeleted"), { actor, ruleName: str("ruleName") });
+      return interpolate(t(lang, "eventRuleDeleted"), { actor, ruleName: str("ruleName"), ruleNumber: str("ruleNumber") });
     case "alert.created":
-      return interpolate(t(lang, "eventAlertCreated"), { ruleName: str("ruleName"), customerLabel: str("customerLabel") });
+      return interpolate(t(lang, "eventAlertCreated"), {
+        ruleName: str("ruleName"),
+        ruleNumber: str("ruleNumber"),
+        alertNumber: str("alertNumber"),
+        customerLabel: str("customerLabel"),
+      });
     case "transaction.blocked":
       return interpolate(t(lang, "eventTransactionBlocked"), { customerLabel: str("customerLabel"), amount: str("amount"), currency: str("currency") });
     case "alert.status_changed": {
       const statusKey = STATUS_KEY[str("status")];
       const statusLabel = statusKey ? t(lang, statusKey) : str("status");
-      return interpolate(t(lang, "eventAlertStatusChanged"), { actor, ruleName: str("ruleName"), status: statusLabel });
+      return interpolate(t(lang, "eventAlertStatusChanged"), {
+        actor,
+        ruleName: str("ruleName"),
+        ruleNumber: str("ruleNumber"),
+        alertNumber: str("alertNumber"),
+        status: statusLabel,
+      });
     }
     case "api_key.generated":
       return interpolate(t(lang, "eventApiKeyGenerated"), { actor });
@@ -143,20 +154,20 @@ export function describeEvent(lang: Lang, event: NotificationEvent): string {
       return interpolate(t(lang, "eventDeviceSignalFlagged"), { customerLabel: str("customerLabel"), deviceAction: actionLabel });
     }
     case "case.created":
-      return interpolate(t(lang, "eventCaseCreated"), { actor, customerLabel: str("customerLabel"), title: str("title") });
+      return interpolate(t(lang, "eventCaseCreated"), { actor, caseNumber: str("caseNumber"), customerLabel: str("customerLabel"), title: str("title") });
     case "case.note_added":
-      return interpolate(t(lang, "eventCaseNoteAdded"), { actor, title: str("title") });
+      return interpolate(t(lang, "eventCaseNoteAdded"), { actor, caseNumber: str("caseNumber"), title: str("title") });
     case "case.assigned":
-      return interpolate(t(lang, "eventCaseAssigned"), { actor, title: str("title") });
+      return interpolate(t(lang, "eventCaseAssigned"), { actor, caseNumber: str("caseNumber"), title: str("title") });
     case "case.status_changed": {
       const statusKey = CASE_STATUS_KEY[str("status")];
       const statusLabel = statusKey ? t(lang, statusKey) : str("status");
-      return interpolate(t(lang, "eventCaseStatusChanged"), { actor, title: str("title"), status: statusLabel });
+      return interpolate(t(lang, "eventCaseStatusChanged"), { actor, caseNumber: str("caseNumber"), title: str("title"), status: statusLabel });
     }
     case "case.closed": {
       const outcomeKey = CASE_OUTCOME_KEY[str("outcome")];
       const outcomeLabel = outcomeKey ? t(lang, outcomeKey) : str("outcome");
-      return interpolate(t(lang, "eventCaseClosed"), { actor, title: str("title"), outcome: outcomeLabel });
+      return interpolate(t(lang, "eventCaseClosed"), { actor, caseNumber: str("caseNumber"), title: str("title"), outcome: outcomeLabel });
     }
     case "sar.submitted":
       return interpolate(t(lang, "eventSarSubmitted"), { actor });

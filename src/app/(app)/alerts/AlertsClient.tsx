@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState, useTransition, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Eye } from "lucide-react";
@@ -63,17 +63,20 @@ export function AlertsClient({
   result,
   page,
   initialStatus,
+  initialAlertNumber,
   teamMembers,
 }: {
   result: PaginatedResult<AlertWithContext>;
   page: number;
   initialStatus: string;
+  initialAlertNumber: string;
   teamMembers: TeamMember[];
 }) {
   const router = useRouter();
   const { t, lang } = useLang();
   const [, startTransition] = useTransition();
   const [status, setStatus] = useState(initialStatus);
+  const [alertNumberInput, setAlertNumberInput] = useState(initialAlertNumber);
   const locale = lang === "fr" ? "fr-FR" : "en-US";
 
   const statusLabel: Record<AlertStatus, string> = {
@@ -83,11 +86,21 @@ export function AlertsClient({
     dismissed: t("alertsStatusDismissed"),
   };
 
+  function pushFilters(nextStatus: string, nextAlertNumber: string) {
+    const params = new URLSearchParams();
+    if (nextStatus !== "all") params.set("status", nextStatus);
+    if (nextAlertNumber.trim()) params.set("alertNumber", nextAlertNumber.trim());
+    startTransition(() => router.push(`/alerts?${params.toString()}`));
+  }
+
   function applyStatusFilter(next: string) {
     setStatus(next);
-    const params = new URLSearchParams();
-    if (next !== "all") params.set("status", next);
-    startTransition(() => router.push(`/alerts?${params.toString()}`));
+    pushFilters(next, alertNumberInput);
+  }
+
+  function applyAlertNumberFilter(event: FormEvent) {
+    event.preventDefault();
+    pushFilters(status, alertNumberInput);
   }
 
   return (
@@ -115,6 +128,17 @@ export function AlertsClient({
             <option value="dismissed">{t("alertsStatusDismissed")}</option>
           </select>
         </div>
+        <form onSubmit={applyAlertNumberFilter} className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-muted-foreground">{t("alertsFilterNumberLabel")}</label>
+          <input
+            type="number"
+            min={1}
+            value={alertNumberInput}
+            onChange={(e) => setAlertNumberInput(e.target.value)}
+            placeholder={t("alertsFilterNumberPlaceholder")}
+            className="w-32 rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          />
+        </form>
       </div>
 
       {result.data.length === 0 ? (
@@ -124,6 +148,7 @@ export function AlertsClient({
           <table className="w-full min-w-[840px] text-left text-sm">
             <thead className="bg-muted/40 text-xs font-medium uppercase tracking-wide text-muted-foreground">
               <tr>
+                <th className="px-3 py-2">{t("alertsColNumber")}</th>
                 <th className="px-3 py-2">{t("alertsColRule")}</th>
                 <th className="px-3 py-2">{t("alertsColCustomer")}</th>
                 <th className="px-3 py-2">{t("alertsColTransaction")}</th>
@@ -145,11 +170,15 @@ export function AlertsClient({
                     className="animate-fade-in-up cursor-pointer border-t border-border transition-colors hover:bg-muted/40"
                     style={{ animationDelay: `${Math.min(idx, 12) * 25}ms` }}
                   >
+                    <td className="px-3 py-2.5 font-mono text-xs text-muted-foreground">#{alert.alertNumber}</td>
                     <td className="px-3 py-2.5">
                       <Link href={`/alerts/${alert.id}`} onClick={(e) => e.stopPropagation()} className="font-medium text-foreground hover:underline">
                         {ruleName}
                       </Link>
-                      <p className="text-xs text-muted-foreground">{alert.ruleCode}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {alert.ruleCode}
+                        {alert.ruleNumber ? ` · ${t("alertsColRuleNumberShort")}${alert.ruleNumber}` : ""}
+                      </p>
                     </td>
                     <td className="px-3 py-2.5 font-mono text-xs text-foreground">{alert.externalCustomerId}</td>
                     <td className="px-3 py-2.5 text-xs text-foreground">
@@ -201,6 +230,7 @@ export function AlertsClient({
         onPageChange={(nextPage) => {
           const params = new URLSearchParams();
           if (status !== "all") params.set("status", status);
+          if (alertNumberInput.trim()) params.set("alertNumber", alertNumberInput.trim());
           params.set("page", String(nextPage));
           startTransition(() => router.push(`/alerts?${params.toString()}`));
         }}

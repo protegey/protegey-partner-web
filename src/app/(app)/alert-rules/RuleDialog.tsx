@@ -130,7 +130,7 @@ export function RuleDialog({
   }
 
   return (
-    <Dialog open onClose={onClose} title={`${ruleName(rule, lang)} (${rule.code})`} maxWidthClassName="max-w-2xl" closeAriaLabel={t("close")}>
+    <Dialog open onClose={onClose} title={`#${rule.ruleNumber} — ${ruleName(rule, lang)} (${rule.code})`} maxWidthClassName="max-w-2xl" closeAriaLabel={t("close")}>
       <div className="flex flex-col gap-6">
         <div>
           <p className="text-xs font-medium uppercase text-muted-foreground">{t("ruleDialogDescriptionLabel")}</p>

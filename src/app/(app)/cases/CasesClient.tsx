@@ -65,17 +65,20 @@ export function CasesClient({
   page,
   initialStatus,
   initialCustomer,
+  initialCaseNumber,
 }: {
   result: PaginatedResult<Case>;
   page: number;
   initialStatus: string;
   initialCustomer: string;
+  initialCaseNumber: string;
 }) {
   const router = useRouter();
   const { t, lang } = useLang();
   const [, startTransition] = useTransition();
   const [status, setStatus] = useState(initialStatus);
   const [customer, setCustomer] = useState(initialCustomer);
+  const [caseNumber, setCaseNumber] = useState(initialCaseNumber);
 
   const statusLabel: Record<string, string> = {
     open: t("caseStatusOpen"),
@@ -95,6 +98,7 @@ export function CasesClient({
     if (newPage > 1) params.set("page", String(newPage));
     if (status !== "all") params.set("status", status);
     if (customer) params.set("customer", customer);
+    if (caseNumber.trim()) params.set("caseNumber", caseNumber.trim());
     startTransition(() => router.push(`/cases?${params.toString()}`));
   }
 
@@ -129,6 +133,18 @@ export function CasesClient({
           />
         </div>
         <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-muted-foreground">{t("casesFilterNumberLabel")}</label>
+          <input
+            type="number"
+            min={1}
+            value={caseNumber}
+            onChange={(e) => setCaseNumber(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && applyFilters()}
+            placeholder={t("casesFilterNumberPlaceholder")}
+            className="w-32 rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-muted-foreground">{t("casesFilterStatusLabel")}</label>
           <select
             value={status}
@@ -160,6 +176,7 @@ export function CasesClient({
           <table className="w-full text-left text-sm">
             <thead className="bg-muted text-muted-foreground">
               <tr>
+                <th className="px-4 py-2.5 font-medium">{t("casesColNumber")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("casesColTitle")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("signalsColCustomer")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("casesColStatus")}</th>
@@ -176,6 +193,7 @@ export function CasesClient({
             <tbody className="divide-y divide-border">
               {result.data.map((kase) => (
                 <tr key={kase.id} onClick={() => router.push(`/cases/${kase.id}`)} className="cursor-pointer hover:bg-muted/50">
+                  <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">#{kase.caseNumber}</td>
                   <td className="px-4 py-2.5 font-medium text-foreground">{kase.title}</td>
                   <td className="px-4 py-2.5 text-foreground">{kase.externalCustomerId}</td>
                   <td className="px-4 py-2.5">

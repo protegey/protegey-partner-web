@@ -15,27 +15,36 @@ export const metadata: Metadata = {
 export default async function AlertsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; status?: string }>;
+  searchParams: Promise<{ page?: string; status?: string; alertNumber?: string }>;
 }) {
   const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
   const denied = requirePageAccess(user, ["partners.manage_alerts", "partners.view_alerts"], lang);
   if (denied) return denied;
 
-  const { page: pageParam, status } = await searchParams;
+  const { page: pageParam, status, alertNumber: alertNumberParam } = await searchParams;
   const page = Math.max(1, Number(pageParam) || 1);
+  const alertNumber = alertNumberParam ? Number(alertNumberParam) : undefined;
 
   const [result, teamMembers] = await Promise.all([
-    getAlerts({ page, status: status as AlertStatus | undefined }),
+    getAlerts({ page, status: status as AlertStatus | undefined, alertNumber }),
     getAssignableTeamMembers("partners.manage_alerts"),
   ]);
 
   return (
     <Suspense>
-      {/* Keyed on page+status: a filter/pagination change pushes a new URL that re-renders this
-          server component with fresh props, but wouldn't otherwise remount the client component
-          below — forcing a remount is what makes its local `alerts`/`status` state (seeded once
-          from props via useState) actually reflect the new filter instead of staying stale. */}
-      <AlertsClient key={`${page}-${status ?? "all"}`} result={result} page={page} initialStatus={status ?? "all"} teamMembers={teamMembers} />
+      {/* Keyed on page+status+alertNumber: a filter/pagination change pushes a new URL that
+          re-renders this server component with fresh props, but wouldn't otherwise remount the
+          client component below — forcing a remount is what makes its local `alerts`/`status`
+          state (seeded once from props via useState) actually reflect the new filter instead of
+          staying stale. */}
+      <AlertsClient
+        key={`${page}-${status ?? "all"}-${alertNumber ?? ""}`}
+        result={result}
+        page={page}
+        initialStatus={status ?? "all"}
+        initialAlertNumber={alertNumberParam ?? ""}
+        teamMembers={teamMembers}
+      />
     </Suspense>
   );
 }

@@ -13,6 +13,8 @@ export interface AlertRule {
   id: string;
   partnerId: string | null;
   code: string;
+  /** Human-readable "rule 25" — shared by a system rule and any partner's fork of it, never the uuid. */
+  ruleNumber: number;
   name: string;
   nameFr: string | null;
   description: string;

@@ -16,6 +16,8 @@ export interface AlertWithContext {
   partnerId: string;
   ruleId: string;
   ruleCode: string;
+  /** Human-readable "alert 1032" — never the uuid. */
+  alertNumber: number;
   externalCustomerId: string;
   transactionId: string | null;
   triggeredAt: string;
@@ -34,6 +36,7 @@ export interface AlertWithContext {
   ruleExplanation: string | null;
   ruleExplanationFr: string | null;
   ruleSeverity: "review" | "block";
+  ruleNumber: number | null;
   transaction: {
     amount: string;
     currency: string;
@@ -47,6 +50,7 @@ export interface AlertsQuery {
   page?: number;
   limit?: number;
   status?: AlertStatus;
+  alertNumber?: number;
   ruleCode?: string;
   externalCustomerId?: string;
   transactionId?: string;

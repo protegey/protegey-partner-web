@@ -58,9 +58,12 @@ function RuleCard({
   return (
     <div className="flex flex-col gap-2.5 rounded-md border border-border bg-card p-3.5">
       <div className="flex items-start justify-between gap-2">
-        <button type="button" onClick={onOpen} className="text-left text-sm font-semibold text-foreground hover:underline">
-          {ruleName(rule, lang)}
-        </button>
+        <div className="flex items-center gap-1.5">
+          <span className="rounded-full bg-muted px-1.5 py-0.5 font-mono text-[10px] font-semibold text-muted-foreground">#{rule.ruleNumber}</span>
+          <button type="button" onClick={onOpen} className="text-left text-sm font-semibold text-foreground hover:underline">
+            {ruleName(rule, lang)}
+          </button>
+        </div>
         <StatusPill rule={rule} t={t} />
       </div>
 
@@ -112,10 +115,13 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
   const [justAddedRuleId, setJustAddedRuleId] = useState<string | null>(null);
   const rulesListRef = useRef<HTMLDivElement>(null);
   const justAddedRule = rules.find((r) => r.id === justAddedRuleId) ?? null;
+  const [numberSearch, setNumberSearch] = useState("");
 
   const grouped = useMemo(() => {
+    const query = numberSearch.trim();
+    const visibleRules = query ? rules.filter((rule) => String(rule.ruleNumber) === query) : rules;
     const bySegment = new Map<RuleSegment, AlertRule[]>();
-    for (const rule of rules) {
+    for (const rule of visibleRules) {
       const list = bySegment.get(rule.segment) ?? [];
       list.push(rule);
       bySegment.set(rule.segment, list);
@@ -125,7 +131,7 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
       segment,
       rules: bySegment.get(segment)!,
     }));
-  }, [rules]);
+  }, [rules, numberSearch]);
 
   function replaceRule(updated: AlertRule) {
     setRules((prev) => {
@@ -168,7 +174,19 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
       </div>
 
       <div ref={rulesListRef} className="flex scroll-mt-8 flex-col gap-6">
-        <p className="text-sm font-semibold text-foreground">{t("rulesListTitle")}</p>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <p className="text-sm font-semibold text-foreground">{t("rulesListTitle")}</p>
+          <div className="flex flex-col gap-1">
+            <input
+              type="number"
+              min={1}
+              value={numberSearch}
+              onChange={(e) => setNumberSearch(e.target.value)}
+              placeholder={t("rulesFilterNumberPlaceholder")}
+              className="w-40 rounded-md border border-border bg-background px-3 py-1.5 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring"
+            />
+          </div>
+        </div>
 
         {justAddedRule ? (
           <div className="flex items-start gap-3 rounded-md border-2 border-primary/40 bg-primary/5 p-3.5">

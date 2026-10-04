@@ -16,6 +16,8 @@ export type CaseNoteVisibility = "internal" | "partner_visible";
 export interface Case {
   id: string;
   partnerId: string;
+  /** Human-readable "case 48" — never the uuid. */
+  caseNumber: number;
   externalCustomerId: string;
   title: string;
   status: CaseStatus;
@@ -63,6 +65,7 @@ export interface CaseWithNotes extends Case {
 export interface CasesQuery {
   page?: number;
   status?: CaseStatus;
+  caseNumber?: number;
   externalCustomerId?: string;
 }
 
