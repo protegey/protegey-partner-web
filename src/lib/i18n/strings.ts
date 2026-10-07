@@ -1330,6 +1330,8 @@ const STRINGS = {
   alertsActionDismiss: { en: "Dismiss", fr: "Rejeter" },
   alertsActionRequestInfo: { en: "Request more info", fr: "Demander plus d'infos" },
   alertsActionReopen: { en: "Reopen", fr: "Rouvrir" },
+  alertsActionAssign: { en: "Assign", fr: "Assigner" },
+  alertsActionResolve: { en: "Resolve", fr: "Résoudre" },
   alertsFilterStatusLabel: { en: "Status", fr: "Statut" },
   alertsEmpty: {
     en: "No alerts — nothing has crossed a rule's threshold yet.",
@@ -1707,6 +1709,28 @@ const STRINGS = {
     en: "This marks the alert as a false positive. You can reopen it later if needed.",
     fr: "Ceci marque l'alerte comme un faux positif. Vous pourrez la rouvrir plus tard si nécessaire.",
   },
+  alertsAssignDialogTitle: { en: "Assign this alert", fr: "Assigner cette alerte" },
+  alertsAssignDialogDescription: {
+    en: "Pick who should handle it, and leave a note if useful.",
+    fr: "Choisissez qui doit la traiter, et laissez une note si utile.",
+  },
+  alertsResolveDialogTitle: { en: "Resolve this alert?", fr: "Résoudre cette alerte ?" },
+  alertsResolveDialogDescription: {
+    en: "Marks the alert as handled by you — no assignment needed.",
+    fr: "Marque l'alerte comme traitée par vous — aucune assignation nécessaire.",
+  },
+  alertsFalsePositiveDialogTitle: { en: "Mark as false positive", fr: "Marquer comme faux positif" },
+  alertsFalsePositiveDialogDescription: {
+    en: "Explain briefly why this alert doesn't need further action.",
+    fr: "Expliquez brièvement pourquoi cette alerte ne nécessite pas d'action supplémentaire.",
+  },
+  alertsFalsePositiveNotePlaceholder: {
+    en: "e.g. Verified with the customer — this was a legitimate transfer.",
+    fr: "ex. Vérifié avec le client — il s'agissait d'un transfert légitime.",
+  },
+  alertResolvedToast: { en: "Alert resolved.", fr: "Alerte résolue." },
+  alertAssignedToast: { en: "Alert assigned.", fr: "Alerte assignée." },
+  alertFalsePositiveToast: { en: "Alert marked as false positive.", fr: "Alerte marquée comme faux positif." },
   alertsRequestInfoDialogTitle: { en: "Request more information?", fr: "Demander plus d'informations ?" },
   alertsRequestInfoDialogDescription: {
     en: "This flags the alert as pending additional information before a decision is made.",

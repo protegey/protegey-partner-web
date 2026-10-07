@@ -4,19 +4,18 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { ArrowLeft, Briefcase, CalendarClock, CircleCheck, CircleX, Loader2, MessageCircleQuestion, RotateCcw, Zap } from "lucide-react";
+import { ArrowLeft, CalendarClock, CircleCheck, Flag, Loader2, RotateCcw, UserPlus } from "lucide-react";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { DeviceAttributesDetails } from "@/components/DeviceAttributesSummary";
 import {
   updateAlert,
-  updateAlertStatus,
-  convertAlertToCaseAction,
   type AlertDecisionVerdict,
   type AlertDisposition,
   type AlertRuleHistory,
   type AlertStatus,
+  type AlertUpdatePayload,
   type AlertWithContext,
 } from "../actions";
 import type { MonitoringTransaction } from "../../transactions/actions";
@@ -28,7 +27,7 @@ const ALERT_DETAIL_GUIDE: Record<"en" | "fr", PageGuideContent> = {
   fr: {
     title: "Détail de l'alerte",
     explanation:
-      "Toutes les informations disponibles sur cette alerte sont ici : la règle qui l'a déclenchée, les valeurs exactes qui ont franchi le seuil, la transaction liée (avec le signal d'appareil complet), l'historique de ce client avec cette même règle, et le traitement en cours (assignation, disposition, notes).\n\nLes actions — confirmer la fraude, rejeter, demander plus d'informations, convertir en dossier ou en ouvrir un directement — sont regroupées en haut à droite.",
+      "Toutes les informations disponibles sur cette alerte sont ici : la règle qui l'a déclenchée, les valeurs exactes qui ont franchi le seuil, la transaction liée (avec le signal d'appareil complet), l'historique de ce client avec cette même règle, et le traitement en cours (assignation, disposition, notes).\n\nLes actions — assigner à un membre de l'équipe, résoudre soi-même, ou marquer comme faux positif — sont regroupées en haut à droite.",
     diagram: [
       [{ label: "Liste des alertes", note: "vue tableau" }],
       [{ label: "Détail de l'alerte", note: "toutes les informations + actions", current: true }],
@@ -38,7 +37,7 @@ const ALERT_DETAIL_GUIDE: Record<"en" | "fr", PageGuideContent> = {
   en: {
     title: "Alert detail",
     explanation:
-      "Everything known about this alert lives here: the rule that fired it, the exact values that crossed the threshold, the linked transaction (with its full device signal), this customer's history with the same rule, and the current workflow state (assignment, disposition, notes).\n\nActions — confirm as fraud, dismiss, request more info, convert to a case, or open one directly — are grouped in the top right.",
+      "Everything known about this alert lives here: the rule that fired it, the exact values that crossed the threshold, the linked transaction (with its full device signal), this customer's history with the same rule, and the current workflow state (assignment, disposition, notes).\n\nActions — assign to a team member, resolve it yourself, or mark it as a false positive — are grouped in the top right.",
     diagram: [
       [{ label: "Alerts list", note: "table view" }],
       [{ label: "Alert detail", note: "all information + actions", current: true }],
@@ -65,21 +64,11 @@ const DECISION_VERDICT_CONFIG: Record<AlertDecisionVerdict, { key: StringKey; co
   ALERT: { key: "alertsVerdictAlert", color: "bg-blue-500/15 text-blue-600" },
 };
 
-const UPDATE_TOAST_KEY: Record<AlertStatus, StringKey> = {
-  open: "alertReopenedToast",
-  confirmed: "alertConfirmedToast",
-  more_info_requested: "alertMoreInfoRequestedToast",
-  dismissed: "alertDismissedToast",
-};
-
-type PendingActionKind = AlertStatus | "convert";
+type PendingActionKind = "resolve" | "open";
 
 const DIALOG_COPY: Record<PendingActionKind, { title: StringKey; description: StringKey; confirmLabel: StringKey }> = {
-  confirmed: { title: "alertsConfirmFraudDialogTitle", description: "alertsConfirmFraudDialogDescription", confirmLabel: "alertsActionConfirm" },
-  dismissed: { title: "alertsDismissDialogTitle", description: "alertsDismissDialogDescription", confirmLabel: "alertsActionDismiss" },
-  more_info_requested: { title: "alertsRequestInfoDialogTitle", description: "alertsRequestInfoDialogDescription", confirmLabel: "alertsActionRequestInfo" },
+  resolve: { title: "alertsResolveDialogTitle", description: "alertsResolveDialogDescription", confirmLabel: "alertsActionResolve" },
   open: { title: "alertsReopenDialogTitle", description: "alertsReopenDialogDescription", confirmLabel: "alertsActionReopen" },
-  convert: { title: "alertsConvertToCaseDialogTitle", description: "alertsConvertToCaseDialogDescription", confirmLabel: "alertsConvertToCase" },
 };
 
 function formatMatchedValue(v: unknown): string {
@@ -109,7 +98,11 @@ export function AlertDetailClient({
   const [alert, setAlert] = useState(initialAlert);
   const [pendingAction, setPendingAction] = useState<PendingActionKind | null>(null);
   const [updating, setUpdating] = useState(false);
-  const [converting, setConverting] = useState(false);
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [assignUserId, setAssignUserId] = useState("");
+  const [assignNote, setAssignNote] = useState("");
+  const [falsePositiveOpen, setFalsePositiveOpen] = useState(false);
+  const [falsePositiveNote, setFalsePositiveNote] = useState("");
   const [editingLifecycle, setEditingLifecycle] = useState(false);
   const [savingLifecycle, setSavingLifecycle] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -142,11 +135,13 @@ export function AlertDetailClient({
     return new Date(date.getTime() - offset).toISOString().slice(0, 16);
   }
 
-  async function handleUpdate(next: AlertStatus) {
+  /** Every action on this page — Assign, Resolve, False Positive, Reopen — is the same PATCH
+   * under the hood (see UpdateAlertDto on the backend), just with different fields set. */
+  async function applyUpdate(payload: AlertUpdatePayload, successMessage: string) {
     setUpdating(true);
     setError(null);
     try {
-      const updated = await guard(() => updateAlertStatus(alert.id, next));
+      const updated = await guard(() => updateAlert(alert.id, payload));
       if (updated === null) return;
       if (isError(updated)) {
         setError(updated.error);
@@ -154,8 +149,10 @@ export function AlertDetailClient({
         return;
       }
       setAlert(updated);
-      toast.success(t(UPDATE_TOAST_KEY[next]));
+      toast.success(successMessage);
       setPendingAction(null);
+      setAssignOpen(false);
+      setFalsePositiveOpen(false);
       router.refresh();
     } finally {
       setUpdating(false);
@@ -190,30 +187,28 @@ export function AlertDetailClient({
     }
   }
 
-  async function handleConvertToCase() {
-    setConverting(true);
-    setError(null);
-    try {
-      const result = await guard(() => convertAlertToCaseAction(alert.id));
-      if (result === null) return;
-      if (isError(result)) {
-        setError(result.error);
-        toast.error(result.error);
-        return;
-      }
-      setAlert(result.alert);
-      toast.success(t("alertConvertedToCaseToast"));
-      setPendingAction(null);
-      router.push(`/cases/${result.case.id}`);
-    } finally {
-      setConverting(false);
+  async function handleConfirmPendingAction() {
+    if (pendingAction === "resolve") {
+      await applyUpdate({ status: "dismissed", disposition: "no_action" }, t("alertResolvedToast"));
+    } else if (pendingAction === "open") {
+      await applyUpdate({ status: "open" }, t("alertReopenedToast"));
     }
   }
 
-  async function handleConfirmPendingAction() {
-    if (!pendingAction) return;
-    if (pendingAction === "convert") await handleConvertToCase();
-    else await handleUpdate(pendingAction);
+  async function handleAssignConfirm() {
+    if (!assignUserId) return;
+    await applyUpdate(
+      { assignedToUserId: assignUserId, investigationNotes: assignNote.trim() ? assignNote.trim() : undefined },
+      t("alertAssignedToast"),
+    );
+  }
+
+  async function handleFalsePositiveConfirm() {
+    if (!falsePositiveNote.trim()) return;
+    await applyUpdate(
+      { status: "dismissed", disposition: "false_positive", investigationNotes: falsePositiveNote.trim() },
+      t("alertFalsePositiveToast"),
+    );
   }
 
   return (
@@ -244,32 +239,37 @@ export function AlertDetailClient({
                   <button
                     type="button"
                     disabled={updating}
-                    onClick={() => setPendingAction("confirmed")}
-                    className="flex items-center gap-1.5 rounded-md bg-destructive px-3 py-1.5 text-sm font-semibold text-destructive-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+                    onClick={() => {
+                      setAssignUserId(alert.assignedToUserId ?? "");
+                      setAssignNote("");
+                      setAssignOpen(true);
+                    }}
+                    className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
                   >
-                    <CircleCheck className="size-4" />
-                    {t("alertsActionConfirm")}
+                    <UserPlus className="size-4" />
+                    {t("alertsActionAssign")}
                   </button>
                   <button
                     type="button"
                     disabled={updating}
-                    onClick={() => setPendingAction("dismissed")}
+                    onClick={() => setPendingAction("resolve")}
+                    className="flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+                  >
+                    <CircleCheck className="size-4" />
+                    {t("alertsActionResolve")}
+                  </button>
+                  <button
+                    type="button"
+                    disabled={updating}
+                    onClick={() => {
+                      setFalsePositiveNote("");
+                      setFalsePositiveOpen(true);
+                    }}
                     className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
                   >
-                    <CircleX className="size-4" />
-                    {t("alertsActionDismiss")}
+                    <Flag className="size-4" />
+                    {t("alertsDispositionFalsePositive")}
                   </button>
-                  {alert.status === "open" ? (
-                    <button
-                      type="button"
-                      disabled={updating}
-                      onClick={() => setPendingAction("more_info_requested")}
-                      className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
-                    >
-                      <MessageCircleQuestion className="size-4" />
-                      {t("alertsActionRequestInfo")}
-                    </button>
-                  ) : null}
                 </>
               ) : (
                 <button
@@ -282,22 +282,6 @@ export function AlertDetailClient({
                   {t("alertsActionReopen")}
                 </button>
               )}
-              <button
-                type="button"
-                disabled={converting}
-                onClick={() => setPendingAction("convert")}
-                className="flex items-center gap-1.5 rounded-md border border-primary/40 bg-primary/5 px-3 py-1.5 text-sm font-medium text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
-              >
-                {converting ? <Loader2 className="size-4 animate-spin" /> : <Zap className="size-4" />}
-                {t("alertsConvertToCase")}
-              </button>
-              <Link
-                href={`/cases/new?customer=${encodeURIComponent(alert.externalCustomerId)}&alertId=${alert.id}`}
-                className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-              >
-                <Briefcase className="size-4" />
-                {t("alertsOpenCase")}
-              </Link>
             </div>
           ) : null}
         </div>
@@ -509,8 +493,67 @@ export function AlertDetailClient({
         title={pendingAction ? t(DIALOG_COPY[pendingAction].title) : ""}
         description={pendingAction ? t(DIALOG_COPY[pendingAction].description) : undefined}
         confirmLabel={pendingAction ? t(DIALOG_COPY[pendingAction].confirmLabel) : ""}
-        pending={pendingAction ? (pendingAction === "convert" ? converting : updating) : false}
+        pending={updating}
       />
+
+      <ConfirmActionDialog
+        open={assignOpen}
+        onClose={() => setAssignOpen(false)}
+        onConfirm={handleAssignConfirm}
+        title={t("alertsAssignDialogTitle")}
+        description={t("alertsAssignDialogDescription")}
+        confirmLabel={t("alertsActionAssign")}
+        pending={updating}
+        confirmDisabled={!assignUserId}
+      >
+        <div className="flex flex-col gap-3">
+          <label className="flex flex-col gap-1 text-xs font-medium text-foreground">
+            {t("alertsAssignedTo")}
+            <select
+              value={assignUserId}
+              onChange={(event) => setAssignUserId(event.target.value)}
+              className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm font-normal outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="">{t("alertsUnassigned")}</option>
+              {teamMembers.filter((member) => member.isActive).map((member) => (
+                <option key={member.id} value={member.id}>{member.firstName} {member.lastName}</option>
+              ))}
+            </select>
+          </label>
+          <label className="flex flex-col gap-1 text-xs font-medium text-foreground">
+            {t("alertsInvestigationNotes")}
+            <textarea
+              value={assignNote}
+              onChange={(event) => setAssignNote(event.target.value)}
+              placeholder={t("alertsInvestigationNotesPlaceholder")}
+              rows={3}
+              className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm font-normal outline-none focus:ring-2 focus:ring-ring"
+            />
+          </label>
+        </div>
+      </ConfirmActionDialog>
+
+      <ConfirmActionDialog
+        open={falsePositiveOpen}
+        onClose={() => setFalsePositiveOpen(false)}
+        onConfirm={handleFalsePositiveConfirm}
+        title={t("alertsFalsePositiveDialogTitle")}
+        description={t("alertsFalsePositiveDialogDescription")}
+        confirmLabel={t("alertsDispositionFalsePositive")}
+        pending={updating}
+        confirmDisabled={!falsePositiveNote.trim()}
+      >
+        <label className="flex flex-col gap-1 text-xs font-medium text-foreground">
+          {t("alertsInvestigationNotes")}
+          <textarea
+            value={falsePositiveNote}
+            onChange={(event) => setFalsePositiveNote(event.target.value)}
+            placeholder={t("alertsFalsePositiveNotePlaceholder")}
+            rows={3}
+            className="rounded-md border border-border bg-background px-2.5 py-1.5 text-sm font-normal outline-none focus:ring-2 focus:ring-ring"
+          />
+        </label>
+      </ConfirmActionDialog>
     </div>
   );
 }
