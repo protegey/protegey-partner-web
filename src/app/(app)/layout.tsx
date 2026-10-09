@@ -131,6 +131,7 @@ function buildNavItemDefs(lang: Lang): NavItemDef[] {
         { label: tt("navIntegrationGuide"), href: "/integration-guide" },
         { href: "/integration-health", label: tt("navIntegrationHealth") },
         { label: tt("navDocumentation"), href: "/documentation" },
+        { label: tt("navDecisionFlow"), href: "/decision-flow" },
       ],
     },
     {
