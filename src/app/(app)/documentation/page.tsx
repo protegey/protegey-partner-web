@@ -6,6 +6,7 @@ import { t } from "@/lib/i18n/strings";
 import { CodeBlock } from "@/components/CodeBlock";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 import { ApiConsole } from "@/components/ApiConsole";
+import { TransactionSequenceDiagram } from "@/components/TransactionSequenceDiagram";
 import { getSessionUser } from "@/lib/session";
 import { requirePageAccess } from "@/lib/requirePageAccess";
 
@@ -332,6 +333,11 @@ export default async function DocumentationPage() {
                 { name: "occurredAt", label: "occurredAt", type: "text", required: true, defaultValue: new Date().toISOString() },
               ]}
             />
+          </div>
+          <p className="mt-6 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSequenceTitle")}</p>
+          <p className="mb-3 text-sm leading-relaxed text-muted-foreground">{t(lang, "docsSequenceBody")}</p>
+          <div className="overflow-x-auto rounded-md border border-border bg-muted/30 p-3">
+            <TransactionSequenceDiagram />
           </div>
         </Section>
 

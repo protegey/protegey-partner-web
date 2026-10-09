@@ -2457,6 +2457,11 @@ const STRINGS = {
     en: "For the full list of default monitoring rules and how to test them, see the Alert Rules page.",
     fr: "Pour la liste complète des règles de surveillance par défaut et comment les tester, consultez la page Règles d'alerte.",
   },
+  docsSequenceTitle: { en: "How the decision reaches your system", fr: "Comment la décision arrive jusqu'à vous" },
+  docsSequenceBody: {
+    en: "The decision comes back in the same HTTP response, immediately — nothing to poll or wait for to act on it. Webhooks fire too, as a separate parallel channel (useful if a different system than the one that called the API should handle the alert), and are the only channel for two things with no synchronous equivalent: a hosted identity check finishing on the user's own device, and an analyst changing an alert's status later from the Protegey portal.",
+    fr: "La décision revient dans la même réponse HTTP, immédiatement — rien à interroger ni attendre pour agir dessus. Les webhooks se déclenchent aussi, en plus, comme un canal séparé (utile si un autre système que celui qui a appelé l'API doit traiter l'alerte) — et sont le seul canal pour deux choses sans équivalent synchrone : une vérification d'identité hébergée qui se termine sur l'appareil de l'utilisateur, et un analyste qui change le statut d'une alerte plus tard depuis le portail Protegey.",
+  },
   docsSeeAlsoDeviceSignals: {
     en: "See every device signal received so far in Pan-Guard → Device Signals.",
     fr: "Consultez tous les signaux d'appareil reçus jusqu'ici dans Pan-Guard → Signaux d'appareil.",
