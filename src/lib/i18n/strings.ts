@@ -2256,6 +2256,14 @@ const STRINGS = {
     en: "A thin, faithful mapping onto the transactions API — no business logic lives in the SDK, all validation and rule evaluation stays server-side.",
     fr: "Un mappage fidèle et léger vers l'API des transactions — aucune logique métier ne vit dans le SDK, toute la validation et l'évaluation des règles reste côté serveur.",
   },
+  sdkTransactionsBodyMobile: {
+    en: "Not shown here on purpose: reporting a transaction belongs server-to-server, from your own backend, not from this app — it carries the full-privilege API key, and your backend already has the authoritative transaction data. Call device.identify() above instead; as long as your backend sends the same externalCustomerId when it reports the transaction moments later (via the JS, PHP or Java SDK, or raw HTTP), Protegey links the two automatically.",
+    fr: "Volontairement absent d'ici : signaler une transaction se fait en serveur à serveur, depuis votre propre backend, pas depuis cette application — cet appel porte la clé API à tous les droits, et votre backend a déjà les données authentiques de la transaction. Appelez plutôt device.identify() ci-dessus ; dès lors que votre backend transmet le même externalCustomerId en signalant la transaction quelques instants plus tard (via le SDK JS, PHP ou Java, ou en HTTP brut), Protegey relie les deux automatiquement.",
+  },
+  sdkTransactionsMobileSeeAlso: {
+    en: "See the server-side SDKs for reporting a transaction:",
+    fr: "Voir les SDK côté serveur pour signaler une transaction :",
+  },
   sdkKycBody: {
     en: "Starts a hosted identity verification session for one of your end users, and lets you check its status without waiting on a webhook.",
     fr: "Démarre une session de vérification d'identité hébergée pour l'un de vos utilisateurs, et permet de vérifier son statut sans attendre un webhook.",
@@ -2289,8 +2297,8 @@ const STRINGS = {
   sdkSeeAlsoApiDocs: { en: "See the full API reference (raw HTTP, webhooks, ...)", fr: "Voir la référence API complète (HTTP brut, webhooks, ...)" },
   docsTransactionsTitle: { en: "Sending transactions for monitoring", fr: "Envoyer des transactions pour surveillance" },
   docsTransactionsBody: {
-    en: "POST each transaction to /partner-api/transactions as it happens (or use protegey.transactions.report() from an SDK). Protegey runs it against your active alert rules immediately and responds with a decision (clear, review or blocked), a 0-100 risk score, and the list of any rules that matched. The optional visitorId/deviceAttributes fields let you pass in a device/session signal from a Protegey SDK — when present, Protegey factors it into the same decision automatically.",
-    fr: "Envoyez chaque transaction par POST à /partner-api/transactions au moment où elle a lieu (ou utilisez protegey.transactions.report() depuis un SDK). Protegey l'évalue immédiatement selon vos règles d'alerte actives et répond avec une décision (clear, review ou blocked), un score de risque de 0 à 100, et la liste des règles éventuellement déclenchées. Les champs optionnels visitorId/deviceAttributes permettent de transmettre un signal d'appareil/de session issu d'un SDK Protegey — s'il est présent, Protegey l'intègre automatiquement à la même décision.",
+    en: "POST each transaction to /partner-api/transactions as it happens, server-to-server from your own backend — this call is meant to come from there, not from a mobile or web SDK. If the same externalCustomerId had a device.identify() call reported (directly from the end user's device) within the last 15 minutes, Protegey automatically picks up that device/session signal and factors it into this decision — no extra field to relay yourself. You can still pass an explicit visitorId when you want to point at one specific identify() call rather than relying on the automatic match.",
+    fr: "Envoyez chaque transaction par POST à /partner-api/transactions au moment où elle a lieu, en serveur à serveur depuis votre propre backend — cet appel est pensé pour venir de là, pas d'un SDK mobile ou web. Si ce même externalCustomerId a eu un appel device.identify() signalé (directement depuis l'appareil de l'utilisateur final) dans les 15 dernières minutes, Protegey récupère automatiquement ce signal d'appareil/de session et l'intègre à cette décision — rien à relayer vous-même. Vous pouvez toujours transmettre un visitorId explicite si vous voulez pointer vers un appel identify() précis plutôt que de vous reposer sur la correspondance automatique.",
   },
   docsKycTitle: { en: "Starting an identity verification session", fr: "Démarrer une session de vérification d'identité" },
   docsKycBody: {
@@ -2304,8 +2312,8 @@ const STRINGS = {
   },
   docsDeviceEventsTitle: { en: "Reporting a device signal outside a transaction", fr: "Signaler un signal d'appareil hors transaction" },
   docsDeviceEventsBody: {
-    en: "For a device/session signal that isn't tied to a transaction — a login, a session start — POST to /partner-api/device-events along with the customer it belongs to (or use protegey.device.identify() from an SDK, which computes visitorId/deviceAttributes for you). Protegey scores it and stores it as a standalone signal, so you build up a device/session history per customer over time, not just at the moment of a purchase.",
-    fr: "Pour un signal d'appareil/de session qui n'est pas rattaché à une transaction — une connexion, un début de session — envoyez par POST à /partner-api/device-events, avec le client concerné (ou utilisez protegey.device.identify() depuis un SDK, qui calcule visitorId/deviceAttributes pour vous). Protegey le score et le stocke comme signal autonome, ce qui constitue un historique d'appareil/de session par client dans le temps, pas seulement au moment d'un achat.",
+    en: "This is the mobile/web SDK's actual job: call protegey.device.identify() directly from the end user's device (app open, login, before a payment screen) — it computes visitorId/deviceAttributes for you and posts them here. Always pass the same externalCustomerId you'll later use on that customer's transactions: it's what lets Protegey automatically attach this signal to a transaction reported moments later from your backend, with nothing extra to wire up. Protegey scores and stores it as a standalone signal too, building a device/session history per customer over time, not just at the moment of a purchase.",
+    fr: "C'est le vrai rôle du SDK mobile/web : appelez protegey.device.identify() directement depuis l'appareil de l'utilisateur final (ouverture de l'app, connexion, avant un écran de paiement) — il calcule visitorId/deviceAttributes pour vous et les envoie ici. Transmettez toujours le même externalCustomerId que celui utilisé plus tard sur les transactions de ce client : c'est ce qui permet à Protegey de rattacher automatiquement ce signal à une transaction signalée quelques instants plus tard depuis votre backend, sans rien à câbler en plus. Protegey le score et le stocke aussi comme signal autonome, ce qui constitue un historique d'appareil/de session par client dans le temps, pas seulement au moment d'un achat.",
   },
   docsBehavioralEventsTitle: { en: "Reporting behavioral signals (keystroke, touch, navigation)", fr: "Signaler des signaux comportementaux (frappe, tactile, navigation)" },
   docsBehavioralEventsBody: {

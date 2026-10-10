@@ -48,18 +48,6 @@ final identify = await protegey.device.identify(
   externalCustomerId: 'cust-9981',
 );`;
 
-const TRANSACTIONS_EXAMPLE = `final result = await protegey.transactions.report(TransactionInput(
-  externalTransactionId: 'tx-00234',
-  externalCustomerId: 'cust-9981',
-  direction: TransactionDirection.debit,
-  amount: 250000,
-  currency: 'XOF',
-  transactionType: 'cashout',
-  isCash: true,
-  visitorId: identify.visitorId, // fold the device signal above into this transaction's decision
-));
-// result.decision: 'clear' | 'review' | 'blocked' — result.alerts lists any rule that matched.`;
-
 const KYC_START_EXAMPLE = `// Starts the session and hands back the link — no manual API call needed
 final session = await protegey.kyc.startSession(externalUserId: 'cust-9981');
 // Send session.url to your user however you like (SMS, email, in-app webview).`;
@@ -172,8 +160,19 @@ export default async function SdkFlutterPage() {
           <CodeBlock code={DEVICE_OUTSIDE_ANDROID_IOS} className="mt-1.5" />
         </Section>
 
-        <Section id="transactions" icon={ArrowRightLeft} title={t(lang, "docsSdksCapabilityTransactions")} body={t(lang, "sdkTransactionsBody")}>
-          <CodeBlock code={TRANSACTIONS_EXAMPLE} className="mt-4" />
+        <Section id="transactions" icon={ArrowRightLeft} title={t(lang, "docsSdksCapabilityTransactions")} body={t(lang, "sdkTransactionsBodyMobile")}>
+          <p className="mt-4 text-xs font-medium text-muted-foreground">{t(lang, "sdkTransactionsMobileSeeAlso")}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Link href="/sdks/js" className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted">
+              {t(lang, "navSdkJs")}
+            </Link>
+            <Link href="/sdks/php" className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted">
+              {t(lang, "navSdkPhp")}
+            </Link>
+            <Link href="/sdks/java" className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted">
+              {t(lang, "navSdkJava")}
+            </Link>
+          </div>
         </Section>
 
         <Section id="kyc" icon={IdCard} title={t(lang, "docsSdksCapabilityKyc")} body={t(lang, "sdkKycBody")}>

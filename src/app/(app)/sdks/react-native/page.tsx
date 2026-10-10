@@ -11,12 +11,12 @@ const SDK_RN_GUIDE: Record<"en" | "fr", PageGuideContent> = {
   fr: {
     title: "SDK React Native",
     explanation:
-      "Le paquet `@protegey/react-native-sdk` réexporte tout le SDK JavaScript de base (intelligence d'appareil, transactions, biométrie comportementale), et ajoute un écran de vérification d'identité intégré à l'app : `ProtegeyKycProvider` + `useProtegeyKyc()`. Un seul appel démarre la session et l'affiche dans un panneau coulissant — ton utilisateur ne quitte jamais l'app.\n\nCette page ne montre aucune donnée de ton compte — c'est une référence technique avec des exemples de code à copier-coller.",
+      "Le paquet `@protegey/react-native-sdk` apporte l'intelligence d'appareil et la biométrie comportementale directement depuis l'app, et ajoute un écran de vérification d'identité intégré : `ProtegeyKycProvider` + `useProtegeyKyc()`. Un seul appel démarre la session et l'affiche dans un panneau coulissant — ton utilisateur ne quitte jamais l'app.\n\nCette page ne montre aucune donnée de ton compte — c'est une référence technique avec des exemples de code à copier-coller.",
   },
   en: {
     title: "React Native SDK",
     explanation:
-      "The `@protegey/react-native-sdk` package re-exports the entire base JavaScript SDK (device intelligence, transactions, behavioral biometrics), and adds an in-app identity-verification screen: `ProtegeyKycProvider` + `useProtegeyKyc()`. One call starts the session and shows it in a draggable sheet — your user never leaves the app.\n\nThis page shows none of your account's data — it's a technical reference with copy-paste code examples.",
+      "The `@protegey/react-native-sdk` package brings device intelligence and behavioral biometrics directly from the app, and adds an in-app identity-verification screen: `ProtegeyKycProvider` + `useProtegeyKyc()`. One call starts the session and shows it in a draggable sheet — your user never leaves the app.\n\nThis page shows none of your account's data — it's a technical reference with copy-paste code examples.",
   },
 };
 
@@ -48,18 +48,6 @@ const { visitorId, action, riskScore } = await protegey.device.identify({
 const DEVICE_NO_DOM = `// There's no DOM in React Native, so identify() falls back to a fresh random id on every
 // call. Pass your own stable id if you have one (e.g. one you persist with AsyncStorage):
 await protegey.device.identify({ visitorId: myStoredDeviceId, externalCustomerId: "cust-9981" });`;
-
-const TRANSACTIONS_EXAMPLE = `const result = await protegey.transactions.report({
-  externalTransactionId: "tx-00234",
-  externalCustomerId: "cust-9981",
-  direction: "DEBIT",
-  amount: 250000,
-  currency: "XOF",
-  transactionType: "cashout",
-  isCash: true,
-  visitorId, // fold the device signal above into this transaction's decision
-});
-// result.decision: "clear" | "review" | "blocked" — result.alerts lists any rule that matched.`;
 
 const KYC_PRESENT_EXAMPLE = `function Home() {
   const { present } = useProtegeyKyc();
@@ -174,8 +162,19 @@ export default async function SdkReactNativePage() {
           <CodeBlock code={DEVICE_NO_DOM} className="mt-1.5" />
         </Section>
 
-        <Section id="transactions" icon={ArrowRightLeft} title={t(lang, "docsSdksCapabilityTransactions")} body={t(lang, "sdkTransactionsBody")}>
-          <CodeBlock code={TRANSACTIONS_EXAMPLE} className="mt-4" />
+        <Section id="transactions" icon={ArrowRightLeft} title={t(lang, "docsSdksCapabilityTransactions")} body={t(lang, "sdkTransactionsBodyMobile")}>
+          <p className="mt-4 text-xs font-medium text-muted-foreground">{t(lang, "sdkTransactionsMobileSeeAlso")}</p>
+          <div className="mt-2 flex flex-wrap gap-2">
+            <Link href="/sdks/js" className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted">
+              {t(lang, "navSdkJs")}
+            </Link>
+            <Link href="/sdks/php" className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted">
+              {t(lang, "navSdkPhp")}
+            </Link>
+            <Link href="/sdks/java" className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted">
+              {t(lang, "navSdkJava")}
+            </Link>
+          </div>
         </Section>
 
         <Section id="kyc" icon={IdCard} title={t(lang, "docsSdksCapabilityKyc")} body={t(lang, "sdkKycInAppBody")}>

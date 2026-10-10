@@ -37,8 +37,7 @@ const TRANSACTION_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/t
     "currency": "XOF",
     "transactionType": "cashout",
     "isCash": true,
-    "occurredAt": "2026-01-15T10:00:00.000Z",
-    "deviceEventId": "evt_optional_device_signal"
+    "occurredAt": "2026-01-15T10:00:00.000Z"
   }'
 
 # Response
