@@ -9,6 +9,11 @@ export class ApiError extends Error {
   constructor(
     public status: number,
     message: string,
+    /** The raw error response body, beyond `message` — e.g. a `suggestion` field some endpoints
+     * (like Pan Studio's rule generator) attach to guide the caller toward a working alternative.
+     * Most call sites never need this; it's here so one endpoint can opt in without widening
+     * every other error path's shape. */
+    public details?: Record<string, unknown>,
   ) {
     super(message);
   }
@@ -58,7 +63,7 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
   if (!response.ok) {
     const rawMessage = (data && (data.message as string)) || response.statusText;
     const message = Array.isArray(rawMessage) ? rawMessage.join(", ") : rawMessage;
-    throw new ApiError(response.status, await resolveErrorMessage(response.status, message));
+    throw new ApiError(response.status, await resolveErrorMessage(response.status, message), data ?? undefined);
   }
 
   return data as T;

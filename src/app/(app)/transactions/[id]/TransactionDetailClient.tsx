@@ -318,6 +318,18 @@ export function TransactionDetailClient({
             <p className="text-xs text-muted-foreground">{t("txColCash")}</p>
             <p className="font-medium text-foreground">{transaction.isCash ? t("txCashYes") : t("txCashNo")}</p>
           </div>
+          <div>
+            <p className="text-xs text-muted-foreground">{t("txColChannel")}</p>
+            <p className="font-medium text-foreground">{transaction.channel ?? "—"}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">{t("txColCounterpartyInstitution")}</p>
+            <p className="font-mono text-xs font-medium text-foreground">{transaction.counterpartyInstitutionCode ?? "—"}</p>
+          </div>
+          <div>
+            <p className="text-xs text-muted-foreground">{t("txColCounterpartyCountry")}</p>
+            <p className="font-medium text-foreground">{transaction.counterpartyCountry ?? "—"}</p>
+          </div>
         </div>
       </div>
 

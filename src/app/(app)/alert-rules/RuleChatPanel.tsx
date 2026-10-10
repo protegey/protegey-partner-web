@@ -9,11 +9,18 @@ import { generateAlertRule, type AlertRule } from "./actions";
 import { ruleExplanation, ruleName } from "./localize";
 import type { StringKey } from "@/lib/i18n/strings";
 
-function isError(value: unknown): value is { error: string } {
+function isError(value: unknown): value is { error: string; suggestion?: string } {
   return Boolean(value) && typeof value === "object" && "error" in (value as object);
 }
 
-const EXAMPLE_KEYS: StringKey[] = ["chatExampleText", "chatExampleText2", "chatExampleText3", "chatExampleText5", "chatExampleText6"];
+const EXAMPLE_KEYS: StringKey[] = [
+  "chatExampleText",
+  "chatExampleText2",
+  "chatExampleText3",
+  "chatExampleText5",
+  "chatExampleText6",
+  "chatExampleText7",
+];
 
 /** Picks a random example, different from `exclude` when there's more than one to choose from —
  * shown one at a time so the panel doesn't read as a wall of text, and varied so a partner who
@@ -26,7 +33,7 @@ function pickExampleKey(exclude?: StringKey): StringKey {
 type ChatMessage =
   | { id: string; role: "user"; text: string }
   | { id: string; role: "assistant"; kind: "success"; rule: AlertRule }
-  | { id: string; role: "assistant"; kind: "declined"; reason: string };
+  | { id: string; role: "assistant"; kind: "declined"; reason: string; suggestion?: string };
 
 /**
  * Pan-Studio, rebuilt as a chat: you describe a rule like you're texting a colleague, and each
@@ -58,7 +65,10 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
       const result = await guard(() => generateAlertRule(trimmed));
       if (result === null) return;
       if (isError(result)) {
-        setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "assistant", kind: "declined", reason: result.error }]);
+        setMessages((prev) => [
+          ...prev,
+          { id: crypto.randomUUID(), role: "assistant", kind: "declined", reason: result.error, suggestion: result.suggestion },
+        ]);
         return;
       }
       setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "assistant", kind: "success", rule: result }]);
@@ -118,7 +128,22 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
               if (message.kind === "declined") {
                 return (
                   <div key={message.id} className="mr-auto max-w-[85%] rounded-2xl rounded-tl-sm border border-destructive/30 bg-destructive/10 px-3.5 py-2 text-sm text-destructive">
-                    <span className="font-semibold">{t("chatDeclinedPrefix")}</span> {message.reason}
+                    <p>
+                      <span className="font-semibold">{t("chatDeclinedPrefix")}</span> {message.reason}
+                    </p>
+                    {message.suggestion ? (
+                      <div className="mt-2 rounded-md border border-destructive/20 bg-background/60 p-2.5">
+                        <p className="text-xs font-semibold uppercase text-muted-foreground">{t("chatSuggestionPrefix")}</p>
+                        <p className="mt-1 text-foreground">{message.suggestion}</p>
+                        <button
+                          type="button"
+                          onClick={() => send(message.suggestion!)}
+                          className="mt-1.5 rounded-md border border-primary px-2 py-0.5 text-[11px] font-medium text-primary transition-colors hover:bg-primary/10"
+                        >
+                          {t("chatUseSuggestion")}
+                        </button>
+                      </div>
+                    ) : null}
                   </div>
                 );
               }

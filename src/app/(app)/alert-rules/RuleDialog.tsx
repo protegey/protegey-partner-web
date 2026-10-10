@@ -60,6 +60,8 @@ export function RuleDialog({
 }) {
   const guard = useSessionGuard();
   const { lang, t } = useLang();
+  const [name, setName] = useState(ruleName(rule, lang));
+  const [description, setDescription] = useState(ruleDescription(rule, lang));
   const [parameters, setParameters] = useState<Record<string, number>>(rule.parameters);
   const [severity, setSeverity] = useState<AlertRuleSeverity>(rule.severity);
   const [saving, setSaving] = useState(false);
@@ -72,11 +74,13 @@ export function RuleDialog({
   const [simulating, setSimulating] = useState(false);
   const [simError, setSimError] = useState<string | null>(null);
 
-  async function handleSaveParameters() {
+  async function handleSave() {
     setSaving(true);
     setSaveError(null);
     try {
-      const result = await guard(() => updateAlertRule(rule.id, { parameters, severity }));
+      const patch: Parameters<typeof updateAlertRule>[1] =
+        lang === "fr" ? { nameFr: name, descriptionFr: description, parameters, severity } : { name, description, parameters, severity };
+      const result = await guard(() => updateAlertRule(rule.id, patch));
       if (result === null) return;
       if (isError(result)) {
         setSaveError(result.error);
@@ -130,11 +134,32 @@ export function RuleDialog({
   }
 
   return (
-    <Dialog open onClose={onClose} title={`#${rule.ruleNumber} — ${ruleName(rule, lang)} (${rule.code})`} maxWidthClassName="max-w-2xl" closeAriaLabel={t("close")}>
+    <Dialog open onClose={onClose} title={`#${rule.ruleNumber} — ${name} (${rule.code})`} maxWidthClassName="max-w-2xl" closeAriaLabel={t("close")}>
       <div className="flex flex-col gap-6">
         <div>
-          <p className="text-xs font-medium uppercase text-muted-foreground">{t("ruleDialogDescriptionLabel")}</p>
-          <p className="mt-1 text-sm text-foreground">{ruleDescription(rule, lang)}</p>
+          <label className="text-xs font-medium uppercase text-muted-foreground" htmlFor="rule-name-input">
+            {t("ruleDialogNameLabel")}
+          </label>
+          <input
+            id="rule-name-input"
+            type="text"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="mt-1 w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+
+        <div>
+          <label className="text-xs font-medium uppercase text-muted-foreground" htmlFor="rule-description-input">
+            {t("ruleDialogDescriptionLabel")}
+          </label>
+          <textarea
+            id="rule-description-input"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+            rows={3}
+            className="mt-1 w-full resize-none rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          />
         </div>
 
         <div>
@@ -180,7 +205,7 @@ export function RuleDialog({
           {saveError ? <p className="mt-2 text-sm text-destructive">{saveError}</p> : null}
           <button
             type="button"
-            onClick={handleSaveParameters}
+            onClick={handleSave}
             disabled={saving}
             className="mt-3 flex items-center gap-1.5 rounded-md bg-primary px-3 py-1.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-40"
           >

@@ -244,6 +244,10 @@ const STRINGS = {
     en: "Flag any transaction from a customer whose account was created less than 1 hour ago and exceeds 100,000 XOF.",
     fr: "Signale toute transaction provenant d'un client dont le compte a été créé depuis moins d'une heure et dépasse 100 000 XOF.",
   },
+  chatExampleText7: {
+    en: "Block any transaction from a customer with a confirmed sanctions match.",
+    fr: "Bloque toute transaction provenant d'un client avec une correspondance sanctions confirmée.",
+  },
   chatUseExample: { en: "Use this example", fr: "Utiliser cet exemple" },
   chatAnotherExample: { en: "Try another example", fr: "Un autre exemple" },
   chatInputPlaceholder: { en: "Describe the rule you want…", fr: "Décrivez la règle que vous voulez…" },
@@ -251,6 +255,8 @@ const STRINGS = {
   chatSending: { en: "Thinking…", fr: "Réflexion…" },
   chatTooShort: { en: "Please add a bit more detail (at least 10 characters).", fr: "Ajoutez un peu plus de détails (au moins 10 caractères)." },
   chatDeclinedPrefix: { en: "I can't create that:", fr: "Je ne peux pas créer cela :" },
+  chatSuggestionPrefix: { en: "Try this instead", fr: "Essayez plutôt ceci" },
+  chatUseSuggestion: { en: "Use this suggestion", fr: "Utiliser cette suggestion" },
   chatSuccessPrefix: { en: "New draft rule created:", fr: "Nouveau brouillon de règle créé :" },
   chatSuccessHint: {
     en: "Find it in the list on the right, check it over, then switch it on when you're ready.",
@@ -265,7 +271,12 @@ const STRINGS = {
   rulesListTitle: { en: "Your rules", fr: "Vos règles" },
   rulesFilterNumberPlaceholder: { en: "Search by rule #", fr: "Rechercher par règle n°" },
   ruleJustAddedLabel: { en: "Just added", fr: "Vient d'être ajoutée" },
-  rulesListEmpty: { en: "No rules yet. Ask for one on the left!", fr: "Aucune règle pour l'instant. Demandez-en une à gauche !" },
+  rulesListEmpty: { en: "No rules match this view.", fr: "Aucune règle ne correspond à cette vue." },
+  rulesTabActive: { en: "Active", fr: "Actives" },
+  rulesTabDraft: { en: "Waiting for review", fr: "En attente de validation" },
+  rulesTabDisabled: { en: "Disabled", fr: "Désactivées" },
+  rulesTabAll: { en: "All", fr: "Toutes" },
+  rulesFilterCustomOnly: { en: "My rules only", fr: "Mes règles uniquement" },
   ruleStatusOn: { en: "On", fr: "Activée" },
   ruleStatusOff: { en: "Off", fr: "Désactivée" },
   ruleStatusWaiting: { en: "Waiting for review", fr: "En attente de validation" },
@@ -298,6 +309,7 @@ const STRINGS = {
   segmentAll: { en: "Everyone", fr: "Tout le monde" },
 
   // ── Rule dialog (edit & simulate) ───────────────────────────────────────
+  ruleDialogNameLabel: { en: "Title", fr: "Titre" },
   ruleDialogDescriptionLabel: { en: "What this checks", fr: "Ce que ça vérifie" },
   ruleDialogThresholdsTitle: { en: "Numbers you can change", fr: "Les chiffres que vous pouvez changer" },
   ruleDialogNoThresholds: { en: "Nothing to adjust here — this rule has no numbers to set.", fr: "Rien à régler ici — cette règle n'a pas de chiffre à définir." },
@@ -1177,6 +1189,9 @@ const STRINGS = {
   txColIp: { en: "IP address", fr: "Adresse IP" },
   txColExternalId: { en: "Transaction ID", fr: "ID de transaction" },
   txColCounterparty: { en: "Counterparty", fr: "Contrepartie" },
+  txColChannel: { en: "Channel", fr: "Canal" },
+  txColCounterpartyInstitution: { en: "Counterparty institution", fr: "Institution de la contrepartie" },
+  txColCounterpartyCountry: { en: "Counterparty country", fr: "Pays de la contrepartie" },
   alertsSeverityReview: { en: "Review", fr: "Vérification" },
   alertsSeverityBlock: { en: "Block", fr: "Blocage" },
   alertsVerdictBlock: { en: "Block", fr: "Blocage" },
@@ -2297,8 +2312,8 @@ const STRINGS = {
   sdkSeeAlsoApiDocs: { en: "See the full API reference (raw HTTP, webhooks, ...)", fr: "Voir la référence API complète (HTTP brut, webhooks, ...)" },
   docsTransactionsTitle: { en: "Sending transactions for monitoring", fr: "Envoyer des transactions pour surveillance" },
   docsTransactionsBody: {
-    en: "POST each transaction to /partner-api/transactions as it happens, server-to-server from your own backend — this call is meant to come from there, not from a mobile or web SDK. If the same externalCustomerId had a device.identify() call reported (directly from the end user's device) within the last 15 minutes, Protegey automatically picks up that device/session signal and factors it into this decision — no extra field to relay yourself. You can still pass an explicit visitorId when you want to point at one specific identify() call rather than relying on the automatic match.",
-    fr: "Envoyez chaque transaction par POST à /partner-api/transactions au moment où elle a lieu, en serveur à serveur depuis votre propre backend — cet appel est pensé pour venir de là, pas d'un SDK mobile ou web. Si ce même externalCustomerId a eu un appel device.identify() signalé (directement depuis l'appareil de l'utilisateur final) dans les 15 dernières minutes, Protegey récupère automatiquement ce signal d'appareil/de session et l'intègre à cette décision — rien à relayer vous-même. Vous pouvez toujours transmettre un visitorId explicite si vous voulez pointer vers un appel identify() précis plutôt que de vous reposer sur la correspondance automatique.",
+    en: "POST each transaction to /partner-api/transactions as it happens, server-to-server from your own backend — this call is meant to come from there, not from a mobile or web SDK. If the same externalCustomerId had a device.identify() call reported (directly from the end user's device) within the last 15 minutes, Protegey automatically picks up that device/session signal and factors it into this decision — no extra field to relay yourself. You can still pass an explicit visitorId when you want to point at one specific identify() call rather than relying on the automatic match. Banks and telcos: the optional channel, counterpartyInstitutionCode and counterpartyCountry fields let Pan Studio rules target bank-wire and cross-border scenarios, not just mobile-money structuring — see Pan Studio.",
+    fr: "Envoyez chaque transaction par POST à /partner-api/transactions au moment où elle a lieu, en serveur à serveur depuis votre propre backend — cet appel est pensé pour venir de là, pas d'un SDK mobile ou web. Si ce même externalCustomerId a eu un appel device.identify() signalé (directement depuis l'appareil de l'utilisateur final) dans les 15 dernières minutes, Protegey récupère automatiquement ce signal d'appareil/de session et l'intègre à cette décision — rien à relayer vous-même. Vous pouvez toujours transmettre un visitorId explicite si vous voulez pointer vers un appel identify() précis plutôt que de vous reposer sur la correspondance automatique. Banques et télécos : les champs optionnels channel, counterpartyInstitutionCode et counterpartyCountry permettent à Pan Studio de cibler des scénarios de virement bancaire et de cross-border, pas seulement le structuring mobile money — voir Pan Studio.",
   },
   docsKycTitle: { en: "Starting an identity verification session", fr: "Démarrer une session de vérification d'identité" },
   docsKycBody: {

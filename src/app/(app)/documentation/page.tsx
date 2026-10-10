@@ -37,6 +37,9 @@ const TRANSACTION_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/t
     "currency": "XOF",
     "transactionType": "cashout",
     "isCash": true,
+    "channel": "ussd",
+    "counterpartyInstitutionCode": "ECOBKTGTG",
+    "counterpartyCountry": "SN",
     "occurredAt": "2026-01-15T10:00:00.000Z"
   }'
 
@@ -328,6 +331,14 @@ export default async function DocumentationPage() {
                 { name: "currency", label: "currency", type: "text", defaultValue: "XOF" },
                 { name: "transactionType", label: "transactionType", type: "text", required: true, placeholder: "TRANSFER" },
                 { name: "isCash", label: "isCash", type: "boolean", defaultValue: false },
+                {
+                  name: "channel",
+                  label: "channel",
+                  type: "select",
+                  options: ["branch", "atm", "pos", "online", "mobile_app", "ussd", "agent", "api", "call_center"],
+                },
+                { name: "counterpartyInstitutionCode", label: "counterpartyInstitutionCode", type: "text", placeholder: "SWIFT/BIC or local bank code" },
+                { name: "counterpartyCountry", label: "counterpartyCountry", type: "text", placeholder: "SN" },
                 { name: "occurredAt", label: "occurredAt", type: "text", required: true, defaultValue: new Date().toISOString() },
               ]}
             />

@@ -40,13 +40,16 @@ export async function getAlertRules(): Promise<AlertRule[]> {
   return apiFetch<AlertRule[]>("/alert-rules/me");
 }
 
-export type MutationResult<T> = T | { error: string } | AuthExpired;
+export type MutationResult<T> = T | { error: string; suggestion?: string } | AuthExpired;
 
 async function runGuarded<T>(path: string, options?: Parameters<typeof apiFetch>[1]): Promise<MutationResult<T>> {
   try {
     return await apiFetchGuarded<T>(path, options);
   } catch (error) {
-    if (error instanceof ApiError) return { error: error.message };
+    if (error instanceof ApiError) {
+      const suggestion = error.details?.suggestion;
+      return { error: error.message, suggestion: typeof suggestion === "string" ? suggestion : undefined };
+    }
     throw error;
   }
 }
@@ -55,6 +58,9 @@ export interface UpdateAlertRuleInput {
   status?: AlertRuleStatus;
   parameters?: Record<string, number>;
   name?: string;
+  nameFr?: string;
+  description?: string;
+  descriptionFr?: string;
   severity?: AlertRuleSeverity;
 }
 

@@ -20,6 +20,9 @@ export interface MonitoringTransaction {
   currency: string;
   transactionType: string;
   counterpartyExternalId: string | null;
+  channel: string | null;
+  counterpartyInstitutionCode: string | null;
+  counterpartyCountry: string | null;
   isCash: boolean;
   occurredAt: string;
   decision: TransactionDecision;

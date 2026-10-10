@@ -135,10 +135,22 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
   const rulesListRef = useRef<HTMLDivElement>(null);
   const justAddedRule = rules.find((r) => r.id === justAddedRuleId) ?? null;
   const [numberSearch, setNumberSearch] = useState("");
+  const [statusTab, setStatusTab] = useState<AlertRuleStatus | "all">("active");
+  const [customOnly, setCustomOnly] = useState(false);
+
+  // Counts reflect the FULL set (ignoring the current tab/number-search), so every tab always
+  // shows how many rules it holds, not just how many match whatever's currently filtered in.
+  const statusCounts = useMemo(() => {
+    const counts: Record<AlertRuleStatus | "all", number> = { active: 0, draft: 0, disabled: 0, all: rules.length };
+    for (const rule of rules) counts[rule.status] += 1;
+    return counts;
+  }, [rules]);
 
   const grouped = useMemo(() => {
     const query = numberSearch.trim();
-    const visibleRules = query ? rules.filter((rule) => String(rule.ruleNumber) === query) : rules;
+    let visibleRules = statusTab === "all" ? rules : rules.filter((rule) => rule.status === statusTab);
+    if (customOnly) visibleRules = visibleRules.filter((rule) => rule.source !== "system");
+    if (query) visibleRules = visibleRules.filter((rule) => String(rule.ruleNumber) === query);
     const bySegment = new Map<RuleSegment, AlertRule[]>();
     for (const rule of visibleRules) {
       const list = bySegment.get(rule.segment) ?? [];
@@ -150,7 +162,7 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
       segment,
       rules: bySegment.get(segment)!,
     }));
-  }, [rules, numberSearch]);
+  }, [rules, numberSearch, statusTab, customOnly]);
 
   function replaceRule(updated: AlertRule) {
     setRules((prev) => {
@@ -212,19 +224,45 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
         <RuleChatPanel onGenerated={handleRuleGenerated} />
       </div>
 
-      <div ref={rulesListRef} className="flex scroll-mt-8 flex-col gap-6">
+      <div ref={rulesListRef} className="flex scroll-mt-8 flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-semibold text-foreground">{t("rulesListTitle")}</p>
-          <div className="flex flex-col gap-1">
-            <input
-              type="number"
-              min={1}
-              value={numberSearch}
-              onChange={(e) => setNumberSearch(e.target.value)}
-              placeholder={t("rulesFilterNumberPlaceholder")}
-              className="w-40 rounded-md border border-border bg-background px-3 py-1.5 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring"
-            />
+          <input
+            type="number"
+            min={1}
+            value={numberSearch}
+            onChange={(e) => setNumberSearch(e.target.value)}
+            placeholder={t("rulesFilterNumberPlaceholder")}
+            className="w-40 rounded-md border border-border bg-background px-3 py-1.5 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
+          <div className="flex flex-wrap items-center gap-1.5" role="tablist">
+            {([
+              ["active", "rulesTabActive"],
+              ["draft", "rulesTabDraft"],
+              ["disabled", "rulesTabDisabled"],
+              ["all", "rulesTabAll"],
+            ] as const).map(([value, labelKey]) => (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                aria-selected={statusTab === value}
+                onClick={() => setStatusTab(value)}
+                className={`rounded-md px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  statusTab === value ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                }`}
+              >
+                {t(labelKey)} <span className="opacity-70">({statusCounts[value]})</span>
+              </button>
+            ))}
           </div>
+          <label className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-muted-foreground">
+            <input type="checkbox" checked={customOnly} onChange={(e) => setCustomOnly(e.target.checked)} className="accent-primary" />
+            {t("rulesFilterCustomOnly")}
+          </label>
         </div>
 
         {justAddedRule ? (
