@@ -94,6 +94,8 @@ export async function generateAlertRule(description: string): Promise<MutationRe
   return result;
 }
 
+export type SimulateTransactionChannel = "branch" | "atm" | "pos" | "online" | "mobile_app" | "ussd" | "agent" | "api" | "call_center";
+
 export interface SimulateTransactionInput {
   externalCustomerId: string;
   direction: "DEBIT" | "CREDIT";
@@ -101,6 +103,20 @@ export interface SimulateTransactionInput {
   counterpartyExternalId?: string;
   isCash?: boolean;
   occurredAt: string;
+  channel?: SimulateTransactionChannel;
+  transactionType?: string;
+  /** SWIFT/BIC or a local bank/MNO code — bank-wire and cross-institution scenarios. */
+  counterpartyInstitutionCode?: string;
+  /** The counterparty's country — compare against the simulated customer's own `country` to test a cross-border rule. */
+  counterpartyCountry?: string;
+  /** The simulated customer's own registered country. */
+  country?: string;
+  isPep?: boolean;
+  /** Seconds since the simulated customer's password/email/phone last changed — lets you test an
+   * account-takeover rule. Omit to simulate "the partner never reported this signal". */
+  secondsSincePasswordChange?: number;
+  secondsSinceEmailChange?: number;
+  secondsSincePhoneChange?: number;
 }
 
 export interface SimulationOutcome {

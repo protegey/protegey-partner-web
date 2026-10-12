@@ -13,9 +13,35 @@ import {
   simulateAlertRule,
   type AlertRule,
   type AlertRuleSeverity,
+  type SimulateTransactionChannel,
   type SimulateTransactionInput,
   type SimulationOutcome,
 } from "./actions";
+
+const CHANNEL_OPTIONS: { value: SimulateTransactionChannel; labelKey:
+  | "ruleDialogChannelBranch" | "ruleDialogChannelAtm" | "ruleDialogChannelPos" | "ruleDialogChannelOnline"
+  | "ruleDialogChannelMobileApp" | "ruleDialogChannelUssd" | "ruleDialogChannelAgent" | "ruleDialogChannelApi" | "ruleDialogChannelCallCenter" }[] = [
+  { value: "branch", labelKey: "ruleDialogChannelBranch" },
+  { value: "atm", labelKey: "ruleDialogChannelAtm" },
+  { value: "pos", labelKey: "ruleDialogChannelPos" },
+  { value: "online", labelKey: "ruleDialogChannelOnline" },
+  { value: "mobile_app", labelKey: "ruleDialogChannelMobileApp" },
+  { value: "ussd", labelKey: "ruleDialogChannelUssd" },
+  { value: "agent", labelKey: "ruleDialogChannelAgent" },
+  { value: "api", labelKey: "ruleDialogChannelApi" },
+  { value: "call_center", labelKey: "ruleDialogChannelCallCenter" },
+];
+
+/** The simulate form stores account-change recency in hours (human-friendly: "changed 72h ago")
+ * and converts to/from the seconds the backend's SimulateTransactionDto actually expects. */
+function hoursInputToSeconds(raw: string): number | undefined {
+  if (raw.trim() === "") return undefined;
+  const hours = Number(raw);
+  return Number.isFinite(hours) ? Math.round(hours * 3600) : undefined;
+}
+function secondsToHoursInput(seconds?: number): string {
+  return seconds === undefined ? "" : String(seconds / 3600);
+}
 
 const SEVERITY_OPTIONS: { value: AlertRuleSeverity; labelKey: "alertsVerdictAlert" | "alertsVerdictStepUp" | "alertsVerdictBlock" | "alertsVerdictEscalate" }[] = [
   { value: "review", labelKey: "alertsVerdictAlert" },
@@ -233,52 +259,125 @@ export function RuleDialog({
 
           <div className="flex flex-col gap-3">
             {transactions.map((tx, i) => (
-              <div key={i} className="flex flex-wrap items-center gap-2 rounded-md border border-border p-2">
-                <select
-                  value={tx.direction}
-                  onChange={(e) => updateTransaction(i, { direction: e.target.value as "DEBIT" | "CREDIT" })}
-                  className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                >
-                  <option value="DEBIT">{t("ruleDialogDirectionDebit")}</option>
-                  <option value="CREDIT">{t("ruleDialogDirectionCredit")}</option>
-                </select>
-                <input
-                  type="number"
-                  placeholder={t("ruleDialogAmountPlaceholder")}
-                  value={tx.amount || ""}
-                  onChange={(e) => updateTransaction(i, { amount: Number(e.target.value) })}
-                  className="w-28 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                />
-                <input
-                  type="datetime-local"
-                  value={tx.occurredAt.slice(0, 16)}
-                  onChange={(e) => updateTransaction(i, { occurredAt: new Date(e.target.value).toISOString() })}
-                  className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                />
-                <input
-                  type="text"
-                  placeholder={t("ruleDialogCounterpartyPlaceholder")}
-                  value={tx.counterpartyExternalId ?? ""}
-                  onChange={(e) => updateTransaction(i, { counterpartyExternalId: e.target.value || undefined })}
-                  className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                />
-                <label className="flex items-center gap-1 text-xs text-muted-foreground">
-                  <input type="checkbox" checked={Boolean(tx.isCash)} onChange={(e) => updateTransaction(i, { isCash: e.target.checked })} />
-                  {t("ruleDialogCash")}
-                </label>
-                {outcomes?.[i] ? (
-                  <span className={`ml-auto text-xs font-semibold ${outcomes[i].matched ? "text-destructive" : "text-muted-foreground"}`}>
-                    {outcomes[i].matched ? t("ruleDialogMatched") : t("ruleDialogNoMatch")}
-                  </span>
-                ) : null}
-                <button
-                  type="button"
-                  onClick={() => setTransactions((prev) => prev.filter((_, idx) => idx !== i))}
-                  className="text-muted-foreground transition-colors hover:text-destructive"
-                  aria-label={t("ruleDialogRemoveAria")}
-                >
-                  <Trash2 className="size-3.5" />
-                </button>
+              <div key={i} className="flex flex-col gap-2 rounded-md border border-border p-2">
+                <div className="flex flex-wrap items-center gap-2">
+                  <select
+                    value={tx.direction}
+                    onChange={(e) => updateTransaction(i, { direction: e.target.value as "DEBIT" | "CREDIT" })}
+                    className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  >
+                    <option value="DEBIT">{t("ruleDialogDirectionDebit")}</option>
+                    <option value="CREDIT">{t("ruleDialogDirectionCredit")}</option>
+                  </select>
+                  <input
+                    type="number"
+                    placeholder={t("ruleDialogAmountPlaceholder")}
+                    value={tx.amount || ""}
+                    onChange={(e) => updateTransaction(i, { amount: Number(e.target.value) })}
+                    className="w-28 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  />
+                  <input
+                    type="datetime-local"
+                    value={tx.occurredAt.slice(0, 16)}
+                    onChange={(e) => updateTransaction(i, { occurredAt: new Date(e.target.value).toISOString() })}
+                    className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  />
+                  <input
+                    type="text"
+                    placeholder={t("ruleDialogCounterpartyPlaceholder")}
+                    value={tx.counterpartyExternalId ?? ""}
+                    onChange={(e) => updateTransaction(i, { counterpartyExternalId: e.target.value || undefined })}
+                    className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  />
+                  <label className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <input type="checkbox" checked={Boolean(tx.isCash)} onChange={(e) => updateTransaction(i, { isCash: e.target.checked })} />
+                    {t("ruleDialogCash")}
+                  </label>
+                  {outcomes?.[i] ? (
+                    <span className={`ml-auto text-xs font-semibold ${outcomes[i].matched ? "text-destructive" : "text-muted-foreground"}`}>
+                      {outcomes[i].matched ? t("ruleDialogMatched") : t("ruleDialogNoMatch")}
+                    </span>
+                  ) : null}
+                  <button
+                    type="button"
+                    onClick={() => setTransactions((prev) => prev.filter((_, idx) => idx !== i))}
+                    className="text-muted-foreground transition-colors hover:text-destructive"
+                    aria-label={t("ruleDialogRemoveAria")}
+                  >
+                    <Trash2 className="size-3.5" />
+                  </button>
+                </div>
+
+                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{t("ruleDialogAdvancedToggle")}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <select
+                    value={tx.channel ?? ""}
+                    onChange={(e) => updateTransaction(i, { channel: (e.target.value || undefined) as SimulateTransactionChannel | undefined })}
+                    className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  >
+                    <option value="">{t("ruleDialogChannelAny")}</option>
+                    {CHANNEL_OPTIONS.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {t(opt.labelKey)}
+                      </option>
+                    ))}
+                  </select>
+                  <input
+                    type="text"
+                    placeholder={t("ruleDialogTransactionTypePlaceholder")}
+                    value={tx.transactionType ?? ""}
+                    onChange={(e) => updateTransaction(i, { transactionType: e.target.value || undefined })}
+                    className="w-32 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  />
+                  <input
+                    type="text"
+                    placeholder={t("ruleDialogInstitutionCodePlaceholder")}
+                    value={tx.counterpartyInstitutionCode ?? ""}
+                    onChange={(e) => updateTransaction(i, { counterpartyInstitutionCode: e.target.value || undefined })}
+                    className="w-36 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  />
+                  <input
+                    type="text"
+                    placeholder={t("ruleDialogCounterpartyCountryPlaceholder")}
+                    value={tx.counterpartyCountry ?? ""}
+                    onChange={(e) => updateTransaction(i, { counterpartyCountry: e.target.value || undefined })}
+                    className="w-32 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  />
+                  <input
+                    type="text"
+                    placeholder={t("ruleDialogCustomerCountryPlaceholder")}
+                    value={tx.country ?? ""}
+                    onChange={(e) => updateTransaction(i, { country: e.target.value || undefined })}
+                    className="w-32 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  />
+                  <label className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <input type="checkbox" checked={Boolean(tx.isPep)} onChange={(e) => updateTransaction(i, { isPep: e.target.checked })} />
+                    {t("ruleDialogIsPep")}
+                  </label>
+                </div>
+                <div className="flex flex-wrap items-center gap-2">
+                  <input
+                    type="number"
+                    placeholder={t("ruleDialogPasswordChangeHoursPlaceholder")}
+                    value={secondsToHoursInput(tx.secondsSincePasswordChange)}
+                    onChange={(e) => updateTransaction(i, { secondsSincePasswordChange: hoursInputToSeconds(e.target.value) })}
+                    className="w-44 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  />
+                  <input
+                    type="number"
+                    placeholder={t("ruleDialogEmailChangeHoursPlaceholder")}
+                    value={secondsToHoursInput(tx.secondsSinceEmailChange)}
+                    onChange={(e) => updateTransaction(i, { secondsSinceEmailChange: hoursInputToSeconds(e.target.value) })}
+                    className="w-40 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  />
+                  <input
+                    type="number"
+                    placeholder={t("ruleDialogPhoneChangeHoursPlaceholder")}
+                    value={secondsToHoursInput(tx.secondsSincePhoneChange)}
+                    onChange={(e) => updateTransaction(i, { secondsSincePhoneChange: hoursInputToSeconds(e.target.value) })}
+                    className="w-52 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  />
+                </div>
               </div>
             ))}
           </div>
