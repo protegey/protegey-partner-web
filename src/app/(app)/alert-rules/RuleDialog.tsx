@@ -386,6 +386,19 @@ export function RuleDialog({
                     onChange={(e) => updateTransaction(i, { balanceDepletionRatio: e.target.value === "" ? undefined : Number(e.target.value) })}
                     className="w-48 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
                   />
+                  <label className="flex items-center gap-1 text-xs text-muted-foreground">
+                    <input type="checkbox" checked={Boolean(tx.isNewCounterparty)} onChange={(e) => updateTransaction(i, { isNewCounterparty: e.target.checked })} />
+                    {t("ruleDialogIsNewCounterparty")}
+                  </label>
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    placeholder={t("ruleDialogBehavioralDeviationPlaceholder")}
+                    value={tx.behavioralDeviationScore ?? ""}
+                    onChange={(e) => updateTransaction(i, { behavioralDeviationScore: e.target.value === "" ? undefined : Number(e.target.value) })}
+                    className="w-48 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  />
                 </div>
               </div>
             ))}

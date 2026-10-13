@@ -367,6 +367,8 @@ const STRINGS = {
   ruleDialogEmailChangeHoursPlaceholder: { en: "Email changed Xh ago", fr: "E-mail changé il y a Xh" },
   ruleDialogPhoneChangeHoursPlaceholder: { en: "Phone changed Xh ago (or SIM swap)", fr: "Téléphone changé il y a Xh (ou SIM swap)" },
   ruleDialogBalanceDepletionPlaceholder: { en: "% of balance withdrawn", fr: "% du solde retiré" },
+  ruleDialogIsNewCounterparty: { en: "New counterparty", fr: "Nouvelle contrepartie" },
+  ruleDialogBehavioralDeviationPlaceholder: { en: "Behavioral deviation score", fr: "Score de déviation comportementale" },
 
   // ── Dashboard ────────────────────────────────────────────────────────────
   dashboardWelcomeBack: { en: "Welcome back", fr: "Bon retour" },

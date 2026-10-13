@@ -120,6 +120,10 @@ export interface SimulateTransactionInput {
   /** 0-100 — what percentage of the account balance this simulated DEBIT represents. Lets you
    * test a mule-account/account-drain rule. */
   balanceDepletionRatio?: number;
+  /** Simulate "the customer has never sent to this counterparty before". */
+  isNewCounterparty?: boolean;
+  /** 0-100 — simulate a recent behavioral-biometrics deviation score. */
+  behavioralDeviationScore?: number;
 }
 
 export interface SimulationOutcome {
