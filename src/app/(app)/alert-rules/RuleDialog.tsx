@@ -377,6 +377,15 @@ export function RuleDialog({
                     onChange={(e) => updateTransaction(i, { secondsSincePhoneChange: hoursInputToSeconds(e.target.value) })}
                     className="w-52 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
                   />
+                  <input
+                    type="number"
+                    min={0}
+                    max={100}
+                    placeholder={t("ruleDialogBalanceDepletionPlaceholder")}
+                    value={tx.balanceDepletionRatio ?? ""}
+                    onChange={(e) => updateTransaction(i, { balanceDepletionRatio: e.target.value === "" ? undefined : Number(e.target.value) })}
+                    className="w-48 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
+                  />
                 </div>
               </div>
             ))}
