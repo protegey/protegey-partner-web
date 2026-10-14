@@ -59,11 +59,55 @@ function nowIso(offsetMinutes = 0): string {
   return new Date(Date.now() + offsetMinutes * 60_000).toISOString();
 }
 
+/** Every advanced field gets a plausible, non-alarming value here — not because a rule needs it,
+ * but because a blank "Code institution de la contrepartie" or "Pays" box forces the person
+ * testing a rule to guess what belongs there. These are illustrative filler only: whichever of
+ * them actually matter for the rule being tested are overwritten below with the real triggering
+ * value, so a rule's own fields always win over this filler. */
+const REALISTIC_ADVANCED_DEFAULTS: Required<
+  Pick<
+    SimulateTransactionInput,
+    | "channel"
+    | "transactionType"
+    | "counterpartyExternalId"
+    | "counterpartyInstitutionCode"
+    | "counterpartyCountry"
+    | "country"
+    | "isPep"
+    | "isCash"
+    | "secondsSincePasswordChange"
+    | "secondsSinceEmailChange"
+    | "secondsSincePhoneChange"
+    | "balanceDepletionRatio"
+    | "isNewCounterparty"
+    | "behavioralDeviationScore"
+  >
+> = {
+  channel: "mobile_app",
+  transactionType: "transfer",
+  counterpartyExternalId: "acct-regular-partner",
+  counterpartyInstitutionCode: "ECOBKTGTG",
+  counterpartyCountry: "SN",
+  country: "TG",
+  isPep: false,
+  isCash: false,
+  // Long-ago-and-safe, not zero — a real customer whose password/email/phone hasn't changed
+  // recently, so this filler never accidentally looks like an account-takeover signal on a rule
+  // that happens to check it but wasn't the one being tested.
+  secondsSincePasswordChange: 30 * 24 * 3600,
+  secondsSinceEmailChange: 60 * 24 * 3600,
+  secondsSincePhoneChange: 90 * 24 * 3600,
+  balanceDepletionRatio: 12,
+  isNewCounterparty: false,
+  behavioralDeviationScore: 8,
+};
+
 function emptyTransaction(index: number): SimulateTransactionInput {
   return {
+    ...REALISTIC_ADVANCED_DEFAULTS,
     externalCustomerId: "sim-customer",
     direction: "DEBIT",
-    amount: 0,
+    amount: 50_000,
     occurredAt: nowIso(index),
   };
 }
@@ -73,9 +117,13 @@ const SIMULATE_CHANNEL_VALUES = new Set(CHANNEL_OPTIONS.map((opt) => opt.value a
 /** Pre-fills the first "Try it out" row from `rule.examplePayload` — the same server-computed
  * payload already shown as read-only JSON above the simulator, so clicking "Run" immediately
  * demonstrates a transaction that actually triggers this rule instead of starting from zeros.
- * Falls back to an empty row whenever the payload isn't transaction-shaped (identity-domain and
- * behavioral-deviation rules have their own, non-transaction example shapes — see
- * rule-example-payload.service.ts) so the form never breaks on an unexpected field set. */
+ * Every advanced field the rule's own expression doesn't care about is still filled in, from
+ * `REALISTIC_ADVANCED_DEFAULTS`, so nothing in the form reads as "a mystery empty box" — only the
+ * fields that actually matter for THIS rule are set from the real example below, overriding the
+ * filler. Falls back to an empty (but still fully-filled) row whenever the payload isn't
+ * transaction-shaped (identity-domain and behavioral-deviation rules have their own, non-transaction
+ * example shapes — see rule-example-payload.service.ts) so the form never breaks on an unexpected
+ * field set. */
 function examplePayloadToSimulateInput(payload: Record<string, unknown> | null, index: number): SimulateTransactionInput {
   const fallback = emptyTransaction(index);
   if (!payload || typeof payload.amount !== "number" || (payload.direction !== "DEBIT" && payload.direction !== "CREDIT")) {
@@ -84,6 +132,7 @@ function examplePayloadToSimulateInput(payload: Record<string, unknown> | null, 
 
   const occurredAt = typeof payload.occurredAt === "string" ? payload.occurredAt : fallback.occurredAt;
   const input: SimulateTransactionInput = {
+    ...REALISTIC_ADVANCED_DEFAULTS,
     externalCustomerId: typeof payload.externalCustomerId === "string" ? payload.externalCustomerId : fallback.externalCustomerId,
     direction: payload.direction,
     amount: payload.amount,
