@@ -227,6 +227,15 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           }
         />
         <div className="flex flex-1 flex-col overflow-hidden">
+          {/* Environment strip: green = live (production), orange = test (development). */}
+          <div
+            role="status"
+            className={`px-4 py-1 text-center text-xs font-semibold tracking-wide ${
+              sandboxMode ? "bg-amber-500 text-amber-950" : "bg-emerald-600 text-white"
+            }`}
+          >
+            {t(lang, sandboxMode ? "envBannerTest" : "envBannerLive")}
+          </div>
           <header className="flex items-center justify-end gap-2 border-b border-border py-3 pl-16 pr-4 md:px-6 lg:px-8">
             <SandboxModeToggle initialEnabled={sandboxMode} />
             <NotificationBellLink ariaLabel={t(lang, "notificationsBellAria")} />

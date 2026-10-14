@@ -20,6 +20,20 @@ const STRINGS = {
   sandboxModeToggleTest: { en: "Test mode", fr: "Mode test" },
   sandboxModeToggleAriaOn: { en: "Switch to live mode", fr: "Passer en mode réel" },
   sandboxModeToggleAriaOff: { en: "Switch to test mode", fr: "Passer en mode test" },
+  sandboxConfirmToTestTitle: { en: "Switch to test mode?", fr: "Passer en mode test ?" },
+  sandboxConfirmToTestDescription: {
+    en: "You'll see sandbox data only. Nothing you do there affects your live account.",
+    fr: "Vous ne verrez que des données de test. Rien de ce que vous y faites n'affecte votre compte réel.",
+  },
+  sandboxConfirmToTestConfirm: { en: "Switch to test mode", fr: "Passer en mode test" },
+  sandboxConfirmToLiveTitle: { en: "Switch to live mode?", fr: "Passer en mode réel ?" },
+  sandboxConfirmToLiveDescription: {
+    en: "You'll see your real data. Actions you take from now on affect your live account.",
+    fr: "Vous verrez vos données réelles. Les actions effectuées à partir de maintenant affectent votre compte réel.",
+  },
+  sandboxConfirmToLiveConfirm: { en: "Switch to live mode", fr: "Passer en mode réel" },
+  envBannerLive: { en: "LIVE mode — production data", fr: "Mode RÉEL — données de production" },
+  envBannerTest: { en: "TEST mode — development data", fr: "Mode TEST — données de développement" },
   sandboxModeBanner: {
     en: "You're viewing test data — nothing here is real, and nothing you do here affects your live account.",
     fr: "Vous visualisez des données de test — rien ici n'est réel, et rien de ce que vous faites ici n'affecte votre compte réel.",
