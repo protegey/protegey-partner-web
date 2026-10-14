@@ -29,6 +29,20 @@ const STRINGS = {
     en: "Use this key from your test/staging environment — everything it creates is fully isolated from your real data, and only visible here with Test mode on.",
     fr: "Utilisez cette clé depuis votre environnement de test — tout ce qu'elle crée est totalement isolé de vos données réelles, et visible ici uniquement avec le mode test activé.",
   },
+  sandboxConfirmToTestTitle: { en: "Switch to Test mode?", fr: "Passer en mode Test ?" },
+  sandboxConfirmToTestDescription: {
+    en: "You'll only see sandbox data (test transactions, KYC sessions, alerts…) until you switch back — nothing from your live account.",
+    fr: "Vous ne verrez plus que des données sandbox (transactions de test, sessions KYC, alertes…) jusqu'à ce que vous repassiez en mode réel — rien de votre compte réel.",
+  },
+  sandboxConfirmToTestConfirm: { en: "Switch to Test mode", fr: "Passer en mode Test" },
+  sandboxConfirmToLiveTitle: { en: "Switch to Live mode?", fr: "Passer en mode Réel ?" },
+  sandboxConfirmToLiveDescription: {
+    en: "You'll see your real account data again — transactions, alerts, and cases your team is actually working.",
+    fr: "Vous reverrez les vraies données de votre compte — transactions, alertes et cas sur lesquels votre équipe travaille réellement.",
+  },
+  sandboxConfirmToLiveConfirm: { en: "Switch to Live mode", fr: "Passer en mode Réel" },
+  sandboxEnvBarLive: { en: "Live mode — this is your real, production data", fr: "Mode réel — ce sont vos vraies données de production" },
+  sandboxEnvBarTest: { en: "Test mode — sandbox data only, fully isolated from your real account", fr: "Mode test — données sandbox uniquement, totalement isolées de votre compte réel" },
 
   // ── Access denied (fixed-role screen/page guard) ────────────────────────
   accessDeniedTitle: { en: "You don't have access to this page", fr: "Vous n'avez pas accès à cette page" },
