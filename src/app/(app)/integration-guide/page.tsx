@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KeyRound, IdCard, ArrowRightLeft, Building2, ShieldCheck, Webhook, ArrowRight, BookOpen, Fingerprint } from "lucide-react";
+import { KeyRound, IdCard, ArrowRightLeft, Building2, ShieldCheck, Webhook, ArrowRight, BookOpen, Fingerprint, FlaskConical, CircleCheck, CircleX } from "lucide-react";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import { getSessionUser } from "@/lib/session";
@@ -75,9 +75,58 @@ export default async function IntegrationGuidePage() {
         </div>
       </div>
 
+      <div className="rounded-md border border-amber-500/30 bg-card p-5">
+        <div className="flex items-center gap-2.5">
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-amber-500 text-sm font-bold text-white">2</div>
+          <p className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+            <FlaskConical className="size-4 text-amber-600" />
+            {t(lang, "igSandboxStepTitle")}
+          </p>
+        </div>
+        <p className="mt-2 text-sm text-muted-foreground">{t(lang, "igSandboxStepBody")}</p>
+        <Link
+          href="/settings/api-keys"
+          className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-border px-3.5 py-1.5 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+        >
+          <KeyRound className="size-4" />
+          {t(lang, "igSandboxStepButton")}
+        </Link>
+
+        <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igSandboxWorksTitle")}</p>
+            <ul className="flex flex-col gap-1.5">
+              {[t(lang, "igSandboxWorksTx"), t(lang, "igSandboxWorksKyc"), t(lang, "igSandboxWorksNetwork")].map((line) => (
+                <li key={line} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                  <CircleCheck className="mt-0.5 size-3.5 shrink-0 text-emerald-600" />
+                  {line}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div>
+            <p className="mb-2 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igSandboxLimitsTitle")}</p>
+            <ul className="flex flex-col gap-1.5">
+              {[
+                t(lang, "igSandboxLimitTx"),
+                t(lang, "igSandboxLimitKyc"),
+                t(lang, "igSandboxLimitShare"),
+                t(lang, "igSandboxLimitCompliance"),
+                t(lang, "igSandboxLimitAccount"),
+              ].map((line) => (
+                <li key={line} className="flex items-start gap-1.5 text-xs text-muted-foreground">
+                  <CircleX className="mt-0.5 size-3.5 shrink-0 text-destructive" />
+                  {line}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
       <div>
         <div className="mb-3 flex items-center gap-2.5">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">2</div>
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">3</div>
           <div>
             <p className="text-sm font-semibold text-foreground">{t(lang, "igStep2Title")}</p>
             <p className="text-xs text-muted-foreground">{t(lang, "igStep2Subtitle")}</p>
@@ -109,7 +158,7 @@ export default async function IntegrationGuidePage() {
 
       <div className="rounded-md border border-border bg-card p-5">
         <div className="flex items-center gap-2.5">
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">3</div>
+          <div className="flex size-8 shrink-0 items-center justify-center rounded-full bg-primary text-sm font-bold text-primary-foreground">4</div>
           <p className="text-sm font-semibold text-foreground">{t(lang, "igStep3Title")}</p>
         </div>
         <p className="mt-2 text-sm text-muted-foreground">{t(lang, "igStep3Body")}</p>

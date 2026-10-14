@@ -2555,7 +2555,7 @@ const STRINGS = {
   },
 
   // ── Integration Guide (redesigned) ──────────────────────────────────────
-  igHeroTitle: { en: "Get integrated in three steps", fr: "Intégrez-vous en trois étapes" },
+  igHeroTitle: { en: "Get integrated in four steps", fr: "Intégrez-vous en quatre étapes" },
   igHeroSubtitle: {
     en: "A quick, practical path to sending your first real request. For the complete reference, see Documentation.",
     fr: "Un chemin rapide et pratique pour envoyer votre première requête réelle. Pour la référence complète, consultez la Documentation.",
@@ -2567,7 +2567,28 @@ const STRINGS = {
   },
   igStep1Button: { en: "Go to Settings", fr: "Aller aux Paramètres" },
   igStep1SdkLink: { en: "Or skip the raw API — use a Protegey SDK", fr: "Ou passez l'API brute — utilisez un SDK Protegey" },
-  igStep2Title: { en: "2. Pick what you need", fr: "2. Choisissez ce dont vous avez besoin" },
+
+  igSandboxStepTitle: { en: "2. Test in sandbox before going live", fr: "2. Testez en sandbox avant de passer en live" },
+  igSandboxStepBody: {
+    en: "Generate a separate sandbox key below and turn on Test mode (top of the app) — everything you create with it (transactions, KYC sessions, device/behavioral signals) is fully isolated from your real data, visible only while Test mode is on.",
+    fr: "Générez une clé sandbox distincte ci-dessous et activez le Mode test (en haut de l'application) — tout ce que vous créez avec elle (transactions, sessions KYC, signaux device/comportementaux) est totalement isolé de vos données réelles, visible uniquement avec le Mode test actif.",
+  },
+  igSandboxStepButton: { en: "Generate a sandbox key", fr: "Générer une clé sandbox" },
+  igSandboxWorksTitle: { en: "Works exactly like live", fr: "Fonctionne exactement comme en live" },
+  igSandboxWorksTx: { en: "Test transactions trigger your real Pan Studio rules — same rules, same settings, isolated data.", fr: "Les transactions de test déclenchent vos vraies règles Pan Studio — mêmes règles, même configuration, données isolées." },
+  igSandboxWorksKyc: { en: "Test KYC sessions, device and behavioral signals, generated alerts/cases/risk profiles.", fr: "Sessions KYC de test, signaux device et comportementaux, alertes/cas/profils de risque générés." },
+  igSandboxWorksNetwork: { en: "Checking an identity against the shared fraud-signal network (read-only, never polluted).", fr: "Vérification d'une identité contre le réseau anti-fraude partagé (lecture seule, jamais pollué)." },
+  igSandboxLimitsTitle: { en: "Limits — enough to test, not enough to run on", fr: "Limites — assez pour tester, pas assez pour faire tourner votre produit" },
+  igSandboxLimitTx: { en: "100 test transactions per day.", fr: "100 transactions de test par jour." },
+  igSandboxLimitKyc: {
+    en: "10 test KYC sessions per day — each one still calls our real verification provider (Didit/FaceTec), so use their own test documents, never a real ID.",
+    fr: "10 sessions KYC de test par jour — chacune appelle quand même notre vrai fournisseur de vérification (Didit/FaceTec) : utilisez leurs propres documents de test, jamais une vraie pièce d'identité.",
+  },
+  igSandboxLimitShare: { en: "Sharing a signal with the cross-partner fraud network — not available for sandbox data.", fr: "Partager un signal avec le réseau anti-fraude cross-partenaire — indisponible pour des données sandbox." },
+  igSandboxLimitCompliance: { en: "Regulatory filings (SAR/STR, CTR) — live data only.", fr: "Dépôts réglementaires (SAR/STR, CTR) — données réelles uniquement." },
+  igSandboxLimitAccount: { en: "Team, business clients (KYB), billing — always your real account data, no sandbox equivalent.", fr: "Équipe, clients entreprise (KYB), facturation — toujours vos vraies données de compte, pas d'équivalent sandbox." },
+
+  igStep2Title: { en: "3. Pick what you need", fr: "3. Choisissez ce dont vous avez besoin" },
   igStep2Subtitle: { en: "Most partners use one or both of these:", fr: "La plupart des partenaires utilisent l'un ou l'autre (ou les deux) :" },
   igCardKycTitle: { en: "Identity verification (KYC)", fr: "Vérification d'identité (KYC)" },
   igCardKycBody: { en: "Verify a person's identity with a hosted, guided flow.", fr: "Vérifiez l'identité d'une personne avec un parcours guidé et hébergé." },
@@ -2575,7 +2596,7 @@ const STRINGS = {
   igCardTxBody: { en: "Send us each transaction, get back a risk decision instantly.", fr: "Envoyez-nous chaque transaction, recevez une décision de risque instantanément." },
   igCardKybTitle: { en: "Business onboarding (KYB)", fr: "Intégration d'entreprise (KYB)" },
   igCardKybBody: { en: "Invite a business client to complete your own KYB questionnaire.", fr: "Invitez un client entreprise à compléter votre propre questionnaire KYB." },
-  igStep3Title: { en: "3. Listen for webhooks", fr: "3. Recevez les webhooks" },
+  igStep3Title: { en: "4. Listen for webhooks", fr: "4. Recevez les webhooks" },
   igStep3Body: {
     en: "Configure one https:// URL from Settings to be notified the moment a KYC session's status changes — no polling needed.",
     fr: "Configurez une URL https:// depuis les Paramètres pour être notifié dès qu'un statut de session KYC change — aucun sondage nécessaire.",
