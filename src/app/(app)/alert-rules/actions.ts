@@ -38,6 +38,10 @@ export interface AlertRule {
    * always reflects this rule's live thresholds, never a stale snapshot. Null when the rule's
    * expression shape doesn't map to a known example pattern. */
   examplePayload: Record<string, unknown> | null;
+  /** Earlier transactions (oldest first) needed alongside `examplePayload` to actually cross a
+   * velocity/count/sum rule's threshold — empty for every rule a single transaction already
+   * demonstrates on its own. */
+  exampleAdditionalPayloads: Record<string, unknown>[];
   exampleScenarioEn: string | null;
   exampleScenarioFr: string | null;
   examplePayloadNoteEn: string | null;

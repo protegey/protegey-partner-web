@@ -370,8 +370,12 @@ const STRINGS = {
     fr: "Testez cette règle sur quelques transactions imaginaires avant de lui faire confiance — rien ici ne touche à des données réelles.",
   },
   ruleDialogSimulatePrefilledHint: {
-    en: "The first transaction is pre-filled with an example that triggers this rule — edit it or add your own.",
-    fr: "La première transaction est pré-remplie avec un exemple qui déclenche cette règle — modifiez-la ou ajoutez la vôtre.",
+    en: "The transaction below is pre-filled with an example that triggers this rule — edit it or add your own.",
+    fr: "La transaction ci-dessous est pré-remplie avec un exemple qui déclenche cette règle — modifiez-la ou ajoutez la vôtre.",
+  },
+  ruleDialogSimulatePrefilledHintMultiple: {
+    en: "This rule needs more than one transaction to trigger — all the transactions below are pre-filled together as a working example. Edit them or add your own.",
+    fr: "Cette règle a besoin de plusieurs transactions pour se déclencher — toutes les transactions ci-dessous sont pré-remplies ensemble comme exemple fonctionnel. Modifiez-les ou ajoutez les vôtres.",
   },
   ruleDialogAddTransaction: { en: "Add a test transaction", fr: "Ajouter une transaction de test" },
   ruleDialogRunSimulation: { en: "Run the test", fr: "Lancer le test" },

@@ -161,10 +161,14 @@ export function RuleDialog({
   const prefilledFromExample = Boolean(
     rule.examplePayload && typeof rule.examplePayload.amount === "number" && (rule.examplePayload.direction === "DEBIT" || rule.examplePayload.direction === "CREDIT"),
   );
-  const [transactions, setTransactions] = useState<SimulateTransactionInput[]>([
-    examplePayloadToSimulateInput(rule.examplePayload, 0),
-    emptyTransaction(1),
-  ]);
+  // Oldest first, ending with the primary example — for a velocity/count/sum rule this is
+  // exactly enough repeated activity to cross the threshold, not just one isolated transaction
+  // that could never trigger it alone (see exampleAdditionalPayloads' own doc comment).
+  const [transactions, setTransactions] = useState<SimulateTransactionInput[]>(
+    prefilledFromExample
+      ? [...rule.exampleAdditionalPayloads, rule.examplePayload as Record<string, unknown>].map((payload, i) => examplePayloadToSimulateInput(payload, i))
+      : [emptyTransaction(0), emptyTransaction(1)],
+  );
   const [outcomes, setOutcomes] = useState<SimulationOutcome[] | null>(null);
   const [simulating, setSimulating] = useState(false);
   const [simError, setSimError] = useState<string | null>(null);
@@ -343,7 +347,9 @@ export function RuleDialog({
           <p className="mb-1 text-sm font-semibold text-foreground">{t("ruleDialogSimulateTitle")}</p>
           <p className="mb-1 text-xs text-muted-foreground">{t("ruleDialogSimulateSubtitle")}</p>
           {prefilledFromExample ? (
-            <p className="mb-3 text-xs font-medium text-primary">{t("ruleDialogSimulatePrefilledHint")}</p>
+            <p className="mb-3 text-xs font-medium text-primary">
+              {t(rule.exampleAdditionalPayloads.length > 0 ? "ruleDialogSimulatePrefilledHintMultiple" : "ruleDialogSimulatePrefilledHint")}
+            </p>
           ) : (
             <div className="mb-3" />
           )}
