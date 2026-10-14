@@ -68,6 +68,69 @@ function emptyTransaction(index: number): SimulateTransactionInput {
   };
 }
 
+const SIMULATE_CHANNEL_VALUES = new Set(CHANNEL_OPTIONS.map((opt) => opt.value as string));
+
+/** Pre-fills the first "Try it out" row from `rule.examplePayload` — the same server-computed
+ * payload already shown as read-only JSON above the simulator, so clicking "Run" immediately
+ * demonstrates a transaction that actually triggers this rule instead of starting from zeros.
+ * Falls back to an empty row whenever the payload isn't transaction-shaped (identity-domain and
+ * behavioral-deviation rules have their own, non-transaction example shapes — see
+ * rule-example-payload.service.ts) so the form never breaks on an unexpected field set. */
+function examplePayloadToSimulateInput(payload: Record<string, unknown> | null, index: number): SimulateTransactionInput {
+  const fallback = emptyTransaction(index);
+  if (!payload || typeof payload.amount !== "number" || (payload.direction !== "DEBIT" && payload.direction !== "CREDIT")) {
+    return fallback;
+  }
+
+  const occurredAt = typeof payload.occurredAt === "string" ? payload.occurredAt : fallback.occurredAt;
+  const input: SimulateTransactionInput = {
+    externalCustomerId: typeof payload.externalCustomerId === "string" ? payload.externalCustomerId : fallback.externalCustomerId,
+    direction: payload.direction,
+    amount: payload.amount,
+    occurredAt,
+  };
+
+  if (typeof payload.counterpartyExternalId === "string") {
+    input.counterpartyExternalId = payload.counterpartyExternalId;
+    // The backend's own sentinel value for "a counterparty never seen before" (see
+    // rule-example-payload.service.ts's isNewCounterparty branch) — isNewCounterparty itself is
+    // never a field the real payload sends (it's computed server-side), so this is the only signal
+    // available to pre-check the simulator's matching checkbox.
+    if (payload.counterpartyExternalId === "acct-never-used-before") input.isNewCounterparty = true;
+  }
+  if (typeof payload.isCash === "boolean") input.isCash = payload.isCash;
+  if (typeof payload.channel === "string" && SIMULATE_CHANNEL_VALUES.has(payload.channel)) input.channel = payload.channel as SimulateTransactionChannel;
+  if (typeof payload.transactionType === "string") input.transactionType = payload.transactionType;
+  if (typeof payload.counterpartyInstitutionCode === "string") input.counterpartyInstitutionCode = payload.counterpartyInstitutionCode;
+  if (typeof payload.counterpartyCountry === "string") input.counterpartyCountry = payload.counterpartyCountry;
+  if (typeof payload.country === "string") input.country = payload.country;
+  if (typeof payload.isPep === "boolean") input.isPep = payload.isPep;
+
+  // The real payload sends absolute dates (lastPasswordChangeAt etc.) — the simulator works in
+  // seconds-before-occurredAt instead, so convert rather than expecting the same shape.
+  const occurredAtMs = new Date(occurredAt).getTime();
+  const dateFields: { payloadKey: string; inputKey: "secondsSincePasswordChange" | "secondsSinceEmailChange" | "secondsSincePhoneChange" }[] = [
+    { payloadKey: "lastPasswordChangeAt", inputKey: "secondsSincePasswordChange" },
+    { payloadKey: "lastEmailChangeAt", inputKey: "secondsSinceEmailChange" },
+    { payloadKey: "lastPhoneChangeAt", inputKey: "secondsSincePhoneChange" },
+  ];
+  for (const { payloadKey, inputKey } of dateFields) {
+    const raw = payload[payloadKey];
+    if (typeof raw === "string") {
+      const seconds = Math.round((occurredAtMs - new Date(raw).getTime()) / 1000);
+      if (seconds >= 0) input[inputKey] = seconds;
+    }
+  }
+
+  // Same idea for the balance-depletion rule shape: the real payload sends the raw
+  // accountBalanceBefore, the simulator wants the already-computed percentage.
+  if (typeof payload.accountBalanceBefore === "number" && payload.accountBalanceBefore > 0) {
+    input.balanceDepletionRatio = Math.min(100, Math.round((input.amount / payload.accountBalanceBefore) * 100));
+  }
+
+  return input;
+}
+
 /**
  * The one place a rule is edited in depth (thresholds + simulate). A modal dialog like every
  * other edit flow in the app — not a full-screen drawer, so it reads as "adjust this one thing"
@@ -95,7 +158,13 @@ export function RuleDialog({
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
-  const [transactions, setTransactions] = useState<SimulateTransactionInput[]>([emptyTransaction(0), emptyTransaction(1)]);
+  const prefilledFromExample = Boolean(
+    rule.examplePayload && typeof rule.examplePayload.amount === "number" && (rule.examplePayload.direction === "DEBIT" || rule.examplePayload.direction === "CREDIT"),
+  );
+  const [transactions, setTransactions] = useState<SimulateTransactionInput[]>([
+    examplePayloadToSimulateInput(rule.examplePayload, 0),
+    emptyTransaction(1),
+  ]);
   const [outcomes, setOutcomes] = useState<SimulationOutcome[] | null>(null);
   const [simulating, setSimulating] = useState(false);
   const [simError, setSimError] = useState<string | null>(null);
@@ -272,7 +341,12 @@ export function RuleDialog({
         {rule.domain === "transaction" ? (
         <div className="border-t border-border pt-5">
           <p className="mb-1 text-sm font-semibold text-foreground">{t("ruleDialogSimulateTitle")}</p>
-          <p className="mb-3 text-xs text-muted-foreground">{t("ruleDialogSimulateSubtitle")}</p>
+          <p className="mb-1 text-xs text-muted-foreground">{t("ruleDialogSimulateSubtitle")}</p>
+          {prefilledFromExample ? (
+            <p className="mb-3 text-xs font-medium text-primary">{t("ruleDialogSimulatePrefilledHint")}</p>
+          ) : (
+            <div className="mb-3" />
+          )}
 
           <div className="flex flex-col gap-3">
             {transactions.map((tx, i) => (

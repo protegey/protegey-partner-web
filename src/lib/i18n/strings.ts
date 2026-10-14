@@ -369,6 +369,10 @@ const STRINGS = {
     en: "Test this rule on a few made-up transactions before trusting it — nothing here touches real data.",
     fr: "Testez cette règle sur quelques transactions imaginaires avant de lui faire confiance — rien ici ne touche à des données réelles.",
   },
+  ruleDialogSimulatePrefilledHint: {
+    en: "The first transaction is pre-filled with an example that triggers this rule — edit it or add your own.",
+    fr: "La première transaction est pré-remplie avec un exemple qui déclenche cette règle — modifiez-la ou ajoutez la vôtre.",
+  },
   ruleDialogAddTransaction: { en: "Add a test transaction", fr: "Ajouter une transaction de test" },
   ruleDialogRunSimulation: { en: "Run the test", fr: "Lancer le test" },
   ruleDialogRunning: { en: "Testing…", fr: "Test en cours…" },
