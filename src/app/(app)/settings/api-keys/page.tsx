@@ -5,6 +5,7 @@ import { getSessionUser } from "@/lib/session";
 import { requirePageAccess } from "@/lib/requirePageAccess";
 import { getApiKeySummary } from "./actions";
 import { ApiKeyCard } from "./ApiKeyCard";
+import { SandboxApiKeyCard } from "./SandboxApiKeyCard";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
 const API_KEYS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
@@ -43,6 +44,7 @@ export default async function ApiKeysPage() {
       </div>
 
       <ApiKeyCard credentials={credentials} canManage={canManageSettings} />
+      <SandboxApiKeyCard credentials={credentials} canManage={canManageSettings} />
     </div>
   );
 }

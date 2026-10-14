@@ -6,6 +6,8 @@ import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api
 export interface ApiKeySummary {
   apiKeyPrefix: string | null;
   apiKeyCreatedAt: string | null;
+  sandboxApiKeyPrefix: string | null;
+  sandboxApiKeyCreatedAt: string | null;
 }
 
 export async function getApiKeySummary(): Promise<ApiKeySummary> {
@@ -20,6 +22,20 @@ export async function generateApiKeyAction(): Promise<GenerateApiKeyResult> {
     if ("authExpired" in result) return result;
     revalidatePath("/settings/api-keys");
     return { success: true, apiKey: result.apiKey };
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
+}
+
+export type GenerateSandboxApiKeyResult = { success: true; sandboxApiKey: string } | { error: string } | AuthExpired;
+
+export async function generateSandboxApiKeyAction(): Promise<GenerateSandboxApiKeyResult> {
+  try {
+    const result = await apiFetchGuarded<{ sandboxApiKey: string }>("/partners/me/api-credentials/sandbox-key", { method: "POST" });
+    if ("authExpired" in result) return result;
+    revalidatePath("/settings/api-keys");
+    return { success: true, sandboxApiKey: result.sandboxApiKey };
   } catch (error) {
     if (error instanceof ApiError) return { error: error.message };
     throw error;

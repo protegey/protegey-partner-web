@@ -15,6 +15,21 @@ const STRINGS = {
   signOut: { en: "Sign out", fr: "Se déconnecter" },
   close: { en: "Close", fr: "Fermer" },
 
+  // ── Sandbox (test) mode ──────────────────────────────────────────────────
+  sandboxModeToggleLive: { en: "Live", fr: "Réel" },
+  sandboxModeToggleTest: { en: "Test mode", fr: "Mode test" },
+  sandboxModeToggleAriaOn: { en: "Switch to live mode", fr: "Passer en mode réel" },
+  sandboxModeToggleAriaOff: { en: "Switch to test mode", fr: "Passer en mode test" },
+  sandboxModeBanner: {
+    en: "You're viewing test data — nothing here is real, and nothing you do here affects your live account.",
+    fr: "Vous visualisez des données de test — rien ici n'est réel, et rien de ce que vous faites ici n'affecte votre compte réel.",
+  },
+  sandboxKeyTitle: { en: "Sandbox key", fr: "Clé sandbox" },
+  sandboxKeyHint: {
+    en: "Use this key from your test/staging environment — everything it creates is fully isolated from your real data, and only visible here with Test mode on.",
+    fr: "Utilisez cette clé depuis votre environnement de test — tout ce qu'elle crée est totalement isolé de vos données réelles, et visible ici uniquement avec le mode test activé.",
+  },
+
   // ── Access denied (fixed-role screen/page guard) ────────────────────────
   accessDeniedTitle: { en: "You don't have access to this page", fr: "Vous n'avez pas accès à cette page" },
   accessDeniedReservedFor: {

@@ -2,6 +2,7 @@ import "server-only";
 import { getAccessToken } from "./session";
 import { getLang } from "./i18n/lang";
 import { t } from "./i18n/strings";
+import { getSandboxMode } from "./sandbox-mode";
 
 const BACKEND_API_URL = process.env.BACKEND_API_URL ?? "http://localhost:3000";
 
@@ -48,6 +49,12 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
     const token = await getAccessToken();
     if (token) {
       headers.Authorization = `Bearer ${token}`;
+    }
+    // Lets the backend show/filter sandbox (test) data instead of this partner's real data —
+    // see getSandboxMode's own doc comment. Never sent on an unauthenticated call (login, etc.),
+    // which has no partner session for the toggle to apply to anyway.
+    if (await getSandboxMode()) {
+      headers["x-protegey-sandbox"] = "true";
     }
   }
 
@@ -110,6 +117,9 @@ export async function apiUpload<T>(path: string, formData: FormData, options: { 
     const token = await getAccessToken();
     if (token) {
       headers.Authorization = `Bearer ${token}`;
+    }
+    if (await getSandboxMode()) {
+      headers["x-protegey-sandbox"] = "true";
     }
   }
 
