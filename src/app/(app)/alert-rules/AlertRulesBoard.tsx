@@ -74,9 +74,12 @@ function RuleCard({
           ) : null}
           <div className="flex items-center gap-2">
             <span className="rounded-md bg-primary/15 px-2 py-1 font-mono text-sm font-bold text-primary">#{rule.ruleNumber}</span>
-            <button type="button" onClick={onOpen} className="text-left text-sm font-semibold text-foreground hover:underline">
-              {ruleName(rule, lang)}
-            </button>
+            <div className="flex flex-col">
+              <button type="button" onClick={onOpen} className="text-left text-sm font-semibold text-foreground hover:underline">
+                {ruleName(rule, lang)}
+              </button>
+              <span className="font-mono text-[10px] text-muted-foreground">{rule.code}</span>
+            </div>
           </div>
         </div>
         <StatusPill rule={rule} t={t} />
@@ -150,7 +153,10 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
     const query = numberSearch.trim();
     let visibleRules = statusTab === "all" ? rules : rules.filter((rule) => rule.status === statusTab);
     if (customOnly) visibleRules = visibleRules.filter((rule) => rule.source !== "system");
-    if (query) visibleRules = visibleRules.filter((rule) => String(rule.ruleNumber) === query);
+    if (query) {
+      const queryLower = query.toLowerCase();
+      visibleRules = visibleRules.filter((rule) => String(rule.ruleNumber) === query || rule.code.toLowerCase().includes(queryLower));
+    }
     const bySegment = new Map<RuleSegment, AlertRule[]>();
     for (const rule of visibleRules) {
       const list = bySegment.get(rule.segment) ?? [];
@@ -228,12 +234,11 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
         <div className="flex flex-wrap items-center justify-between gap-3">
           <p className="text-sm font-semibold text-foreground">{t("rulesListTitle")}</p>
           <input
-            type="number"
-            min={1}
+            type="text"
             value={numberSearch}
             onChange={(e) => setNumberSearch(e.target.value)}
             placeholder={t("rulesFilterNumberPlaceholder")}
-            className="w-40 rounded-md border border-border bg-background px-3 py-1.5 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring"
+            className="w-52 rounded-md border border-border bg-background px-3 py-1.5 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
 

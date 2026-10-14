@@ -269,7 +269,7 @@ const STRINGS = {
 
   // ── Rules list (right column) ───────────────────────────────────────────
   rulesListTitle: { en: "Your rules", fr: "Vos règles" },
-  rulesFilterNumberPlaceholder: { en: "Search by rule #", fr: "Rechercher par règle n°" },
+  rulesFilterNumberPlaceholder: { en: "Search by rule # or code", fr: "Rechercher par règle n° ou code" },
   ruleJustAddedLabel: { en: "Just added", fr: "Vient d'être ajoutée" },
   rulesListEmpty: { en: "No rules match this view.", fr: "Aucune règle ne correspond à cette vue." },
   rulesTabActive: { en: "Active", fr: "Actives" },
