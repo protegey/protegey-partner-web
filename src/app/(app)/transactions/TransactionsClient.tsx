@@ -215,7 +215,12 @@ export function TransactionsClient({
                     {new Date(tx.occurredAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
                   </td>
                   <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{tx.externalTransactionId}</td>
-                  <td className="px-4 py-2.5 font-mono text-xs text-foreground">{tx.externalCustomerId}</td>
+                  <td className="px-4 py-2.5">
+                    <div className="flex flex-col">
+                      {tx.customerName ? <span className="text-xs font-medium text-foreground">{tx.customerName}</span> : null}
+                      <span className="font-mono text-xs text-muted-foreground">{tx.externalCustomerId}</span>
+                    </div>
+                  </td>
                   <td className="px-4 py-2.5 font-mono text-xs text-muted-foreground">{tx.counterpartyExternalId ?? "—"}</td>
                   <td className="px-4 py-2.5">
                     <span className="inline-flex items-center gap-1 text-xs text-foreground">

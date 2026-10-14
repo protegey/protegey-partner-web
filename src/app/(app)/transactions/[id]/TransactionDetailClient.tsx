@@ -304,6 +304,7 @@ export function TransactionDetailClient({
           </div>
           <div>
             <p className="text-xs text-muted-foreground">{t("txColCustomer")}</p>
+            {transaction.customerName ? <p className="text-xs font-medium text-foreground">{transaction.customerName}</p> : null}
             <p className="font-mono text-xs font-medium text-foreground">{transaction.externalCustomerId}</p>
           </div>
           <div>

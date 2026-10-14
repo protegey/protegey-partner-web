@@ -33,6 +33,15 @@ export interface AlertRule {
   source: AlertRuleSource;
   createdAt: string;
   updatedAt: string;
+  /** A concrete, fillable example of the payload that would trigger THIS rule as it's currently
+   * configured — recomputed server-side from `expression`/`parameters` on every fetch, so it
+   * always reflects this rule's live thresholds, never a stale snapshot. Null when the rule's
+   * expression shape doesn't map to a known example pattern. */
+  examplePayload: Record<string, unknown> | null;
+  exampleScenarioEn: string | null;
+  exampleScenarioFr: string | null;
+  examplePayloadNoteEn: string | null;
+  examplePayloadNoteFr: string | null;
 }
 
 /** Initial page load — a 401 here bubbles to the (app) error boundary, same as every other page. */

@@ -331,6 +331,10 @@ const STRINGS = {
   },
   ruleDeletingEllipsis: { en: "Deleting…", fr: "Suppression…" },
   ruleDeletedToast: { en: "Rule deleted.", fr: "Règle supprimée." },
+  ruleDialogExamplePayloadTitle: {
+    en: "What triggers this rule",
+    fr: "Ce qui déclenche cette règle",
+  },
   ruleDialogSimulateTitle: { en: "Try it out", fr: "Faire un essai" },
   ruleDialogSimulateSubtitle: {
     en: "Test this rule on a few made-up transactions before trusting it — nothing here touches real data.",

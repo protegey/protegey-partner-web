@@ -15,6 +15,9 @@ export interface MonitoringTransaction {
   partnerId: string;
   externalTransactionId: string;
   externalCustomerId: string;
+  /** Self-declared by the partner at the time of the transaction (or carried over from a
+   * previous one for the same customer) — never verified by Protegey, same trust model as isPep. */
+  customerName: string | null;
   direction: TransactionDirection;
   amount: string;
   currency: string;

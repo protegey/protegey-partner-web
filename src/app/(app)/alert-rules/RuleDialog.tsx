@@ -252,6 +252,23 @@ export function RuleDialog({
           )}
         </div>
 
+        {rule.examplePayload ? (
+          <div className="border-t border-border pt-5">
+            <p className="mb-1 text-sm font-semibold text-foreground">{t("ruleDialogExamplePayloadTitle")}</p>
+            <p className="mb-3 text-xs text-muted-foreground">
+              {(lang === "fr" ? rule.exampleScenarioFr : rule.exampleScenarioEn) ?? rule.exampleScenarioEn}
+            </p>
+            <pre className="overflow-x-auto rounded-md border border-border bg-muted px-3 py-2 text-xs text-foreground">
+              <code>{JSON.stringify(rule.examplePayload, null, 2)}</code>
+            </pre>
+            {(lang === "fr" ? rule.examplePayloadNoteFr : rule.examplePayloadNoteEn) ? (
+              <p className="mt-2 text-xs italic text-amber-600">
+                {lang === "fr" ? rule.examplePayloadNoteFr : rule.examplePayloadNoteEn}
+              </p>
+            ) : null}
+          </div>
+        ) : null}
+
         {rule.domain === "transaction" ? (
         <div className="border-t border-border pt-5">
           <p className="mb-1 text-sm font-semibold text-foreground">{t("ruleDialogSimulateTitle")}</p>
