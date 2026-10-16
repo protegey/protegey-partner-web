@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useRouter } from "next/navigation";
 import { Lock } from "lucide-react";
 import { lockScreenAction, unlockScreenAction } from "@/lib/auth-actions";
 import { useLang } from "@/lib/i18n/LangProvider";
@@ -57,6 +58,7 @@ export function ScreenLockProvider({
   // the instant the screen locks, not to tear down and rebuild the listeners themselves.
   const lockedRef = useRef(initiallyLocked);
   const { t } = useLang();
+  const router = useRouter();
 
   // Shows the overlay immediately and optimistically — the server call races in the background.
   // Even if it's still in flight (or fails outright), every other request already gets rejected
@@ -103,6 +105,13 @@ export function ScreenLockProvider({
     setPassword("");
     lockedRef.current = false;
     setLocked(false);
+    // The page underneath may have been server-rendered WHILE still locked (a reload-while-locked,
+    // or a fresh login on a different device that was already locked elsewhere) — every data fetch
+    // in that render 423'd, so hiding the overlay alone would reveal a stale/broken/empty page.
+    // router.refresh() re-runs the current route's server components now that the account is
+    // actually unlocked, replacing that stale render with a real one — not a full browser reload,
+    // just Next's own data refresh for the route already on screen.
+    router.refresh();
     // Activity resumes the inactivity clock from zero on unlock, same as any other activity event.
     if (timerRef.current) clearTimeout(timerRef.current);
     timerRef.current = setTimeout(lock, INACTIVITY_TIMEOUT_MS);
