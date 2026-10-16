@@ -40,6 +40,13 @@ const CASE_OUTCOME_KEY: Record<string, StringKey> = {
   sar_filed: "caseOutcomeSarFiled",
 };
 
+const CASE_PRIORITY_KEY: Record<string, StringKey> = {
+  critical: "casePriorityCritical",
+  high: "casePriorityHigh",
+  medium: "casePriorityMedium",
+  low: "casePriorityLow",
+};
+
 const BILLING_FIELD_KEY: Record<string, StringKey> = {
   standardMonthlyFee: "billingFieldStandardMonthlyFee",
   discountType: "billingFieldDiscountType",
@@ -86,7 +93,7 @@ export function eventHref(event: NotificationEvent): string | null {
   if (event.type.startsWith("team.")) return "/team";
   if (event.type === "settings.password_changed") return "/settings/security";
   if (event.type === "settings.logo_changed" || event.type === "settings.logo_removed") return "/settings/profile";
-  if (event.type === "api_key.generated") return "/settings/api-keys";
+  if (event.type === "api_key.generated" || event.type === "api_key.sandbox_generated") return "/settings/api-keys";
   if (event.type === "webhook.configured") return "/settings/webhooks";
   if (event.type.startsWith("billing.")) return "/settings/billing";
 
@@ -116,6 +123,14 @@ export function describeEvent(lang: Lang, event: NotificationEvent): string {
       return interpolate(t(lang, "eventKybRejected"), { actor, businessName: str("businessName") });
     case "kyb.decision_more_info":
       return interpolate(t(lang, "eventKybMoreInfo"), { actor, businessName: str("businessName") });
+    case "kyb_template.created":
+      return interpolate(t(lang, "eventKybTemplateCreated"), { actor, name: str("name") });
+    case "kyb_template.updated":
+      return interpolate(t(lang, "eventKybTemplateUpdated"), { actor, name: str("name") });
+    case "kyb_template.deleted":
+      return interpolate(t(lang, "eventKybTemplateDeleted"), { actor, name: str("name") });
+    case "kyb_template.duplicated":
+      return interpolate(t(lang, "eventKybTemplateDuplicated"), { actor, name: str("name") });
     case "rule.created":
       return interpolate(t(lang, "eventRuleCreated"), { actor, ruleName: str("ruleName"), ruleNumber: str("ruleNumber") });
     case "rule.activated":
@@ -146,6 +161,8 @@ export function describeEvent(lang: Lang, event: NotificationEvent): string {
     }
     case "api_key.generated":
       return interpolate(t(lang, "eventApiKeyGenerated"), { actor });
+    case "api_key.sandbox_generated":
+      return interpolate(t(lang, "eventApiKeySandboxGenerated"), { actor });
     case "webhook.configured":
       return interpolate(t(lang, "eventWebhookConfigured"), { actor });
     case "device.signal_flagged": {
@@ -169,6 +186,17 @@ export function describeEvent(lang: Lang, event: NotificationEvent): string {
       const outcomeLabel = outcomeKey ? t(lang, outcomeKey) : str("outcome");
       return interpolate(t(lang, "eventCaseClosed"), { actor, caseNumber: str("caseNumber"), title: str("title"), outcome: outcomeLabel });
     }
+    case "case.evidence_added":
+      return interpolate(t(lang, "eventCaseEvidenceAdded"), { actor, caseNumber: str("caseNumber"), title: str("title") });
+    case "case.evidence_removed":
+      return interpolate(t(lang, "eventCaseEvidenceRemoved"), { actor, caseNumber: str("caseNumber"), title: str("title") });
+    case "case.priority_changed": {
+      const priorityKey = CASE_PRIORITY_KEY[str("priority")];
+      const priorityLabel = priorityKey ? t(lang, priorityKey) : str("priority");
+      return interpolate(t(lang, "eventCasePriorityChanged"), { actor, caseNumber: str("caseNumber"), title: str("title"), priority: priorityLabel });
+    }
+    case "case.escalated":
+      return interpolate(t(lang, "eventCaseEscalated"), { actor, caseNumber: str("caseNumber"), title: str("title") });
     case "sar.submitted":
       return interpolate(t(lang, "eventSarSubmitted"), { actor });
     case "shared_signal.reported": {
@@ -203,6 +231,8 @@ export function describeEvent(lang: Lang, event: NotificationEvent): string {
       const fieldLabel = fieldKey ? t(lang, fieldKey) : str("field");
       return interpolate(t(lang, "eventBillingContractUpdated"), { actor, field: fieldLabel, from: str("from"), to: str("to") });
     }
+    case "billing.invoice_marked_paid":
+      return interpolate(t(lang, "eventBillingInvoiceMarkedPaid"), { actor, invoiceNumber: str("invoiceNumber"), totalDue: str("totalDue"), currency: str("currency") });
     default:
       return t(lang, "eventUnknown");
   }

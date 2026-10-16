@@ -1475,6 +1475,13 @@ const STRINGS = {
     en: "{actor} asked {businessName} for more information on their application.",
     fr: "{actor} a demandé plus d'informations à {businessName} concernant son dossier.",
   },
+  eventKybTemplateCreated: { en: "{actor} created the KYB form template \"{name}\".", fr: "{actor} a créé le modèle de formulaire KYB « {name} »." },
+  eventKybTemplateUpdated: { en: "{actor} updated the KYB form template \"{name}\".", fr: "{actor} a modifié le modèle de formulaire KYB « {name} »." },
+  eventKybTemplateDeleted: { en: "{actor} deleted the KYB form template \"{name}\".", fr: "{actor} a supprimé le modèle de formulaire KYB « {name} »." },
+  eventKybTemplateDuplicated: {
+    en: "{actor} duplicated the KYB form template as \"{name}\".",
+    fr: "{actor} a dupliqué le modèle de formulaire KYB sous le nom « {name} ».",
+  },
   eventRuleCreated: { en: "{actor} created a new alert rule: {ruleName} (rule #{ruleNumber}).", fr: "{actor} a créé une nouvelle règle d'alerte : {ruleName} (règle n°{ruleNumber})." },
   eventRuleActivated: { en: "{actor} turned on the rule \"{ruleName}\" (rule #{ruleNumber}).", fr: "{actor} a activé la règle « {ruleName} » (règle n°{ruleNumber})." },
   eventRuleDisabled: { en: "{actor} turned off the rule \"{ruleName}\" (rule #{ruleNumber}).", fr: "{actor} a désactivé la règle « {ruleName} » (règle n°{ruleNumber})." },
@@ -1492,6 +1499,7 @@ const STRINGS = {
     fr: "Une transaction de {customerLabel} a été bloquée ({amount} {currency}).",
   },
   eventApiKeyGenerated: { en: "{actor} generated a new API key.", fr: "{actor} a généré une nouvelle clé API." },
+  eventApiKeySandboxGenerated: { en: "{actor} generated a new sandbox API key.", fr: "{actor} a généré une nouvelle clé API sandbox." },
   eventWebhookConfigured: { en: "{actor} configured the webhook.", fr: "{actor} a configuré le webhook." },
   eventDeviceSignalFlagged: {
     en: "Device check flagged a transaction from {customerLabel}: {deviceAction}.",
@@ -1506,6 +1514,13 @@ const STRINGS = {
   eventCaseAssigned: { en: "{actor} assigned case #{caseNumber} \"{title}\".", fr: "{actor} a assigné le dossier n°{caseNumber} « {title} »." },
   eventCaseStatusChanged: { en: "{actor} marked case #{caseNumber} \"{title}\" as {status}.", fr: "{actor} a marqué le dossier n°{caseNumber} « {title} » comme {status}." },
   eventCaseClosed: { en: "{actor} closed case #{caseNumber} \"{title}\" — {outcome}.", fr: "{actor} a clos le dossier n°{caseNumber} « {title} » — {outcome}." },
+  eventCaseEvidenceAdded: { en: "{actor} added evidence to case #{caseNumber} \"{title}\".", fr: "{actor} a ajouté une pièce au dossier n°{caseNumber} « {title} »." },
+  eventCaseEvidenceRemoved: { en: "{actor} removed evidence from case #{caseNumber} \"{title}\".", fr: "{actor} a retiré une pièce du dossier n°{caseNumber} « {title} »." },
+  eventCasePriorityChanged: {
+    en: "{actor} set the priority of case #{caseNumber} \"{title}\" to {priority}.",
+    fr: "{actor} a défini la priorité du dossier n°{caseNumber} « {title} » sur {priority}.",
+  },
+  eventCaseEscalated: { en: "{actor} escalated case #{caseNumber} \"{title}\".", fr: "{actor} a escaladé le dossier n°{caseNumber} « {title} »." },
   eventSarSubmitted: { en: "{actor} submitted a SAR/STR declaration.", fr: "{actor} a soumis une déclaration SAR/STR." },
   eventSharedSignalReported: {
     en: "{actor} shared the case \"{title}\" with the fraud signal network ({category}).",
@@ -1522,6 +1537,10 @@ const STRINGS = {
   eventBillingContractUpdated: {
     en: "{actor} changed the {field} from {from} to {to}.",
     fr: "{actor} a changé {field} de {from} à {to}.",
+  },
+  eventBillingInvoiceMarkedPaid: {
+    en: "{actor} marked invoice {invoiceNumber} as paid ({totalDue} {currency}).",
+    fr: "{actor} a marqué la facture {invoiceNumber} comme payée ({totalDue} {currency}).",
   },
   billingFieldStandardMonthlyFee: { en: "standard monthly fee", fr: "le prix standard mensuel" },
   billingFieldDiscountType: { en: "discount type", fr: "le type de remise" },
