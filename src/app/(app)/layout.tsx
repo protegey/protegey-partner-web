@@ -20,6 +20,8 @@ import { getSandboxMode } from "@/lib/sandbox-mode";
 import { NotificationBellLink } from "@/components/NotificationBellLink";
 import { Logo } from "@/components/Logo";
 import { SignOutButton } from "@/components/SignOutButton";
+import { LockButton } from "@/components/LockButton";
+import { ScreenLockProvider } from "@/components/ScreenLockProvider";
 import { ActivationProgress } from "./ActivationProgress";
 import { KybWelcomeModal } from "./KybWelcomeModal";
 import { OnboardingTour } from "./OnboardingTour";
@@ -205,73 +207,76 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   const active = partner?.status === "active";
 
   return (
-    <SessionExpiredProvider>
-      <div className="flex h-svh flex-col bg-background">
-        <div
-          className={`flex h-7 shrink-0 items-center justify-center gap-2 text-xs font-semibold text-white ${
-            sandboxMode ? "bg-amber-500" : "bg-emerald-600"
-          }`}
-        >
-          <span className="size-1.5 rounded-full bg-white" />
-          {t(lang, sandboxMode ? "sandboxEnvBarTest" : "sandboxEnvBarLive")}
-        </div>
-        <div className="flex flex-1 overflow-hidden">
-          <Sidebar
-            navItems={buildNavItems(lang, user)}
-            soonLabel={t(lang, "soonBadge")}
-            footer={
-              <div className="flex flex-col">
-                <ActivationProgress status={partner?.status ?? "active"} />
-                <div className="flex flex-col gap-3 pt-3">
-                  {partner ? (
-                    <div className="flex items-center gap-2 px-1">
-                      <OrganizationLogo logoUrl={partner.logoFileName ? "/api/partner-logo" : null} name={partner.name} size={28} />
-                      <p className="truncate text-sm font-medium text-foreground">{partner.name}</p>
+    <ScreenLockProvider userEmail={user?.email ?? null}>
+      <SessionExpiredProvider>
+        <div className="flex h-svh flex-col bg-background">
+          <div
+            className={`flex h-7 shrink-0 items-center justify-center gap-2 text-xs font-semibold text-white ${
+              sandboxMode ? "bg-amber-500" : "bg-emerald-600"
+            }`}
+          >
+            <span className="size-1.5 rounded-full bg-white" />
+            {t(lang, sandboxMode ? "sandboxEnvBarTest" : "sandboxEnvBarLive")}
+          </div>
+          <div className="flex flex-1 overflow-hidden">
+            <Sidebar
+              navItems={buildNavItems(lang, user)}
+              soonLabel={t(lang, "soonBadge")}
+              footer={
+                <div className="flex flex-col">
+                  <ActivationProgress status={partner?.status ?? "active"} />
+                  <div className="flex flex-col gap-3 pt-3">
+                    {partner ? (
+                      <div className="flex items-center gap-2 px-1">
+                        <OrganizationLogo logoUrl={partner.logoFileName ? "/api/partner-logo" : null} name={partner.name} size={28} />
+                        <p className="truncate text-sm font-medium text-foreground">{partner.name}</p>
+                      </div>
+                    ) : null}
+                    <p className="truncate px-1 text-xs text-muted-foreground">{user?.email}</p>
+                  </div>
+                </div>
+              }
+            />
+            <div className="flex flex-1 flex-col overflow-hidden">
+              <header className="flex items-center justify-end gap-2 border-b border-border py-3 pl-16 pr-4 md:px-6 lg:px-8">
+                <SandboxModeToggle initialEnabled={sandboxMode} />
+                <NotificationBellLink ariaLabel={t(lang, "notificationsBellAria")} />
+                <ThemeToggle />
+                <LangToggle />
+                <LockButton className="flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-muted" />
+                <SignOutButton className="rounded-md border border-border px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-muted" />
+              </header>
+              <main className="relative flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
+                {partner?.status === "suspended" ? (
+                  <div className="mb-4 flex items-start gap-3 rounded-md border border-destructive/30 bg-destructive/10 p-4">
+                    <ShieldAlert className="mt-0.5 size-5 shrink-0 text-destructive" />
+                    <div>
+                      <p className="text-sm font-semibold text-destructive">{t(lang, "suspendedBannerTitle")}</p>
+                      <p className="mt-1 text-sm text-destructive">{partner.suspensionReason || t(lang, "suspendedBannerFallbackReason")}</p>
+                      <p className="mt-1 text-xs text-destructive/80">{t(lang, "suspendedBannerHint")}</p>
                     </div>
-                  ) : null}
-                  <p className="truncate px-1 text-xs text-muted-foreground">{user?.email}</p>
-                </div>
-              </div>
-            }
-          />
-          <div className="flex flex-1 flex-col overflow-hidden">
-            <header className="flex items-center justify-end gap-2 border-b border-border py-3 pl-16 pr-4 md:px-6 lg:px-8">
-              <SandboxModeToggle initialEnabled={sandboxMode} />
-              <NotificationBellLink ariaLabel={t(lang, "notificationsBellAria")} />
-              <ThemeToggle />
-              <LangToggle />
-              <SignOutButton className="rounded-md border border-border px-3 py-1.5 text-sm text-foreground transition-colors hover:bg-muted" />
-            </header>
-            <main className="relative flex-1 overflow-y-auto overflow-x-hidden px-4 py-6 sm:px-6 sm:py-8 lg:px-8">
-              {partner?.status === "suspended" ? (
-                <div className="mb-4 flex items-start gap-3 rounded-md border border-destructive/30 bg-destructive/10 p-4">
-                  <ShieldAlert className="mt-0.5 size-5 shrink-0 text-destructive" />
-                  <div>
-                    <p className="text-sm font-semibold text-destructive">{t(lang, "suspendedBannerTitle")}</p>
-                    <p className="mt-1 text-sm text-destructive">{partner.suspensionReason || t(lang, "suspendedBannerFallbackReason")}</p>
-                    <p className="mt-1 text-xs text-destructive/80">{t(lang, "suspendedBannerHint")}</p>
                   </div>
-                </div>
-              ) : !hasContract ? (
-                <div className="mb-4 flex items-start gap-3 rounded-md border border-destructive/30 bg-destructive/10 p-4">
-                  <ShieldAlert className="mt-0.5 size-5 shrink-0 text-destructive" />
-                  <div>
-                    <p className="text-sm font-semibold text-destructive">{t(lang, "noContractBannerTitle")}</p>
-                    <p className="mt-1 text-sm text-destructive">{t(lang, "noContractBannerHint")}</p>
+                ) : !hasContract ? (
+                  <div className="mb-4 flex items-start gap-3 rounded-md border border-destructive/30 bg-destructive/10 p-4">
+                    <ShieldAlert className="mt-0.5 size-5 shrink-0 text-destructive" />
+                    <div>
+                      <p className="text-sm font-semibold text-destructive">{t(lang, "noContractBannerTitle")}</p>
+                      <p className="mt-1 text-sm text-destructive">{t(lang, "noContractBannerHint")}</p>
+                    </div>
                   </div>
+                ) : null}
+                <div className="mb-4 flex justify-end">
+                  <RefreshButton />
                 </div>
-              ) : null}
-              <div className="mb-4 flex justify-end">
-                <RefreshButton />
-              </div>
-              <RouteFadeIn>{children}</RouteFadeIn>
-            </main>
+                <RouteFadeIn>{children}</RouteFadeIn>
+              </main>
+            </div>
           </div>
         </div>
-      </div>
-      <OnboardingTour />
-      <PageTransitionOverlay />
-      <NetworkStatusToast />
-    </SessionExpiredProvider>
+        <OnboardingTour />
+        <PageTransitionOverlay />
+        <NetworkStatusToast />
+      </SessionExpiredProvider>
+    </ScreenLockProvider>
   );
 }

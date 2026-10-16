@@ -727,6 +727,22 @@ const STRINGS = {
   sessionExpiredSigningIn: { en: "Signing in…", fr: "Connexion en cours…" },
   sessionExpiredSignIn: { en: "Sign in", fr: "Se connecter" },
 
+  // ── Screen lock ───────────────────────────────────────────────────────────
+  lockScreenButtonLabel: { en: "Lock", fr: "Verrouiller" },
+  lockScreenButtonAria: { en: "Lock your screen", fr: "Verrouiller votre écran" },
+  lockScreenTitle: { en: "Screen locked", fr: "Écran verrouillé" },
+  lockScreenDescription: {
+    en: "Enter your password to keep working — nothing you were doing has been lost.",
+    fr: "Entrez votre mot de passe pour continuer — rien de ce que vous faisiez n'a été perdu.",
+  },
+  lockScreenAutoLockNotice: {
+    en: "Locked automatically after 5 minutes of inactivity.",
+    fr: "Verrouillé automatiquement après 5 minutes d'inactivité.",
+  },
+  lockScreenPasswordPlaceholder: { en: "Password", fr: "Mot de passe" },
+  lockScreenUnlocking: { en: "Unlocking…", fr: "Déverrouillage…" },
+  lockScreenUnlock: { en: "Unlock", fr: "Déverrouiller" },
+
   // ── Documents page ───────────────────────────────────────────────────────
   documentsPageTitleRejected: { en: "Action required — Protegey Partner", fr: "Action requise — Protegey Partner" },
   documentsPageTitleOnboarding: { en: "Verification in progress — Protegey Partner", fr: "Vérification en cours — Protegey Partner" },
