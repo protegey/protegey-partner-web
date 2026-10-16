@@ -108,7 +108,11 @@ export function SessionExpiredProvider({ children }: { children: React.ReactNode
           <input
             name="password"
             type="password"
-            autoComplete="current-password"
+            // See ScreenLockProvider's identical input for why this is "new-password" and not
+            // "current-password" — same shared-machine autofill-dropdown concern applies here.
+            autoComplete="new-password"
+            data-1p-ignore
+            data-lpignore="true"
             required
             placeholder={t("sessionExpiredPasswordPlaceholder")}
             className="rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"

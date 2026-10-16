@@ -113,7 +113,16 @@ export function ScreenLockProvider({ children, userEmail }: { children: React.Re
                 <form onSubmit={handleSubmit} className="flex w-full flex-col gap-3">
                   <input
                     type="password"
-                    autoComplete="current-password"
+                    // Deliberately NOT "current-password" — on a shared/demo machine where several
+                    // accounts have ever logged in from this browser, that triggers the browser's
+                    // native autofill dropdown listing every saved credential for this domain (a
+                    // real info leak on a screen meant to re-authenticate ONE specific already-known
+                    // user, not offer to switch accounts). "new-password" is the standard,
+                    // cross-browser way to suppress that suggestion list entirely. data-1p-ignore/
+                    // data-lpignore do the same for 1Password/LastPass's own autofill icon.
+                    autoComplete="new-password"
+                    data-1p-ignore
+                    data-lpignore="true"
                     autoFocus
                     required
                     value={password}

@@ -51,7 +51,12 @@ export function LoginForm({ returnTo }: { returnTo?: string }) {
           id="password"
           name="password"
           type="password"
-          autoComplete="current-password"
+          // See ScreenLockProvider's identical input for why this is "new-password" and not
+          // "current-password" — on a shared/demo machine, "current-password" triggers the
+          // browser's native autofill dropdown listing every saved credential for this domain.
+          autoComplete="new-password"
+          data-1p-ignore
+          data-lpignore="true"
           required
           className="rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
           placeholder="••••••••"
