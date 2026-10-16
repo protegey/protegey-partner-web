@@ -28,7 +28,7 @@ import { OnboardingTour } from "./OnboardingTour";
 import { PageTransitionOverlay } from "@/components/PageTransitionOverlay";
 import { NetworkStatusToast } from "@/components/NetworkStatusToast";
 import { getSessionUser, type SessionUser } from "@/lib/session";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, ApiError } from "@/lib/api";
 import { OrganizationLogo } from "@/components/OrganizationLogo";
 import { SessionExpiredProvider } from "@/components/SessionExpiredProvider";
 import { getLang } from "@/lib/i18n/lang";
@@ -43,14 +43,27 @@ interface PartnerSummary {
   suspensionReason: string | null;
 }
 
-async function loadPartner(): Promise<PartnerSummary | null> {
+/**
+ * Also reports whether this call came back 423 Locked — the only server-side signal this layout
+ * has for "is the screen currently locked" on a FRESH page load (a reload, a direct URL hit, a
+ * new tab). ScreenLockProvider's own `locked` state is otherwise just in-memory React state that
+ * resets to false on any full reload, which would silently undo a lock — this is what makes
+ * reloading not bypass it. Reuses this call rather than firing a second one purely to check lock
+ * status: every request while locked 423s identically regardless of which endpoint, since the
+ * lock is per-user, not per-endpoint.
+ */
+async function loadPartner(): Promise<{ partner: PartnerSummary | null; isScreenLocked: boolean }> {
   try {
-    return await apiFetch<PartnerSummary>("/partners/me");
-  } catch {
-    // Any failure here (a structured 4xx/5xx, or the backend being unreachable entirely — a raw
+    const partner = await apiFetch<PartnerSummary>("/partners/me");
+    return { partner, isScreenLocked: false };
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 423) {
+      return { partner: null, isScreenLocked: true };
+    }
+    // Any OTHER failure (a structured 4xx/5xx, or the backend being unreachable entirely — a raw
     // network TypeError, not an ApiError) must never take down the whole authenticated shell:
     // every page renders under this layout, so a crash here breaks every page, not just this banner.
-    return null;
+    return { partner: null, isScreenLocked: false };
   }
 }
 
@@ -203,11 +216,16 @@ function buildNavItems(lang: Lang, user: SessionUser | null): NavItem[] {
 }
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const [user, partner, hasContract, lang, sandboxMode] = await Promise.all([getSessionUser(), loadPartner(), loadHasContract(), getLang(), getSandboxMode()]);
-  const active = partner?.status === "active";
+  const [user, { partner, isScreenLocked }, hasContract, lang, sandboxMode] = await Promise.all([
+    getSessionUser(),
+    loadPartner(),
+    loadHasContract(),
+    getLang(),
+    getSandboxMode(),
+  ]);
 
   return (
-    <ScreenLockProvider userEmail={user?.email ?? null}>
+    <ScreenLockProvider userEmail={user?.email ?? null} initiallyLocked={isScreenLocked}>
       <SessionExpiredProvider>
         <div className="flex h-svh flex-col bg-background">
           <div

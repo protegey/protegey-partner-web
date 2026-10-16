@@ -27,8 +27,26 @@ export function useScreenLock() {
   return ctx;
 }
 
-export function ScreenLockProvider({ children, userEmail }: { children: React.ReactNode; userEmail: string | null }) {
-  const [locked, setLocked] = useState(false);
+export function ScreenLockProvider({
+  children,
+  userEmail,
+  initiallyLocked,
+}: {
+  children: React.ReactNode;
+  userEmail: string | null;
+  /**
+   * From the layout's own server-side check (loadPartner's 423 detection) — NOT always false.
+   * The lock state otherwise lives only in this component's in-memory React state, which a full
+   * page reload resets to its initial value regardless of what it was before the reload. Without
+   * this prop, that reset was literally the bug: locking, then reloading, landed back on the
+   * dashboard with no password prompt at all — the server was still correctly rejecting every
+   * data fetch with 423, the client just had no way to know to show the overlay again instead of
+   * rendering the page underneath it. Seeding React state from this on first render closes that
+   * gap: a reload while locked now starts locked, not unlocked-by-default.
+   */
+  initiallyLocked: boolean;
+}) {
+  const [locked, setLocked] = useState(initiallyLocked);
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
@@ -37,7 +55,7 @@ export function ScreenLockProvider({ children, userEmail }: { children: React.Re
   // `locked` in their effect's dependency array — re-attaching 5 window listeners on every
   // lock/unlock would be wasteful, and pointless: the whole point is to stop resetting the timer
   // the instant the screen locks, not to tear down and rebuild the listeners themselves.
-  const lockedRef = useRef(false);
+  const lockedRef = useRef(initiallyLocked);
   const { t } = useLang();
 
   // Shows the overlay immediately and optimistically — the server call races in the background.
