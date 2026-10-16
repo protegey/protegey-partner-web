@@ -95,8 +95,13 @@ export function ScreenLockProvider({ children, userEmail }: { children: React.Re
       {children}
       {locked
         ? createPortal(
-            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background p-4">
-              <div className="flex w-full max-w-sm flex-col items-center gap-4 text-center">
+            <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
+              {/* Blurred, not opaque — same backdrop treatment as Dialog, so the app visibly
+                  continues behind the lock as a blurred layer. Deliberately no onClick here
+                  (Dialog's backdrop dismisses on click; this one must never be dismissible
+                  except by entering the correct password). */}
+              <div className="absolute inset-0 animate-fade-in bg-black/30 backdrop-blur-sm" aria-hidden="true" />
+              <div className="relative flex w-full max-w-sm flex-col items-center gap-4 rounded-md border border-border bg-card p-6 text-center shadow-xl animate-scale-in">
                 <div className="flex size-14 items-center justify-center rounded-full bg-muted">
                   <Lock className="size-6 text-foreground" />
                 </div>
