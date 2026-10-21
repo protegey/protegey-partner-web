@@ -233,6 +233,10 @@ export function describeEvent(lang: Lang, event: NotificationEvent): string {
     }
     case "billing.invoice_marked_paid":
       return interpolate(t(lang, "eventBillingInvoiceMarkedPaid"), { actor, invoiceNumber: str("invoiceNumber"), totalDue: str("totalDue"), currency: str("currency") });
+    case "on_premise.license_issued":
+      return interpolate(t(lang, "eventOnPremiseLicenseIssued"), { actor, label: str("label"), expiresAt: str("expiresAt") });
+    case "on_premise.license_revoked":
+      return interpolate(t(lang, "eventOnPremiseLicenseRevoked"), { actor, label: str("label") });
     default:
       return t(lang, "eventUnknown");
   }

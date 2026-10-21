@@ -1542,6 +1542,14 @@ const STRINGS = {
     en: "{actor} marked invoice {invoiceNumber} as paid ({totalDue} {currency}).",
     fr: "{actor} a marqué la facture {invoiceNumber} comme payée ({totalDue} {currency}).",
   },
+  eventOnPremiseLicenseIssued: {
+    en: "{actor} issued an on-premise license for \"{label}\", valid until {expiresAt}.",
+    fr: "{actor} a émis une licence on-premise pour « {label} », valable jusqu'au {expiresAt}.",
+  },
+  eventOnPremiseLicenseRevoked: {
+    en: "{actor} revoked the on-premise license for \"{label}\".",
+    fr: "{actor} a révoqué la licence on-premise pour « {label} ».",
+  },
   billingFieldStandardMonthlyFee: { en: "standard monthly fee", fr: "le prix standard mensuel" },
   billingFieldDiscountType: { en: "discount type", fr: "le type de remise" },
   billingFieldDiscountValue: { en: "discount", fr: "la remise" },
