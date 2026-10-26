@@ -5,6 +5,7 @@ import { t } from "@/lib/i18n/strings";
 import { getSessionUser } from "@/lib/session";
 import { requirePageAccess } from "@/lib/requirePageAccess";
 import { ZoomableSequenceDiagram } from "@/components/ZoomableSequenceDiagram";
+import { getSetupStatus } from "@/app/setup/actions";
 
 export const metadata: Metadata = {
   title: "Decision Flow — Protegey Partner",
@@ -22,7 +23,7 @@ const STEP_KEYS = [
 ] as const;
 
 export default async function DecisionFlowPage() {
-  const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
+  const [user, lang, setupStatus] = await Promise.all([getSessionUser(), getLang(), getSetupStatus()]);
   const denied = requirePageAccess(user, "partners.manage_integrations", lang);
   if (denied) return denied;
 
@@ -38,6 +39,7 @@ export default async function DecisionFlowPage() {
           lang={lang}
           dialogTitle={t(lang, "decisionFlowPageTitle")}
           closeAriaLabel={t(lang, "closeDialogAria")}
+          onPremise={setupStatus.enabled}
         />
       </div>
 
@@ -49,7 +51,9 @@ export default async function DecisionFlowPage() {
               <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/10 font-mono text-xs font-bold text-primary">
                 {i + 1}
               </span>
-              <p className="text-sm leading-relaxed text-foreground">{t(lang, key)}</p>
+              <p className="text-sm leading-relaxed text-foreground">
+                {t(lang, key === "decisionFlowStep8" && setupStatus.enabled ? "decisionFlowStep8OnPremise" : key)}
+              </p>
             </li>
           ))}
         </ol>

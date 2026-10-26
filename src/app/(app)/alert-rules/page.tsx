@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getAlertRules } from "./actions";
+import { getAlertRules, getAssistantStatus } from "./actions";
 import { AlertRulesBoard } from "./AlertRulesBoard";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
@@ -49,7 +49,7 @@ export default async function AlertRulesPage() {
   const denied = requirePageAccess(user, ["partners.manage_alert_rules", "partners.view_alert_rules"], lang);
   if (denied) return denied;
 
-  const rules = await getAlertRules();
+  const [rules, assistantStatus] = await Promise.all([getAlertRules(), getAssistantStatus()]);
 
   return (
     <div className="mx-auto flex min-h-0 max-w-6xl flex-1 flex-col gap-6">
@@ -61,7 +61,7 @@ export default async function AlertRulesPage() {
         <p className="text-sm text-muted-foreground">{t(lang, "alertRulesSubtitle")}</p>
       </div>
 
-      <AlertRulesBoard initialRules={rules} />
+      <AlertRulesBoard initialRules={rules} assistantConfigured={assistantStatus.configured} />
     </div>
   );
 }

@@ -119,7 +119,7 @@ function RuleCard({
   );
 }
 
-export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] }) {
+export function AlertRulesBoard({ initialRules, assistantConfigured }: { initialRules: AlertRule[]; assistantConfigured: boolean }) {
   const guard = useSessionGuard();
   const router = useRouter();
   const { lang, t } = useLang();
@@ -225,10 +225,14 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
   }
 
   return (
-    <div className="grid min-h-0 flex-1 grid-cols-1 gap-6 lg:grid-cols-[minmax(0,380px)_1fr]">
-      <div id="pan-studio" className="scroll-mt-8 lg:h-[calc(100vh-14rem)] lg:sticky lg:top-8">
-        <RuleChatPanel onGenerated={handleRuleGenerated} />
-      </div>
+    <div
+      className={`grid min-h-0 flex-1 grid-cols-1 gap-6 ${assistantConfigured ? "lg:grid-cols-[minmax(0,380px)_1fr]" : ""}`}
+    >
+      {assistantConfigured ? (
+        <div id="pan-studio" className="scroll-mt-8 lg:h-[calc(100vh-14rem)] lg:sticky lg:top-8">
+          <RuleChatPanel onGenerated={handleRuleGenerated} />
+        </div>
+      ) : null}
 
       <div ref={rulesListRef} className="flex scroll-mt-8 flex-col gap-4">
         <div className="flex flex-wrap items-center justify-between gap-3">
@@ -325,6 +329,15 @@ export function AlertRulesBoard({ initialRules }: { initialRules: AlertRule[] })
 
       {editingRule ? (
         <RuleDialog
+          // Forces a clean remount whenever the rule being edited changes identity — in
+          // particular, editing a system default for the first time forks it into a new row with
+          // a NEW id (see AlertRulesService.updateForPartner), and onUpdated below swaps this
+          // dialog's `rule` to that fork. Without this key, React treats that as the same
+          // component instance with new props, so every useState seeded from the original rule
+          // (parameters, the Test-panel's pre-filled example transactions) stays frozen at its
+          // pre-save value instead of picking up the fork's — most visibly, the Test panel kept
+          // testing the OLD threshold until this was added.
+          key={editingRule.id}
           rule={editingRule}
           onClose={() => setEditingRule(null)}
           onUpdated={(updated) => {

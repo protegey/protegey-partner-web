@@ -6,6 +6,11 @@ const STR: Record<string, Record<Lang, string>> = {
   backendActor: { fr: "Backend partenaire", en: "Partner backend" },
   backendActorSub: { fr: "votre système", en: "your system" },
   protegeyActorSub: { fr: "moteur de décision", en: "decision engine" },
+  protegeyActorSubOnPremise: { fr: "déployé dans votre infrastructure", en: "deployed in your own infrastructure" },
+  infraBoundaryLabel: {
+    fr: "Reste entièrement dans votre infrastructure — aucun appel réseau externe",
+    en: "Stays entirely inside your infrastructure — no external network call",
+  },
   step1: { fr: "1 · Lance une transaction", en: "1 · Starts a transaction" },
   step2: { fr: "2 · POST /partner-api/transactions", en: "2 · POST /partner-api/transactions" },
   step2sub: { fr: "externalTransactionId, amount, currency…", en: "externalTransactionId, amount, currency…" },
@@ -23,6 +28,7 @@ const STR: Record<string, Record<Lang, string>> = {
   sep2: { fr: "PLUS TARD · AUCUN ÉQUIVALENT SYNCHRONE", en: "LATER · NO SYNCHRONOUS EQUIVALENT" },
   noteLine1: { fr: "Un analyste change un statut", en: "An analyst changes a status" },
   noteLine2: { fr: "dans le portail Protegey, ou une", en: "in the Protegey portal, or a" },
+  noteLine2OnPremise: { fr: "dans votre propre portail, ou une", en: "in your own portal, or a" },
   noteLine3: { fr: "vérification KYC se termine", en: "hosted KYC check finishes" },
   step8: { fr: "8 · Webhook : alert.status_changed / kyc.status_changed", en: "8 · Webhook: alert.status_changed / kyc.status_changed" },
 };
@@ -33,7 +39,7 @@ const STR: Record<string, Record<Lang, string>> = {
  * its own dedicated page, not squeezed into a sidebar card. All labels follow the viewer's own
  * `lang`, same as every other string in the app — field/endpoint names stay identical in both
  * since those are literal API contract, not prose. */
-export function TransactionSequenceDiagram({ lang }: { lang: Lang }) {
+export function TransactionSequenceDiagram({ lang, onPremise = false }: { lang: Lang; onPremise?: boolean }) {
   const s = (key: keyof typeof STR) => STR[key][lang];
 
   return (
@@ -50,6 +56,19 @@ export function TransactionSequenceDiagram({ lang }: { lang: Lang }) {
         </marker>
       </defs>
 
+      {/* On-premise: Backend + Protegey live in the SAME infrastructure — this boundary is the
+          one thing that's actually different from the SaaS version of this same diagram, so it's
+          drawn first (underneath everything else) rather than left implicit. */}
+      {onPremise ? (
+        <g>
+          <rect x="370" y="8" width="630" height="820" rx="14" strokeDasharray="6,5" className="fill-none stroke-muted-foreground/40" strokeWidth={1.3} />
+          <rect x="455" y="-2" width="460" height="20" className="fill-background" />
+          <text x="685" y="12" textAnchor="middle" fontSize={11} fontWeight={700} className="fill-muted-foreground">
+            {s("infraBoundaryLabel")}
+          </text>
+        </g>
+      ) : null}
+
       {/* actor boxes */}
       <g fontWeight={700} fontSize={16}>
         <rect x="20" y="18" width="220" height="56" rx="11" className="fill-muted stroke-border" strokeWidth={1.2} />
@@ -62,7 +81,9 @@ export function TransactionSequenceDiagram({ lang }: { lang: Lang }) {
 
         <rect x="760" y="18" width="220" height="56" rx="11" className="fill-primary/10 stroke-primary" strokeWidth={1.4} />
         <text x="870" y="42" textAnchor="middle" className="fill-primary">Protegey</text>
-        <text x="870" y="61" textAnchor="middle" fontSize={11.5} fontWeight={400} className="fill-primary">{s("protegeyActorSub")}</text>
+        <text x="870" y="61" textAnchor="middle" fontSize={11.5} fontWeight={400} className="fill-primary">
+          {onPremise ? s("protegeyActorSubOnPremise") : s("protegeyActorSub")}
+        </text>
       </g>
 
       {/* lifelines */}
@@ -117,7 +138,9 @@ export function TransactionSequenceDiagram({ lang }: { lang: Lang }) {
       {/* note: trigger context */}
       <rect x="745" y="686" width="235" height="76" rx="10" className="fill-muted stroke-border" strokeWidth={1.2} />
       <text x="862" y="709" textAnchor="middle" fontSize={11.8} fontWeight={600} className="fill-muted-foreground">{s("noteLine1")}</text>
-      <text x="862" y="726" textAnchor="middle" fontSize={11.8} className="fill-muted-foreground">{s("noteLine2")}</text>
+      <text x="862" y="726" textAnchor="middle" fontSize={11.8} className="fill-muted-foreground">
+        {onPremise ? s("noteLine2OnPremise") : s("noteLine2")}
+      </text>
       <text x="862" y="743" textAnchor="middle" fontSize={11.8} className="fill-muted-foreground">{s("noteLine3")}</text>
 
       {/* 8 — webhook alert.status_changed / kyc.status_changed */}

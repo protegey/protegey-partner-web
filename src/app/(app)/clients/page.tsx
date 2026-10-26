@@ -124,8 +124,8 @@ export default async function ClientsPage({
         <>
           <ClientsFilters activeTab={activeTab} initialSearch={search} initialStatus={status ?? ""} />
 
-          <div className="overflow-hidden rounded-md border border-border">
-            <table className="w-full text-left text-sm">
+          <div className="overflow-x-auto rounded-md border border-border">
+            <table className="w-full min-w-max text-left text-sm">
               <thead className="bg-muted text-muted-foreground">
                 <tr>
                   <th className="px-4 py-2.5 font-medium">{t(lang, "clientsColBusiness")}</th>

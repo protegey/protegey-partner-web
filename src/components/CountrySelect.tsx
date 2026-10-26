@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
-import type { Lang } from "./i18n";
+import type { Lang } from "@/lib/i18n/strings";
 
 // ISO 3166-1 alpha-2 codes — names are resolved via Intl.DisplayNames below, so this list
 // never needs to carry (or translate) country names itself.

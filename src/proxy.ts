@@ -10,8 +10,12 @@ import {
 // "/client-application" is a business's own KYB questionnaire for a partner (e.g. Neero) — it
 // has no Protegey account and no session at all, so it must never redirect to /login. Its two
 // API proxy routes (document + partner-logo download) are equally public and session-less.
+// "/setup" is the on-premise first-run wizard — there is no account yet to gate it behind; the
+// backend's own /setup/bootstrap refuses it outright once this deployment already has a partner
+// (or isn't an on-premise build at all), so reachability here is never the same as it succeeding.
 const PUBLIC_PATHS = [
   "/login",
+  "/setup",
   "/invitations/accept",
   "/reset-password",
   "/client-application",

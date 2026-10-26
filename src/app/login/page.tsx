@@ -1,17 +1,26 @@
 import type { Metadata } from "next";
 import Image from "next/image";
+import { redirect } from "next/navigation";
 import { LoginForm } from "./LoginForm";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import { Logo } from "@/components/Logo";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
+import { getSetupStatus } from "../setup/actions";
 
 export const metadata: Metadata = {
   title: "Sign in — Protegey Partner",
 };
 
 export default async function LoginPage({ searchParams }: { searchParams: Promise<{ returnTo?: string }> }) {
-  const [{ returnTo }, lang] = await Promise.all([searchParams, getLang()]);
+  const [{ returnTo }, lang, setupStatus] = await Promise.all([searchParams, getLang(), getSetupStatus()]);
+
+  // On-premise and this deployment has no partner yet — there's no account anyone could sign in
+  // with, so send them straight to first-run setup instead of a login form that can never work.
+  // A no-op on the shared SaaS instance (getSetupStatus's enabled is always false there).
+  if (setupStatus.enabled && !setupStatus.completed) {
+    redirect("/setup");
+  }
 
   return (
     <div className="relative flex min-h-svh bg-background">

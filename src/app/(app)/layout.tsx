@@ -35,6 +35,7 @@ import { getLang } from "@/lib/i18n/lang";
 import { t, type Lang } from "@/lib/i18n/strings";
 import { RefreshButton } from "@/components/RefreshButton";
 import { RouteFadeIn } from "@/components/RouteFadeIn";
+import { getSetupStatus } from "../setup/actions";
 
 interface PartnerSummary {
   name: string;
@@ -67,7 +68,13 @@ async function loadPartner(): Promise<{ partner: PartnerSummary | null; isScreen
   }
 }
 
-async function loadHasContract(): Promise<boolean> {
+async function loadHasContract(isOnPremise: boolean): Promise<boolean> {
+  // A negotiated billing contract is a SaaS-only concept (Protegey metering a partner's usage
+  // against agreed terms) — an on-premise deployment is licensed as a flat, whole-deployment
+  // license instead (see LicenseEnforcementService on the backend) and never gets one, by
+  // design. Without this check, every on-premise partner would see this banner forever, telling
+  // them to "contact your account manager" for something that doesn't apply to them.
+  if (isOnPremise) return true;
   try {
     const contract = await apiFetch<unknown | null>("/partners/me/contract");
     return contract !== null;
@@ -89,7 +96,7 @@ type NavItemDef = Omit<NavItem, "children"> & { requiredPermission?: RequiredPer
 // v2) — an item/group with no `requiredPermission` is visible to every signed-in partner user. An
 // array means "any of these" — used for pages split into a view/manage permission pair so a
 // read-only role (Tuning/Risk Data Analyst, QA/Quality Control) still sees the page in nav.
-function buildNavItemDefs(lang: Lang): NavItemDef[] {
+function buildNavItemDefs(lang: Lang, isOnPremise: boolean): NavItemDef[] {
   const tt = (key: Parameters<typeof t>[1]) => t(lang, key);
   return [
     { href: "/dashboard", label: tt("navDashboard"), icon: <LayoutDashboard className="size-4" /> },
@@ -161,6 +168,7 @@ function buildNavItemDefs(lang: Lang): NavItemDef[] {
         { label: tt("navSdkFlutter"), href: "/sdks/flutter" },
         { label: tt("navSdkPhp"), href: "/sdks/php" },
         { label: tt("navSdkJava"), href: "/sdks/java" },
+        { label: tt("navSdkDotnet"), href: "/sdks/dotnet" },
       ],
     },
     {
@@ -168,6 +176,21 @@ function buildNavItemDefs(lang: Lang): NavItemDef[] {
       icon: <SettingsIcon className="size-4" />,
       children: [
         { href: "/settings/profile", label: tt("navOrganizationProfile"), requiredPermission: "partners.manage_organization" },
+        // Mail provider config is a SaaS-admin-only concern everywhere else (one shared Resend
+        // account for every partner) — only an on-premise deployment's own admin controls their
+        // own mail provider, since there's exactly one partner in that deployment's database.
+        ...(isOnPremise
+          ? [
+              { href: "/settings/email", label: tt("navEmailSettings"), requiredPermission: "partners.manage_organization" },
+              // Same reasoning as mail config above — one shared DeepSeek account on SaaS, but
+              // each on-premise deployment needs its own key for Pan Studio's rule assistant to
+              // work at all.
+              { href: "/settings/ai", label: tt("navAiSettings"), requiredPermission: "partners.manage_organization" },
+              // Set once during the setup wizard (required there, unlike mail/AI) — kept editable
+              // here too for when the reverse proxy's public domain changes after the fact.
+              { href: "/settings/portal-url", label: tt("navPortalUrlSettings"), requiredPermission: "partners.manage_organization" },
+            ]
+          : []),
         { href: "/settings/billing", label: tt("navBillingPlans"), requiredPermission: "partners.manage_billing" },
         { href: "/settings/usage", label: tt("navUsageQuotas"), requiredPermission: "partners.manage_billing" },
         { href: "/team", label: tt("navTeamManagement"), requiredPermission: "partners.manage_team" },
@@ -211,18 +234,20 @@ function filterNavItems(items: NavItemDef[], permissions: string[]): NavItem[] {
   }, []);
 }
 
-function buildNavItems(lang: Lang, user: SessionUser | null): NavItem[] {
-  return filterNavItems(buildNavItemDefs(lang), user?.permissions ?? []);
+function buildNavItems(lang: Lang, user: SessionUser | null, isOnPremise: boolean): NavItem[] {
+  return filterNavItems(buildNavItemDefs(lang, isOnPremise), user?.permissions ?? []);
 }
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
-  const [user, { partner, isScreenLocked }, hasContract, lang, sandboxMode] = await Promise.all([
+  const [user, { partner, isScreenLocked }, setupStatus, lang, sandboxMode] = await Promise.all([
     getSessionUser(),
     loadPartner(),
-    loadHasContract(),
+    getSetupStatus(),
     getLang(),
     getSandboxMode(),
   ]);
+  const isOnPremise = setupStatus.enabled;
+  const hasContract = await loadHasContract(isOnPremise);
 
   return (
     <ScreenLockProvider userEmail={user?.email ?? null} initiallyLocked={isScreenLocked}>
@@ -238,7 +263,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           </div>
           <div className="flex flex-1 overflow-hidden">
             <Sidebar
-              navItems={buildNavItems(lang, user)}
+              navItems={buildNavItems(lang, user, isOnPremise)}
               soonLabel={t(lang, "soonBadge")}
               footer={
                 <div className="flex flex-col">

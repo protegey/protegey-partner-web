@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Check } from "lucide-react";
 import { OrganizationLogo } from "@/components/OrganizationLogo";
 import { LanguageToggle } from "./LanguageToggle";
-import { CountrySelect } from "./CountrySelect";
+import { CountrySelect } from "@/components/CountrySelect";
 import { SuccessIllustration } from "./SuccessIllustration";
 import { t, type Lang } from "./i18n";
 import {

@@ -6,6 +6,7 @@ import { Loader2, Play, Plus, Save, Trash2 } from "lucide-react";
 import { Dialog } from "@/components/Dialog";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
+import { FieldHint } from "@/components/FieldHint";
 import { useLang } from "@/lib/i18n/LangProvider";
 import {
   updateAlertRule,
@@ -285,8 +286,9 @@ export function RuleDialog({
     <Dialog open onClose={onClose} title={`#${rule.ruleNumber} — ${name} (${rule.code})`} maxWidthClassName="max-w-2xl" closeAriaLabel={t("close")}>
       <div className="flex flex-col gap-6">
         <div>
-          <label className="text-xs font-medium uppercase text-muted-foreground" htmlFor="rule-name-input">
+          <label className="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground" htmlFor="rule-name-input">
             {t("ruleDialogNameLabel")}
+            <FieldHint text={t("ruleDialogNameHint")} />
           </label>
           <input
             id="rule-name-input"
@@ -298,8 +300,9 @@ export function RuleDialog({
         </div>
 
         <div>
-          <label className="text-xs font-medium uppercase text-muted-foreground" htmlFor="rule-description-input">
+          <label className="flex items-center gap-1.5 text-xs font-medium uppercase text-muted-foreground" htmlFor="rule-description-input">
             {t("ruleDialogDescriptionLabel")}
+            <FieldHint text={t("ruleDialogDescriptionHint")} />
           </label>
           <textarea
             id="rule-description-input"
@@ -311,7 +314,10 @@ export function RuleDialog({
         </div>
 
         <div>
-          <p className="mb-1 text-sm font-semibold text-foreground">{t("ruleDialogSeverityTitle")}</p>
+          <p className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-foreground">
+            {t("ruleDialogSeverityTitle")}
+            <FieldHint text={t("ruleDialogSeverityFieldHint")} />
+          </p>
           <p className="mb-2 text-xs text-muted-foreground">{t("ruleDialogSeverityHint")}</p>
           <div className="flex flex-wrap gap-2">
             {SEVERITY_OPTIONS.map((option) => (
@@ -332,7 +338,10 @@ export function RuleDialog({
         </div>
 
         <div>
-          <p className="mb-2 text-sm font-semibold text-foreground">{t("ruleDialogThresholdsTitle")}</p>
+          <p className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-foreground">
+            {t("ruleDialogThresholdsTitle")}
+            <FieldHint text={t("ruleDialogThresholdsHint")} />
+          </p>
           {Object.keys(parameters).length === 0 ? (
             <p className="text-sm text-muted-foreground">{t("ruleDialogNoThresholds")}</p>
           ) : (
@@ -393,7 +402,10 @@ export function RuleDialog({
 
         {rule.domain === "transaction" ? (
         <div className="border-t border-border pt-5">
-          <p className="mb-1 text-sm font-semibold text-foreground">{t("ruleDialogSimulateTitle")}</p>
+          <p className="mb-1 flex items-center gap-1.5 text-sm font-semibold text-foreground">
+            {t("ruleDialogSimulateTitle")}
+            <FieldHint text={t("ruleDialogSimulateFieldHint")} />
+          </p>
           <p className="mb-1 text-xs text-muted-foreground">{t("ruleDialogSimulateSubtitle")}</p>
           {prefilledFromExample ? (
             <p className="mb-3 text-xs font-medium text-primary">
@@ -422,6 +434,7 @@ export function RuleDialog({
                     onChange={(e) => updateTransaction(i, { amount: Number(e.target.value) })}
                     className="w-28 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
                   />
+                  <FieldHint text={t("ruleDialogAmountHint")} />
                   <input
                     type="datetime-local"
                     value={tx.occurredAt.slice(0, 16)}
@@ -435,9 +448,11 @@ export function RuleDialog({
                     onChange={(e) => updateTransaction(i, { counterpartyExternalId: e.target.value || undefined })}
                     className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
                   />
+                  <FieldHint text={t("ruleDialogCounterpartyHint")} />
                   <label className="flex items-center gap-1 text-xs text-muted-foreground">
                     <input type="checkbox" checked={Boolean(tx.isCash)} onChange={(e) => updateTransaction(i, { isCash: e.target.checked })} />
                     {t("ruleDialogCash")}
+                    <FieldHint text={t("ruleDialogCashHint")} />
                   </label>
                   {outcomes?.[i] ? (
                     <span className={`ml-auto text-xs font-semibold ${outcomes[i].matched ? "text-destructive" : "text-muted-foreground"}`}>
@@ -468,6 +483,7 @@ export function RuleDialog({
                       </option>
                     ))}
                   </select>
+                  <FieldHint text={t("ruleDialogChannelHint")} />
                   <input
                     type="text"
                     placeholder={t("ruleDialogTransactionTypePlaceholder")}
@@ -475,6 +491,7 @@ export function RuleDialog({
                     onChange={(e) => updateTransaction(i, { transactionType: e.target.value || undefined })}
                     className="w-32 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
                   />
+                  <FieldHint text={t("ruleDialogTransactionTypeHint")} />
                   <input
                     type="text"
                     placeholder={t("ruleDialogInstitutionCodePlaceholder")}
@@ -482,6 +499,7 @@ export function RuleDialog({
                     onChange={(e) => updateTransaction(i, { counterpartyInstitutionCode: e.target.value || undefined })}
                     className="w-36 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
                   />
+                  <FieldHint text={t("ruleDialogInstitutionCodeHint")} />
                   <input
                     type="text"
                     placeholder={t("ruleDialogCounterpartyCountryPlaceholder")}
@@ -489,6 +507,7 @@ export function RuleDialog({
                     onChange={(e) => updateTransaction(i, { counterpartyCountry: e.target.value || undefined })}
                     className="w-32 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
                   />
+                  <FieldHint text={t("ruleDialogCounterpartyCountryHint")} />
                   <input
                     type="text"
                     placeholder={t("ruleDialogCustomerCountryPlaceholder")}
@@ -496,9 +515,11 @@ export function RuleDialog({
                     onChange={(e) => updateTransaction(i, { country: e.target.value || undefined })}
                     className="w-32 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
                   />
+                  <FieldHint text={t("ruleDialogCustomerCountryHint")} />
                   <label className="flex items-center gap-1 text-xs text-muted-foreground">
                     <input type="checkbox" checked={Boolean(tx.isPep)} onChange={(e) => updateTransaction(i, { isPep: e.target.checked })} />
                     {t("ruleDialogIsPep")}
+                    <FieldHint text={t("ruleDialogIsPepHint")} />
                   </label>
                 </div>
                 <div className="flex flex-wrap items-center gap-2">
@@ -509,6 +530,7 @@ export function RuleDialog({
                     onChange={(e) => updateTransaction(i, { secondsSincePasswordChange: hoursInputToSeconds(e.target.value) })}
                     className="w-44 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
                   />
+                  <FieldHint text={t("ruleDialogPasswordChangeHoursHint")} />
                   <input
                     type="number"
                     placeholder={t("ruleDialogEmailChangeHoursPlaceholder")}
@@ -516,6 +538,7 @@ export function RuleDialog({
                     onChange={(e) => updateTransaction(i, { secondsSinceEmailChange: hoursInputToSeconds(e.target.value) })}
                     className="w-40 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
                   />
+                  <FieldHint text={t("ruleDialogEmailChangeHoursHint")} />
                   <input
                     type="number"
                     placeholder={t("ruleDialogPhoneChangeHoursPlaceholder")}
@@ -523,6 +546,7 @@ export function RuleDialog({
                     onChange={(e) => updateTransaction(i, { secondsSincePhoneChange: hoursInputToSeconds(e.target.value) })}
                     className="w-52 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
                   />
+                  <FieldHint text={t("ruleDialogPhoneChangeHoursHint")} />
                   <input
                     type="number"
                     min={0}
@@ -532,9 +556,11 @@ export function RuleDialog({
                     onChange={(e) => updateTransaction(i, { balanceDepletionRatio: e.target.value === "" ? undefined : Number(e.target.value) })}
                     className="w-48 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
                   />
+                  <FieldHint text={t("ruleDialogBalanceDepletionHint")} />
                   <label className="flex items-center gap-1 text-xs text-muted-foreground">
                     <input type="checkbox" checked={Boolean(tx.isNewCounterparty)} onChange={(e) => updateTransaction(i, { isNewCounterparty: e.target.checked })} />
                     {t("ruleDialogIsNewCounterparty")}
+                    <FieldHint text={t("ruleDialogIsNewCounterpartyHint")} />
                   </label>
                   <input
                     type="number"
@@ -545,6 +571,7 @@ export function RuleDialog({
                     onChange={(e) => updateTransaction(i, { behavioralDeviationScore: e.target.value === "" ? undefined : Number(e.target.value) })}
                     className="w-48 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
                   />
+                  <FieldHint text={t("ruleDialogBehavioralDeviationHint")} />
                 </div>
               </div>
             ))}

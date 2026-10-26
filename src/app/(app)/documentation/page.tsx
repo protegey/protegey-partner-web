@@ -312,6 +312,12 @@ export default async function DocumentationPage() {
             >
               {t(lang, "navSdkJava")}
             </Link>
+            <Link
+              href="/sdks/dotnet"
+              className="flex items-center gap-1.5 rounded-md border border-border px-3.5 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
+            >
+              {t(lang, "navSdkDotnet")}
+            </Link>
           </div>
         </Section>
 

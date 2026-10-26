@@ -53,6 +53,17 @@ export async function getAlertRules(): Promise<AlertRule[]> {
   return apiFetch<AlertRule[]>("/alert-rules/me");
 }
 
+/** Whether the "ask for a rule" chat assistant has a working DeepSeek key behind it — fails
+ * toward "not configured" on any error, so a transient backend hiccup hides the panel rather
+ * than show a chat box that's actually going to fail every message. */
+export async function getAssistantStatus(): Promise<{ configured: boolean }> {
+  try {
+    return await apiFetch<{ configured: boolean }>("/alert-rules/me/assistant-status");
+  } catch {
+    return { configured: false };
+  }
+}
+
 export type MutationResult<T> = T | { error: string; suggestion?: string } | AuthExpired;
 
 async function runGuarded<T>(path: string, options?: Parameters<typeof apiFetch>[1]): Promise<MutationResult<T>> {

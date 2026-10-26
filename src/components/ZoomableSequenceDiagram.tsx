@@ -12,10 +12,12 @@ export function ZoomableSequenceDiagram({
   lang,
   dialogTitle,
   closeAriaLabel,
+  onPremise = false,
 }: {
   lang: "en" | "fr";
   dialogTitle: string;
   closeAriaLabel: string;
+  onPremise?: boolean;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -26,7 +28,7 @@ export function ZoomableSequenceDiagram({
         onClick={() => setOpen(true)}
         className="group relative block w-full cursor-zoom-in rounded-md border border-border bg-muted/30 p-4 text-left transition-colors hover:border-primary/40"
       >
-        <TransactionSequenceDiagram lang={lang} />
+        <TransactionSequenceDiagram lang={lang} onPremise={onPremise} />
         <span className="absolute right-3 top-3 flex items-center gap-1 rounded-md border border-border bg-card px-2 py-1 text-xs font-medium text-muted-foreground opacity-0 shadow-sm transition-opacity group-hover:opacity-100">
           <ZoomIn className="size-3.5" />
         </span>
@@ -34,7 +36,7 @@ export function ZoomableSequenceDiagram({
 
       <Dialog open={open} onClose={() => setOpen(false)} title={dialogTitle} maxWidthClassName="max-w-[96vw]" closeAriaLabel={closeAriaLabel}>
         <div className="overflow-x-auto">
-          <TransactionSequenceDiagram lang={lang} />
+          <TransactionSequenceDiagram lang={lang} onPremise={onPremise} />
         </div>
       </Dialog>
     </>

@@ -237,6 +237,8 @@ export function describeEvent(lang: Lang, event: NotificationEvent): string {
       return interpolate(t(lang, "eventOnPremiseLicenseIssued"), { actor, label: str("label"), expiresAt: str("expiresAt") });
     case "on_premise.license_revoked":
       return interpolate(t(lang, "eventOnPremiseLicenseRevoked"), { actor, label: str("label") });
+    case "on_premise.license_renewed":
+      return interpolate(t(lang, "eventOnPremiseLicenseRenewed"), { actor, label: str("label"), expiresAt: str("expiresAt") });
     default:
       return t(lang, "eventUnknown");
   }
