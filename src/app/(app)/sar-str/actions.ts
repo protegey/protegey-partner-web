@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api";
+import { apiFetch, apiFetchGuarded, apiFetchTextGuarded, ApiError, type AuthExpired } from "@/lib/api";
 import type { PaginatedResult } from "../transactions/actions";
 
 export type SarReportStatus = "draft" | "submitted" | "mlro_review" | "filing_pending" | "filed" | "rejected";
@@ -44,6 +44,19 @@ export async function getSarReports(query: SarReportsQuery = {}): Promise<Pagina
 
 export async function getSarReport(id: string): Promise<SarReport> {
   return apiFetch<SarReport>(`/sar-reports/me/${id}`);
+}
+
+/** Every row matching `query`, as CSV text — the backend's `/sar-reports/me/export` endpoint
+ * ignores pagination and returns the full filtered set. */
+export async function exportSarReportsAction(query: Omit<SarReportsQuery, "page">): Promise<string | { error: string } | AuthExpired> {
+  const params = new URLSearchParams();
+  if (query.status) params.set("status", query.status);
+  try {
+    return await apiFetchTextGuarded(`/sar-reports/me/export?${params.toString()}`);
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }
 
 export type SarFieldType = "text" | "date" | "number" | "textarea" | "checkbox";

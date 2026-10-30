@@ -1,6 +1,6 @@
 "use server";
 
-import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api";
+import { apiFetch, apiFetchGuarded, apiFetchTextGuarded, ApiError, type AuthExpired } from "@/lib/api";
 import type { PaginatedResult } from "../../transactions/actions";
 
 export type SharedSignalCategory = "confirmed_fraud" | "identity_theft" | "money_laundering" | "other";
@@ -48,6 +48,20 @@ export async function getSharedSignalReports(query: SharedSignalReportsQuery = {
     if (value !== undefined && value !== "") params.set(key, String(value));
   }
   return apiFetch<PaginatedResult<SharedSignalReportSummary>>(`/partners/me/shared-signals/reports?${params.toString()}`);
+}
+
+/** Every row matching the active category filter, as CSV text — the backend's
+ * `/partners/me/shared-signals/reports/export` endpoint ignores pagination and returns the full
+ * filtered set. */
+export async function exportSharedSignalReportsAction(query: Omit<SharedSignalReportsQuery, "page"> = {}): Promise<string | { error: string } | AuthExpired> {
+  const params = new URLSearchParams();
+  if (query.category) params.set("category", query.category);
+  try {
+    return await apiFetchTextGuarded(`/partners/me/shared-signals/reports/export?${params.toString()}`);
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }
 
 export async function getSharedSignalReport(id: string): Promise<SharedSignalReportDetail> {

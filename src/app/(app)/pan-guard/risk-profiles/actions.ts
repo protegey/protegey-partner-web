@@ -1,6 +1,6 @@
 "use server";
 
-import { apiFetch } from "@/lib/api";
+import { apiFetch, apiFetchTextGuarded, ApiError, type AuthExpired } from "@/lib/api";
 import type { PaginatedResult } from "../../transactions/actions";
 
 export interface RiskProfileContribution {
@@ -69,6 +69,21 @@ export async function getRiskProfiles(query: RiskProfilesQuery = {}): Promise<Pa
     if (value !== undefined && value !== "") params.set(key, String(value));
   }
   return apiFetch<PaginatedResult<EntityRiskProfile>>(`/risk-profile/me?${params.toString()}`);
+}
+
+/** Every row matching the active filter, as CSV text — the backend's `/risk-profile/me/export`
+ * endpoint ignores pagination and returns the full filtered set. */
+export async function exportRiskProfilesAction(query: Omit<RiskProfilesQuery, "page"> = {}): Promise<string | { error: string } | AuthExpired> {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== "") params.set(key, String(value));
+  }
+  try {
+    return await apiFetchTextGuarded(`/risk-profile/me/export?${params.toString()}`);
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }
 
 /** Per-customer drill-down — same richer shape as the list, fetched for a single entity. */

@@ -42,9 +42,8 @@ export interface RequestOptions {
   unauthenticated?: boolean;
 }
 
-export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
-  const headers: Record<string, string> = { "Content-Type": "application/json" };
-
+async function buildAuthHeaders(options: RequestOptions): Promise<Record<string, string>> {
+  const headers: Record<string, string> = {};
   if (!options.unauthenticated) {
     const token = await getAccessToken();
     if (token) {
@@ -57,6 +56,12 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
       headers["x-protegey-sandbox"] = "true";
     }
   }
+  return headers;
+}
+
+export async function apiFetch<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const headers = await buildAuthHeaders(options);
+  headers["Content-Type"] = "application/json";
 
   const response = await fetch(`${BACKEND_API_URL}${path}`, {
     method: options.method ?? "GET",
@@ -74,6 +79,40 @@ export async function apiFetch<T>(path: string, options: RequestOptions = {}): P
   }
 
   return data as T;
+}
+
+/**
+ * For endpoints that return a plain-text body (currently: CSV exports) rather than JSON —
+ * `apiFetch`'s `response.json()` would silently return null on a CSV body instead of erroring.
+ * Same auth/sandbox header handling as `apiFetch`, otherwise.
+ */
+export async function apiFetchText(path: string, options: RequestOptions = {}): Promise<string> {
+  const headers = await buildAuthHeaders(options);
+
+  const response = await fetch(`${BACKEND_API_URL}${path}`, {
+    method: options.method ?? "GET",
+    headers,
+    body: options.body ? JSON.stringify(options.body) : undefined,
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const data = await response.json().catch(() => null);
+    const rawMessage = (data && (data.message as string)) || response.statusText;
+    const message = Array.isArray(rawMessage) ? rawMessage.join(", ") : rawMessage;
+    throw new ApiError(response.status, await resolveErrorMessage(response.status, message), data ?? undefined);
+  }
+
+  return response.text();
+}
+
+export async function apiFetchTextGuarded(path: string, options?: RequestOptions): Promise<string | AuthExpired> {
+  try {
+    return await apiFetchText(path, options);
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return { authExpired: true };
+    throw error;
+  }
 }
 
 /**

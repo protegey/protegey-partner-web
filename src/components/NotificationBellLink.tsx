@@ -18,7 +18,7 @@ export function NotificationBellLink({ ariaLabel }: { ariaLabel: string }) {
 
   const refresh = useCallback(async () => {
     try {
-      const result = await getNotifications(1);
+      const result = await getNotifications({ page: 1 });
       setItems(result.data.slice(0, 8));
       setUnreadCount(result.unreadCount);
     } catch {

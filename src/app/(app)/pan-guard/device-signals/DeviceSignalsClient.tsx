@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { ChevronDown, ChevronRight, Fingerprint } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
+import { ExportCsvButton } from "@/components/ExportCsvButton";
 import { CountryBadge, DeviceAttributesDetails, DeviceRiskBadges, DeviceSummaryCell, MapLinkBadge } from "@/components/DeviceAttributesSummary";
-import type { DeviceSignal } from "./actions";
+import { exportDeviceSignalsAction, type DeviceAction, type DeviceSignal } from "./actions";
 import type { PaginatedResult } from "../../transactions/actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
@@ -133,6 +134,14 @@ export function DeviceSignalsClient({
         >
           {t("txFilterApply")}
         </button>
+        <div className="ml-auto">
+          <ExportCsvButton
+            filename="device-signals-export.csv"
+            onExport={() =>
+              exportDeviceSignalsAction({ externalCustomerId: customer || undefined, action: action !== "all" ? (action as DeviceAction) : undefined })
+            }
+          />
+        </div>
       </div>
 
       {result.data.length === 0 ? (

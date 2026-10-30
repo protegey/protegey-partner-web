@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useLang } from "@/lib/i18n/LangProvider";
-import type { DiditSessionStatus } from "./actions";
+import { ExportCsvButton } from "@/components/ExportCsvButton";
+import { exportKycEnrollmentsAction, type DiditSessionStatus } from "./actions";
 
 const STATUSES: DiditSessionStatus[] = [
   "Not Started",
@@ -81,6 +82,13 @@ export function KycFilters({ initialStatus, initialSearch }: { initialStatus: Di
             </option>
           ))}
         </select>
+      </div>
+
+      <div className="ml-auto">
+        <ExportCsvButton
+          filename="kyc-export.csv"
+          onExport={() => exportKycEnrollmentsAction({ status: status || undefined, search: search || undefined })}
+        />
       </div>
     </div>
   );

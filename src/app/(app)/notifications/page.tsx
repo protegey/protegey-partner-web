@@ -9,15 +9,25 @@ export const metadata: Metadata = {
 export default async function NotificationsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; type?: string; actorLabel?: string; dateFrom?: string; dateTo?: string }>;
 }) {
-  const { page: pageParam } = await searchParams;
+  const { page: pageParam, type, actorLabel, dateFrom, dateTo } = await searchParams;
   const page = Math.max(1, Number(pageParam) || 1);
-  const result = await getNotifications(page);
+  const result = await getNotifications({ page, type, actorLabel, dateFrom, dateTo });
 
   // Opening this page is what "reading" your notifications means — mark them seen server-side,
   // right when the data is fetched, so the sidebar badge clears without a separate click.
   await markNotificationsSeen();
 
-  return <NotificationsClient result={result} page={page} />;
+  return (
+    <NotificationsClient
+      key={`${page}-${type ?? ""}-${actorLabel ?? ""}-${dateFrom ?? ""}-${dateTo ?? ""}`}
+      result={result}
+      page={page}
+      initialType={type ?? ""}
+      initialActorLabel={actorLabel ?? ""}
+      initialDateFrom={dateFrom ?? ""}
+      initialDateTo={dateTo ?? ""}
+    />
+  );
 }

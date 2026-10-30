@@ -5,8 +5,9 @@ import { useRouter } from "next/navigation";
 import { Activity } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
+import { ExportCsvButton } from "@/components/ExportCsvButton";
 import type { StringKey } from "@/lib/i18n/strings";
-import type { BehavioralSignal, BehavioralCategory } from "./actions";
+import { exportBehavioralSignalsAction, type BehavioralSignal, type BehavioralCategory, type BehavioralConfidenceTier } from "./actions";
 import type { PaginatedResult } from "../../transactions/actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
@@ -123,6 +124,17 @@ export function BehavioralSignalsClient({
         >
           {t("txFilterApply")}
         </button>
+        <div className="ml-auto">
+          <ExportCsvButton
+            filename="behavioral-signals-export.csv"
+            onExport={() =>
+              exportBehavioralSignalsAction({
+                externalCustomerId: customer || undefined,
+                confidenceTier: tier !== "all" ? (tier as BehavioralConfidenceTier) : undefined,
+              })
+            }
+          />
+        </div>
       </div>
 
       {result.data.length === 0 ? (

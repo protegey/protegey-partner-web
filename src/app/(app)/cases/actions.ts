@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiFetch, apiFetchGuarded, apiUploadGuarded, ApiError, type AuthExpired } from "@/lib/api";
+import { apiFetch, apiFetchGuarded, apiFetchTextGuarded, apiUploadGuarded, ApiError, type AuthExpired } from "@/lib/api";
 import type { PaginatedResult } from "../transactions/actions";
 import type { NotificationEvent } from "@/lib/events";
 import type { EntityRiskProfile } from "../pan-guard/risk-profiles/actions";
@@ -75,6 +75,21 @@ export async function getCases(query: CasesQuery = {}): Promise<PaginatedResult<
     if (value !== undefined && value !== "") params.set(key, String(value));
   }
   return apiFetch<PaginatedResult<Case>>(`/cases/me?${params.toString()}`);
+}
+
+/** Every row matching `query`, as CSV text — the backend's `/cases/me/export` endpoint ignores
+ * pagination and returns the full filtered set. */
+export async function exportCasesAction(query: Omit<CasesQuery, "page">): Promise<string | { error: string } | AuthExpired> {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== "") params.set(key, String(value));
+  }
+  try {
+    return await apiFetchTextGuarded(`/cases/me/export?${params.toString()}`);
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }
 
 export interface CaseStats {

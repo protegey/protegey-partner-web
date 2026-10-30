@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api";
+import { apiFetch, apiFetchGuarded, apiFetchTextGuarded, ApiError, type AuthExpired } from "@/lib/api";
 
 export type PepStatus = "possible_match" | "confirmed" | "false_positive" | "cleared" | "expired";
 export type PepCategory = "domestic" | "foreign" | "international_organisation" | "family_member" | "close_associate";
@@ -45,6 +45,19 @@ export async function getPepDesignations(query: { page?: number; status?: PepSta
   const params = new URLSearchParams({ page: String(query.page ?? 1), limit: "20" });
   if (query.status) params.set("status", query.status);
   return apiFetch<PaginatedPepDesignations>(`/pep/me?${params.toString()}`);
+}
+
+/** Every row matching the active status filter, as CSV text — the backend's `/pep/me/export`
+ * endpoint ignores pagination and returns the full filtered set. */
+export async function exportPepDesignationsAction(query: { status?: PepStatus } = {}): Promise<string | { error: string } | AuthExpired> {
+  const params = new URLSearchParams();
+  if (query.status) params.set("status", query.status);
+  try {
+    return await apiFetchTextGuarded(`/pep/me/export?${params.toString()}`);
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }
 
 export type PepMutationResult<T> = T | { error: string } | AuthExpired;

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { getAlerts, getAlertStats } from "./actions";
-import type { AlertStatus } from "./actions";
+import type { AlertDisposition, AlertStatus } from "./actions";
 import { getAssignableTeamMembers } from "../team/actions";
 import { AlertsClient } from "./AlertsClient";
 import { getLang } from "@/lib/i18n/lang";
@@ -15,35 +15,36 @@ export const metadata: Metadata = {
 export default async function AlertsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string; status?: string; alertNumber?: string }>;
+  searchParams: Promise<{ page?: string; status?: string; alertNumber?: string; disposition?: string }>;
 }) {
   const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
   const denied = requirePageAccess(user, ["partners.manage_alerts", "partners.view_alerts"], lang);
   if (denied) return denied;
 
-  const { page: pageParam, status, alertNumber: alertNumberParam } = await searchParams;
+  const { page: pageParam, status, alertNumber: alertNumberParam, disposition } = await searchParams;
   const page = Math.max(1, Number(pageParam) || 1);
   const alertNumber = alertNumberParam ? Number(alertNumberParam) : undefined;
 
   const [result, teamMembers, stats] = await Promise.all([
-    getAlerts({ page, status: status as AlertStatus | undefined, alertNumber }),
+    getAlerts({ page, status: status as AlertStatus | undefined, alertNumber, disposition: disposition as AlertDisposition | undefined }),
     getAssignableTeamMembers("partners.manage_alerts"),
     getAlertStats().catch(() => null),
   ]);
 
   return (
     <Suspense>
-      {/* Keyed on page+status+alertNumber: a filter/pagination change pushes a new URL that
-          re-renders this server component with fresh props, but wouldn't otherwise remount the
-          client component below — forcing a remount is what makes its local `alerts`/`status`
-          state (seeded once from props via useState) actually reflect the new filter instead of
-          staying stale. */}
+      {/* Keyed on page+status+alertNumber+disposition: a filter/pagination change pushes a new
+          URL that re-renders this server component with fresh props, but wouldn't otherwise
+          remount the client component below — forcing a remount is what makes its local
+          `alerts`/`status` state (seeded once from props via useState) actually reflect the new
+          filter instead of staying stale. */}
       <AlertsClient
-        key={`${page}-${status ?? "all"}-${alertNumber ?? ""}`}
+        key={`${page}-${status ?? "all"}-${alertNumber ?? ""}-${disposition ?? "all"}`}
         result={result}
         page={page}
         initialStatus={status ?? "all"}
         initialAlertNumber={alertNumberParam ?? ""}
+        initialDisposition={disposition ?? "all"}
         teamMembers={teamMembers}
         stats={stats}
       />

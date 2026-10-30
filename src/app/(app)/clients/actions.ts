@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api";
+import { apiFetch, apiFetchGuarded, apiFetchTextGuarded, ApiError, type AuthExpired } from "@/lib/api";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 
@@ -212,6 +212,20 @@ export async function getClientsPage(params: { stage: ClientStage; page?: number
   if (params.search) query.set("search", params.search);
   if (params.status) query.set("status", params.status);
   return apiFetch<PaginatedClients>(`/clients/me?${query.toString()}`);
+}
+
+/** Every row matching the active filters, as CSV text — the backend's `/clients/me/export`
+ * endpoint ignores pagination and returns the full filtered set. */
+export async function exportClientsAction(params: { stage: ClientStage; search?: string; status?: ClientBusinessStatus }): Promise<string | { error: string } | AuthExpired> {
+  const query = new URLSearchParams({ stage: params.stage });
+  if (params.search) query.set("search", params.search);
+  if (params.status) query.set("status", params.status);
+  try {
+    return await apiFetchTextGuarded(`/clients/me/export?${query.toString()}`);
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }
 
 export async function getClient(clientId: string): Promise<ClientBusiness> {

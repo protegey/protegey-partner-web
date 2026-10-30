@@ -6,9 +6,10 @@ import Link from "next/link";
 import { ChevronDown, ChevronRight, Eye, ShieldAlert } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
+import { ExportCsvButton } from "@/components/ExportCsvButton";
 import { RiskBreakdown } from "./RiskBreakdown";
 import type { StringKey } from "@/lib/i18n/strings";
-import type { EntityRiskProfile, RiskProfileCategory } from "./actions";
+import { exportRiskProfilesAction, type EntityRiskProfile, type RiskProfileCategory } from "./actions";
 import type { PaginatedResult } from "../../transactions/actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
@@ -128,6 +129,12 @@ export function RiskProfilesClient({
         >
           {t("txFilterApply")}
         </button>
+        <div className="ml-auto">
+          <ExportCsvButton
+            filename="risk-profiles-export.csv"
+            onExport={() => exportRiskProfilesAction({ externalCustomerId: customer || undefined })}
+          />
+        </div>
       </div>
 
       {result.data.length === 0 ? (

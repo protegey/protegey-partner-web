@@ -9,7 +9,8 @@ import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { Dialog } from "@/components/Dialog";
 import { useLang } from "@/lib/i18n/LangProvider";
 import type { TeamMember } from "../team/actions";
-import { updateEddReview, type EddChecklist, type EddReview, type EddStatus } from "./actions";
+import { ExportCsvButton } from "@/components/ExportCsvButton";
+import { exportEddReviewsAction, updateEddReview, type EddChecklist, type EddReview, type EddStatus } from "./actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
 const EDD_GUIDE: Record<"en" | "fr", PageGuideContent> = {
@@ -161,7 +162,7 @@ export function EddClient({ result, initialStatus, teamMembers }: { result: { da
 
   return <div className="flex w-full flex-col gap-6">
     <div><div className="flex items-center gap-2"><h1 className="text-xl font-semibold text-foreground">{t("eddPageTitle")}</h1><PageGuideButton content={EDD_GUIDE[lang]} /></div><p className="text-sm text-muted-foreground">{t("eddPageSubtitle")}</p></div>
-    <div className="flex items-end gap-3"><label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">{t("eddStatus")}<select value={filter} onChange={(event) => changeFilter(event.target.value)} className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground"><option value="all">{t("eddAllStatuses")}</option>{statuses.map((status) => <option key={status} value={status}>{t(`eddStatus_${status}` as never)}</option>)}</select></label></div>
+    <div className="flex items-end gap-3"><label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">{t("eddStatus")}<select value={filter} onChange={(event) => changeFilter(event.target.value)} className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground"><option value="all">{t("eddAllStatuses")}</option>{statuses.map((status) => <option key={status} value={status}>{t(`eddStatus_${status}` as never)}</option>)}</select></label><div className="ml-auto"><ExportCsvButton filename="edd-export.csv" onExport={() => exportEddReviewsAction(filter !== "all" ? { status: filter } : {})} /></div></div>
     {error ? <p className="text-sm text-destructive">{error}</p> : null}
     <div className="flex flex-col gap-3 md:hidden">{reviews.length === 0 ? <p className="rounded-md border border-border p-6 text-center text-sm text-muted-foreground">{t("eddEmpty")}</p> : reviews.map((review) => <div key={review.id} className="rounded-md border border-border bg-card p-4"><div className="flex items-start justify-between gap-3"><div><p className="text-sm font-semibold text-foreground">{review.externalCustomerId}</p><p className="mt-0.5 text-xs text-muted-foreground">{t(`eddTrigger_${review.trigger}` as never)}</p></div><span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${statusColors[review.status]}`}>{t(`eddStatus_${review.status}` as never)}</span></div><div className="mt-3 rounded-md border border-border bg-muted/20 p-3">{summary(review, true)}</div></div>)}</div>
     <div className="hidden overflow-x-auto rounded-md border border-border bg-card md:block">

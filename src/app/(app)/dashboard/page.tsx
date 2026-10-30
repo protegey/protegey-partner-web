@@ -94,7 +94,7 @@ export default async function DashboardPage() {
     getLang(),
     getTransactionStats().catch(() => null),
     getAlerts({ status: "open", limit: 1 }).catch(() => null),
-    getNotifications(1).catch(() => null),
+    getNotifications({ page: 1 }).catch(() => null),
   ]);
   const pendingClientReviews = clients.filter((client) => client.status === "pending_review").length;
   const locale = lang === "fr" ? "fr-FR" : "en-US";

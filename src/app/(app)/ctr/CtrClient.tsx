@@ -36,7 +36,8 @@ const CTR_GUIDE: Record<"en" | "fr", PageGuideContent> = {
 };
 import { Pagination } from "@/components/Pagination";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
-import { generateCtrAction, updateCtrAction, type CtrReport, type CtrStatus } from "./actions";
+import { ExportCsvButton } from "@/components/ExportCsvButton";
+import { generateCtrAction, updateCtrAction, exportCtrAction, type CtrReport, type CtrStatus } from "./actions";
 import type { PaginatedResult } from "../transactions/actions";
 import type { StringKey } from "@/lib/i18n/strings";
 
@@ -50,9 +51,18 @@ const DIALOG_COPY: Record<PendingTransition, { title: StringKey; description: St
   filed: { title: "ctrConfirmFileTitle", description: "ctrConfirmFileDescription", confirmLabel: "ctrFile" },
 };
 
-export function CtrClient({ result, page }: { result: PaginatedResult<CtrReport>; page: number }) {
+export function CtrClient({
+  result, page, initialStatus, initialCurrency, initialPeriodFrom, initialPeriodTo,
+}: {
+  result: PaginatedResult<CtrReport>; page: number;
+  initialStatus: string; initialCurrency: string; initialPeriodFrom: string; initialPeriodTo: string;
+}) {
   const { t, lang } = useLang(); const router = useRouter(); const [, transition] = useTransition();
   const [form, setForm] = useState({ periodStart: "", periodEnd: "", currency: "XOF", thresholdAmount: "" }); const [message, setMessage] = useState("");
+  const [statusFilter, setStatusFilter] = useState(initialStatus);
+  const [currencyFilter, setCurrencyFilter] = useState(initialCurrency);
+  const [periodFrom, setPeriodFrom] = useState(initialPeriodFrom);
+  const [periodTo, setPeriodTo] = useState(initialPeriodTo);
   const [confirmTarget, setConfirmTarget] = useState<{ report: CtrReport; status: PendingTransition } | null>(null);
   const [filingNotes, setFilingNotes] = useState("");
   const [regulatorReference, setRegulatorReference] = useState("");
@@ -102,6 +112,16 @@ export function CtrClient({ result, page }: { result: PaginatedResult<CtrReport>
 
   const actionForStatus: Partial<Record<CtrStatus, PendingTransition>> = { draft: "mlro_review", mlro_review: "filing_pending", filing_pending: "filed" };
 
+  function applyFilters(newPage: number = 1) {
+    const params = new URLSearchParams();
+    if (statusFilter !== "all") params.set("status", statusFilter);
+    if (currencyFilter.trim()) params.set("currency", currencyFilter.trim().toUpperCase());
+    if (periodFrom) params.set("periodFrom", periodFrom);
+    if (periodTo) params.set("periodTo", periodTo);
+    params.set("page", String(newPage));
+    transition(() => router.push(`/ctr?${params.toString()}`));
+  }
+
   return <div className="flex w-full flex-col gap-6">
     <div><div className="flex items-center gap-2"><h1 className="text-xl font-semibold text-foreground">{t("ctrPageTitle")}</h1><PageGuideButton content={CTR_GUIDE[lang]} /></div><p className="text-sm text-muted-foreground">{t("ctrPageSubtitle")}</p></div>
     <form onSubmit={generate} className="grid gap-3 rounded-md border border-border bg-card p-4 md:grid-cols-5">
@@ -112,11 +132,19 @@ export function CtrClient({ result, page }: { result: PaginatedResult<CtrReport>
       <button className="self-end rounded bg-primary px-3 py-2 text-sm font-medium text-primary-foreground">{t("ctrGenerate")}</button>
     </form>
     {message && <p className="text-sm text-muted-foreground">{message}</p>}
+    <div className="flex flex-wrap items-end gap-3 rounded-md border border-border bg-card p-4">
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">{t("ctrFilterStatusLabel")}<select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"><option value="all">{t("txFilterAllOption")}</option><option value="draft">{t("ctrStatus_draft")}</option><option value="mlro_review">{t("ctrStatus_mlro_review")}</option><option value="filing_pending">{t("ctrStatus_filing_pending")}</option><option value="filed">{t("ctrStatus_filed")}</option><option value="rejected">{t("ctrStatus_rejected")}</option></select></label>
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">{t("ctrFilterCurrencyLabel")}<input value={currencyFilter} onChange={e => setCurrencyFilter(e.target.value)} onKeyDown={e => e.key === "Enter" && applyFilters()} placeholder={t("ctrFilterCurrencyPlaceholder")} className="w-28 rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring" /></label>
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">{t("ctrFilterPeriodFromLabel")}<input type="date" value={periodFrom} onChange={e => setPeriodFrom(e.target.value)} className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring" /></label>
+      <label className="flex flex-col gap-1 text-xs font-medium text-muted-foreground">{t("ctrFilterPeriodToLabel")}<input type="date" value={periodTo} onChange={e => setPeriodTo(e.target.value)} className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring" /></label>
+      <button type="button" onClick={() => applyFilters()} className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90">{t("txFilterApply")}</button>
+      <div className="ml-auto"><ExportCsvButton filename="ctr-reports-export.csv" onExport={() => exportCtrAction({ status: statusFilter !== "all" ? (statusFilter as CtrStatus) : undefined, currency: currencyFilter.trim() || undefined, periodFrom: periodFrom || undefined, periodTo: periodTo || undefined })} /></div>
+    </div>
     {result.data.length === 0 ? <div className="flex flex-col items-center gap-3 rounded-md border border-border p-10 text-center"><FileText className="size-8 text-muted-foreground/40" /><p className="text-sm text-muted-foreground">{t("ctrEmpty")}</p></div> : <div className="overflow-x-auto rounded-md border border-border"><table className="w-full text-left text-sm"><thead className="bg-muted text-muted-foreground"><tr>{["ctrCustomer", "ctrPeriod", "ctrAmount", "ctrCount", "ctrStatus", "ctrReference", "ctrActions"].map(k => <th key={k} className="px-4 py-2.5 font-medium">{t(k as never)}</th>)}</tr></thead><tbody className="divide-y divide-border">{result.data.map(report => {
       const nextAction = actionForStatus[report.status];
       return <tr key={report.id}><td className="px-4 py-2.5 font-mono text-xs">{report.externalCustomerId}</td><td className="px-4 py-2.5 text-xs">{report.periodStart} – {report.periodEnd}</td><td className="px-4 py-2.5">{report.cashTotalAmount} {report.currency}</td><td className="px-4 py-2.5">{report.cashTransactionCount}</td><td className="px-4 py-2.5"><span className={`rounded-full px-2 py-0.5 text-xs ${colors[report.status]}`}>{t(`ctrStatus_${report.status}` as never)}</span></td><td className="px-4 py-2.5 text-xs">{report.regulatorReference ?? "—"}</td><td className="px-4 py-2.5"><div className="flex items-center gap-3">{nextAction ? <button onClick={() => openConfirm(report, nextAction)} className="text-xs text-primary hover:underline">{t(DIALOG_COPY[nextAction].confirmLabel)}</button> : null}<Link href={`/ctr/${report.id}/apercu`} className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground hover:underline"><FileOutput className="size-3.5" />{t("ctrPreviewButton")}</Link></div></td></tr>;
     })}</tbody></table></div>}
-    <Pagination page={page} totalPages={result.totalPages} total={result.total} onPageChange={(next) => transition(() => router.push(`/ctr?page=${next}`))} />
+    <Pagination page={page} totalPages={result.totalPages} total={result.total} onPageChange={applyFilters} />
 
     {confirmTarget ? (
       <ConfirmActionDialog

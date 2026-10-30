@@ -6,9 +6,10 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
+import { ExportCsvButton } from "@/components/ExportCsvButton";
 import { StatsCards } from "./StatsCards";
 import { SanctionsTable } from "./SanctionsTable";
-import type { SanctionsEntity, SanctionsStats } from "./actions";
+import { exportSanctionsAction, type SanctionsEntity, type SanctionsStats } from "./actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
 const SANCTIONS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
@@ -162,6 +163,19 @@ export function SanctionsClient({
         >
           {t("sanctionsApplyButton")}
         </button>
+        <div className="ml-auto">
+          <ExportCsvButton
+            filename="sanctions-export.csv"
+            onExport={() =>
+              exportSanctionsAction({
+                search: search || undefined,
+                type: type !== "all" ? type : undefined,
+                source: source !== "all" ? source : undefined,
+                includeDelisted,
+              })
+            }
+          />
+        </div>
       </div>
 
       <SanctionsTable sanctions={sanctions} total={total} />

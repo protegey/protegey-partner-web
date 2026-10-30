@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api";
+import { apiFetch, apiFetchGuarded, apiFetchTextGuarded, ApiError, type AuthExpired } from "@/lib/api";
 import type { PaginatedResult } from "../../transactions/actions";
 
 export interface WebhookSummary {
@@ -27,8 +27,29 @@ export interface WebhookDelivery {
   createdAt: string;
 }
 
-export async function getWebhookDeliveries(page = 1): Promise<PaginatedResult<WebhookDelivery>> {
-  return apiFetch<PaginatedResult<WebhookDelivery>>(`/partners/me/api-credentials/webhook-deliveries?page=${page}&limit=20`);
+export interface WebhookDeliveriesQuery {
+  page?: number;
+  status?: WebhookDeliveryStatus;
+}
+
+export async function getWebhookDeliveries(query: WebhookDeliveriesQuery = {}): Promise<PaginatedResult<WebhookDelivery>> {
+  const params = new URLSearchParams({ page: String(query.page ?? 1), limit: "20" });
+  if (query.status) params.set("status", query.status);
+  return apiFetch<PaginatedResult<WebhookDelivery>>(`/partners/me/api-credentials/webhook-deliveries?${params.toString()}`);
+}
+
+/** Every row matching the active status filter, as CSV text — the backend's
+ * `/partners/me/api-credentials/webhook-deliveries/export` endpoint ignores pagination and
+ * returns the full filtered set. */
+export async function exportWebhookDeliveriesAction(query: Omit<WebhookDeliveriesQuery, "page"> = {}): Promise<string | { error: string } | AuthExpired> {
+  const params = new URLSearchParams();
+  if (query.status) params.set("status", query.status);
+  try {
+    return await apiFetchTextGuarded(`/partners/me/api-credentials/webhook-deliveries/export?${params.toString()}`);
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }
 
 export async function sendTestWebhookAction(): Promise<{ success: true } | { error: string } | AuthExpired> {

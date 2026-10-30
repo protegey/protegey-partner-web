@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api";
+import { apiFetch, apiFetchGuarded, apiFetchTextGuarded, ApiError, type AuthExpired } from "@/lib/api";
 import type { PaginatedResult } from "../transactions/actions";
 import type { Case } from "../cases/actions";
 
@@ -50,6 +50,7 @@ export interface AlertsQuery {
   page?: number;
   limit?: number;
   status?: AlertStatus;
+  disposition?: AlertDisposition;
   alertNumber?: number;
   ruleCode?: string;
   externalCustomerId?: string;
@@ -64,6 +65,21 @@ export async function getAlerts(query: AlertsQuery = {}): Promise<PaginatedResul
     if (value !== undefined && value !== "") params.set(key, String(value));
   }
   return apiFetch<PaginatedResult<AlertWithContext>>(`/alerts/me?${params.toString()}`);
+}
+
+/** Every row matching `query`, as CSV text — ignores `page`/`limit` even if passed, since the
+ * backend's `/alerts/me/export` endpoint always returns the full filtered set. */
+export async function exportAlertsAction(query: Omit<AlertsQuery, "page" | "limit">): Promise<string | { error: string } | AuthExpired> {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== "") params.set(key, String(value));
+  }
+  try {
+    return await apiFetchTextGuarded(`/alerts/me/export?${params.toString()}`);
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }
 
 export interface AlertStats {

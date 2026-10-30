@@ -8,7 +8,14 @@ import { Search, ShieldAlert, ShieldCheck, Eye } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
-import { checkSharedSignalAction, type CheckSharedSignalResult, type SharedSignalCategory, type SharedSignalReportSummary } from "./actions";
+import { ExportCsvButton } from "@/components/ExportCsvButton";
+import {
+  checkSharedSignalAction,
+  exportSharedSignalReportsAction,
+  type CheckSharedSignalResult,
+  type SharedSignalCategory,
+  type SharedSignalReportSummary,
+} from "./actions";
 import type { PaginatedResult } from "../../transactions/actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
@@ -206,6 +213,10 @@ export function SharedSignalNetworkClient({
             >
               {t("txFilterApply")}
             </button>
+            <ExportCsvButton
+              filename="shared-signal-reports-export.csv"
+              onExport={() => exportSharedSignalReportsAction({ category: category !== "all" ? (category as SharedSignalCategory) : undefined })}
+            />
           </div>
         </div>
 

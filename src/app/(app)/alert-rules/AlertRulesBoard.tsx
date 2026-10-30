@@ -5,8 +5,10 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Loader2, Sparkles, Trash2, X } from "lucide-react";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
+import { ExportCsvButton } from "@/components/ExportCsvButton";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
+import { toCsv } from "@/lib/csv";
 import { updateAlertRule, deleteAlertRule, type AlertRule, type AlertRuleStatus, type RuleSegment } from "./actions";
 import { RuleChatPanel } from "./RuleChatPanel";
 import { RuleDialog } from "./RuleDialog";
@@ -268,10 +270,31 @@ export function AlertRulesBoard({ initialRules, assistantConfigured }: { initial
               </button>
             ))}
           </div>
-          <label className="flex shrink-0 items-center gap-1.5 text-xs font-medium text-muted-foreground">
-            <input type="checkbox" checked={customOnly} onChange={(e) => setCustomOnly(e.target.checked)} className="accent-primary" />
-            {t("rulesFilterCustomOnly")}
-          </label>
+          <div className="flex shrink-0 items-center gap-3">
+            <label className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
+              <input type="checkbox" checked={customOnly} onChange={(e) => setCustomOnly(e.target.checked)} className="accent-primary" />
+              {t("rulesFilterCustomOnly")}
+            </label>
+            <ExportCsvButton
+              filename="alert-rules-export.csv"
+              onExport={async () =>
+                toCsv<AlertRule>(
+                  [
+                    { header: "Rule number", value: (r) => r.ruleNumber },
+                    { header: "Code", value: (r) => r.code },
+                    { header: "Name", value: (r) => r.name },
+                    { header: "Segment", value: (r) => r.segment },
+                    { header: "Status", value: (r) => r.status },
+                    { header: "Severity", value: (r) => r.severity },
+                    { header: "Domain", value: (r) => r.domain },
+                    { header: "Source", value: (r) => r.source },
+                    { header: "Updated at", value: (r) => r.updatedAt },
+                  ],
+                  grouped.flatMap((g) => g.rules),
+                )
+              }
+            />
+          </div>
         </div>
 
         {justAddedRule ? (

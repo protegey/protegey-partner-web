@@ -6,7 +6,8 @@ import Link from "next/link";
 import { Eye, FileText } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
-import type { SarReport } from "./actions";
+import { ExportCsvButton } from "@/components/ExportCsvButton";
+import { exportSarReportsAction, type SarReport, type SarReportStatus } from "./actions";
 import type { PaginatedResult } from "../transactions/actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
@@ -109,6 +110,12 @@ export function SarStrClient({
             <option value="filed">{t("sarStatusFiled")}</option>
             <option value="rejected">{t("sarStatusRejected")}</option>
           </select>
+        </div>
+        <div className="ml-auto">
+          <ExportCsvButton
+            filename="sar-str-export.csv"
+            onExport={() => exportSarReportsAction({ status: status !== "all" ? (status as SarReportStatus) : undefined })}
+          />
         </div>
       </div>
 

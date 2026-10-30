@@ -1,11 +1,14 @@
 "use client";
 
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { ScrollText } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
+import { ExportCsvButton } from "@/components/ExportCsvButton";
 import { describeEvent, type NotificationEvent } from "@/lib/events";
 import type { PaginatedResult } from "../transactions/actions";
+import { exportAuditLogsAction } from "./actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
 const AUDIT_LOGS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
@@ -41,9 +44,38 @@ const AUDIT_LOGS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
   },
 };
 
-export function AuditLogsClient({ result, page }: { result: PaginatedResult<NotificationEvent>; page: number }) {
+export function AuditLogsClient({
+  result,
+  page,
+  initialType,
+  initialActorLabel,
+  initialDateFrom,
+  initialDateTo,
+}: {
+  result: PaginatedResult<NotificationEvent>;
+  page: number;
+  initialType: string;
+  initialActorLabel: string;
+  initialDateFrom: string;
+  initialDateTo: string;
+}) {
   const router = useRouter();
   const { t, lang } = useLang();
+  const [, startTransition] = useTransition();
+  const [type, setType] = useState(initialType);
+  const [actorLabel, setActorLabel] = useState(initialActorLabel);
+  const [dateFrom, setDateFrom] = useState(initialDateFrom);
+  const [dateTo, setDateTo] = useState(initialDateTo);
+
+  function applyFilters(newPage: number = 1) {
+    const params = new URLSearchParams();
+    if (type.trim()) params.set("type", type.trim());
+    if (actorLabel.trim()) params.set("actorLabel", actorLabel.trim());
+    if (dateFrom) params.set("dateFrom", dateFrom);
+    if (dateTo) params.set("dateTo", dateTo);
+    params.set("page", String(newPage));
+    startTransition(() => router.push(`/audit-logs?${params.toString()}`));
+  }
 
   return (
     <div className="flex w-full flex-col gap-6">
@@ -53,6 +85,67 @@ export function AuditLogsClient({ result, page }: { result: PaginatedResult<Noti
           <PageGuideButton content={AUDIT_LOGS_GUIDE[lang]} />
         </div>
         <p className="text-sm text-muted-foreground">{t("auditLogsPageSubtitle")}</p>
+      </div>
+
+      <div className="flex flex-wrap items-end gap-3 rounded-md border border-border bg-card p-4">
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-muted-foreground">{t("auditLogsFilterTypeLabel")}</label>
+          <input
+            value={type}
+            onChange={(e) => setType(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && applyFilters()}
+            placeholder={t("auditLogsFilterTypePlaceholder")}
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-muted-foreground">{t("auditLogsFilterActorLabel")}</label>
+          <input
+            value={actorLabel}
+            onChange={(e) => setActorLabel(e.target.value)}
+            onKeyDown={(e) => e.key === "Enter" && applyFilters()}
+            placeholder={t("auditLogsFilterActorPlaceholder")}
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-muted-foreground">{t("auditLogsFilterDateFromLabel")}</label>
+          <input
+            type="date"
+            value={dateFrom}
+            onChange={(e) => setDateFrom(e.target.value)}
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-muted-foreground">{t("auditLogsFilterDateToLabel")}</label>
+          <input
+            type="date"
+            value={dateTo}
+            onChange={(e) => setDateTo(e.target.value)}
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          />
+        </div>
+        <button
+          type="button"
+          onClick={() => applyFilters()}
+          className="rounded-md bg-primary px-3 py-1.5 text-sm font-medium text-primary-foreground transition-colors hover:opacity-90"
+        >
+          {t("txFilterApply")}
+        </button>
+        <div className="ml-auto">
+          <ExportCsvButton
+            filename="audit-logs-export.csv"
+            onExport={() =>
+              exportAuditLogsAction({
+                type: type.trim() || undefined,
+                actorLabel: actorLabel.trim() || undefined,
+                dateFrom: dateFrom || undefined,
+                dateTo: dateTo || undefined,
+              })
+            }
+          />
+        </div>
       </div>
 
       {result.data.length === 0 ? (
@@ -93,7 +186,7 @@ export function AuditLogsClient({ result, page }: { result: PaginatedResult<Noti
         </div>
       )}
 
-      <Pagination page={page} totalPages={result.totalPages} total={result.total} onPageChange={(next) => router.push(`/audit-logs?page=${next}`)} />
+      <Pagination page={page} totalPages={result.totalPages} total={result.total} onPageChange={applyFilters} />
     </div>
   );
 }

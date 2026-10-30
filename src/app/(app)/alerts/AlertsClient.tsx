@@ -8,7 +8,9 @@ import { Eye } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import { KpiCard } from "@/components/KpiCard";
-import type { AlertDecisionVerdict, AlertStats, AlertStatus, AlertWithContext } from "./actions";
+import { ExportCsvButton } from "@/components/ExportCsvButton";
+import type { AlertDecisionVerdict, AlertDisposition, AlertStats, AlertStatus, AlertWithContext } from "./actions";
+import { exportAlertsAction } from "./actions";
 import type { StringKey } from "@/lib/i18n/strings";
 import type { TeamMember } from "../team/actions";
 import type { PaginatedResult } from "../transactions/actions";
@@ -61,11 +63,21 @@ const DECISION_VERDICT_CONFIG: Record<AlertDecisionVerdict, { key: StringKey; co
   ALERT: { key: "alertsVerdictAlert", color: "bg-blue-500/15 text-blue-600" },
 };
 
+/** "Faux positif / vrai positif / tous" filter — "tous" is simply the absence of this param. */
+const DISPOSITION_LABEL_KEY: Record<AlertDisposition, StringKey> = {
+  confirmed_fraud: "alertsDispositionConfirmedFraud",
+  false_positive: "alertsDispositionFalsePositive",
+  no_action: "alertsDispositionNoAction",
+  sar_filed: "alertsDispositionSarFiled",
+  escalated: "alertsDispositionEscalated",
+};
+
 export function AlertsClient({
   result,
   page,
   initialStatus,
   initialAlertNumber,
+  initialDisposition,
   teamMembers,
   stats,
 }: {
@@ -73,6 +85,7 @@ export function AlertsClient({
   page: number;
   initialStatus: string;
   initialAlertNumber: string;
+  initialDisposition: string;
   teamMembers: TeamMember[];
   stats: AlertStats | null;
 }) {
@@ -81,6 +94,7 @@ export function AlertsClient({
   const [, startTransition] = useTransition();
   const [status, setStatus] = useState(initialStatus);
   const [alertNumberInput, setAlertNumberInput] = useState(initialAlertNumber);
+  const [disposition, setDisposition] = useState(initialDisposition);
   const locale = lang === "fr" ? "fr-FR" : "en-US";
 
   const statusLabel: Record<AlertStatus, string> = {
@@ -90,21 +104,27 @@ export function AlertsClient({
     dismissed: t("alertsStatusDismissed"),
   };
 
-  function pushFilters(nextStatus: string, nextAlertNumber: string) {
+  function pushFilters(nextStatus: string, nextAlertNumber: string, nextDisposition: string) {
     const params = new URLSearchParams();
     if (nextStatus !== "all") params.set("status", nextStatus);
     if (nextAlertNumber.trim()) params.set("alertNumber", nextAlertNumber.trim());
+    if (nextDisposition !== "all") params.set("disposition", nextDisposition);
     startTransition(() => router.push(`/alerts?${params.toString()}`));
   }
 
   function applyStatusFilter(next: string) {
     setStatus(next);
-    pushFilters(next, alertNumberInput);
+    pushFilters(next, alertNumberInput, disposition);
+  }
+
+  function applyDispositionFilter(next: string) {
+    setDisposition(next);
+    pushFilters(status, alertNumberInput, next);
   }
 
   function applyAlertNumberFilter(event: FormEvent) {
     event.preventDefault();
-    pushFilters(status, alertNumberInput);
+    pushFilters(status, alertNumberInput, disposition);
   }
 
   return (
@@ -139,7 +159,7 @@ export function AlertsClient({
         </div>
       ) : null}
 
-      <div className="flex items-end gap-3">
+      <div className="flex flex-wrap items-end gap-3">
         <div className="flex flex-col gap-1">
           <label className="text-xs font-medium text-muted-foreground">{t("alertsFilterStatusLabel")}</label>
           <select
@@ -154,6 +174,21 @@ export function AlertsClient({
             <option value="dismissed">{t("alertsStatusDismissed")}</option>
           </select>
         </div>
+        <div className="flex flex-col gap-1">
+          <label className="text-xs font-medium text-muted-foreground">{t("alertsFilterDispositionLabel")}</label>
+          <select
+            value={disposition}
+            onChange={(e) => applyDispositionFilter(e.target.value)}
+            className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
+          >
+            <option value="all">{t("txFilterAllOption")}</option>
+            {(Object.keys(DISPOSITION_LABEL_KEY) as AlertDisposition[]).map((value) => (
+              <option key={value} value={value}>
+                {t(DISPOSITION_LABEL_KEY[value])}
+              </option>
+            ))}
+          </select>
+        </div>
         <form onSubmit={applyAlertNumberFilter} className="flex flex-col gap-1">
           <label className="text-xs font-medium text-muted-foreground">{t("alertsFilterNumberLabel")}</label>
           <input
@@ -165,6 +200,18 @@ export function AlertsClient({
             className="w-32 rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring"
           />
         </form>
+        <div className="ml-auto">
+          <ExportCsvButton
+            filename="alerts-export.csv"
+            onExport={() =>
+              exportAlertsAction({
+                status: status !== "all" ? (status as AlertStatus) : undefined,
+                disposition: disposition !== "all" ? (disposition as AlertDisposition) : undefined,
+                alertNumber: alertNumberInput.trim() ? Number(alertNumberInput.trim()) : undefined,
+              })
+            }
+          />
+        </div>
       </div>
 
       {result.data.length === 0 ? (
@@ -261,6 +308,7 @@ export function AlertsClient({
           const params = new URLSearchParams();
           if (status !== "all") params.set("status", status);
           if (alertNumberInput.trim()) params.set("alertNumber", alertNumberInput.trim());
+          if (disposition !== "all") params.set("disposition", disposition);
           params.set("page", String(nextPage));
           startTransition(() => router.push(`/alerts?${params.toString()}`));
         }}

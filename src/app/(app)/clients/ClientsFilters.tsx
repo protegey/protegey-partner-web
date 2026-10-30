@@ -3,7 +3,8 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useLang } from "@/lib/i18n/LangProvider";
-import type { ClientStage, ClientBusinessStatus } from "./actions";
+import { ExportCsvButton } from "@/components/ExportCsvButton";
+import { exportClientsAction, type ClientStage, type ClientBusinessStatus } from "./actions";
 
 const RESPONDED_STATUSES: ClientBusinessStatus[] = ["pending_review", "more_info_required", "active", "rejected"];
 
@@ -77,6 +78,13 @@ export function ClientsFilters({
           </select>
         </div>
       ) : null}
+
+      <div className="ml-auto">
+        <ExportCsvButton
+          filename="clients-export.csv"
+          onExport={() => exportClientsAction({ stage: activeTab, search: search || undefined, status: status || undefined })}
+        />
+      </div>
     </div>
   );
 }

@@ -7,7 +7,9 @@ import { Briefcase, CircleCheck, Eye, FolderOpen, Plus, Search, TrendingUp } fro
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import { KpiCard } from "@/components/KpiCard";
-import type { Case, CaseStats } from "./actions";
+import { ExportCsvButton } from "@/components/ExportCsvButton";
+import type { Case, CaseStatus, CaseStats } from "./actions";
+import { exportCasesAction } from "./actions";
 import type { PaginatedResult } from "../transactions/actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
@@ -178,6 +180,18 @@ export function CasesClient({
         >
           {t("txFilterApply")}
         </button>
+        <div className="ml-auto">
+          <ExportCsvButton
+            filename="cases-export.csv"
+            onExport={() =>
+              exportCasesAction({
+                status: status !== "all" ? (status as CaseStatus) : undefined,
+                caseNumber: caseNumber.trim() ? Number(caseNumber.trim()) : undefined,
+                externalCustomerId: customer.trim() || undefined,
+              })
+            }
+          />
+        </div>
       </div>
 
       {result.data.length === 0 ? (

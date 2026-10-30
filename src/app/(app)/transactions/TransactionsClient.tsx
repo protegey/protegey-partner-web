@@ -7,7 +7,9 @@ import { ArrowDownLeft, ArrowUpRight, Eye } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import { CountryBadge, DeviceSummaryCell, MapLinkBadge } from "@/components/DeviceAttributesSummary";
-import type { MonitoringTransaction, PaginatedResult } from "./actions";
+import { ExportCsvButton } from "@/components/ExportCsvButton";
+import type { MonitoringTransaction, PaginatedResult, TransactionDecision, TransactionDirection } from "./actions";
+import { exportTransactionsAction } from "./actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
 const TRANSACTIONS_GUIDE: Record<"en" | "fr", PageGuideContent> = {
@@ -178,6 +180,20 @@ export function TransactionsClient({
         >
           {t("txFilterReset")}
         </button>
+        <div className="ml-auto">
+          <ExportCsvButton
+            filename="transactions-export.csv"
+            onExport={() =>
+              exportTransactionsAction({
+                direction: direction !== "all" ? (direction as TransactionDirection) : undefined,
+                decision: decision !== "all" ? (decision as TransactionDecision) : undefined,
+                externalCustomerId: customer || undefined,
+                dateFrom: dateFrom || undefined,
+                dateTo: dateTo || undefined,
+              })
+            }
+          />
+        </div>
       </div>
 
       {result.data.length === 0 ? (

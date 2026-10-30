@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiFetch, apiFetchGuarded, type AuthExpired } from "@/lib/api";
+import { apiFetch, apiFetchGuarded, apiFetchTextGuarded, ApiError, type AuthExpired } from "@/lib/api";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 
@@ -46,6 +46,20 @@ export async function getKycEnrollments(params: { page?: number; status?: DiditS
   if (params.status) query.set("status", params.status);
   if (params.search) query.set("search", params.search);
   return apiFetch<PaginatedKycEnrollments>(`/kyc/me/sessions?${query.toString()}`);
+}
+
+/** Every row matching the active filters, as CSV text — the backend's `/kyc/me/sessions/export`
+ * endpoint ignores pagination and returns the full filtered set. */
+export async function exportKycEnrollmentsAction(params: { status?: DiditSessionStatus; search?: string } = {}): Promise<string | { error: string } | AuthExpired> {
+  const query = new URLSearchParams();
+  if (params.status) query.set("status", params.status);
+  if (params.search) query.set("search", params.search);
+  try {
+    return await apiFetchTextGuarded(`/kyc/me/sessions/export?${query.toString()}`);
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }
 
 export interface KycEnrollmentDetail extends KycEnrollment {

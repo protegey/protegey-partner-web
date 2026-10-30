@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api";
+import { apiFetch, apiFetchGuarded, apiFetchTextGuarded, ApiError, type AuthExpired } from "@/lib/api";
 import type { Case } from "../cases/actions";
 
 export type MutationResult<T> = T | { error: string } | AuthExpired;
@@ -70,6 +70,21 @@ export async function getTransactions(query: TransactionsQuery = {}): Promise<Pa
     if (value !== undefined && value !== "") params.set(key, String(value));
   }
   return apiFetch<PaginatedResult<MonitoringTransaction>>(`/transactions/me?${params.toString()}`);
+}
+
+/** Every row matching `query`, as CSV text — the backend's `/transactions/me/export` endpoint
+ * ignores pagination and returns the full filtered set. */
+export async function exportTransactionsAction(query: Omit<TransactionsQuery, "page" | "limit">): Promise<string | { error: string } | AuthExpired> {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== "") params.set(key, String(value));
+  }
+  try {
+    return await apiFetchTextGuarded(`/transactions/me/export?${params.toString()}`);
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }
 
 export async function getTransaction(id: string): Promise<MonitoringTransaction> {

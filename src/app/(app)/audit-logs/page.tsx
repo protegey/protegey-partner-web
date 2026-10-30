@@ -12,15 +12,25 @@ export const metadata: Metadata = {
 export default async function AuditLogsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ page?: string }>;
+  searchParams: Promise<{ page?: string; type?: string; actorLabel?: string; dateFrom?: string; dateTo?: string }>;
 }) {
   const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
   const denied = requirePageAccess(user, "partners.view_audit_logs", lang);
   if (denied) return denied;
 
-  const { page: pageParam } = await searchParams;
+  const { page: pageParam, type, actorLabel, dateFrom, dateTo } = await searchParams;
   const page = Math.max(1, Number(pageParam) || 1);
-  const result = await getAuditLogs(page);
+  const result = await getAuditLogs({ page, type, actorLabel, dateFrom, dateTo });
 
-  return <AuditLogsClient result={result} page={page} />;
+  return (
+    <AuditLogsClient
+      key={`${page}-${type ?? ""}-${actorLabel ?? ""}-${dateFrom ?? ""}-${dateTo ?? ""}`}
+      result={result}
+      page={page}
+      initialType={type ?? ""}
+      initialActorLabel={actorLabel ?? ""}
+      initialDateFrom={dateFrom ?? ""}
+      initialDateTo={dateTo ?? ""}
+    />
+  );
 }

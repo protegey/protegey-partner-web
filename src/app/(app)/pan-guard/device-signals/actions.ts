@@ -1,6 +1,6 @@
 "use server";
 
-import { apiFetch } from "@/lib/api";
+import { apiFetch, apiFetchTextGuarded, ApiError, type AuthExpired } from "@/lib/api";
 import type { PaginatedResult } from "../../transactions/actions";
 
 export type DeviceAction = "allow" | "soft_challenge" | "hard_challenge" | "block";
@@ -39,4 +39,19 @@ export async function getDeviceSignals(query: DeviceSignalsQuery = {}): Promise<
     if (value !== undefined && value !== "") params.set(key, String(value));
   }
   return apiFetch<PaginatedResult<DeviceSignal>>(`/device-signals/me?${params.toString()}`);
+}
+
+/** Every row matching the active filters, as CSV text — the backend's `/device-signals/me/export`
+ * endpoint ignores pagination and returns the full filtered set. */
+export async function exportDeviceSignalsAction(query: Omit<DeviceSignalsQuery, "page"> = {}): Promise<string | { error: string } | AuthExpired> {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(query)) {
+    if (value !== undefined && value !== "") params.set(key, String(value));
+  }
+  try {
+    return await apiFetchTextGuarded(`/device-signals/me/export?${params.toString()}`);
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }

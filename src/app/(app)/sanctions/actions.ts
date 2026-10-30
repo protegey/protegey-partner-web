@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api";
+import { apiFetch, apiFetchGuarded, apiFetchTextGuarded, ApiError, type AuthExpired } from "@/lib/api";
 import type { PaginatedResult } from "../transactions/actions";
 
 export interface SanctionsEntity {
@@ -48,6 +48,27 @@ export async function getSanctions(params: {
   if (params.search) query.set("search", params.search);
   if (params.includeDelisted) query.set("includeDelisted", "true");
   return apiFetch<PaginatedSanctions>(`/sanctions?${query.toString()}`);
+}
+
+/** Every row matching the active filters, as CSV text — the backend's `/sanctions/export`
+ * endpoint ignores pagination and returns the full filtered set. */
+export async function exportSanctionsAction(params: {
+  type?: string;
+  source?: string;
+  search?: string;
+  includeDelisted?: boolean;
+}): Promise<string | { error: string } | AuthExpired> {
+  const query = new URLSearchParams();
+  if (params.type) query.set("type", params.type);
+  if (params.source) query.set("source", params.source);
+  if (params.search) query.set("search", params.search);
+  if (params.includeDelisted) query.set("includeDelisted", "true");
+  try {
+    return await apiFetchTextGuarded(`/sanctions/export?${query.toString()}`);
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }
 
 export async function getSanctionsStats(): Promise<SanctionsStats> {

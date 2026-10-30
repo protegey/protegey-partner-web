@@ -9,6 +9,8 @@ import { TeamMemberActions } from "./TeamMemberActions";
 import { ResendInvitationButton } from "./ResendInvitationButton";
 import { EditInvitationDialogButton } from "./EditInvitationDialogButton";
 import { RolesSection } from "./RolesSection";
+import { TeamMembersToolbar } from "./TeamMembersToolbar";
+import { InvitationsToolbar } from "./InvitationsToolbar";
 import { PaginationControls } from "@/components/PaginationControls";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
@@ -29,7 +31,19 @@ export const metadata: Metadata = {
   title: "Team — Protegey Partner",
 };
 
-export default async function TeamPage({ searchParams }: { searchParams: Promise<{ membersPage?: string; invitationsPage?: string; rolesPage?: string }> }) {
+export default async function TeamPage({
+  searchParams,
+}: {
+  searchParams: Promise<{
+    membersPage?: string;
+    invitationsPage?: string;
+    rolesPage?: string;
+    membersSearch?: string;
+    membersRoleId?: string;
+    membersStatus?: string;
+    invitationsSearch?: string;
+  }>;
+}) {
   const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
   const denied = requirePageAccess(user, "partners.manage_team", lang);
   if (denied) return denied;
@@ -38,13 +52,22 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
   const membersPage = Math.max(1, Number(params.membersPage) || 1);
   const invitationsPage = Math.max(1, Number(params.invitationsPage) || 1);
   const rolesPage = Math.max(1, Number(params.rolesPage) || 1);
+  const membersSearch = params.membersSearch ?? "";
+  const membersRoleId = params.membersRoleId ?? "";
+  const membersStatus = params.membersStatus ?? "";
+  const invitationsSearch = params.invitationsSearch ?? "";
   const canManageTeam = user?.permissions.includes("partners.manage_team") ?? false;
   const canViewRoles = user?.permissions.includes("roles.view") ?? false;
   const canManageRoles = user?.permissions.includes("roles.manage") ?? false;
 
   const [members, invitations, roles, partnerRoles, permissionsCatalogue] = await Promise.all([
-    getPaginatedTeamMembers(membersPage),
-    canManageTeam ? getPendingInvitations(invitationsPage) : Promise.resolve(null),
+    getPaginatedTeamMembers({
+      page: membersPage,
+      search: membersSearch || undefined,
+      roleId: membersRoleId || undefined,
+      status: (membersStatus as "active" | "suspended") || undefined,
+    }),
+    canManageTeam ? getPendingInvitations(invitationsPage, invitationsSearch || undefined) : Promise.resolve(null),
     canManageTeam ? getAssignableRoles() : Promise.resolve([]),
     canViewRoles ? getPartnerRoles(rolesPage) : Promise.resolve(null),
     canManageRoles ? getPermissionsCatalogue() : Promise.resolve([]),
@@ -65,6 +88,7 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
         {canManageTeam ? <InviteAgentDialogButton roles={roles} /> : null}
       </div>
 
+       {canManageTeam && invitations ? <InvitationsToolbar initialSearch={invitationsSearch} membersPage={membersPage} rolesPage={rolesPage} /> : null}
        {canManageTeam && invitations && invitations.data.length > 0 ? (
         <div className="overflow-hidden rounded-md border border-border">
           <table className="w-full text-left text-sm">
@@ -104,8 +128,16 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
           </table>
          </div>
        ) : null}
-       {canManageTeam && invitations ? <PaginationControls page={invitations.page} totalPages={invitations.totalPages} total={invitations.total} href={(page) => `/team?invitationsPage=${page}&membersPage=${membersPage}&rolesPage=${rolesPage}`} /> : null}
+       {canManageTeam && invitations ? <PaginationControls page={invitations.page} totalPages={invitations.totalPages} total={invitations.total} href={(page) => `/team?invitationsPage=${page}&membersPage=${membersPage}&rolesPage=${rolesPage}${invitationsSearch ? `&invitationsSearch=${encodeURIComponent(invitationsSearch)}` : ""}`} /> : null}
 
+      <TeamMembersToolbar
+        roles={roles}
+        initialSearch={membersSearch}
+        initialRoleId={membersRoleId}
+        initialStatus={membersStatus}
+        invitationsPage={invitationsPage}
+        rolesPage={rolesPage}
+      />
       <div className="overflow-hidden rounded-md border border-border">
         <table className="w-full text-left text-sm">
           <thead className="bg-muted text-muted-foreground">
@@ -160,7 +192,7 @@ export default async function TeamPage({ searchParams }: { searchParams: Promise
           </tbody>
          </table>
        </div>
-       <PaginationControls page={members.page} totalPages={members.totalPages} total={members.total} href={(page) => `/team?membersPage=${page}&invitationsPage=${invitationsPage}&rolesPage=${rolesPage}`} />
+       <PaginationControls page={members.page} totalPages={members.totalPages} total={members.total} href={(page) => `/team?membersPage=${page}&invitationsPage=${invitationsPage}&rolesPage=${rolesPage}${membersSearch ? `&membersSearch=${encodeURIComponent(membersSearch)}` : ""}${membersRoleId ? `&membersRoleId=${encodeURIComponent(membersRoleId)}` : ""}${membersStatus ? `&membersStatus=${encodeURIComponent(membersStatus)}` : ""}`} />
 
        {canViewRoles ? (
          <>

@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiFetch, apiFetchGuarded, ApiError, type AuthExpired } from "@/lib/api";
+import { apiFetch, apiFetchGuarded, apiFetchTextGuarded, ApiError, type AuthExpired } from "@/lib/api";
 import type { PaginatedResult } from "../transactions/actions";
 
 export type EddStatus = "pending" | "in_review" | "approved" | "rejected";
@@ -34,6 +34,19 @@ export async function getEddReviews(query: { page?: number; status?: EddStatus }
   const params = new URLSearchParams({ page: String(query.page ?? 1), limit: "20" });
   if (query.status) params.set("status", query.status);
   return apiFetch<PaginatedResult<EddReview>>(`/edd/me?${params.toString()}`);
+}
+
+/** Every row matching the active status filter, as CSV text — the backend's `/edd/me/export`
+ * endpoint ignores pagination and returns the full filtered set. */
+export async function exportEddReviewsAction(query: { status?: EddStatus } = {}): Promise<string | { error: string } | AuthExpired> {
+  const params = new URLSearchParams();
+  if (query.status) params.set("status", query.status);
+  try {
+    return await apiFetchTextGuarded(`/edd/me/export?${params.toString()}`);
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }
 
 export type EddMutationResult = EddReview | { error: string } | AuthExpired;

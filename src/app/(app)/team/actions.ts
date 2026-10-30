@@ -1,7 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { apiFetch, ApiError, type AuthExpired } from "@/lib/api";
+import { apiFetch, apiFetchTextGuarded, ApiError, type AuthExpired } from "@/lib/api";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import { rolesAllowedFor } from "@/lib/roles";
@@ -69,8 +69,34 @@ export interface ActionResult {
   success?: boolean;
 }
 
-export async function getPaginatedTeamMembers(page = 1): Promise<PaginatedResult<TeamMember>> {
-  return apiFetch<PaginatedResult<TeamMember>>(`/partners/me/team?page=${page}&limit=20`);
+export interface TeamQuery {
+  page?: number;
+  search?: string;
+  roleId?: string;
+  status?: "active" | "suspended";
+}
+
+export async function getPaginatedTeamMembers(query: TeamQuery = {}): Promise<PaginatedResult<TeamMember>> {
+  const params = new URLSearchParams({ page: String(query.page ?? 1), limit: "20" });
+  if (query.search) params.set("search", query.search);
+  if (query.roleId) params.set("roleId", query.roleId);
+  if (query.status) params.set("status", query.status);
+  return apiFetch<PaginatedResult<TeamMember>>(`/partners/me/team?${params.toString()}`);
+}
+
+/** Every member matching the active filters, as CSV text — the backend's
+ * `/partners/me/team/export` endpoint ignores pagination and returns the full filtered set. */
+export async function exportTeamMembersAction(query: Omit<TeamQuery, "page"> = {}): Promise<string | { error: string } | AuthExpired> {
+  const params = new URLSearchParams();
+  if (query.search) params.set("search", query.search);
+  if (query.roleId) params.set("roleId", query.roleId);
+  if (query.status) params.set("status", query.status);
+  try {
+    return await apiFetchTextGuarded(`/partners/me/team/export?${params.toString()}`);
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }
 
 export async function getTeamMembers(): Promise<TeamMember[]> {
@@ -85,8 +111,24 @@ export async function getAssignableTeamMembers(permission: string): Promise<Team
   return members.filter((member) => member.roles.some((role) => allowedRoleNames.has(role.name)));
 }
 
-export async function getPendingInvitations(page = 1): Promise<PaginatedResult<PendingInvitation>> {
-  return apiFetch<PaginatedResult<PendingInvitation>>(`/partners/me/team/invitations?page=${page}&limit=20`);
+export async function getPendingInvitations(page = 1, search?: string): Promise<PaginatedResult<PendingInvitation>> {
+  const params = new URLSearchParams({ page: String(page), limit: "20" });
+  if (search) params.set("search", search);
+  return apiFetch<PaginatedResult<PendingInvitation>>(`/partners/me/team/invitations?${params.toString()}`);
+}
+
+/** Every pending invitation matching the active search, as CSV text — the backend's
+ * `/partners/me/team/invitations/export` endpoint ignores pagination and returns the full
+ * filtered set. */
+export async function exportPendingInvitationsAction(search?: string): Promise<string | { error: string } | AuthExpired> {
+  const params = new URLSearchParams();
+  if (search) params.set("search", search);
+  try {
+    return await apiFetchTextGuarded(`/partners/me/team/invitations/export?${params.toString()}`);
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
 }
 
 export async function getAssignableRoles(): Promise<AssignableRole[]> {

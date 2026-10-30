@@ -8,7 +8,8 @@ import { useLang } from "@/lib/i18n/LangProvider";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import type { StringKey } from "@/lib/i18n/strings";
-import { createPepDesignationAction, reviewPepDesignationAction, type PepCategory, type PepDesignation, type PepStatus } from "./actions";
+import { ExportCsvButton } from "@/components/ExportCsvButton";
+import { createPepDesignationAction, exportPepDesignationsAction, reviewPepDesignationAction, type PepCategory, type PepDesignation, type PepStatus } from "./actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
 const PEP_GUIDE: Record<"en" | "fr", PageGuideContent> = {
@@ -181,7 +182,7 @@ export function PepClient({ designations, initialStatus }: { designations: PepDe
         </div>
       </form>
 
-      <div className="flex items-center justify-between gap-3"><h2 className="text-sm font-semibold text-foreground">{t("pepListTitle")}</h2><select value={statusFilter} onChange={(event) => filterChanged(event.target.value)} className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground"><option value="all">{t("pepAllStatuses")}</option>{statuses.map((value) => <option key={value} value={value}>{t(`pepStatus_${value}` as never)}</option>)}</select></div>
+      <div className="flex items-center justify-between gap-3"><h2 className="text-sm font-semibold text-foreground">{t("pepListTitle")}</h2><div className="flex items-center gap-3"><select value={statusFilter} onChange={(event) => filterChanged(event.target.value)} className="rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground"><option value="all">{t("pepAllStatuses")}</option>{statuses.map((value) => <option key={value} value={value}>{t(`pepStatus_${value}` as never)}</option>)}</select><ExportCsvButton filename="pep-export.csv" onExport={() => exportPepDesignationsAction(statusFilter !== "all" ? { status: statusFilter } : {})} /></div></div>
       <div className="overflow-x-auto rounded-md border border-border bg-card">
         <table className="w-full text-left text-sm"><thead className="border-b border-border text-xs text-muted-foreground"><tr>{["pepCustomerId", "pepCategory", "pepRole", "pepJurisdiction", "pepSource", "pepStatus", "pepNotes", "pepReview"].map((key) => <th key={key} className="whitespace-nowrap px-4 py-3 font-medium">{t(key as never)}</th>)}</tr></thead><tbody className="divide-y divide-border">{designations.length === 0 ? <tr><td colSpan={8} className="px-4 py-8 text-center text-muted-foreground">{t("pepEmpty")}</td></tr> : designations.map((designation) => <PepRow key={designation.id} designation={designation} onReview={review} t={t} />)}</tbody></table>
       </div>

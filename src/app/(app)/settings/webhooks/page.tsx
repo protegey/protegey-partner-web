@@ -3,9 +3,10 @@ import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import { getSessionUser } from "@/lib/session";
 import { requirePageAccess } from "@/lib/requirePageAccess";
-import { getWebhookSummary, getWebhookDeliveries } from "./actions";
+import { getWebhookSummary, getWebhookDeliveries, type WebhookDeliveryStatus } from "./actions";
 import { WebhookCard } from "./WebhookCard";
 import { WebhookDeliveriesSection } from "./WebhookDeliveriesSection";
+import { WebhookDeliveriesToolbar } from "./WebhookDeliveriesToolbar";
 import { PaginationControls } from "@/components/PaginationControls";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
@@ -26,14 +27,17 @@ export const metadata: Metadata = {
   title: "Webhooks — Protegey Partner",
 };
 
-export default async function WebhooksPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
-  const [user, lang, { page: pageParam }] = await Promise.all([getSessionUser(), getLang(), searchParams]);
+export default async function WebhooksPage({ searchParams }: { searchParams: Promise<{ page?: string; status?: string }> }) {
+  const [user, lang, { page: pageParam, status }] = await Promise.all([getSessionUser(), getLang(), searchParams]);
   const denied = requirePageAccess(user, "partners.manage_integrations", lang);
   if (denied) return denied;
 
   const page = Math.max(1, Number(pageParam) || 1);
   const canManageSettings = user?.permissions.includes("partners.manage_integrations") ?? false;
-  const [credentials, deliveries] = await Promise.all([getWebhookSummary(), getWebhookDeliveries(page)]);
+  const [credentials, deliveries] = await Promise.all([
+    getWebhookSummary(),
+    getWebhookDeliveries({ page, status: status as WebhookDeliveryStatus | undefined }),
+  ]);
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-6">
@@ -47,8 +51,14 @@ export default async function WebhooksPage({ searchParams }: { searchParams: Pro
 
       <WebhookCard credentials={credentials} canManage={canManageSettings} />
 
+      <WebhookDeliveriesToolbar initialStatus={(status as WebhookDeliveryStatus | undefined) ?? "all"} />
       <WebhookDeliveriesSection deliveries={deliveries.data} />
-      <PaginationControls page={deliveries.page} totalPages={deliveries.totalPages} total={deliveries.total} href={(nextPage) => `/settings/webhooks?page=${nextPage}`} />
+      <PaginationControls
+        page={deliveries.page}
+        totalPages={deliveries.totalPages}
+        total={deliveries.total}
+        href={(nextPage) => `/settings/webhooks?page=${nextPage}${status ? `&status=${encodeURIComponent(status)}` : ""}`}
+      />
     </div>
   );
 }
