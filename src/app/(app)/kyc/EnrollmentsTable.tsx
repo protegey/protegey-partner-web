@@ -2,11 +2,11 @@ import { ShieldCheck, ShieldAlert, ShieldX, ShieldQuestion } from "lucide-react"
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import type { Lang, StringKey } from "@/lib/i18n/strings";
-import type { KycEnrollment, DiditSessionStatus } from "./actions";
+import type { KycEnrollment, KycSessionStatus } from "./actions";
 import { KycDetailButton } from "./KycDetailButton";
 import { countryFlag, countryName } from "./country";
 
-const STATUS_CONFIG: Record<DiditSessionStatus, { key: StringKey; color: string; icon: typeof ShieldCheck }> = {
+const STATUS_CONFIG: Record<KycSessionStatus, { key: StringKey; color: string; icon: typeof ShieldCheck }> = {
   "Not Started": { key: "kycStatusNotStarted", color: "text-muted-foreground", icon: ShieldQuestion },
   "In Progress": { key: "kycStatusInProgress", color: "text-amber-600", icon: ShieldAlert },
   "Awaiting User": { key: "kycStatusAwaitingUser", color: "text-amber-600", icon: ShieldAlert },
@@ -19,7 +19,7 @@ const STATUS_CONFIG: Record<DiditSessionStatus, { key: StringKey; color: string;
   "Kyc Expired": { key: "kycStatusKycExpired", color: "text-destructive", icon: ShieldX },
 };
 
-function StatusBadge({ status, lang }: { status: DiditSessionStatus; lang: Lang }) {
+function StatusBadge({ status, lang }: { status: KycSessionStatus; lang: Lang }) {
   const config = STATUS_CONFIG[status] ?? STATUS_CONFIG["Not Started"];
   const Icon = config.icon;
   return (
@@ -62,7 +62,6 @@ export async function EnrollmentsTable({ enrollments }: { enrollments: KycEnroll
             <th className="px-4 py-2.5 font-medium">{t(lang, "kycColAml")}</th>
             <th className="px-4 py-2.5 font-medium">{t(lang, "kycColStarted")}</th>
             <th className="px-4 py-2.5 font-medium">{t(lang, "kycColDetails")}</th>
-            <th className="px-4 py-2.5 font-medium text-right">{t(lang, "kycColLink")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
@@ -102,15 +101,6 @@ export async function EnrollmentsTable({ enrollments }: { enrollments: KycEnroll
                 <td className="px-4 py-2.5 text-muted-foreground">{new Date(e.createdAt).toLocaleString()}</td>
                 <td className="px-4 py-2.5">
                   <KycDetailButton enrollmentId={e.id} fullName={e.fullName} />
-                </td>
-                <td className="px-4 py-2.5 text-right">
-                  {e.sessionUrl ? (
-                    <a href={e.sessionUrl} target="_blank" rel="noreferrer" className="text-xs font-medium text-primary hover:underline">
-                      {t(lang, "kycLinkOpen")}
-                    </a>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">—</span>
-                  )}
                 </td>
               </tr>
             ))

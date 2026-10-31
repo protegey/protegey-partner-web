@@ -4,9 +4,9 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { ExportCsvButton } from "@/components/ExportCsvButton";
-import { exportKycEnrollmentsAction, type DiditSessionStatus } from "./actions";
+import { exportKycEnrollmentsAction, type KycSessionStatus } from "./actions";
 
-const STATUSES: DiditSessionStatus[] = [
+const STATUSES: KycSessionStatus[] = [
   "Not Started",
   "In Progress",
   "Awaiting User",
@@ -19,7 +19,7 @@ const STATUSES: DiditSessionStatus[] = [
   "Kyc Expired",
 ];
 
-const STATUS_LABEL_KEY: Record<DiditSessionStatus, string> = {
+const STATUS_LABEL_KEY: Record<KycSessionStatus, string> = {
   "Not Started": "kycStatusNotStarted",
   "In Progress": "kycStatusInProgress",
   "Awaiting User": "kycStatusAwaitingUser",
@@ -32,14 +32,14 @@ const STATUS_LABEL_KEY: Record<DiditSessionStatus, string> = {
   "Kyc Expired": "kycStatusKycExpired",
 };
 
-export function KycFilters({ initialStatus, initialSearch }: { initialStatus: DiditSessionStatus | ""; initialSearch: string }) {
+export function KycFilters({ initialStatus, initialSearch }: { initialStatus: KycSessionStatus | ""; initialSearch: string }) {
   const router = useRouter();
   const { t } = useLang();
   const [, startTransition] = useTransition();
   const [status, setStatus] = useState(initialStatus);
   const [search, setSearch] = useState(initialSearch);
 
-  function applyFilters(nextStatus: DiditSessionStatus | "", nextSearch: string) {
+  function applyFilters(nextStatus: KycSessionStatus | "", nextSearch: string) {
     const params = new URLSearchParams();
     if (nextStatus) params.set("status", nextStatus);
     if (nextSearch) params.set("search", nextSearch);
@@ -69,7 +69,7 @@ export function KycFilters({ initialStatus, initialSearch }: { initialStatus: Di
         <select
           value={status}
           onChange={(e) => {
-            const next = e.target.value as DiditSessionStatus | "";
+            const next = e.target.value as KycSessionStatus | "";
             setStatus(next);
             applyFilters(next, search);
           }}

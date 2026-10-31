@@ -125,7 +125,7 @@ export function ImageLightbox({
           </button>
         ) : null}
 
-        {/* eslint-disable-next-line @next/next/no-img-element -- external Didit-hosted asset, no local optimization needed */}
+        {/* eslint-disable-next-line @next/next/no-img-element -- base64 data: URI, not a remote asset Next can optimize */}
         <img
           src={current.url}
           alt={current.label}

@@ -5,7 +5,7 @@ import { apiFetch, apiFetchGuarded, apiFetchTextGuarded, ApiError, type AuthExpi
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 
-export type DiditSessionStatus =
+export type KycSessionStatus =
   | "Not Started"
   | "In Progress"
   | "Awaiting User"
@@ -20,9 +20,8 @@ export type DiditSessionStatus =
 export interface KycEnrollment {
   id: string;
   fullName: string | null;
-  status: DiditSessionStatus;
-  sessionUrl: string | null;
-  /** FaceTec only — full URL at the standalone facetec-web app with enrollmentId/token/apiBase embedded. */
+  status: KycSessionStatus;
+  /** Full URL at the standalone facetec-web app with enrollmentId/token/apiBase embedded. */
   captureUrl?: string | null;
   country: string | null;
   livenessScore: number | null;
@@ -30,6 +29,10 @@ export interface KycEnrollment {
   amlRiskScore: number | null;
   amlTotalHits: number | null;
   documentType: string | null;
+  idDocumentNumber?: string | null;
+  /** Base64, no data: URI prefix — the ID photo and the liveness selfie capture. */
+  documentPhoto: string | null;
+  selfiePhoto: string | null;
   createdAt: string;
 }
 
@@ -41,7 +44,7 @@ export interface PaginatedKycEnrollments {
   totalPages: number;
 }
 
-export async function getKycEnrollments(params: { page?: number; status?: DiditSessionStatus; search?: string } = {}) {
+export async function getKycEnrollments(params: { page?: number; status?: KycSessionStatus; search?: string } = {}) {
   const query = new URLSearchParams({ page: String(params.page ?? 1), limit: "20" });
   if (params.status) query.set("status", params.status);
   if (params.search) query.set("search", params.search);
@@ -50,7 +53,7 @@ export async function getKycEnrollments(params: { page?: number; status?: DiditS
 
 /** Every row matching the active filters, as CSV text — the backend's `/kyc/me/sessions/export`
  * endpoint ignores pagination and returns the full filtered set. */
-export async function exportKycEnrollmentsAction(params: { status?: DiditSessionStatus; search?: string } = {}): Promise<string | { error: string } | AuthExpired> {
+export async function exportKycEnrollmentsAction(params: { status?: KycSessionStatus; search?: string } = {}): Promise<string | { error: string } | AuthExpired> {
   const query = new URLSearchParams();
   if (params.status) query.set("status", params.status);
   if (params.search) query.set("search", params.search);
@@ -63,7 +66,7 @@ export async function exportKycEnrollmentsAction(params: { status?: DiditSession
 }
 
 export interface KycEnrollmentDetail extends KycEnrollment {
-  /** Full Didit V3 decision payload, verbatim — images, AML hits, IP/device, everything. */
+  /** Full FaceTec decision payload, verbatim — liveness/match scores, AML hits, IP/device, everything. */
   decision: Record<string, unknown> | null;
 }
 
@@ -74,10 +77,8 @@ export async function getKycEnrollmentDetail(id: string): Promise<KycEnrollmentD
 
 export interface StartKycSessionState {
   error?: string;
-  /** Didit (or any other hosted-redirect provider): a link to send the customer to. */
-  url?: string;
   /**
-   * FaceTec: a full URL at the standalone `protegey-facetec-web` app (own origin — e.g. Vercel +
+   * A full URL at the standalone `protegey-facetec-web` app (own origin — e.g. Vercel +
    * Cloudflare, deliberately kept off our servers since it's the SDK-heavy capture flow) with
    * `enrollmentId`, a one-time `token`, and `apiBase` already embedded as query params.
    * facetec-web posts the capture result straight to the backend using that token
@@ -87,12 +88,6 @@ export interface StartKycSessionState {
   captureUrl?: string;
 }
 
-/**
- * `POST /kyc/me/sessions` branches server-side on the platform-wide KYC provider setting
- * (global, not per-partner — configured by PROTEGEY admins). Didit responds with
- * `sessionUrl`/`sessionId`; FaceTec responds with `captureUrl` instead (no Didit-specific
- * fields) — the UI below picks the right presentation from whichever is present.
- */
 export async function startKycSessionAction(
   _prevState: StartKycSessionState,
   formData: FormData,
@@ -106,9 +101,6 @@ export async function startKycSessionAction(
       body: fullName ? { fullName } : {},
     });
     revalidatePath("/kyc");
-    if (enrollment.sessionUrl) {
-      return { url: enrollment.sessionUrl };
-    }
     if (enrollment.captureUrl) {
       return { captureUrl: enrollment.captureUrl };
     }

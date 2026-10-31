@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
-import { getKycEnrollments, type DiditSessionStatus } from "./actions";
+import { getKycEnrollments, type KycSessionStatus } from "./actions";
 import { KycDashboardTab } from "./KycDashboardTab";
 import { EnrollmentsTable } from "./EnrollmentsTable";
 import { KycFilters } from "./KycFilters";
@@ -47,7 +47,7 @@ export default async function KycPage({ searchParams }: { searchParams: Promise<
 
   const params = await searchParams;
   const page = Math.max(1, Number(params.page) || 1);
-  const status = params.status as DiditSessionStatus | undefined;
+  const status = params.status as KycSessionStatus | undefined;
   const search = params.search ?? "";
   const result = await getKycEnrollments({ page, status, search: search || undefined });
 

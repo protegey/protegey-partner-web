@@ -1,6 +1,6 @@
 import { ALPHA3_TO_ALPHA2 } from "./iso3166";
 
-/** Accepts either alpha-2 ("ES") or alpha-3 ("ESP", what Didit sends) and normalizes to alpha-2. */
+/** Accepts either alpha-2 ("ES", what FaceTec's OCR sends) or alpha-3 ("ESP") and normalizes to alpha-2. */
 function toAlpha2(code: string): string | null {
   const upper = code.toUpperCase();
   if (upper.length === 2) return upper;

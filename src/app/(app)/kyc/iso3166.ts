@@ -1,7 +1,8 @@
 /**
- * Didit returns ISO 3166-1 alpha-3 codes for nationality/issuing_state (e.g. "ESP"), but the
- * flag-emoji trick and Intl.DisplayNames({ type: "region" }) both require alpha-2 ("ES").
- * No built-in JS API converts alpha-3 -> alpha-2, hence this static table.
+ * FaceTec's own OCR sends ISO 3166-1 alpha-2 directly ("ES") — no conversion needed there. This
+ * table is kept for any alpha-3 code ("ESP") that reaches country.ts from elsewhere, since the
+ * flag-emoji trick and Intl.DisplayNames({ type: "region" }) both require alpha-2, and no
+ * built-in JS API converts alpha-3 -> alpha-2.
  */
 export const ALPHA3_TO_ALPHA2: Record<string, string> = {
   AFG: "AF", ALA: "AX", ALB: "AL", DZA: "DZ", ASM: "AS", AND: "AD", AGO: "AO", AIA: "AI",

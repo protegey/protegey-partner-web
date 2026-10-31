@@ -3,7 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { toast } from "sonner";
-import { Check, Copy, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { startKycSessionAction, type StartKycSessionState } from "./actions";
 
@@ -23,55 +23,8 @@ function SubmitButton() {
   );
 }
 
-function CopyLinkField({ url }: { url: string }) {
-  const [copied, setCopied] = useState(false);
-  const { t } = useLang();
-
-  async function copy() {
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      // Clipboard access can be denied — the link is still selectable/openable below.
-    }
-  }
-
-  return (
-    <div className="flex flex-col gap-3">
-      <p className="text-sm text-foreground">
-        {t("kycFormLinkReady")}
-      </p>
-      <div className="flex items-center gap-2">
-        <input
-          readOnly
-          value={url}
-          onFocus={(e) => e.currentTarget.select()}
-          className="flex-1 truncate rounded-md border border-border bg-muted/50 px-3 py-2 text-xs text-foreground outline-none"
-        />
-        <button
-          type="button"
-          onClick={copy}
-          className="flex shrink-0 items-center gap-1.5 rounded-md border border-border px-3 py-2 text-sm font-medium text-foreground transition-colors hover:bg-muted"
-        >
-          {copied ? <Check className="size-4 text-primary" /> : <Copy className="size-4" />}
-          {copied ? t("kycFormCopied") : t("kycFormCopy")}
-        </button>
-      </div>
-      <a
-        href={url}
-        target="_blank"
-        rel="noreferrer"
-        className="text-sm font-medium text-primary hover:underline"
-      >
-        {t("kycFormOpenPage")}
-      </a>
-    </div>
-  );
-}
-
 /**
- * FaceTec: `protegey-facetec-web` is a standalone app on its own origin (kept off our servers —
+ * `protegey-facetec-web` is a standalone app on its own origin (kept off our servers —
  * it owns the SDK-heavy capture flow) that talks to the backend directly using a one-time token
  * embedded in `captureUrl`. This app's only job is to send the customer there, with a
  * `returnUrl` back to this page, and to persist nothing — facetec-web posts the result straight
@@ -109,16 +62,10 @@ export function StartVerificationForm() {
   const [state, formAction] = useActionState(startKycSessionAction, initialState);
 
   useEffect(() => {
-    if (state.url) toast.success(t("kycSessionStartedToast"));
+    if (state.captureUrl) toast.success(t("kycSessionStartedToast"));
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [state.url]);
+  }, [state.captureUrl]);
 
-  if (state.url) {
-    return <CopyLinkField url={state.url} />;
-  }
-
-  // No sessionUrl came back — this partner is on FaceTec. Send the customer to the standalone
-  // capture app instead of the Didit copy-link UI.
   if (state.captureUrl) {
     return <FaceTecRedirect captureUrl={state.captureUrl} />;
   }

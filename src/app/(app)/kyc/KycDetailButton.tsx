@@ -1,27 +1,16 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, Loader2, ShieldAlert, ShieldCheck, ShieldQuestion, ShieldX, ZoomIn } from "lucide-react";
+import { Eye, Loader2, ShieldQuestion, ZoomIn } from "lucide-react";
 import { Drawer } from "@/components/Drawer";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
-import { getKycEnrollmentDetail, type KycEnrollmentDetail, type DiditSessionStatus } from "./actions";
+import { getKycEnrollmentDetail, type KycEnrollmentDetail } from "./actions";
 import { ImageLightbox, type GalleryImage } from "./ImageLightbox";
 import { countryFlag, countryName } from "./country";
 
 type Rec = Record<string, unknown>;
 
-function arr(d: Rec | null | undefined, key: string): Rec[] {
-  const v = d?.[key];
-  return Array.isArray(v) ? (v as Rec[]) : [];
-}
-function first(d: Rec | null | undefined, key: string): Rec | null {
-  return arr(d, key)[0] ?? null;
-}
-function str(o: Rec | null | undefined, key: string): string | null {
-  const v = o?.[key];
-  return typeof v === "string" && v.length > 0 ? v : null;
-}
 function num(o: Rec | null | undefined, key: string): number | null {
   const v = o?.[key];
   return typeof v === "number" ? v : null;
@@ -29,28 +18,6 @@ function num(o: Rec | null | undefined, key: string): number | null {
 function bool(o: Rec | null | undefined, key: string): boolean | null {
   const v = o?.[key];
   return typeof v === "boolean" ? v : null;
-}
-function strArr(o: Rec | null | undefined, key: string): string[] {
-  const v = o?.[key];
-  return Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
-}
-
-const STATUS_CONFIG: Record<string, { color: string; icon: typeof ShieldCheck }> = {
-  Approved: { color: "text-primary", icon: ShieldCheck },
-  Declined: { color: "text-destructive", icon: ShieldX },
-  default: { color: "text-amber-600", icon: ShieldAlert },
-};
-
-function MiniStatus({ status }: { status: string | null }) {
-  if (!status) return null;
-  const config = STATUS_CONFIG[status] ?? STATUS_CONFIG.default;
-  const Icon = config.icon;
-  return (
-    <span className={`inline-flex items-center gap-1 text-xs font-medium ${config.color}`}>
-      <Icon className="size-3.5" />
-      {status}
-    </span>
-  );
 }
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
@@ -79,7 +46,7 @@ function GalleryThumb({ image, onClick }: { image: GalleryImage; onClick: () => 
       onClick={onClick}
       className="group relative aspect-[4/3] overflow-hidden rounded-md border border-border bg-muted"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element -- external Didit-hosted asset */}
+      {/* eslint-disable-next-line @next/next/no-img-element -- base64 data: URI, not a remote asset Next can optimize */}
       <img src={image.url} alt={image.label} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
       <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/30">
         <ZoomIn className="size-5 text-white opacity-0 transition-opacity group-hover:opacity-100" />
@@ -116,25 +83,14 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
   }
 
   const decision = detail?.decision ?? null;
-  const idVerification = first(decision, "id_verifications");
-  const faceMatch = first(decision, "face_matches");
-  const liveness = first(decision, "liveness_checks");
-  const amlScreening = first(decision, "aml_screenings");
-  const ipAnalysis = first(decision, "ip_analyses");
-  const poa = first(decision, "poa_verifications");
+  const riskFactors = (decision?.riskFactors as Rec | null | undefined) ?? null;
 
   const images: GalleryImage[] = [
-    str(idVerification, "front_image") && { url: str(idVerification, "front_image")!, label: "ID — front" },
-    str(idVerification, "back_image") && { url: str(idVerification, "back_image")!, label: "ID — back" },
-    str(idVerification, "portrait_image") && { url: str(idVerification, "portrait_image")!, label: "ID — portrait" },
-    str(faceMatch, "source_image") && { url: str(faceMatch, "source_image")!, label: "Selfie (face match)" },
-    str(faceMatch, "target_image") && { url: str(faceMatch, "target_image")!, label: "ID photo (face match)" },
-    str(liveness, "reference_image") && { url: str(liveness, "reference_image")!, label: "Liveness reference" },
-    str(poa, "document_file") && { url: str(poa, "document_file")!, label: "Proof of address" },
+    detail?.documentPhoto && { url: `data:image/jpeg;base64,${detail.documentPhoto}`, label: t("kycImageIdDocument") },
+    detail?.selfiePhoto && { url: `data:image/jpeg;base64,${detail.selfiePhoto}`, label: t("kycImageSelfie") },
   ].filter((x): x is GalleryImage => Boolean(x));
 
-  const nationality = str(idVerification, "nationality") ?? str(idVerification, "issuing_state");
-  const amlHits = arr(amlScreening, "hits");
+  const hasRiskFactors = bool(riskFactors, "rootedDevice") != null || bool(riskFactors, "emulator") != null || num(riskFactors, "spoofAttempts") != null;
 
   return (
     <>
@@ -172,7 +128,7 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
             {images.length > 0 ? (
               <div>
                 <p className="mb-2 text-sm font-semibold text-foreground">{t("kycCapturedImages")}</p>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   {images.map((image, i) => (
                     <GalleryThumb key={image.label} image={image} onClick={() => setLightboxIndex(i)} />
                   ))}
@@ -180,117 +136,57 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
               </div>
             ) : null}
 
-            {idVerification ? (
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-foreground">{t("kycIdentityDocument")}</p>
-                  <MiniStatus status={str(idVerification, "status")} />
-                </div>
-                <div className="grid grid-cols-2 gap-3 rounded-md border border-border p-3">
-                  <Field label={t("kycFieldFullName")} value={str(idVerification, "full_name")} />
-                  <Field label={t("clientsComplianceFieldDob")} value={str(idVerification, "date_of_birth")} />
-                  <Field label={t("kycFieldDocumentType")} value={str(idVerification, "document_type")} />
-                  <Field label={t("kycFieldDocumentNumber")} value={str(idVerification, "document_number")} />
-                  <Field
-                    label={t("clientsComplianceFieldNationality")}
-                    value={
-                      nationality ? (
-                        <span className="inline-flex items-center gap-1.5">
-                          <span>{countryFlag(nationality)}</span>
-                          {countryName(nationality)}
-                        </span>
-                      ) : null
-                    }
-                  />
-                  <Field label={t("kycFieldExpirationDate")} value={str(idVerification, "expiration_date")} />
-                  <Field label={t("kycFieldGender")} value={str(idVerification, "gender")} />
-                  <Field label={t("kycFieldPlaceOfBirth")} value={str(idVerification, "place_of_birth")} />
-                  <div className="col-span-2">
-                    <Field label={t("kycFieldAddress")} value={str(idVerification, "formatted_address") ?? str(idVerification, "address")} />
-                  </div>
-                </div>
-              </div>
-            ) : null}
-
             <div>
-              <p className="mb-2 text-sm font-semibold text-foreground">{t("kycBiometricScores")}</p>
-              <div className="grid grid-cols-2 gap-3">
-                <ScoreBadge label={t("kycScoreLiveness")} score={num(liveness, "score")} />
-                <ScoreBadge label={t("kycColFaceMatch")} score={num(faceMatch, "score")} />
+              <p className="mb-2 text-sm font-semibold text-foreground">{t("kycIdentityDocument")}</p>
+              <div className="grid grid-cols-2 gap-3 rounded-md border border-border p-3">
+                <Field label={t("kycFieldDocumentType")} value={detail.documentType} />
+                <Field label={t("kycFieldDocumentNumber")} value={detail.idDocumentNumber} />
+                <Field
+                  label={t("clientsComplianceFieldNationality")}
+                  value={
+                    detail.country ? (
+                      <span className="inline-flex items-center gap-1.5">
+                        <span>{countryFlag(detail.country)}</span>
+                        {countryName(detail.country)}
+                      </span>
+                    ) : null
+                  }
+                />
               </div>
             </div>
 
-            {amlScreening ? (
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-foreground">{t("kycAmlSectionTitle")}</p>
-                  <MiniStatus status={str(amlScreening, "status")} />
-                </div>
-                {amlHits.length === 0 ? (
-                  <p className="text-xs text-muted-foreground">{t("kycAmlNoHits")}</p>
-                ) : (
-                  <div className="flex flex-col gap-2">
-                    {amlHits.map((hit, i) => {
-                      const riskScore = num(hit, "risk_score");
-                      const riskColor = (riskScore ?? 0) >= 66 ? "text-destructive" : (riskScore ?? 0) >= 33 ? "text-amber-600" : "text-foreground";
-                      return (
-                        <div key={i} className="rounded-md border border-border p-3">
-                          <div className="flex items-center justify-between gap-2">
-                            <p className="text-sm font-medium text-foreground">{str(hit, "caption") ?? t("kycUnnamedMatch")}</p>
-                            {riskScore != null ? (
-                              <span className={`text-xs font-semibold ${riskColor}`}>{t("kycRiskPrefix")} {riskScore.toFixed(0)}</span>
-                            ) : null}
-                          </div>
-                          <div className="mt-1 flex flex-wrap gap-1">
-                            {strArr(hit, "datasets").map((dataset) => (
-                              <span key={dataset} className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
-                                {dataset}
-                              </span>
-                            ))}
-                          </div>
-                          {num(hit, "match_score") != null ? (
-                            <p className="mt-1.5 text-xs text-muted-foreground">{t("kycNameMatchScorePrefix")} {num(hit, "match_score")}%</p>
-                          ) : null}
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
+            <div>
+              <p className="mb-2 text-sm font-semibold text-foreground">{t("kycBiometricScores")}</p>
+              <div className="grid grid-cols-3 gap-3">
+                <ScoreBadge label={t("kycScoreLiveness")} score={detail.livenessScore} />
+                <ScoreBadge label={t("kycColFaceMatch")} score={detail.faceMatchScore} />
+                <ScoreBadge label={t("kycScoreConfidence")} score={num(decision, "confidenceScore")} />
               </div>
-            ) : null}
+            </div>
 
-            {ipAnalysis ? (
-              <div>
-                <div className="mb-2 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-foreground">{t("kycDeviceIpTitle")}</p>
-                  {bool(ipAnalysis, "is_vpn_or_tor") || bool(ipAnalysis, "is_data_center") ? (
-                    <span className="inline-flex items-center gap-1 text-xs font-semibold text-destructive">
-                      <ShieldAlert className="size-3.5" />
-                      {t("kycVpnDetected")}
-                    </span>
-                  ) : null}
+            <div>
+              <p className="mb-2 text-sm font-semibold text-foreground">{t("kycAmlSectionTitle")}</p>
+              {detail.amlTotalHits && detail.amlTotalHits > 0 ? (
+                <div className="rounded-md border border-border p-3">
+                  <p className="text-sm font-medium text-foreground">{t("kycAmlHitsFound")}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {t("kycRiskPrefix")} {detail.amlRiskScore?.toFixed(0) ?? "—"} · {detail.amlTotalHits}
+                  </p>
                 </div>
-                <div className="grid grid-cols-2 gap-3 rounded-md border border-border p-3">
-                  <Field label={t("kycFieldIpAddress")} value={str(ipAnalysis, "ip_address")} />
-                  <Field
-                    label={t("kycFieldLocation")}
-                    value={
-                      str(ipAnalysis, "ip_country_code") ? (
-                        <span className="inline-flex items-center gap-1.5">
-                          <span>{countryFlag(str(ipAnalysis, "ip_country_code"))}</span>
-                          {[str(ipAnalysis, "ip_city"), str(ipAnalysis, "ip_country")].filter(Boolean).join(", ")}
-                        </span>
-                      ) : (
-                        str(ipAnalysis, "ip_country")
-                      )
-                    }
-                  />
-                  <Field label={t("kycFieldIsp")} value={str(ipAnalysis, "isp")} />
-                  <Field label={t("kycFieldOrganization")} value={str(ipAnalysis, "organization")} />
-                  <Field label={t("kycFieldBrowser")} value={str(ipAnalysis, "browser_family")} />
-                  <Field label={t("kycFieldOsPlatform")} value={str(ipAnalysis, "platform") ?? str(ipAnalysis, "os_family")} />
-                  <Field label={t("kycFieldDevice")} value={str(ipAnalysis, "device_brand")} />
-                  <Field label={t("kycFieldTimeZone")} value={str(ipAnalysis, "time_zone")} />
+              ) : (
+                <p className="text-xs text-muted-foreground">{t("kycAmlNoHits")}</p>
+              )}
+            </div>
+
+            {hasRiskFactors ? (
+              <div>
+                <p className="mb-2 text-sm font-semibold text-foreground">{t("kycRiskFactorsTitle")}</p>
+                <div className="flex flex-col gap-1.5 rounded-md border border-border p-3 text-xs text-muted-foreground">
+                  {bool(riskFactors, "rootedDevice") ? <p className="font-medium text-destructive">{t("kycRiskRootedDevice")}</p> : null}
+                  {bool(riskFactors, "emulator") ? <p className="font-medium text-destructive">{t("kycRiskEmulator")}</p> : null}
+                  {num(riskFactors, "spoofAttempts") != null ? (
+                    <p>{t("kycRiskSpoofAttemptsPrefix")} {num(riskFactors, "spoofAttempts")}</p>
+                  ) : null}
                 </div>
               </div>
             ) : null}
@@ -304,3 +200,4 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
     </>
   );
 }
+

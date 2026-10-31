@@ -56,15 +56,16 @@ const KYC_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/kyc/sessi
   -H "x-api-key: YOUR_API_KEY" \\
   -d '{ "externalUserId": "cust-9981" }'
 
-# Response
-{ "sessionId": "sess_...", "url": "https://verify.didit.me/session/..." }`;
+# Response — "url" is a one-time link to our FaceTec capture app (protegey-facetec-web),
+# not a redirect to a third-party verification page
+{ "sessionId": "018f2a3e-...", "url": "https://verify-kyc.protegey.com/?enrollmentId=...&token=...&apiBase=..." }`;
 
 const KYC_POLL_EXAMPLE = `# Polling fallback — see the Webhooks section: delivery is best-effort (one retry, no queue).
-curl https://api.protegey.com/partner-api/kyc/sessions/sess_... \\
+curl https://api.protegey.com/partner-api/kyc/sessions/018f2a3e-... \\
   -H "x-api-key: YOUR_API_KEY"
 
 # Response — identical shape to the outbound webhook payload, minus eventId
-{ "sessionId": "sess_...", "externalUserId": "cust-9981", "status": "Approved", "decision": { ... } }`;
+{ "sessionId": "018f2a3e-...", "externalUserId": "cust-9981", "status": "Approved", "decision": { "source": "facetec", "passed": true, "confidenceScore": 94, ... } }`;
 
 const SANCTIONS_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/sanctions/screen \\
   -H "Content-Type: application/json" \\
@@ -131,8 +132,8 @@ const WEBHOOK_KYC_PAYLOAD_EXAMPLE = `{
   "eventId": "d0d61d39-88c5-4bfb-89eb-08bb1d407c5a",
   "externalUserId": "cust-9981",
   "status": "Approved",
-  "sessionId": "sess_...",
-  "decision": { "id_verifications": [ { "status": "Approved", ... } ], ... }
+  "sessionId": "018f2a3e-...",
+  "decision": { "source": "facetec", "passed": true, "confidenceScore": 94, "livenessScore": 97, "matchScore": 91, ... }
 }`;
 
 const WEBHOOK_ALERT_CREATED_EXAMPLE = `{
