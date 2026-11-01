@@ -8,6 +8,7 @@ import { useLang } from "@/lib/i18n/LangProvider";
 import { getKycEnrollmentDetail, type KycEnrollmentDetail } from "./actions";
 import { ImageLightbox, type GalleryImage } from "./ImageLightbox";
 import { countryFlag, countryName } from "./country";
+import type { StringKey } from "@/lib/i18n/strings";
 
 type Rec = Record<string, unknown>;
 
@@ -35,6 +36,41 @@ function ScoreBadge({ label, score }: { label: string; score: number | null }) {
     <div className="rounded-md border border-border p-3">
       <p className="text-[10px] font-medium uppercase text-muted-foreground">{label}</p>
       <p className="mt-1 text-2xl font-semibold text-foreground">{score != null ? `${score.toFixed(0)}%` : "—"}</p>
+    </div>
+  );
+}
+
+const DOCUMENT_FIELD_LABEL_KEYS: Record<string, "kycFieldDateOfBirth" | "kycFieldPlaceOfBirth" | "kycFieldProfession" | "kycFieldSex" | "kycFieldDateOfIssue" | "kycFieldDateOfExpiration"> = {
+  dateOfBirth: "kycFieldDateOfBirth",
+  placeOfBirth: "kycFieldPlaceOfBirth",
+  profession: "kycFieldProfession",
+  sex: "kycFieldSex",
+  dateOfIssue: "kycFieldDateOfIssue",
+  dateOfExpiration: "kycFieldDateOfExpiration",
+};
+
+const ID_SCAN_CHECK_LABEL_KEYS: Record<string, "kycCheckOcrTemplateMatch" | "kycCheckDocumentQuality" | "kycCheckFaceQuality" | "kycCheckUnexpectedMedia"> = {
+  matchedOcrTemplate: "kycCheckOcrTemplateMatch",
+  qualityIssueOnDocument: "kycCheckDocumentQuality",
+  qualityIssueOnFacePhoto: "kycCheckFaceQuality",
+  unexpectedMediaEncountered: "kycCheckUnexpectedMedia",
+};
+
+/** FaceTec's own enum convention: 0 means OK, any other number means an issue, null/undefined
+ * means the document template doesn't carry that feature at all (e.g. no NFC chip, no MRZ). The
+ * two quality flags are booleans instead (true meaning an issue was found), inverted to match. */
+function CheckRow({ t, labelKey, value }: { t: (key: StringKey) => string; labelKey: StringKey; value: unknown }) {
+  let status: "ok" | "issue" | "na";
+  if (typeof value === "number") status = value === 0 ? "ok" : "issue";
+  else if (typeof value === "boolean") status = value ? "issue" : "ok";
+  else status = "na";
+
+  const statusLabel = status === "ok" ? t("kycCheckOk") : status === "issue" ? t("kycCheckIssue") : t("kycCheckNotApplicable");
+  const color = status === "issue" ? "text-destructive" : status === "ok" ? "text-foreground" : "text-muted-foreground";
+  return (
+    <div className="flex items-center justify-between text-xs">
+      <span className="text-muted-foreground">{t(labelKey)}</span>
+      <span className={`font-medium ${color}`}>{statusLabel}</span>
     </div>
   );
 }
@@ -87,6 +123,7 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
 
   const images: GalleryImage[] = [
     detail?.documentPhoto && { url: `data:image/jpeg;base64,${detail.documentPhoto}`, label: t("kycImageIdDocument") },
+    detail?.documentBackPhoto && { url: `data:image/jpeg;base64,${detail.documentBackPhoto}`, label: t("kycImageIdDocumentBack") },
     detail?.selfiePhoto && { url: `data:image/jpeg;base64,${detail.selfiePhoto}`, label: t("kycImageSelfie") },
   ].filter((x): x is GalleryImage => Boolean(x));
 

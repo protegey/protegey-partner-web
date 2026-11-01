@@ -30,8 +30,9 @@ export interface KycEnrollment {
   amlTotalHits: number | null;
   documentType: string | null;
   idDocumentNumber?: string | null;
-  /** Base64, no data: URI prefix — the ID photo and the liveness selfie capture. */
+  /** Base64, no data: URI prefix — the ID photo (front/back) and the liveness selfie capture. */
   documentPhoto: string | null;
+  documentBackPhoto?: string | null;
   selfiePhoto: string | null;
   createdAt: string;
 }
