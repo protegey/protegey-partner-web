@@ -120,6 +120,11 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
 
   const decision = detail?.decision ?? null;
   const riskFactors = (decision?.riskFactors as Rec | null | undefined) ?? null;
+  const documentFields = (decision?.documentFields as Record<string, string> | null | undefined) ?? null;
+  const idScanChecks = (decision?.idScanChecks as Rec | null | undefined) ?? null;
+  const sanctionsMatches = (decision?.sanctionsMatches as Rec[] | null | undefined) ?? null;
+  const identityResolution = (decision?.identityResolution as Rec | null | undefined) ?? null;
+  const networkFlag = (identityResolution?.networkFlag as Rec | null | undefined) ?? null;
 
   const images: GalleryImage[] = [
     detail?.documentPhoto && { url: `data:image/jpeg;base64,${detail.documentPhoto}`, label: t("kycImageIdDocument") },
@@ -192,6 +197,30 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
               </div>
             </div>
 
+            {documentFields && Object.keys(documentFields).length > 0 ? (
+              <div>
+                <p className="mb-2 text-sm font-semibold text-foreground">{t("kycDocumentFieldsTitle")}</p>
+                <div className="grid grid-cols-2 gap-3 rounded-md border border-border p-3">
+                  {Object.entries(DOCUMENT_FIELD_LABEL_KEYS)
+                    .filter(([key]) => documentFields[key])
+                    .map(([key, labelKey]) => (
+                      <Field key={key} label={t(labelKey)} value={documentFields[key]} />
+                    ))}
+                </div>
+              </div>
+            ) : null}
+
+            {idScanChecks ? (
+              <div>
+                <p className="mb-2 text-sm font-semibold text-foreground">{t("kycIdScanChecksTitle")}</p>
+                <div className="flex flex-col gap-1.5 rounded-md border border-border p-3">
+                  {Object.entries(ID_SCAN_CHECK_LABEL_KEYS).map(([key, labelKey]) => (
+                    <CheckRow key={key} t={t} labelKey={labelKey} value={idScanChecks[key]} />
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
             <div>
               <p className="mb-2 text-sm font-semibold text-foreground">{t("kycBiometricScores")}</p>
               <div className="grid grid-cols-3 gap-3">
@@ -204,16 +233,72 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
             <div>
               <p className="mb-2 text-sm font-semibold text-foreground">{t("kycAmlSectionTitle")}</p>
               {detail.amlTotalHits && detail.amlTotalHits > 0 ? (
-                <div className="rounded-md border border-border p-3">
-                  <p className="text-sm font-medium text-foreground">{t("kycAmlHitsFound")}</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
+                <div className="space-y-2">
+                  <p className="text-xs text-muted-foreground">
                     {t("kycRiskPrefix")} {detail.amlRiskScore?.toFixed(0) ?? "—"} · {detail.amlTotalHits}
                   </p>
+                  {sanctionsMatches && sanctionsMatches.length > 0 ? (
+                    <div className="flex flex-col gap-2">
+                      {sanctionsMatches.map((match, i) => (
+                        <div key={String(match.id ?? i)} className="rounded-md border border-border p-3">
+                          <div className="flex items-center justify-between gap-2">
+                            <p className="text-sm font-medium text-foreground">{String(match.name ?? "—")}</p>
+                            {match.isPep ? (
+                              <span className="rounded-full bg-amber-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase text-amber-600">
+                                {t("kycSanctionsPepBadge")}
+                              </span>
+                            ) : null}
+                          </div>
+                          <p className="mt-1 text-xs text-muted-foreground">
+                            {t("kycSanctionsMatchSourcePrefix")} {String(match.source ?? "—")} · {t("kycSanctionsMatchScorePrefix")}{" "}
+                            {typeof match.score === "number" ? `${Math.round(match.score * 100)}%` : "—"}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="rounded-md border border-border p-3">
+                      <p className="text-sm font-medium text-foreground">{t("kycAmlHitsFound")}</p>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <p className="text-xs text-muted-foreground">{t("kycAmlNoHits")}</p>
               )}
             </div>
+
+            {identityResolution ? (
+              <div>
+                <p className="mb-2 text-sm font-semibold text-foreground">{t("kycNetworkSectionTitle")}</p>
+                <div className="space-y-2">
+                  <div className="rounded-md border border-border p-3">
+                    <p className={`text-sm font-medium ${networkFlag?.flagged ? "text-destructive" : "text-foreground"}`}>
+                      {networkFlag?.flagged ? t("kycNetworkFlagged") : t("kycNetworkClear")}
+                    </p>
+                    {networkFlag?.flagged && typeof networkFlag.matchCount === "number" ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {t("kycNetworkMatchCountPrefix")} {networkFlag.matchCount}
+                      </p>
+                    ) : null}
+                  </div>
+                  <div className="rounded-md border border-border p-3">
+                    <p className="text-sm font-medium text-foreground">{t("kycIdentityLinkTitle")}</p>
+                    <p className="mt-1 text-xs text-muted-foreground">
+                      {identityResolution.linkType === "new"
+                        ? t("kycIdentityLinkNew")
+                        : identityResolution.linkType === "conflict"
+                          ? t("kycIdentityLinkConflict")
+                          : t("kycIdentityLinkMatched")}
+                    </p>
+                    {typeof identityResolution.linkConfidence === "number" ? (
+                      <p className="mt-1 text-xs text-muted-foreground">
+                        {t("kycIdentityLinkConfidencePrefix")} {Math.round(identityResolution.linkConfidence * 100)}%
+                      </p>
+                    ) : null}
+                  </div>
+                </div>
+              </div>
+            ) : null}
 
             {hasRiskFactors ? (
               <div>
