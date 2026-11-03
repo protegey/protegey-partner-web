@@ -25,3 +25,10 @@ export function countryName(code: string | null | undefined): string {
     return code;
   }
 }
+
+/** Every ISO 3166-1 alpha-2 code this app otherwise knows about (derived from ALPHA3_TO_ALPHA2's
+ * own values, so there's exactly one place that enumerates countries), sorted by display name —
+ * for a real country picker instead of a free-text 2-letter box a partner could easily mistype. */
+export const ALL_COUNTRIES: { code: string; name: string }[] = Array.from(new Set(Object.values(ALPHA3_TO_ALPHA2)))
+  .map((code) => ({ code, name: countryName(code) || code }))
+  .sort((a, b) => a.name.localeCompare(b.name));

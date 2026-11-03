@@ -178,7 +178,25 @@ export function AuditLogsClient({
                   <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">
                     {event.actorLabel ?? t("eventSystemActor")}
                   </td>
-                  <td className="px-4 py-2.5 text-xs text-muted-foreground">{event.metadata ? Object.keys(event.metadata).length : 0}</td>
+                  <td className="max-w-xs px-4 py-2.5 text-xs text-muted-foreground">
+                    {event.metadata && Object.keys(event.metadata).length > 0 ? (
+                      <details className="group">
+                        <summary className="cursor-pointer select-none font-medium text-foreground marker:content-none">
+                          {t("auditLogsMetadataCount").replace("{count}", String(Object.keys(event.metadata).length))}
+                        </summary>
+                        <dl className="mt-1.5 space-y-1 border-l border-border pl-2.5">
+                          {Object.entries(event.metadata).map(([key, value]) => (
+                            <div key={key}>
+                              <dt className="font-medium text-foreground">{key}</dt>
+                              <dd className="break-words text-muted-foreground">{String(value)}</dd>
+                            </div>
+                          ))}
+                        </dl>
+                      </details>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
                 </tr>
               ))}
             </tbody>

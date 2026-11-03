@@ -4,11 +4,12 @@ import { useState } from "react";
 import { Download, Eye, Loader2, Pencil, RefreshCw, ShieldQuestion, ZoomIn } from "lucide-react";
 import { Drawer } from "@/components/Drawer";
 import { CopyRevealField } from "@/components/CopyRevealField";
+import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { getKycEnrollmentDetail, resendKycEnrollmentAction, updateKycEnrollmentAction, type KycEnrollmentDetail, type UpdateKycEnrollmentInput } from "./actions";
 import { ImageLightbox, downloadGalleryImage, type GalleryImage } from "./ImageLightbox";
-import { countryFlag, countryName } from "./country";
+import { ALL_COUNTRIES, countryFlag, countryName } from "./country";
 import type { StringKey } from "@/lib/i18n/strings";
 
 const RESENDABLE_STATUSES = new Set(["Declined", "Expired", "In Review", "Resubmitted"]);
@@ -113,6 +114,29 @@ function GalleryThumb({ image, onClick }: { image: GalleryImage; onClick: () => 
 
 const STATUS_OPTIONS = ["In Review", "Approved", "Declined"] as const;
 
+const DOCUMENT_FIELD_INPUTS: { key: "sex" | "dateOfBirth" | "placeOfBirth" | "profession" | "dateOfIssue" | "dateOfExpiration"; labelKey: StringKey }[] = [
+  { key: "sex", labelKey: "kycFieldSex" },
+  { key: "dateOfBirth", labelKey: "kycFieldDateOfBirth" },
+  { key: "placeOfBirth", labelKey: "kycFieldPlaceOfBirth" },
+  { key: "profession", labelKey: "kycFieldProfession" },
+  { key: "dateOfIssue", labelKey: "kycFieldDateOfIssue" },
+  { key: "dateOfExpiration", labelKey: "kycFieldDateOfExpiration" },
+];
+
+const FIELD_LABEL_KEYS: Record<string, StringKey> = {
+  fullName: "kycEditFieldFullName",
+  country: "clientsComplianceFieldNationality",
+  documentType: "kycFieldDocumentType",
+  idDocumentNumber: "kycFieldDocumentNumber",
+  sex: "kycFieldSex",
+  dateOfBirth: "kycFieldDateOfBirth",
+  placeOfBirth: "kycFieldPlaceOfBirth",
+  profession: "kycFieldProfession",
+  dateOfIssue: "kycFieldDateOfIssue",
+  dateOfExpiration: "kycFieldDateOfExpiration",
+  status: "kycEditFieldStatus",
+};
+
 function EditEnrollmentForm({
   detail,
   onCancel,
@@ -124,45 +148,79 @@ function EditEnrollmentForm({
 }) {
   const { t } = useLang();
   const guard = useSessionGuard();
+  const documentFields = (detail.decision?.documentFields as Record<string, string> | null | undefined) ?? {};
   const [form, setForm] = useState({
     fullName: detail.fullName ?? "",
     country: detail.country ?? "",
     documentType: detail.documentType ?? "",
     idDocumentNumber: detail.idDocumentNumber ?? "",
+    sex: documentFields.sex ?? "",
+    dateOfBirth: documentFields.dateOfBirth ?? "",
+    placeOfBirth: documentFields.placeOfBirth ?? "",
+    profession: documentFields.profession ?? "",
+    dateOfIssue: documentFields.dateOfIssue ?? "",
+    dateOfExpiration: documentFields.dateOfExpiration ?? "",
     status: detail.status as (typeof STATUS_OPTIONS)[number] | "",
     reviewNote: "",
   });
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  // Built once the user asks to save (not live on every keystroke) — the confirmation dialog shows
+  // exactly this before anything is actually sent, and it's reused as-is for the actual request.
+  const [pendingChanges, setPendingChanges] = useState<{ payload: UpdateKycEnrollmentInput; diff: { label: string; from: string; to: string }[] } | null>(
+    null,
+  );
 
-  async function handleSave() {
-    setSaving(true);
-    setSaveError(null);
-    // Only send what actually changed — never overwrite a field with an identical/blank value by
-    // accident (e.g. leaving the reviewNote box empty when not changing status).
+  function buildPendingChanges(): { payload: UpdateKycEnrollmentInput; diff: { label: string; from: string; to: string }[] } {
     const payload: UpdateKycEnrollmentInput = {};
-    if (form.fullName !== (detail.fullName ?? "")) payload.fullName = form.fullName;
-    if (form.country !== (detail.country ?? "")) payload.country = form.country;
-    if (form.documentType !== (detail.documentType ?? "")) payload.documentType = form.documentType;
-    if (form.idDocumentNumber !== (detail.idDocumentNumber ?? "")) payload.idDocumentNumber = form.idDocumentNumber;
+    const diff: { label: string; from: string; to: string }[] = [];
+    const track = (field: keyof UpdateKycEnrollmentInput, from: string, to: string) => {
+      if (to === from) return;
+      (payload as Record<string, string>)[field] = to;
+      diff.push({ label: t(FIELD_LABEL_KEYS[field] ?? field), from: from || "—", to: to || "—" });
+    };
+
+    track("fullName", detail.fullName ?? "", form.fullName);
+    track("country", detail.country ?? "", form.country);
+    track("documentType", detail.documentType ?? "", form.documentType);
+    track("idDocumentNumber", detail.idDocumentNumber ?? "", form.idDocumentNumber);
+    track("sex", documentFields.sex ?? "", form.sex);
+    track("dateOfBirth", documentFields.dateOfBirth ?? "", form.dateOfBirth);
+    track("placeOfBirth", documentFields.placeOfBirth ?? "", form.placeOfBirth);
+    track("profession", documentFields.profession ?? "", form.profession);
+    track("dateOfIssue", documentFields.dateOfIssue ?? "", form.dateOfIssue);
+    track("dateOfExpiration", documentFields.dateOfExpiration ?? "", form.dateOfExpiration);
+
     if (form.status && form.status !== detail.status) {
-      payload.status = form.status;
+      track("status", detail.status, form.status);
       if (form.reviewNote.trim()) payload.reviewNote = form.reviewNote.trim();
     }
 
-    if (Object.keys(payload).length === 0) {
+    return { payload, diff };
+  }
+
+  function handleReviewClick() {
+    const changes = buildPendingChanges();
+    if (changes.diff.length === 0) {
       onCancel();
-      setSaving(false);
       return;
     }
+    setPendingChanges(changes);
+  }
 
-    const result = await guard(() => updateKycEnrollmentAction(detail.id, payload));
+  async function handleConfirmSave() {
+    if (!pendingChanges) return;
+    setSaving(true);
+    setSaveError(null);
+    const result = await guard(() => updateKycEnrollmentAction(detail.id, pendingChanges.payload));
     setSaving(false);
     if (!result) return; // cancelled or session-expired retry also failed — guard already handled it
     if ("error" in result) {
       setSaveError(result.error);
+      setPendingChanges(null);
       return;
     }
+    setPendingChanges(null);
     onSaved(result);
   }
 
@@ -180,13 +238,18 @@ function EditEnrollmentForm({
         </label>
         <label className="flex flex-col gap-1 text-xs">
           <span className="text-muted-foreground">{t("clientsComplianceFieldNationality")}</span>
-          <input
+          <select
             value={form.country}
-            maxLength={2}
-            onChange={(e) => setForm({ ...form, country: e.target.value.toUpperCase() })}
-            placeholder="CM"
+            onChange={(e) => setForm({ ...form, country: e.target.value })}
             className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
-          />
+          >
+            <option value="">—</option>
+            {ALL_COUNTRIES.map((c) => (
+              <option key={c.code} value={c.code}>
+                {countryFlag(c.code)} {c.name}
+              </option>
+            ))}
+          </select>
         </label>
         <label className="flex flex-col gap-1 text-xs">
           <span className="text-muted-foreground">{t("kycFieldDocumentType")}</span>
@@ -204,6 +267,16 @@ function EditEnrollmentForm({
             className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
           />
         </label>
+        {DOCUMENT_FIELD_INPUTS.map(({ key, labelKey }) => (
+          <label key={key} className="flex flex-col gap-1 text-xs">
+            <span className="text-muted-foreground">{t(labelKey)}</span>
+            <input
+              value={form[key]}
+              onChange={(e) => setForm({ ...form, [key]: e.target.value })}
+              className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+            />
+          </label>
+        ))}
       </div>
 
       <label className="flex flex-col gap-1 text-xs">
@@ -238,7 +311,7 @@ function EditEnrollmentForm({
       <div className="flex gap-2">
         <button
           type="button"
-          onClick={handleSave}
+          onClick={handleReviewClick}
           disabled={saving}
           className="rounded-md bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
         >
@@ -253,6 +326,28 @@ function EditEnrollmentForm({
           {t("cancel")}
         </button>
       </div>
+
+      <ConfirmActionDialog
+        open={pendingChanges != null}
+        onClose={() => setPendingChanges(null)}
+        onConfirm={handleConfirmSave}
+        title={t("kycEditConfirmTitle")}
+        description={t("kycEditConfirmBody")}
+        confirmLabel={t("kycEditSave")}
+        pendingLabel={t("kycEditSaving")}
+        pending={saving}
+      >
+        <div className="max-h-56 space-y-1.5 overflow-y-auto rounded-md border border-border bg-muted/40 p-2.5 text-xs">
+          {pendingChanges?.diff.map((change) => (
+            <div key={change.label} className="flex flex-col">
+              <span className="font-medium text-foreground">{change.label}</span>
+              <span className="text-muted-foreground">
+                {change.from} <span aria-hidden="true">→</span> {change.to}
+              </span>
+            </div>
+          ))}
+        </div>
+      </ConfirmActionDialog>
     </div>
   );
 }

@@ -82,6 +82,14 @@ export interface UpdateKycEnrollmentInput {
   country?: string;
   documentType?: string;
   idDocumentNumber?: string;
+  // Live in decision.documentFields on the backend (FaceTec's OCR output), not typed columns —
+  // same "correct what FaceTec got wrong" idea as the fields above, different storage spot.
+  sex?: string;
+  dateOfBirth?: string;
+  placeOfBirth?: string;
+  profession?: string;
+  dateOfIssue?: string;
+  dateOfExpiration?: string;
   status?: "Approved" | "Declined" | "In Review";
   reviewNote?: string;
 }

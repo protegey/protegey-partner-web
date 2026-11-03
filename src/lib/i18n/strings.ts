@@ -954,6 +954,11 @@ const STRINGS = {
   kycEditFieldReviewNote: { en: "Review note (why this status change)", fr: "Note de revue (pourquoi ce changement de statut)" },
   kycEditSave: { en: "Save", fr: "Enregistrer" },
   kycEditSaving: { en: "Saving…", fr: "Enregistrement…" },
+  kycEditConfirmTitle: { en: "Confirm these changes?", fr: "Confirmer ces modifications ?" },
+  kycEditConfirmBody: {
+    en: "This will be recorded in the audit log with your name and the exact before/after values.",
+    fr: "Ceci sera enregistré dans le journal d'audit avec votre nom et les valeurs exactes avant/après.",
+  },
   kycResendButton: { en: "Resend link", fr: "Renvoyer le lien" },
   kycResendLinkLabel: { en: "New capture link", fr: "Nouveau lien de capture" },
   kycImagesProcessing: {
@@ -2396,6 +2401,7 @@ const STRINGS = {
   auditLogsColType: { en: "Event type", fr: "Type d'événement" },
   auditLogsColId: { en: "Event ID", fr: "ID de l'événement" },
   auditLogsColMetadata: { en: "Metadata fields", fr: "Champs de métadonnées" },
+  auditLogsMetadataCount: { en: "{count} field(s) — view", fr: "{count} champ(s) — voir" },
   auditLogsFilterTypeLabel: { en: "Event type", fr: "Type d'événement" },
   auditLogsFilterTypePlaceholder: { en: "e.g. team, alert.confirmed…", fr: "ex. team, alert.confirmed…" },
   auditLogsFilterActorLabel: { en: "Actor", fr: "Auteur" },
