@@ -497,9 +497,19 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
               // FaceTec writes these images into its own database asynchronously, well after the
               // decision itself is final (see FaceTecImagesService / the background retry in
               // KycService) — a finished enrollment with no images yet isn't an error, it just
-              // hasn't been backfilled yet.
-              <div className="rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground">
-                {t("kycImagesProcessing")}
+              // hasn't been backfilled yet. Skeleton tiles (same size as the real thumbnails)
+              // make that obvious at a glance instead of a plain text line easy to miss.
+              <div>
+                <p className="mb-2 text-sm font-semibold text-foreground">{t("kycCapturedImages")}</p>
+                <div className="flex flex-wrap gap-2">
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={i}
+                      className="animate-shimmer aspect-[4/3] w-28 shrink-0 rounded-md border border-border bg-muted sm:w-36"
+                    />
+                  ))}
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">{t("kycImagesProcessing")}</p>
               </div>
             )}
 
