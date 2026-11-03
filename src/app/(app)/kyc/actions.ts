@@ -156,3 +156,21 @@ export async function startKycSessionAction(
     return { error: t(lang, "kycStartFailedError") };
   }
 }
+
+export interface KycSettings {
+  kycAutoApproveMinMatchLevel: number | null;
+  platformDefault: number;
+}
+
+export async function getKycSettingsAction(): Promise<KycSettings | AuthExpired> {
+  return apiFetchGuarded<KycSettings>("/partners/me/kyc-settings");
+}
+
+export async function updateKycSettingsAction(kycAutoApproveMinMatchLevel: number | null): Promise<KycSettings | { error: string } | AuthExpired> {
+  try {
+    return await apiFetchGuarded<KycSettings>("/partners/me/kyc-settings", { method: "PATCH", body: { kycAutoApproveMinMatchLevel } });
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
+}

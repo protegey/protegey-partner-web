@@ -6,6 +6,7 @@ import { KycDashboardTab } from "./KycDashboardTab";
 import { EnrollmentsTable } from "./EnrollmentsTable";
 import { KycFilters } from "./KycFilters";
 import { StartVerificationDialogButton } from "./StartVerificationDialogButton";
+import { KycSeverityCard } from "./KycSeverityCard";
 import { PaginationControls } from "@/components/PaginationControls";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 import { getSessionUser } from "@/lib/session";
@@ -67,6 +68,8 @@ export default async function KycPage({ searchParams }: { searchParams: Promise<
           <StartVerificationDialogButton />
         </div>
       </div>
+
+      <KycSeverityCard />
 
       <KycDashboardTab enrollments={result.data} total={result.total} />
 

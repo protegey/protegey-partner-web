@@ -961,6 +961,31 @@ const STRINGS = {
     fr: "Ceci sera enregistré dans le journal d'audit avec votre nom et les valeurs exactes avant/après.",
   },
   kycResendButton: { en: "Resend link", fr: "Renvoyer le lien" },
+  kycSeverityCardTitle: { en: "Auto-approve sensitivity", fr: "Sensibilité d'auto-approbation" },
+  kycSeverityCardSubtitle: {
+    en: "The match confidence below which a session needs human review instead of auto-approving.",
+    fr: "La confiance de correspondance en dessous de laquelle une session passe en revue manuelle au lieu d'être auto-approuvée.",
+  },
+  kycSeverityLevelLabel: { en: "Level {level}", fr: "Niveau {level}" },
+  kycSeverityDefaultSuffix: { en: "default", fr: "défaut" },
+  kycSeverityGuideTitle: { en: "What do these levels mean?", fr: "Que signifient ces niveaux ?" },
+  kycSeverityGuideIntro: {
+    en: "FaceTec reports its face-match confidence as an integer level from 1 to 7, not a percentage — each level is a documented false-accept rate (the chance two different people are wrongly matched as the same person).",
+    fr: "FaceTec exprime sa confiance de correspondance faciale sous forme d'un niveau entier de 1 à 7, pas un pourcentage — chaque niveau correspond à un taux de faux-positif documenté (la probabilité que deux personnes différentes soient à tort reconnues comme la même personne).",
+  },
+  kycSeverityGuideFloorNote: {
+    en: "Level 4 is the practical floor: our FaceTec server is itself configured to require at least Level 4 before it even reports a session as \"successful\" — anything below that, FaceTec makes the user retry before it ever reaches us.",
+    fr: "Le niveau 4 est le plancher pratique : notre serveur FaceTec est lui-même configuré pour exiger au moins le niveau 4 avant même de considérer une session comme « réussie » — en dessous, FaceTec fait recommencer l'utilisateur avant que ça n'arrive jusqu'à nous.",
+  },
+  kycSeverityGuideHistoryNote: {
+    en: "Changing this only affects new sessions from now on — an enrollment that was already decided keeps its original status, it's never recalculated.",
+    fr: "Ce changement ne s'applique qu'aux nouvelles sessions à partir de maintenant — un enrôlement déjà décidé garde son statut d'origine, il n'est jamais recalculé.",
+  },
+  kycSeverityConfirmTitle: { en: "Change the auto-approve level?", fr: "Modifier le niveau d'auto-approbation ?" },
+  kycSeverityConfirmBody: {
+    en: "From now on, a match below Level {level} will need manual review instead of auto-approving. This never affects sessions already decided.",
+    fr: "À partir de maintenant, une correspondance sous le niveau {level} passera en revue manuelle au lieu d'être auto-approuvée. Ça n'affecte jamais les sessions déjà décidées.",
+  },
   kycResendLinkLabel: { en: "New capture link", fr: "Nouveau lien de capture" },
   kycImagesProcessing: {
     en: "Processing biometric images — this can take 1 to 3 minutes. Reopen this panel shortly to see them.",
