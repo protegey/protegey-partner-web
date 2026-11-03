@@ -954,6 +954,8 @@ const STRINGS = {
   kycEditFieldReviewNote: { en: "Review note (why this status change)", fr: "Note de revue (pourquoi ce changement de statut)" },
   kycEditSave: { en: "Save", fr: "Enregistrer" },
   kycEditSaving: { en: "Saving…", fr: "Enregistrement…" },
+  kycResendButton: { en: "Resend link", fr: "Renvoyer le lien" },
+  kycResendLinkLabel: { en: "New capture link", fr: "Nouveau lien de capture" },
   kycImagesProcessing: {
     en: "Processing biometric images — this can take 1 to 3 minutes. Reopen this panel shortly to see them.",
     fr: "Traitement des images biométriques en cours — cela peut prendre 1 à 3 minutes. Rouvrez ce panneau dans quelques instants pour les voir.",

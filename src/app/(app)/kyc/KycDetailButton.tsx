@@ -1,14 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Eye, Loader2, Pencil, ShieldQuestion, ZoomIn } from "lucide-react";
+import { Download, Eye, Loader2, Pencil, RefreshCw, ShieldQuestion, ZoomIn } from "lucide-react";
 import { Drawer } from "@/components/Drawer";
+import { CopyRevealField } from "@/components/CopyRevealField";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
-import { getKycEnrollmentDetail, updateKycEnrollmentAction, type KycEnrollmentDetail, type UpdateKycEnrollmentInput } from "./actions";
+import { getKycEnrollmentDetail, resendKycEnrollmentAction, updateKycEnrollmentAction, type KycEnrollmentDetail, type UpdateKycEnrollmentInput } from "./actions";
 import { ImageLightbox, downloadGalleryImage, type GalleryImage } from "./ImageLightbox";
 import { countryFlag, countryName } from "./country";
 import type { StringKey } from "@/lib/i18n/strings";
+
+const RESENDABLE_STATUSES = new Set(["Declined", "Expired", "In Review", "Resubmitted"]);
 
 type Rec = Record<string, unknown>;
 
@@ -263,6 +266,24 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
   const [detail, setDetail] = useState<KycEnrollmentDetail | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [editing, setEditing] = useState(false);
+  const [resending, setResending] = useState(false);
+  const [resendUrl, setResendUrl] = useState<string | null>(null);
+  const [resendError, setResendError] = useState<string | null>(null);
+
+  async function handleResend() {
+    if (!detail) return;
+    setResending(true);
+    setResendError(null);
+    const result = await guard(() => resendKycEnrollmentAction(detail.id));
+    setResending(false);
+    if (!result) return;
+    if ("error" in result) {
+      setResendError(result.error);
+      return;
+    }
+    setResendUrl(result.captureUrl);
+    setDetail({ ...detail, status: result.status });
+  }
 
   async function handleOpen() {
     setOpen(true);
@@ -339,15 +360,30 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
                   }}
                 />
               ) : (
-                <button
-                  type="button"
-                  onClick={() => setEditing(true)}
-                  className="flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
-                >
-                  <Pencil className="size-3.5" />
-                  {t("kycEditButton")}
-                </button>
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setEditing(true)}
+                    className="flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                  >
+                    <Pencil className="size-3.5" />
+                    {t("kycEditButton")}
+                  </button>
+                  {RESENDABLE_STATUSES.has(detail.status) && (
+                    <button
+                      type="button"
+                      onClick={handleResend}
+                      disabled={resending}
+                      className="flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                    >
+                      <RefreshCw className={`size-3.5 ${resending ? "animate-spin" : ""}`} />
+                      {t("kycResendButton")}
+                    </button>
+                  )}
+                </div>
               )}
+              {resendError && <p className="mt-2 text-xs text-destructive">{resendError}</p>}
+              {resendUrl && <div className="mt-2"><CopyRevealField label={t("kycResendLinkLabel")} value={resendUrl} /></div>}
             </div>
 
             {images.length > 0 ? (

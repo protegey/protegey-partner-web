@@ -97,6 +97,19 @@ export async function updateKycEnrollmentAction(id: string, input: UpdateKycEnro
   }
 }
 
+/** Issues a fresh capture link for an enrollment whose previous attempt didn't lead anywhere
+ * (Declined, Expired, stuck In Review) — the customer retries without losing the original record.
+ * Backend returns the full enrollment (now status 'Resubmitted') plus the new captureUrl, same
+ * shape as starting a brand new session. */
+export async function resendKycEnrollmentAction(id: string): Promise<(KycEnrollment & { captureUrl: string }) | { error: string } | AuthExpired> {
+  try {
+    return await apiFetchGuarded<KycEnrollment & { captureUrl: string }>(`/kyc/me/sessions/${id}/resend`, { method: "POST" });
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
+}
+
 export interface StartKycSessionState {
   error?: string;
   /**
