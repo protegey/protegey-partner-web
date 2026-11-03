@@ -34,6 +34,10 @@ export interface KycEnrollment {
   documentPhoto: string | null;
   documentBackPhoto?: string | null;
   selfiePhoto: string | null;
+  /** The face cropped FROM the ID document's own printed photo — distinct from documentPhoto
+   * (whole front of the card) and selfiePhoto (the live person) — lets a reviewer compare them
+   * side by side. */
+  documentFaceCrop?: string | null;
   createdAt: string;
 }
 

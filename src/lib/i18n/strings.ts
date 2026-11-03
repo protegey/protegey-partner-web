@@ -947,6 +947,7 @@ const STRINGS = {
   kycImageIdDocument: { en: "ID document (front)", fr: "Pièce d'identité (recto)" },
   kycImageIdDocumentBack: { en: "ID document (back)", fr: "Pièce d'identité (verso)" },
   kycImageSelfie: { en: "Liveness selfie", fr: "Selfie de vivacité" },
+  kycImageDocumentFaceCrop: { en: "Face on document", fr: "Visage sur la pièce d'identité" },
   kycDownloadImageAria: { en: "Download image", fr: "Télécharger l'image" },
   kycEditButton: { en: "Edit", fr: "Modifier" },
   kycEditFieldFullName: { en: "Full name", fr: "Nom complet" },
