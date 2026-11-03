@@ -464,6 +464,8 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
                     <Pencil className="size-3.5" />
                     {t("kycEditButton")}
                   </button>
+                  {/* Disabled for now, on request — leave the code intact, just don't render the
+                      button. Re-enable by uncommenting this block.
                   {RESENDABLE_STATUSES.has(detail.status) && (
                     <button
                       type="button"
@@ -475,6 +477,7 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
                       {t("kycResendButton")}
                     </button>
                   )}
+                  */}
                 </div>
               )}
               {resendError && <p className="mt-2 text-xs text-destructive">{resendError}</p>}
