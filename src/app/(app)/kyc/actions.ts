@@ -76,6 +76,27 @@ export async function getKycEnrollmentDetail(id: string): Promise<KycEnrollmentD
   return apiFetchGuarded<KycEnrollmentDetail>(`/kyc/me/sessions/${id}`);
 }
 
+export interface UpdateKycEnrollmentInput {
+  fullName?: string;
+  externalUserId?: string;
+  country?: string;
+  documentType?: string;
+  idDocumentNumber?: string;
+  status?: "Approved" | "Declined" | "In Review";
+  reviewNote?: string;
+}
+
+/** Corrects an enrollment after the fact (OCR misread, wrong document number) or resolves an
+ * 'In Review' session — only the fields actually present in `input` are changed. */
+export async function updateKycEnrollmentAction(id: string, input: UpdateKycEnrollmentInput): Promise<KycEnrollmentDetail | { error: string } | AuthExpired> {
+  try {
+    return await apiFetchGuarded<KycEnrollmentDetail>(`/kyc/me/sessions/${id}`, { method: "PATCH", body: input });
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
+}
+
 export interface StartKycSessionState {
   error?: string;
   /**

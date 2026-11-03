@@ -948,6 +948,12 @@ const STRINGS = {
   kycImageIdDocumentBack: { en: "ID document (back)", fr: "Pièce d'identité (verso)" },
   kycImageSelfie: { en: "Liveness selfie", fr: "Selfie de vivacité" },
   kycDownloadImageAria: { en: "Download image", fr: "Télécharger l'image" },
+  kycEditButton: { en: "Edit", fr: "Modifier" },
+  kycEditFieldFullName: { en: "Full name", fr: "Nom complet" },
+  kycEditFieldStatus: { en: "Status", fr: "Statut" },
+  kycEditFieldReviewNote: { en: "Review note (why this status change)", fr: "Note de revue (pourquoi ce changement de statut)" },
+  kycEditSave: { en: "Save", fr: "Enregistrer" },
+  kycEditSaving: { en: "Saving…", fr: "Enregistrement…" },
   kycImagesProcessing: {
     en: "Processing biometric images — this can take 1 to 3 minutes. Reopen this panel shortly to see them.",
     fr: "Traitement des images biométriques en cours — cela peut prendre 1 à 3 minutes. Rouvrez ce panneau dans quelques instants pour les voir.",

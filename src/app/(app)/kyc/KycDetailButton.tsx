@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { Download, Eye, Loader2, ShieldQuestion, ZoomIn } from "lucide-react";
+import { Download, Eye, Loader2, Pencil, ShieldQuestion, ZoomIn } from "lucide-react";
 import { Drawer } from "@/components/Drawer";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
-import { getKycEnrollmentDetail, type KycEnrollmentDetail } from "./actions";
+import { getKycEnrollmentDetail, updateKycEnrollmentAction, type KycEnrollmentDetail, type UpdateKycEnrollmentInput } from "./actions";
 import { ImageLightbox, downloadGalleryImage, type GalleryImage } from "./ImageLightbox";
 import { countryFlag, countryName } from "./country";
 import type { StringKey } from "@/lib/i18n/strings";
@@ -108,6 +108,152 @@ function GalleryThumb({ image, onClick }: { image: GalleryImage; onClick: () => 
   );
 }
 
+const STATUS_OPTIONS = ["In Review", "Approved", "Declined"] as const;
+
+function EditEnrollmentForm({
+  detail,
+  onCancel,
+  onSaved,
+}: {
+  detail: KycEnrollmentDetail;
+  onCancel: () => void;
+  onSaved: (updated: KycEnrollmentDetail) => void;
+}) {
+  const { t } = useLang();
+  const guard = useSessionGuard();
+  const [form, setForm] = useState({
+    fullName: detail.fullName ?? "",
+    country: detail.country ?? "",
+    documentType: detail.documentType ?? "",
+    idDocumentNumber: detail.idDocumentNumber ?? "",
+    status: detail.status as (typeof STATUS_OPTIONS)[number] | "",
+    reviewNote: "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  async function handleSave() {
+    setSaving(true);
+    setSaveError(null);
+    // Only send what actually changed — never overwrite a field with an identical/blank value by
+    // accident (e.g. leaving the reviewNote box empty when not changing status).
+    const payload: UpdateKycEnrollmentInput = {};
+    if (form.fullName !== (detail.fullName ?? "")) payload.fullName = form.fullName;
+    if (form.country !== (detail.country ?? "")) payload.country = form.country;
+    if (form.documentType !== (detail.documentType ?? "")) payload.documentType = form.documentType;
+    if (form.idDocumentNumber !== (detail.idDocumentNumber ?? "")) payload.idDocumentNumber = form.idDocumentNumber;
+    if (form.status && form.status !== detail.status) {
+      payload.status = form.status;
+      if (form.reviewNote.trim()) payload.reviewNote = form.reviewNote.trim();
+    }
+
+    if (Object.keys(payload).length === 0) {
+      onCancel();
+      setSaving(false);
+      return;
+    }
+
+    const result = await guard(() => updateKycEnrollmentAction(detail.id, payload));
+    setSaving(false);
+    if (!result) return; // cancelled or session-expired retry also failed — guard already handled it
+    if ("error" in result) {
+      setSaveError(result.error);
+      return;
+    }
+    onSaved(result);
+  }
+
+  return (
+    <div className="space-y-3 rounded-md border border-border p-3">
+      <p className="text-sm font-semibold text-foreground">{t("kycEditButton")}</p>
+      <div className="grid grid-cols-2 gap-3">
+        <label className="flex flex-col gap-1 text-xs">
+          <span className="text-muted-foreground">{t("kycEditFieldFullName")}</span>
+          <input
+            value={form.fullName}
+            onChange={(e) => setForm({ ...form, fullName: e.target.value })}
+            className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs">
+          <span className="text-muted-foreground">{t("clientsComplianceFieldNationality")}</span>
+          <input
+            value={form.country}
+            maxLength={2}
+            onChange={(e) => setForm({ ...form, country: e.target.value.toUpperCase() })}
+            placeholder="CM"
+            className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs">
+          <span className="text-muted-foreground">{t("kycFieldDocumentType")}</span>
+          <input
+            value={form.documentType}
+            onChange={(e) => setForm({ ...form, documentType: e.target.value })}
+            className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs">
+          <span className="text-muted-foreground">{t("kycFieldDocumentNumber")}</span>
+          <input
+            value={form.idDocumentNumber}
+            onChange={(e) => setForm({ ...form, idDocumentNumber: e.target.value })}
+            className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+          />
+        </label>
+      </div>
+
+      <label className="flex flex-col gap-1 text-xs">
+        <span className="text-muted-foreground">{t("kycEditFieldStatus")}</span>
+        <select
+          value={form.status}
+          onChange={(e) => setForm({ ...form, status: e.target.value as (typeof STATUS_OPTIONS)[number] })}
+          className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+        >
+          {STATUS_OPTIONS.map((s) => (
+            <option key={s} value={s}>
+              {s}
+            </option>
+          ))}
+        </select>
+      </label>
+
+      {form.status && form.status !== detail.status ? (
+        <label className="flex flex-col gap-1 text-xs">
+          <span className="text-muted-foreground">{t("kycEditFieldReviewNote")}</span>
+          <textarea
+            value={form.reviewNote}
+            onChange={(e) => setForm({ ...form, reviewNote: e.target.value })}
+            rows={2}
+            className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+          />
+        </label>
+      ) : null}
+
+      {saveError ? <p className="text-xs text-destructive">{saveError}</p> : null}
+
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={saving}
+          className="rounded-md bg-foreground px-3 py-1.5 text-xs font-medium text-background transition-opacity hover:opacity-90 disabled:opacity-50"
+        >
+          {saving ? t("kycEditSaving") : t("kycEditSave")}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          disabled={saving}
+          className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+        >
+          {t("cancel")}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: string; fullName: string | null }) {
   const guard = useSessionGuard();
   const { t } = useLang();
@@ -116,6 +262,7 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
   const [error, setError] = useState(false);
   const [detail, setDetail] = useState<KycEnrollmentDetail | null>(null);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
+  const [editing, setEditing] = useState(false);
 
   async function handleOpen() {
     setOpen(true);
@@ -181,6 +328,28 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
           </div>
         ) : (
           <div className="space-y-6">
+            <div>
+              {editing ? (
+                <EditEnrollmentForm
+                  detail={detail}
+                  onCancel={() => setEditing(false)}
+                  onSaved={(updated) => {
+                    setDetail(updated);
+                    setEditing(false);
+                  }}
+                />
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setEditing(true)}
+                  className="flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
+                >
+                  <Pencil className="size-3.5" />
+                  {t("kycEditButton")}
+                </button>
+              )}
+            </div>
+
             {images.length > 0 ? (
               <div>
                 <p className="mb-2 text-sm font-semibold text-foreground">{t("kycCapturedImages")}</p>
