@@ -65,7 +65,21 @@ const { sessionId, url } = await protegey.kyc.startSession({
 const KYC_POLL_EXAMPLE = `// Polling fallback — webhook delivery is best-effort (one retry, no queue), so use this
 // if you're not sure a delivery ever arrived, or just want to double-check a session's status.
 const current = await protegey.kyc.getSession(sessionId);
-// current.status is the same value the webhook would have sent (e.g. "Approved", "Declined", "In Review", ...).`;
+
+// Switch on the typed outcome, not the raw status string — it's the same field whether you got
+// here via getSession() or your own webhook payload.
+switch (current.outcome) {
+  case "SUCCESS": // match confidence >= your account's auto-approve threshold (80% by default)
+    showVerifiedScreen();
+    break;
+  case "MANUAL": // passed liveness/ID-scan but below that threshold — a human needs to review it
+    showPendingReviewScreen(); // shows as "In Review" in your dashboard
+    break;
+  case "FAILED": // liveness or ID-scan itself failed
+    showFailedScreen();
+    break;
+  default: // null — no FaceTec result yet, current.status is still "In Progress"
+}`;
 
 const BEHAVIORAL_EXAMPLE = `// Aggregated keystroke/touch/navigation metadata only — never raw content.
 const behavioral = await protegey.behavioral.report({

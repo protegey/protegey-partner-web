@@ -54,8 +54,18 @@ const KYC_PRESENT_EXAMPLE = `function Home() {
 
   async function verifyIdentity() {
     const status = await present(protegey.kyc, { externalUserId: "cust-9981" });
-    // status?.status — e.g. "Approved", "Declined", "In Review" — or undefined if the user
-    // closed the sheet before one arrived.
+    if (!status) return; // user closed the sheet before a status arrived
+
+    // Switch on the typed outcome, not the raw status string — it's the same field whether you
+    // got here via present()/getSession() polling or your own webhook payload.
+    switch (status.outcome) {
+      case "SUCCESS": // match confidence >= your account's auto-approve threshold (80% by default)
+        return showVerifiedScreen();
+      case "MANUAL": // passed liveness/ID-scan but below that threshold — a human needs to review it
+        return showPendingReviewScreen(); // shows as "In Review" in your dashboard
+      case "FAILED": // liveness or ID-scan itself failed
+        return showFailedScreen();
+    }
   }
 }`;
 

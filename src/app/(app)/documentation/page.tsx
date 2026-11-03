@@ -64,8 +64,29 @@ const KYC_POLL_EXAMPLE = `# Polling fallback — see the Webhooks section: deliv
 curl https://api.protegey.com/partner-api/kyc/sessions/018f2a3e-... \\
   -H "x-api-key: YOUR_API_KEY"
 
-# Response — identical shape to the outbound webhook payload, minus eventId
-{ "sessionId": "018f2a3e-...", "externalUserId": "cust-9981", "status": "Approved", "decision": { "source": "facetec", "passed": true, "confidenceScore": 94, ... } }`;
+# Response — identical shape to the outbound webhook payload, minus eventId.
+# "outcome" mirrors decision.outcome, exposed at the top level for convenience: "SUCCESS" (match
+# confidence >= your account's auto-approve threshold, 80% by default), "MANUAL" (passed
+# liveness/ID-scan but below that threshold — status is "In Review", a human on your side needs
+# to decide), or "FAILED" (liveness or ID-scan itself failed). null before a result exists yet.
+{ "sessionId": "018f2a3e-...", "externalUserId": "cust-9981", "status": "Approved", "outcome": "SUCCESS", "decision": { "source": "facetec", "outcome": "SUCCESS", "passed": true, "confidenceScore": 94, ... } }`;
+
+const KYC_UPDATE_EXAMPLE = `# Correct an OCR misread, or resolve an "In Review" session by overriding its status — only the
+# fields you send are changed. The original FaceTec signal (decision.outcome) is never
+# overwritten; a status override is layered on top as decision.manualReview instead.
+curl -X PATCH https://api.protegey.com/partner-api/kyc/sessions/018f2a3e-... \\
+  -H "Content-Type: application/json" \\
+  -H "x-api-key: YOUR_API_KEY" \\
+  -d '{ "status": "Approved", "reviewNote": "Manually verified against a second document" }'`;
+
+const KYC_RESEND_EXAMPLE = `# Issues a fresh single-use capture link for an enrollment whose previous attempt didn't lead
+# anywhere (Declined, Expired, or stuck In Review) — the customer retries without you having to
+# create a whole new enrollment and lose the original record. Sets status to "Resubmitted".
+curl -X POST https://api.protegey.com/partner-api/kyc/sessions/018f2a3e-.../resend \\
+  -H "x-api-key: YOUR_API_KEY"
+
+# Response
+{ "sessionId": "018f2a3e-...", "url": "https://verify-kyc.protegey.com/?enrollmentId=...&token=...&apiBase=..." }`;
 
 const SANCTIONS_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/sanctions/screen \\
   -H "Content-Type: application/json" \\
@@ -133,7 +154,7 @@ const WEBHOOK_KYC_PAYLOAD_EXAMPLE = `{
   "externalUserId": "cust-9981",
   "status": "Approved",
   "sessionId": "018f2a3e-...",
-  "decision": { "source": "facetec", "passed": true, "confidenceScore": 94, "livenessScore": 97, "matchScore": 91, ... }
+  "decision": { "source": "facetec", "outcome": "SUCCESS", "passed": true, "confidenceScore": 94, "livenessScore": 97, "matchScore": 91, ... }
 }`;
 
 const WEBHOOK_ALERT_CREATED_EXAMPLE = `{
@@ -367,6 +388,10 @@ export default async function DocumentationPage() {
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKycPollLabel")}</p>
           <CodeBlock code={KYC_POLL_EXAMPLE} />
           <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsKycPollNote")}</p>
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKycUpdateLabel")}</p>
+          <CodeBlock code={KYC_UPDATE_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKycResendLabel")}</p>
+          <CodeBlock code={KYC_RESEND_EXAMPLE} />
           <div className="mt-4">
             <p className="mb-1.5 text-xs text-amber-600">{t(lang, "docsKycConsoleRealWarning")}</p>
             <ApiConsole
@@ -488,8 +513,10 @@ export default async function DocumentationPage() {
 
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">kyc.status_changed</p>
           <p className="mb-1.5 text-xs text-muted-foreground">
-            {t(lang, "docsWebhooksKycStatusValuesLabel")}: Not Started, In Progress, Awaiting User, In Review, Approved, Declined, Resubmitted, Abandoned, Expired, Kyc Expired
+            {t(lang, "docsWebhooksKycStatusValuesLabel")}: In Progress, Approved, Declined, In Review, Expired, Resubmitted.
           </p>
+          <p className="mb-1.5 text-xs text-muted-foreground">{t(lang, "docsWebhooksKycStatusLegacyNote")}</p>
+          <p className="mb-1.5 text-xs text-muted-foreground">{t(lang, "docsWebhooksKycOutcomeNote")}</p>
           <CodeBlock code={WEBHOOK_KYC_PAYLOAD_EXAMPLE} />
 
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">alert.created</p>

@@ -2661,6 +2661,8 @@ const STRINGS = {
     fr: "Démarrez une session pour l'un de vos utilisateurs depuis la page KYC, ou en serveur à serveur via POST /partner-api/kyc/sessions. Vous recevez un lien de vérification hébergé à envoyer à votre utilisateur comme vous le souhaitez (SMS, e-mail, in-app). Les mises à jour de statut arrivent sur votre webhook configuré au fur et à mesure que l'utilisateur complète chaque étape.",
   },
   docsKycPollLabel: { en: "Polling fallback (GET)", fr: "Repli par interrogation (GET)" },
+  docsKycUpdateLabel: { en: "Correct or resolve manually (PATCH)", fr: "Corriger ou résoudre manuellement (PATCH)" },
+  docsKycResendLabel: { en: "Resend a capture link (POST)", fr: "Renvoyer un lien de capture (POST)" },
   docsKycPollNote: {
     en: "Webhook delivery is best-effort — see the Webhooks section below. Use this endpoint whenever you need to be certain of a session's current status.",
     fr: "L'envoi du webhook est fait au mieux — voir la section Webhooks ci-dessous. Utilisez cet endpoint chaque fois que vous devez être certain du statut actuel d'une session.",
@@ -2812,6 +2814,14 @@ const STRINGS = {
   },
   docsWebhooksHeadersExampleTitle: { en: "Request shape", fr: "Forme de la requête" },
   docsWebhooksKycStatusValuesLabel: { en: "Possible status values", fr: "Valeurs de statut possibles" },
+  docsWebhooksKycStatusLegacyNote: {
+    en: "Not Started, Awaiting User, Abandoned, and Kyc Expired exist on the type for historical compatibility but are never produced by a new enrollment.",
+    fr: "Not Started, Awaiting User, Abandoned et Kyc Expired existent pour la compatibilité avec d'anciennes données mais ne sont plus jamais produits pour un nouvel enregistrement.",
+  },
+  docsWebhooksKycOutcomeNote: {
+    en: 'decision.outcome (also mirrored at the top level on GET /partner-api/kyc/sessions/:sessionId) is "SUCCESS" (match confidence >= your auto-approve threshold, 80% by default — status "Approved"), "MANUAL" (passed liveness/ID-scan but below that threshold — status "In Review", a human on your side decides), or "FAILED" (liveness or ID-scan itself failed — status "Declined").',
+    fr: 'decision.outcome (aussi renvoyé au niveau racine sur GET /partner-api/kyc/sessions/:sessionId) vaut "SUCCESS" (confiance de correspondance ≥ votre seuil d\'auto-approbation, 80% par défaut — statut "Approved"), "MANUAL" (liveness/scan de document réussis mais confiance sous ce seuil — statut "In Review", une personne de votre équipe décide), ou "FAILED" (liveness ou scan de document échoué — statut "Declined").',
+  },
   docsWebhooksDispatchTitle: { en: "Handling multiple event types", fr: "Gérer plusieurs types d'événements" },
   docsWebhooksPayloadTitle: { en: "Payload", fr: "Payload" },
   docsWebhooksHeadersTitle: { en: "Headers", fr: "En-têtes" },
