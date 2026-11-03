@@ -1,12 +1,24 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut } from "lucide-react";
+import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 
 export interface GalleryImage {
   url: string;
   label: string;
+}
+
+/** `url` is already a fully-loaded `data:` URI (the base64 image came down with the enrollment
+ * detail fetch) — no extra request needed, a plain anchor click triggers the browser's own
+ * download handling. */
+export function downloadGalleryImage(image: GalleryImage): void {
+  const link = document.createElement("a");
+  link.href = image.url;
+  link.download = `${image.label.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "")}.jpg`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
 }
 
 const MIN_ZOOM = 1;
@@ -93,6 +105,14 @@ export function ImageLightbox({
             aria-label={t("zoomInAria")}
           >
             <ZoomIn className="size-5" />
+          </button>
+          <button
+            type="button"
+            onClick={() => downloadGalleryImage(current)}
+            className="rounded-md p-1.5 text-white/80 transition-colors hover:bg-white/10 hover:text-white"
+            aria-label={t("kycDownloadImageAria")}
+          >
+            <Download className="size-5" />
           </button>
           <button
             type="button"

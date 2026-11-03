@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Eye, Loader2, ShieldQuestion, ZoomIn } from "lucide-react";
+import { Download, Eye, Loader2, ShieldQuestion, ZoomIn } from "lucide-react";
 import { Drawer } from "@/components/Drawer";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { getKycEnrollmentDetail, type KycEnrollmentDetail } from "./actions";
-import { ImageLightbox, type GalleryImage } from "./ImageLightbox";
+import { ImageLightbox, downloadGalleryImage, type GalleryImage } from "./ImageLightbox";
 import { countryFlag, countryName } from "./country";
 import type { StringKey } from "@/lib/i18n/strings";
 
@@ -76,21 +76,35 @@ function CheckRow({ t, labelKey, value }: { t: (key: StringKey) => string; label
 }
 
 function GalleryThumb({ image, onClick }: { image: GalleryImage; onClick: () => void }) {
+  const { t } = useLang();
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="group relative aspect-[4/3] overflow-hidden rounded-md border border-border bg-muted"
+    <div
+      // Fixed width on purpose — the Drawer has no max-width cap, so a grid that stretches to
+      // fill it (the previous `grid grid-cols-2`) made each thumbnail balloon on a wide screen.
+      className="group relative aspect-[4/3] w-28 shrink-0 overflow-hidden rounded-md border border-border bg-muted sm:w-36"
     >
-      {/* eslint-disable-next-line @next/next/no-img-element -- base64 data: URI, not a remote asset Next can optimize */}
-      <img src={image.url} alt={image.label} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
-      <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/30">
-        <ZoomIn className="size-5 text-white opacity-0 transition-opacity group-hover:opacity-100" />
-      </div>
-      <p className="absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/70 to-transparent px-2 py-1.5 text-left text-[11px] font-medium text-white">
+      <button type="button" onClick={onClick} className="absolute inset-0">
+        {/* eslint-disable-next-line @next/next/no-img-element -- base64 data: URI, not a remote asset Next can optimize */}
+        <img src={image.url} alt={image.label} className="h-full w-full object-cover transition-transform group-hover:scale-105" />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/30">
+          <ZoomIn className="size-4 text-white opacity-0 transition-opacity group-hover:opacity-100" />
+        </div>
+      </button>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          downloadGalleryImage(image);
+        }}
+        aria-label={t("kycDownloadImageAria")}
+        className="absolute right-1 top-1 rounded bg-black/50 p-1 text-white opacity-0 transition-opacity hover:bg-black/70 group-hover:opacity-100"
+      >
+        <Download className="size-3.5" />
+      </button>
+      <p className="pointer-events-none absolute inset-x-0 bottom-0 truncate bg-gradient-to-t from-black/70 to-transparent px-1.5 py-1 text-left text-[10px] font-medium text-white">
         {image.label}
       </p>
-    </button>
+    </div>
   );
 }
 
@@ -170,13 +184,21 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
             {images.length > 0 ? (
               <div>
                 <p className="mb-2 text-sm font-semibold text-foreground">{t("kycCapturedImages")}</p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-wrap gap-2">
                   {images.map((image, i) => (
                     <GalleryThumb key={image.label} image={image} onClick={() => setLightboxIndex(i)} />
                   ))}
                 </div>
               </div>
-            ) : null}
+            ) : (
+              // FaceTec writes these images into its own database asynchronously, well after the
+              // decision itself is final (see FaceTecImagesService / the background retry in
+              // KycService) — a finished enrollment with no images yet isn't an error, it just
+              // hasn't been backfilled yet.
+              <div className="rounded-md border border-dashed border-border p-3 text-xs text-muted-foreground">
+                {t("kycImagesProcessing")}
+              </div>
+            )}
 
             <div>
               <p className="mb-2 text-sm font-semibold text-foreground">{t("kycIdentityDocument")}</p>

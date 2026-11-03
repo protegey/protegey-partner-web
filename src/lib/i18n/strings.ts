@@ -947,6 +947,11 @@ const STRINGS = {
   kycImageIdDocument: { en: "ID document (front)", fr: "Pièce d'identité (recto)" },
   kycImageIdDocumentBack: { en: "ID document (back)", fr: "Pièce d'identité (verso)" },
   kycImageSelfie: { en: "Liveness selfie", fr: "Selfie de vivacité" },
+  kycDownloadImageAria: { en: "Download image", fr: "Télécharger l'image" },
+  kycImagesProcessing: {
+    en: "Processing biometric images — this can take 1 to 3 minutes. Reopen this panel shortly to see them.",
+    fr: "Traitement des images biométriques en cours — cela peut prendre 1 à 3 minutes. Rouvrez ce panneau dans quelques instants pour les voir.",
+  },
   kycIdentityDocument: { en: "Identity document", fr: "Document d'identité" },
   kycFieldDocumentType: { en: "Document type", fr: "Type de document" },
   kycFieldDocumentNumber: { en: "Document number", fr: "Numéro de document" },
