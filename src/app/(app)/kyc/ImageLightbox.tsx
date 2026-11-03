@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { X, ChevronLeft, ChevronRight, ZoomIn, ZoomOut, Download } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 
@@ -85,7 +86,14 @@ export function ImageLightbox({
   const current = images[index];
   if (!current) return null;
 
-  return (
+  // Rendered via a portal straight to <body> — a `fixed inset-0` element only covers the true
+  // viewport when NONE of its ancestors has a transform/filter/perspective/will-change set; any
+  // one of them (anywhere up the tree, including code that has nothing to do with this component)
+  // turns that ancestor into the containing block instead, shrinking this overlay down to that
+  // ancestor's own box — confirmed exactly this happening here (the popup rendering small, pinned
+  // to a corner, instead of centered over the whole screen). Same fix as Dialog.tsx/
+  // ConfirmActionDialog already use for the same reason.
+  return createPortal(
     <div
       className="fixed inset-0 z-[100] flex animate-fade-in items-center justify-center bg-black/80 p-4 backdrop-blur-sm"
       style={{ overscrollBehavior: "contain" }}
@@ -178,6 +186,7 @@ export function ImageLightbox({
           ) : null}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
