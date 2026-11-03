@@ -110,13 +110,25 @@ function GalleryThumb({ image, onClick }: { image: GalleryImage; onClick: () => 
 
 const STATUS_OPTIONS = ["In Review", "Approved", "Declined"] as const;
 
-const DOCUMENT_FIELD_INPUTS: { key: "sex" | "dateOfBirth" | "placeOfBirth" | "profession" | "dateOfIssue" | "dateOfExpiration"; labelKey: StringKey }[] = [
-  { key: "sex", labelKey: "kycFieldSex" },
+// "sex" is rendered separately as a dropdown (see SEX_OPTIONS below), not a free-text input.
+const DOCUMENT_FIELD_INPUTS: { key: "dateOfBirth" | "placeOfBirth" | "profession" | "dateOfIssue" | "dateOfExpiration"; labelKey: StringKey }[] = [
   { key: "dateOfBirth", labelKey: "kycFieldDateOfBirth" },
   { key: "placeOfBirth", labelKey: "kycFieldPlaceOfBirth" },
   { key: "profession", labelKey: "kycFieldProfession" },
   { key: "dateOfIssue", labelKey: "kycFieldDateOfIssue" },
   { key: "dateOfExpiration", labelKey: "kycFieldDateOfExpiration" },
+];
+
+// Male/Female first (what every government ID's own "SEXE/SEX" field actually prints, and what
+// FaceTec's OCR reads off it) — the rest cover how someone correcting this field might reasonably
+// want to describe it instead. Values stay short, uppercase codes so they read the same as
+// whatever OCR already wrote for any field that's never been touched.
+const SEX_OPTIONS: { value: string; label: string }[] = [
+  { value: "M", label: "Homme / Male" },
+  { value: "F", label: "Femme / Female" },
+  { value: "NB", label: "Non-binaire / Non-binary" },
+  { value: "X", label: "Autre / Other (X)" },
+  { value: "U", label: "Préfère ne pas préciser / Prefer not to say" },
 ];
 
 const FIELD_LABEL_KEYS: Record<string, StringKey> = {
@@ -262,6 +274,24 @@ function EditEnrollmentForm({
             onChange={(e) => setForm({ ...form, idDocumentNumber: e.target.value })}
             className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
           />
+        </label>
+        <label className="flex flex-col gap-1 text-xs">
+          <span className="text-muted-foreground">{t("kycFieldSex")}</span>
+          <select
+            value={form.sex}
+            onChange={(e) => setForm({ ...form, sex: e.target.value })}
+            className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+          >
+            <option value="">—</option>
+            {SEX_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+            {/* Preserves whatever raw value OCR (or an older edit) already wrote, instead of
+                silently blanking it out just because it doesn't match one of the options above. */}
+            {form.sex && !SEX_OPTIONS.some((o) => o.value === form.sex) ? <option value={form.sex}>{form.sex}</option> : null}
+          </select>
         </label>
         {DOCUMENT_FIELD_INPUTS.map(({ key, labelKey }) => (
           <label key={key} className="flex flex-col gap-1 text-xs">

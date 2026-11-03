@@ -46,6 +46,12 @@ export function ImageLightbox({
     setPan({ x: 0, y: 0 });
   }, [index]);
 
+  // Zooming back out to 1x (via the button) left `pan` at whatever offset it was dragged to while
+  // zoomed in, so the image came back shrunk but still shifted off-center instead of restored.
+  useEffect(() => {
+    if (zoom <= MIN_ZOOM) setPan({ x: 0, y: 0 });
+  }, [zoom]);
+
   useEffect(() => {
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") onClose();
