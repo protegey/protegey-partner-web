@@ -174,3 +174,14 @@ export async function updateKycSettingsAction(kycAutoApproveMinMatchLevel: numbe
     throw error;
   }
 }
+
+/** Re-runs sanctions/PEP screening for one enrollment and overwrites its stored match list with
+ * the fresh result — useful after a precision fix to the matching logic itself. */
+export async function rescreenSanctionsAction(id: string): Promise<KycEnrollmentDetail | { error: string } | AuthExpired> {
+  try {
+    return await apiFetchGuarded<KycEnrollmentDetail>(`/kyc/me/sessions/${id}/rescreen-sanctions`, { method: "POST" });
+  } catch (error) {
+    if (error instanceof ApiError) return { error: error.message };
+    throw error;
+  }
+}

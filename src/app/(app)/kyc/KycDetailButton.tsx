@@ -7,7 +7,14 @@ import { CopyRevealField } from "@/components/CopyRevealField";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
-import { getKycEnrollmentDetail, resendKycEnrollmentAction, updateKycEnrollmentAction, type KycEnrollmentDetail, type UpdateKycEnrollmentInput } from "./actions";
+import {
+  getKycEnrollmentDetail,
+  rescreenSanctionsAction,
+  resendKycEnrollmentAction,
+  updateKycEnrollmentAction,
+  type KycEnrollmentDetail,
+  type UpdateKycEnrollmentInput,
+} from "./actions";
 import { ImageLightbox, downloadGalleryImage, type GalleryImage } from "./ImageLightbox";
 import { ALL_COUNTRIES, countryFlag, countryName } from "./country";
 import type { StringKey } from "@/lib/i18n/strings";
@@ -390,6 +397,22 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
   const [resending, setResending] = useState(false);
   const [resendUrl, setResendUrl] = useState<string | null>(null);
   const [resendError, setResendError] = useState<string | null>(null);
+  const [rescreening, setRescreening] = useState(false);
+  const [rescreenError, setRescreenError] = useState<string | null>(null);
+
+  async function handleRescreenSanctions() {
+    if (!detail) return;
+    setRescreening(true);
+    setRescreenError(null);
+    const result = await guard(() => rescreenSanctionsAction(detail.id));
+    setRescreening(false);
+    if (!result) return;
+    if ("error" in result) {
+      setRescreenError(result.error);
+      return;
+    }
+    setDetail(result);
+  }
 
   async function handleResend() {
     if (!detail) return;
@@ -590,7 +613,19 @@ export function KycDetailButton({ enrollmentId, fullName }: { enrollmentId: stri
             </div>
 
             <div>
-              <p className="mb-2 text-sm font-semibold text-foreground">{t("kycAmlSectionTitle")}</p>
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <p className="text-sm font-semibold text-foreground">{t("kycAmlSectionTitle")}</p>
+                <button
+                  type="button"
+                  onClick={handleRescreenSanctions}
+                  disabled={rescreening}
+                  className="flex shrink-0 items-center gap-1.5 rounded-md border border-border px-2 py-1 text-[11px] font-medium text-foreground transition-colors hover:bg-muted disabled:opacity-50"
+                >
+                  <RefreshCw className={`size-3 ${rescreening ? "animate-spin" : ""}`} />
+                  {t("kycRescreenButton")}
+                </button>
+              </div>
+              {rescreenError ? <p className="mb-2 text-xs text-destructive">{rescreenError}</p> : null}
               {detail.amlTotalHits && detail.amlTotalHits > 0 ? (
                 <div className="space-y-2">
                   <p className="text-xs text-muted-foreground">

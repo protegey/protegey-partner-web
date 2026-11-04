@@ -961,6 +961,7 @@ const STRINGS = {
     fr: "Ceci sera enregistré dans le journal d'audit avec votre nom et les valeurs exactes avant/après.",
   },
   kycResendButton: { en: "Resend link", fr: "Renvoyer le lien" },
+  kycRescreenButton: { en: "Re-run screening", fr: "Relancer le filtrage" },
   kycSeverityCardTitle: { en: "Auto-approve sensitivity", fr: "Sensibilité d'auto-approbation" },
   kycSeverityCardSubtitle: {
     en: "The match confidence below which a session needs human review instead of auto-approving.",
@@ -968,6 +969,7 @@ const STRINGS = {
   },
   kycSeverityLevelLabel: { en: "Level {level}", fr: "Niveau {level}" },
   kycSeverityDefaultSuffix: { en: "default", fr: "défaut" },
+  kycSeverityFarPrefix: { en: "false-accept rate", fr: "taux de faux-positif" },
   kycSeverityGuideTitle: { en: "What do these levels mean?", fr: "Que signifient ces niveaux ?" },
   kycSeverityGuideIntro: {
     en: "FaceTec reports its face-match confidence as an integer level from 1 to 7, not a percentage — each level is a documented false-accept rate (the chance two different people are wrongly matched as the same person).",
@@ -983,8 +985,8 @@ const STRINGS = {
   },
   kycSeverityConfirmTitle: { en: "Change the auto-approve level?", fr: "Modifier le niveau d'auto-approbation ?" },
   kycSeverityConfirmBody: {
-    en: "From now on, a match below Level {level} will need manual review instead of auto-approving. This never affects sessions already decided.",
-    fr: "À partir de maintenant, une correspondance sous le niveau {level} passera en revue manuelle au lieu d'être auto-approuvée. Ça n'affecte jamais les sessions déjà décidées.",
+    en: "From now on, a match below Level {level} (a {far} chance two different people are wrongly matched as the same person) will need manual review instead of auto-approving. This never affects sessions already decided.",
+    fr: "À partir de maintenant, une correspondance sous le niveau {level} (une probabilité de {far} que deux personnes différentes soient à tort reconnues comme la même personne) passera en revue manuelle au lieu d'être auto-approuvée. Ça n'affecte jamais les sessions déjà décidées.",
   },
   kycResendLinkLabel: { en: "New capture link", fr: "Nouveau lien de capture" },
   kycImagesProcessing: {

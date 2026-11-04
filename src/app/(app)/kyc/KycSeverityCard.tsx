@@ -11,13 +11,13 @@ import { getKycSettingsAction, updateKycSettingsAction } from "./actions";
 // FaceTec's own documented false-accept rate per level — shown in the explanation popup so the
 // level numbers mean something concrete instead of an arbitrary 1-7 scale.
 const MATCH_LEVEL_FAR: Record<number, string> = {
-  1: "≈ 1 / 10",
-  2: "≈ 1 / 100",
-  3: "≈ 1 / 1 000 (approximatif)",
-  4: "1 / 1 000",
-  5: "1 / 10 000",
-  6: "1 / 100 000 (approximatif)",
-  7: "1 / 500 000 (99.9998%) — maximum",
+  1: "≈ 1/10",
+  2: "≈ 1/100",
+  3: "≈ 1/1 000",
+  4: "1/1 000",
+  5: "1/10 000",
+  6: "≈ 1/100 000",
+  7: "1/500 000 (99,9998%)",
 };
 
 export function KycSeverityCard() {
@@ -79,7 +79,7 @@ export function KycSeverityCard() {
         >
           {[1, 2, 3, 4, 5, 6, 7].map((level) => (
             <option key={level} value={level}>
-              {t("kycSeverityLevelLabel").replace("{level}", String(level))}
+              {t("kycSeverityLevelLabel").replace("{level}", String(level))} — {t("kycSeverityFarPrefix")} {MATCH_LEVEL_FAR[level]}
               {level === platformDefault ? ` (${t("kycSeverityDefaultSuffix")})` : ""}
             </option>
           ))}
@@ -115,7 +115,13 @@ export function KycSeverityCard() {
         onClose={() => setPendingLevel(undefined)}
         onConfirm={confirmChange}
         title={t("kycSeverityConfirmTitle")}
-        description={pendingLevel != null ? t("kycSeverityConfirmBody").replace("{level}", String(pendingLevel)) : undefined}
+        description={
+          pendingLevel != null
+            ? t("kycSeverityConfirmBody")
+                .replace("{level}", String(pendingLevel))
+                .replace("{far}", MATCH_LEVEL_FAR[pendingLevel] ?? "")
+            : undefined
+        }
         confirmLabel={t("kycEditSave")}
         pendingLabel={t("kycEditSaving")}
         pending={saving}
