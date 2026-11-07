@@ -126,7 +126,8 @@ function buildNavItemDefs(lang: Lang, isOnPremise: boolean): NavItemDef[] {
       children: [
         { href: "/sanctions", label: tt("navSanctionsList"), requiredPermission: "sanctions.view" },
         { href: "/sanctions/search", label: tt("sanctionsSearchToolLink"), requiredPermission: "sanctions.view" },
-        { href: "/screening-provider", label: tt("navScreeningProvider"), requiredPermission: "sanctions.view" },
+        // Temporarily hidden — not ready to expose yet. Uncomment when ready to ship.
+        // { href: "/screening-provider", label: tt("navScreeningProvider"), requiredPermission: "sanctions.view" },
         { href: "/pan-risk/shared-signal-network", label: tt("navSharedSignalNetwork"), requiredPermission: "partners.share_fraud_signal" },
         { href: "/pep", label: tt("navPepControl"), requiredPermission: "sanctions.view" },
         { href: "/edd", label: tt("navEdd"), requiredPermission: "sanctions.view" },
