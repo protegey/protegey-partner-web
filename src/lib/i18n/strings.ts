@@ -288,6 +288,15 @@ const STRINGS = {
 
   // ── Rule chat panel ──────────────────────────────────────────────────────
   chatPanelTitle: { en: "Ask for a rule", fr: "Demander une règle" },
+  chatStartButton: { en: "Generate a new rule", fr: "Générer une nouvelle règle" },
+  chatModulePickTitle: { en: "Which part of the product is this rule for?", fr: "Pour quelle partie du produit est cette règle ?" },
+  chatModulePickHint: {
+    en: "Pick the module first, before describing the rule — this is what keeps the assistant from creating a rule for the wrong part of the product.",
+    fr: "Choisissez d'abord le module, avant de décrire la règle — c'est ce qui évite de créer une règle pour la mauvaise partie du produit.",
+  },
+  chatModuleCancel: { en: "Cancel", fr: "Annuler" },
+  chatChangeModule: { en: "Change module", fr: "Changer de module" },
+  chatModuleSelectedPrefix: { en: "Module:", fr: "Module :" },
   chatPanelIntro: {
     en: "Describe what you want to catch, like you would to a colleague. A new rule is proposed as a draft — it never turns on by itself.",
     fr: "Décrivez ce que vous voulez repérer, comme vous le feriez à un collègue. Une nouvelle règle est proposée comme brouillon — elle ne s'active jamais toute seule.",

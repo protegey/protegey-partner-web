@@ -2,7 +2,7 @@
 
 import { useId, useState } from "react";
 import { toast } from "sonner";
-import { Loader2, MessageCircle, Send, Sparkles } from "lucide-react";
+import { ArrowLeft, Loader2, MessageCircle, Send, Sparkles } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { generateAlertRule, type AlertRule, type AlertRuleDomain } from "./actions";
@@ -57,6 +57,12 @@ type ChatMessage =
   | { id: string; role: "assistant"; kind: "success"; rule: AlertRule }
   | { id: string; role: "assistant"; kind: "declined"; reason: string; suggestion?: string };
 
+/** The flow is deliberately linear: a start button, then an explicit module choice, then the
+ * chat. Nothing lets you describe a rule before the module is picked — that ordering is the
+ * actual fix for partners creating a rule under the wrong module without noticing, which a
+ * module picker sitting next to an always-open chat input didn't prevent. */
+type Step = "idle" | "module" | "chat";
+
 /**
  * Pan-Studio, rebuilt as a chat: you describe a rule like you're texting a colleague, and each
  * reply is either the new draft rule (shown right there in the conversation) or a plain
@@ -67,6 +73,7 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
   const guard = useSessionGuard();
   const { lang, t } = useLang();
   const inputId = useId();
+  const [step, setStep] = useState<Step>("idle");
   const [moduleIndex, setModuleIndex] = useState(0);
   const activeModule = MODULES[moduleIndex];
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -75,15 +82,20 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
   const [tooShort, setTooShort] = useState(false);
   const [exampleKey, setExampleKey] = useState<StringKey>(() => pickExampleKey(MODULES[0].exampleKeys));
 
-  /** Switching module mid-conversation would leave earlier messages scoped to a field vocabulary
-   * that no longer applies — simplest correct behavior is starting a fresh conversation. */
-  function selectModule(index: number) {
-    if (index === moduleIndex) return;
+  function resetToIdle() {
+    setStep("idle");
+    setMessages([]);
+    setDraft("");
+    setTooShort(false);
+  }
+
+  function chooseModule(index: number) {
     setModuleIndex(index);
     setMessages([]);
     setDraft("");
     setTooShort(false);
     setExampleKey(pickExampleKey(MODULES[index].exampleKeys));
+    setStep("chat");
   }
 
   async function send(text: string) {
@@ -106,12 +118,66 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
         ]);
         return;
       }
-      setMessages((prev) => [...prev, { id: crypto.randomUUID(), role: "assistant", kind: "success", rule: result }]);
       onGenerated(result);
       toast.success(t("ruleGeneratedToast"));
+      // Back to the start, on purpose — each rule gets its own deliberate module choice, instead
+      // of leaving the panel open on whatever module was last selected for the next person to
+      // type into without re-checking it.
+      resetToIdle();
     } finally {
       setPending(false);
     }
+  }
+
+  if (step === "idle") {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4 rounded-md border border-border bg-card p-6 text-center">
+        <Sparkles className="size-8 text-primary" />
+        <div>
+          <p className="text-sm font-semibold text-foreground">{t("chatPanelTitle")}</p>
+          <p className="mt-1.5 max-w-xs text-xs text-muted-foreground">{t("chatPanelIntro")}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => setStep("module")}
+          className="mt-2 flex items-center gap-2 rounded-md bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90"
+        >
+          <Sparkles className="size-4" />
+          {t("chatStartButton")}
+        </button>
+      </div>
+    );
+  }
+
+  if (step === "module") {
+    return (
+      <div className="flex h-full flex-col gap-4 rounded-md border border-border bg-card p-4">
+        <div>
+          <p className="text-sm font-semibold text-foreground">{t("chatModulePickTitle")}</p>
+          <p className="mt-1 text-xs text-muted-foreground">{t("chatModulePickHint")}</p>
+        </div>
+        <div className="flex flex-1 flex-col gap-2.5">
+          {MODULES.map((module, index) => (
+            <button
+              key={module.domain}
+              type="button"
+              onClick={() => chooseModule(index)}
+              className="flex flex-col items-start gap-1 rounded-md border border-border p-3.5 text-left transition-colors hover:border-primary hover:bg-primary/5"
+            >
+              <span className="text-sm font-semibold text-foreground">{t(module.labelKey)}</span>
+              <span className="text-xs text-muted-foreground">{t(module.hintKey)}</span>
+            </button>
+          ))}
+        </div>
+        <button
+          type="button"
+          onClick={() => setStep("idle")}
+          className="self-start text-xs font-medium text-muted-foreground hover:underline"
+        >
+          {t("chatModuleCancel")}
+        </button>
+      </div>
+    );
   }
 
   return (
@@ -120,24 +186,20 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
         <Sparkles className="size-4 text-primary" />
         <p className="text-sm font-semibold text-foreground">{t("chatPanelTitle")}</p>
       </div>
-      <p className="border-b border-border px-4 py-2.5 text-xs text-muted-foreground">{t("chatPanelIntro")}</p>
-      <div className="flex flex-col gap-2 border-b border-border px-4 py-2.5">
-        <div className="flex flex-wrap items-center gap-1.5">
-          {MODULES.map((module, index) => (
-            <button
-              key={module.domain}
-              type="button"
-              onClick={() => selectModule(index)}
-              className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                index === moduleIndex ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:bg-muted/60"
-              }`}
-            >
-              {t(module.labelKey)}
-            </button>
-          ))}
-        </div>
-        <p className="text-xs text-muted-foreground">{t(activeModule.hintKey)}</p>
+      <div className="flex items-center justify-between gap-2 border-b border-border px-4 py-2.5">
+        <p className="text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">{t("chatModuleSelectedPrefix")}</span> {t(activeModule.labelKey)}
+        </p>
+        <button
+          type="button"
+          onClick={() => setStep("module")}
+          className="flex shrink-0 items-center gap-1 text-xs font-medium text-primary hover:underline"
+        >
+          <ArrowLeft className="size-3" />
+          {t("chatChangeModule")}
+        </button>
       </div>
+      <p className="border-b border-border px-4 py-2.5 text-xs text-muted-foreground">{t(activeModule.hintKey)}</p>
 
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {messages.length === 0 ? (
