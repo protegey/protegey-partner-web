@@ -56,7 +56,7 @@ const STRINGS = {
 
   // ── Sidebar navigation ──────────────────────────────────────────────────
   navDashboard: { en: "Dashboard", fr: "Tableau de bord" },
-  navIntelligence: { en: "Intelligence", fr: "Intelligence" },
+  navIntelligence: { en: "Pan-Intel", fr: "Pan-Intel" },
   navDeviceSignals: { en: "Device Signals", fr: "Signaux d'appareil" },
   navBehavioralSignals: { en: "Behavioral Signals", fr: "Signaux comportementaux" },
   navRiskProfiles: { en: "Risk Profiles", fr: "Profils de risque" },
@@ -281,7 +281,6 @@ const STRINGS = {
   navSandbox: { en: "Sandbox", fr: "Bac à sable" },
 
   // ── Alert Rules — page header ───────────────────────────────────────────
-  alertRulesTitle: { en: "Alert Rules", fr: "Règles d'alerte" },
   alertRulesSubtitle: {
     en: "These rules watch every transaction and flag the ones that look risky. Ask for a new rule in plain words on the left, and see every rule you have on the right.",
     fr: "Ces règles surveillent chaque transaction et signalent celles qui semblent risquées. Demandez une nouvelle règle en langage simple à gauche, et retrouvez toutes vos règles à droite.",
@@ -3013,8 +3012,8 @@ const STRINGS = {
     fr: "Chaque erreur revient au format JSON avec un statusCode et un message lisible — 400 pour un problème de validation, 401 pour une clé API manquante/invalide, 404 pour quelque chose qui n'existe pas ou ne vous appartient pas, 409 pour un doublon (par ex. renvoyer le même identifiant de transaction).",
   },
   docsSeeAlsoRules: {
-    en: "For the full list of default monitoring rules and how to test them, see the Alert Rules page.",
-    fr: "Pour la liste complète des règles de surveillance par défaut et comment les tester, consultez la page Règles d'alerte.",
+    en: "For the full list of default monitoring rules and how to test them, see the Pan Studio page.",
+    fr: "Pour la liste complète des règles de surveillance par défaut et comment les tester, consultez la page Pan Studio.",
   },
   docsSequenceTitle: { en: "How the decision reaches your system", fr: "Comment la décision arrive jusqu'à vous" },
   docsSequenceBody: {

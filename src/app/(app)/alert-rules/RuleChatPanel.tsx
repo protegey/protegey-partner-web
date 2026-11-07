@@ -121,20 +121,22 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
         <p className="text-sm font-semibold text-foreground">{t("chatPanelTitle")}</p>
       </div>
       <p className="border-b border-border px-4 py-2.5 text-xs text-muted-foreground">{t("chatPanelIntro")}</p>
-      <div className="flex items-center gap-1.5 border-b border-border px-4 py-2.5">
-        {MODULES.map((module, index) => (
-          <button
-            key={module.domain}
-            type="button"
-            onClick={() => selectModule(index)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              index === moduleIndex ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:bg-muted/60"
-            }`}
-          >
-            {t(module.labelKey)}
-          </button>
-        ))}
-        <p className="ml-1.5 text-xs text-muted-foreground">{t(activeModule.hintKey)}</p>
+      <div className="flex flex-col gap-2 border-b border-border px-4 py-2.5">
+        <div className="flex flex-wrap items-center gap-1.5">
+          {MODULES.map((module, index) => (
+            <button
+              key={module.domain}
+              type="button"
+              onClick={() => selectModule(index)}
+              className={`shrink-0 whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                index === moduleIndex ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:bg-muted/60"
+              }`}
+            >
+              {t(module.labelKey)}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground">{t(activeModule.hintKey)}</p>
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4">
