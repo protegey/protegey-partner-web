@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, type ReactNode } from "react";
 import { toast } from "sonner";
-import { Loader2, Play, Plus, Save, Trash2 } from "lucide-react";
+import { ChevronDown, ChevronRight, Loader2, Play, Plus, Save, Trash2 } from "lucide-react";
 import { Dialog } from "@/components/Dialog";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
@@ -181,6 +181,22 @@ function examplePayloadToSimulateInput(payload: Record<string, unknown> | null, 
   return input;
 }
 
+/** A labelled field for the test-transaction form — every field gets a persistent label, never
+ * just a placeholder that vanishes the moment someone types a value (the previous design's
+ * actual problem: once filled in, a raw "720" or "ECOBKTGTG" next to a bare "?" icon reads as
+ * cryptic, because nothing on screen said what it was). */
+function TestField({ label, hint, children }: { label: string; hint: string; children: ReactNode }) {
+  return (
+    <div className="flex min-w-0 flex-col gap-1">
+      <label className="flex items-center gap-1 text-[11px] font-medium text-muted-foreground">
+        {label}
+        <FieldHint text={hint} />
+      </label>
+      {children}
+    </div>
+  );
+}
+
 /**
  * The one place a rule is edited in depth (thresholds + simulate). A modal dialog like every
  * other edit flow in the app — not a full-screen drawer, so it reads as "adjust this one thing"
@@ -222,6 +238,7 @@ export function RuleDialog({
   const [outcomes, setOutcomes] = useState<SimulationOutcome[] | null>(null);
   const [simulating, setSimulating] = useState(false);
   const [simError, setSimError] = useState<string | null>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   async function handleSave() {
     setSaving(true);
@@ -417,165 +434,189 @@ export function RuleDialog({
 
           <div className="flex flex-col gap-3">
             {transactions.map((tx, i) => (
-              <div key={i} className="flex flex-col gap-2 rounded-md border border-border p-2">
-                <div className="flex flex-wrap items-center gap-2">
-                  <select
-                    value={tx.direction}
-                    onChange={(e) => updateTransaction(i, { direction: e.target.value as "DEBIT" | "CREDIT" })}
-                    className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                  >
-                    <option value="DEBIT">{t("ruleDialogDirectionDebit")}</option>
-                    <option value="CREDIT">{t("ruleDialogDirectionCredit")}</option>
-                  </select>
-                  <input
-                    type="number"
-                    placeholder={t("ruleDialogAmountPlaceholder")}
-                    value={tx.amount || ""}
-                    onChange={(e) => updateTransaction(i, { amount: Number(e.target.value) })}
-                    className="w-28 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                  />
-                  <FieldHint text={t("ruleDialogAmountHint")} />
-                  <input
-                    type="datetime-local"
-                    value={tx.occurredAt.slice(0, 16)}
-                    onChange={(e) => updateTransaction(i, { occurredAt: new Date(e.target.value).toISOString() })}
-                    className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                  />
-                  <input
-                    type="text"
-                    placeholder={t("ruleDialogCounterpartyPlaceholder")}
-                    value={tx.counterpartyExternalId ?? ""}
-                    onChange={(e) => updateTransaction(i, { counterpartyExternalId: e.target.value || undefined })}
-                    className="min-w-0 flex-1 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                  />
-                  <FieldHint text={t("ruleDialogCounterpartyHint")} />
-                  <label className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <input type="checkbox" checked={Boolean(tx.isCash)} onChange={(e) => updateTransaction(i, { isCash: e.target.checked })} />
-                    {t("ruleDialogCash")}
-                    <FieldHint text={t("ruleDialogCashHint")} />
-                  </label>
-                  {outcomes?.[i] ? (
-                    <span className={`ml-auto text-xs font-semibold ${outcomes[i].matched ? "text-destructive" : "text-muted-foreground"}`}>
-                      {outcomes[i].matched ? t("ruleDialogMatched") : t("ruleDialogNoMatch")}
-                    </span>
-                  ) : null}
-                  <button
-                    type="button"
-                    onClick={() => setTransactions((prev) => prev.filter((_, idx) => idx !== i))}
-                    className="text-muted-foreground transition-colors hover:text-destructive"
-                    aria-label={t("ruleDialogRemoveAria")}
-                  >
-                    <Trash2 className="size-3.5" />
-                  </button>
+              <div key={i} className="flex flex-col gap-3 rounded-md border border-border p-3">
+                <div className="flex flex-wrap items-start gap-3">
+                  <TestField label={t("ruleDialogDirectionLabel")} hint={t("ruleDialogDirectionHint")}>
+                    <select
+                      value={tx.direction}
+                      onChange={(e) => updateTransaction(i, { direction: e.target.value as "DEBIT" | "CREDIT" })}
+                      className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                    >
+                      <option value="DEBIT">{t("ruleDialogDirectionDebit")}</option>
+                      <option value="CREDIT">{t("ruleDialogDirectionCredit")}</option>
+                    </select>
+                  </TestField>
+                  <TestField label={t("ruleDialogAmountPlaceholder")} hint={t("ruleDialogAmountHint")}>
+                    <input
+                      type="number"
+                      value={tx.amount || ""}
+                      onChange={(e) => updateTransaction(i, { amount: Number(e.target.value) })}
+                      className="w-28 rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                    />
+                  </TestField>
+                  <TestField label={t("ruleDialogDateLabel")} hint={t("ruleDialogDateHint")}>
+                    <input
+                      type="datetime-local"
+                      value={tx.occurredAt.slice(0, 16)}
+                      onChange={(e) => updateTransaction(i, { occurredAt: new Date(e.target.value).toISOString() })}
+                      className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                    />
+                  </TestField>
+                  <TestField label={t("ruleDialogCounterpartyPlaceholder")} hint={t("ruleDialogCounterpartyHint")}>
+                    <input
+                      type="text"
+                      value={tx.counterpartyExternalId ?? ""}
+                      onChange={(e) => updateTransaction(i, { counterpartyExternalId: e.target.value || undefined })}
+                      className="min-w-0 rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                    />
+                  </TestField>
+                  <div className="flex flex-col gap-1">
+                    <span className="text-[11px] font-medium text-transparent select-none">&nbsp;</span>
+                    <label className="flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm text-foreground">
+                      <input type="checkbox" checked={Boolean(tx.isCash)} onChange={(e) => updateTransaction(i, { isCash: e.target.checked })} />
+                      {t("ruleDialogCash")}
+                      <FieldHint text={t("ruleDialogCashHint")} />
+                    </label>
+                  </div>
+                  <div className="ml-auto flex items-center gap-2 self-center">
+                    {outcomes?.[i] ? (
+                      <span className={`text-xs font-semibold ${outcomes[i].matched ? "text-destructive" : "text-muted-foreground"}`}>
+                        {outcomes[i].matched ? t("ruleDialogMatched") : t("ruleDialogNoMatch")}
+                      </span>
+                    ) : null}
+                    <button
+                      type="button"
+                      onClick={() => setTransactions((prev) => prev.filter((_, idx) => idx !== i))}
+                      className="text-muted-foreground transition-colors hover:text-destructive"
+                      aria-label={t("ruleDialogRemoveAria")}
+                    >
+                      <Trash2 className="size-3.5" />
+                    </button>
+                  </div>
                 </div>
 
-                <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">{t("ruleDialogAdvancedToggle")}</p>
-                <div className="flex flex-wrap items-center gap-2">
-                  <select
-                    value={tx.channel ?? ""}
-                    onChange={(e) => updateTransaction(i, { channel: (e.target.value || undefined) as SimulateTransactionChannel | undefined })}
-                    className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                  >
-                    <option value="">{t("ruleDialogChannelAny")}</option>
-                    {CHANNEL_OPTIONS.map((opt) => (
-                      <option key={opt.value} value={opt.value}>
-                        {t(opt.labelKey)}
-                      </option>
-                    ))}
-                  </select>
-                  <FieldHint text={t("ruleDialogChannelHint")} />
-                  <input
-                    type="text"
-                    placeholder={t("ruleDialogTransactionTypePlaceholder")}
-                    value={tx.transactionType ?? ""}
-                    onChange={(e) => updateTransaction(i, { transactionType: e.target.value || undefined })}
-                    className="w-32 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                  />
-                  <FieldHint text={t("ruleDialogTransactionTypeHint")} />
-                  <input
-                    type="text"
-                    placeholder={t("ruleDialogInstitutionCodePlaceholder")}
-                    value={tx.counterpartyInstitutionCode ?? ""}
-                    onChange={(e) => updateTransaction(i, { counterpartyInstitutionCode: e.target.value || undefined })}
-                    className="w-36 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                  />
-                  <FieldHint text={t("ruleDialogInstitutionCodeHint")} />
-                  <input
-                    type="text"
-                    placeholder={t("ruleDialogCounterpartyCountryPlaceholder")}
-                    value={tx.counterpartyCountry ?? ""}
-                    onChange={(e) => updateTransaction(i, { counterpartyCountry: e.target.value || undefined })}
-                    className="w-32 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                  />
-                  <FieldHint text={t("ruleDialogCounterpartyCountryHint")} />
-                  <input
-                    type="text"
-                    placeholder={t("ruleDialogCustomerCountryPlaceholder")}
-                    value={tx.country ?? ""}
-                    onChange={(e) => updateTransaction(i, { country: e.target.value || undefined })}
-                    className="w-32 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                  />
-                  <FieldHint text={t("ruleDialogCustomerCountryHint")} />
-                  <label className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <input type="checkbox" checked={Boolean(tx.isPep)} onChange={(e) => updateTransaction(i, { isPep: e.target.checked })} />
-                    {t("ruleDialogIsPep")}
-                    <FieldHint text={t("ruleDialogIsPepHint")} />
-                  </label>
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <input
-                    type="number"
-                    placeholder={t("ruleDialogPasswordChangeHoursPlaceholder")}
-                    value={secondsToHoursInput(tx.secondsSincePasswordChange)}
-                    onChange={(e) => updateTransaction(i, { secondsSincePasswordChange: hoursInputToSeconds(e.target.value) })}
-                    className="w-44 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                  />
-                  <FieldHint text={t("ruleDialogPasswordChangeHoursHint")} />
-                  <input
-                    type="number"
-                    placeholder={t("ruleDialogEmailChangeHoursPlaceholder")}
-                    value={secondsToHoursInput(tx.secondsSinceEmailChange)}
-                    onChange={(e) => updateTransaction(i, { secondsSinceEmailChange: hoursInputToSeconds(e.target.value) })}
-                    className="w-40 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                  />
-                  <FieldHint text={t("ruleDialogEmailChangeHoursHint")} />
-                  <input
-                    type="number"
-                    placeholder={t("ruleDialogPhoneChangeHoursPlaceholder")}
-                    value={secondsToHoursInput(tx.secondsSincePhoneChange)}
-                    onChange={(e) => updateTransaction(i, { secondsSincePhoneChange: hoursInputToSeconds(e.target.value) })}
-                    className="w-52 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                  />
-                  <FieldHint text={t("ruleDialogPhoneChangeHoursHint")} />
-                  <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    placeholder={t("ruleDialogBalanceDepletionPlaceholder")}
-                    value={tx.balanceDepletionRatio ?? ""}
-                    onChange={(e) => updateTransaction(i, { balanceDepletionRatio: e.target.value === "" ? undefined : Number(e.target.value) })}
-                    className="w-48 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                  />
-                  <FieldHint text={t("ruleDialogBalanceDepletionHint")} />
-                  <label className="flex items-center gap-1 text-xs text-muted-foreground">
-                    <input type="checkbox" checked={Boolean(tx.isNewCounterparty)} onChange={(e) => updateTransaction(i, { isNewCounterparty: e.target.checked })} />
-                    {t("ruleDialogIsNewCounterparty")}
-                    <FieldHint text={t("ruleDialogIsNewCounterpartyHint")} />
-                  </label>
-                  <input
-                    type="number"
-                    min={0}
-                    max={100}
-                    placeholder={t("ruleDialogBehavioralDeviationPlaceholder")}
-                    value={tx.behavioralDeviationScore ?? ""}
-                    onChange={(e) => updateTransaction(i, { behavioralDeviationScore: e.target.value === "" ? undefined : Number(e.target.value) })}
-                    className="w-48 rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground"
-                  />
-                  <FieldHint text={t("ruleDialogBehavioralDeviationHint")} />
-                </div>
+                {showAdvanced ? (
+                  <div className="grid grid-cols-2 gap-3 border-t border-border pt-3 sm:grid-cols-3">
+                    <TestField label={t("ruleDialogChannelLabel")} hint={t("ruleDialogChannelHint")}>
+                      <select
+                        value={tx.channel ?? ""}
+                        onChange={(e) => updateTransaction(i, { channel: (e.target.value || undefined) as SimulateTransactionChannel | undefined })}
+                        className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                      >
+                        <option value="">{t("ruleDialogChannelAny")}</option>
+                        {CHANNEL_OPTIONS.map((opt) => (
+                          <option key={opt.value} value={opt.value}>
+                            {t(opt.labelKey)}
+                          </option>
+                        ))}
+                      </select>
+                    </TestField>
+                    <TestField label={t("ruleDialogTransactionTypePlaceholder")} hint={t("ruleDialogTransactionTypeHint")}>
+                      <input
+                        type="text"
+                        value={tx.transactionType ?? ""}
+                        onChange={(e) => updateTransaction(i, { transactionType: e.target.value || undefined })}
+                        className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                      />
+                    </TestField>
+                    <TestField label={t("ruleDialogInstitutionCodePlaceholder")} hint={t("ruleDialogInstitutionCodeHint")}>
+                      <input
+                        type="text"
+                        value={tx.counterpartyInstitutionCode ?? ""}
+                        onChange={(e) => updateTransaction(i, { counterpartyInstitutionCode: e.target.value || undefined })}
+                        className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                      />
+                    </TestField>
+                    <TestField label={t("ruleDialogCounterpartyCountryPlaceholder")} hint={t("ruleDialogCounterpartyCountryHint")}>
+                      <input
+                        type="text"
+                        value={tx.counterpartyCountry ?? ""}
+                        onChange={(e) => updateTransaction(i, { counterpartyCountry: e.target.value || undefined })}
+                        className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                      />
+                    </TestField>
+                    <TestField label={t("ruleDialogCustomerCountryPlaceholder")} hint={t("ruleDialogCustomerCountryHint")}>
+                      <input
+                        type="text"
+                        value={tx.country ?? ""}
+                        onChange={(e) => updateTransaction(i, { country: e.target.value || undefined })}
+                        className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                      />
+                    </TestField>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[11px] font-medium text-transparent select-none">&nbsp;</span>
+                      <label className="flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm text-foreground">
+                        <input type="checkbox" checked={Boolean(tx.isPep)} onChange={(e) => updateTransaction(i, { isPep: e.target.checked })} />
+                        {t("ruleDialogIsPep")}
+                        <FieldHint text={t("ruleDialogIsPepHint")} />
+                      </label>
+                    </div>
+                    <TestField label={t("ruleDialogPasswordChangeHoursPlaceholder")} hint={t("ruleDialogPasswordChangeHoursHint")}>
+                      <input
+                        type="number"
+                        value={secondsToHoursInput(tx.secondsSincePasswordChange)}
+                        onChange={(e) => updateTransaction(i, { secondsSincePasswordChange: hoursInputToSeconds(e.target.value) })}
+                        className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                      />
+                    </TestField>
+                    <TestField label={t("ruleDialogEmailChangeHoursPlaceholder")} hint={t("ruleDialogEmailChangeHoursHint")}>
+                      <input
+                        type="number"
+                        value={secondsToHoursInput(tx.secondsSinceEmailChange)}
+                        onChange={(e) => updateTransaction(i, { secondsSinceEmailChange: hoursInputToSeconds(e.target.value) })}
+                        className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                      />
+                    </TestField>
+                    <TestField label={t("ruleDialogPhoneChangeHoursPlaceholder")} hint={t("ruleDialogPhoneChangeHoursHint")}>
+                      <input
+                        type="number"
+                        value={secondsToHoursInput(tx.secondsSincePhoneChange)}
+                        onChange={(e) => updateTransaction(i, { secondsSincePhoneChange: hoursInputToSeconds(e.target.value) })}
+                        className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                      />
+                    </TestField>
+                    <TestField label={t("ruleDialogBalanceDepletionPlaceholder")} hint={t("ruleDialogBalanceDepletionHint")}>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={tx.balanceDepletionRatio ?? ""}
+                        onChange={(e) => updateTransaction(i, { balanceDepletionRatio: e.target.value === "" ? undefined : Number(e.target.value) })}
+                        className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                      />
+                    </TestField>
+                    <div className="flex flex-col gap-1">
+                      <span className="text-[11px] font-medium text-transparent select-none">&nbsp;</span>
+                      <label className="flex items-center gap-1.5 rounded-md border border-border px-2.5 py-1.5 text-sm text-foreground">
+                        <input type="checkbox" checked={Boolean(tx.isNewCounterparty)} onChange={(e) => updateTransaction(i, { isNewCounterparty: e.target.checked })} />
+                        {t("ruleDialogIsNewCounterparty")}
+                        <FieldHint text={t("ruleDialogIsNewCounterpartyHint")} />
+                      </label>
+                    </div>
+                    <TestField label={t("ruleDialogBehavioralDeviationPlaceholder")} hint={t("ruleDialogBehavioralDeviationHint")}>
+                      <input
+                        type="number"
+                        min={0}
+                        max={100}
+                        value={tx.behavioralDeviationScore ?? ""}
+                        onChange={(e) => updateTransaction(i, { behavioralDeviationScore: e.target.value === "" ? undefined : Number(e.target.value) })}
+                        className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                      />
+                    </TestField>
+                  </div>
+                ) : null}
               </div>
             ))}
           </div>
+
+          <button
+            type="button"
+            onClick={() => setShowAdvanced((v) => !v)}
+            className="mt-2 flex items-center gap-1 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {showAdvanced ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
+            {t("ruleDialogAdvancedToggle")}
+          </button>
 
           <div className="mt-3 flex items-center gap-2">
             <button
