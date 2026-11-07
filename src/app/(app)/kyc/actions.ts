@@ -29,6 +29,10 @@ export interface KycEnrollment {
   amlRiskScore: number | null;
   amlTotalHits: number | null;
   documentType: string | null;
+  /** OCR'd from the scanned document, best-effort — null means either not scanned yet or the OCR
+   * string didn't parse cleanly (see ocr-date.util.ts backend-side); never guessed. */
+  documentExpiresAt: string | null;
+  isDocumentExpired: boolean;
   idDocumentNumber?: string | null;
   /** Base64, no data: URI prefix — the ID photo (front/back) and the liveness selfie capture. */
   documentPhoto: string | null;

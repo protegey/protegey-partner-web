@@ -979,6 +979,8 @@ const STRINGS = {
   kycColStatus: { en: "Status", fr: "Statut" },
   kycColCountry: { en: "Country", fr: "Pays" },
   kycColDocument: { en: "Document", fr: "Document" },
+  kycDocumentExpiredOn: { en: "Expired on", fr: "Expiré le" },
+  kycDocumentValidUntil: { en: "Valid until", fr: "Valide jusqu'au" },
   kycColLiveness: { en: "Liveness", fr: "Vivacité" },
   kycColFaceMatch: { en: "Face match", fr: "Correspondance faciale" },
   kycColAml: { en: "AML", fr: "LBC" },

@@ -30,6 +30,20 @@ function StatusBadge({ status, lang }: { status: KycSessionStatus; lang: Lang })
   );
 }
 
+function DocumentExpiryHint({ enrollment, lang }: { enrollment: KycEnrollment; lang: Lang }) {
+  if (!enrollment.documentExpiresAt) return null;
+  const formatted = new Date(enrollment.documentExpiresAt).toLocaleDateString(lang === "fr" ? "fr-FR" : "en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+  });
+  return (
+    <span className={`text-[11px] ${enrollment.isDocumentExpired ? "font-semibold text-destructive" : "text-muted-foreground"}`}>
+      {enrollment.isDocumentExpired ? t(lang, "kycDocumentExpiredOn") : t(lang, "kycDocumentValidUntil")} {formatted}
+    </span>
+  );
+}
+
 function ScoreCell({ score }: { score: number | null }) {
   if (score == null) return <span className="text-muted-foreground">—</span>;
   return <span className="text-foreground">{score.toFixed(0)}%</span>;
@@ -88,7 +102,12 @@ export async function EnrollmentsTable({ enrollments }: { enrollments: KycEnroll
                     <span className="text-muted-foreground">—</span>
                   )}
                 </td>
-                <td className="px-4 py-2.5 text-muted-foreground">{e.documentType ?? "—"}</td>
+                <td className="px-4 py-2.5 text-muted-foreground">
+                  <div className="flex flex-col">
+                    <span>{e.documentType ?? "—"}</span>
+                    <DocumentExpiryHint enrollment={e} lang={lang} />
+                  </div>
+                </td>
                 <td className="px-4 py-2.5">
                   <ScoreCell score={e.livenessScore} />
                 </td>
