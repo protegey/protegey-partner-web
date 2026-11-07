@@ -109,7 +109,11 @@ export function Sidebar({ navItems, footer, soonLabel = "Soon" }: { navItems: Na
         type="button"
         onClick={() => setMobileOpen(true)}
         aria-label="Open navigation"
-        className="fixed left-3 top-3 z-40 flex size-9 items-center justify-center rounded-md border border-border bg-card text-foreground shadow-sm md:hidden"
+        // top-11, not top-3: this is fixed to the VIEWPORT, so it ignores the environment bar
+        // above it in normal flow (h-7 = 1.75rem) — top-3 alone left it sitting on top of that
+        // bar instead of in the header row below it. top-11 (2.75rem) clears the bar with the
+        // same breathing room top-3 gave it when there was no bar to clear.
+        className="fixed left-3 top-11 z-40 flex size-9 items-center justify-center rounded-md border border-border bg-card text-foreground shadow-sm md:hidden"
       >
         <Menu className="size-5" />
       </button>
