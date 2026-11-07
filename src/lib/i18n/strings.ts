@@ -2048,6 +2048,23 @@ const STRINGS = {
   riskProfileHistoryTitle: { en: "Score history", fr: "Historique du score" },
   riskProfileHistoryEmpty: { en: "No score changes recorded yet.", fr: "Aucune évolution de score enregistrée pour l'instant." },
 
+  // ── Simplified risk score presentation — one number, one plain-language reason; the
+  // weighted/decayed/cumulative split and the category weights move into an opt-in "advanced"
+  // section instead of three equally-sized numbers with no indication which one actually matters. ──
+  riskProfileScoreLabel: { en: "Risk score", fr: "Score de risque" },
+  riskProfilesColReason: { en: "Main reason", fr: "Raison principale" },
+  riskProfileReasonTemplate: {
+    en: "Mainly {category} signals — {count} recorded, most recently: “{reason}”",
+    fr: "Principalement des signaux {category} — {count} enregistré(s), le plus récent : « {reason} »",
+  },
+  riskProfileReasonNone: { en: "No signal recorded yet.", fr: "Aucun signal enregistré pour l'instant." },
+  riskProfileAdvancedToggleShow: { en: "See how this is calculated", fr: "Voir comment ce score est calculé" },
+  riskProfileAdvancedToggleHide: { en: "Hide calculation detail", fr: "Masquer le détail du calcul" },
+  riskProfileAdvancedIntro: {
+    en: "For reference only — the risk score above is the one number that matters. Everything below explains the math behind it.",
+    fr: "À titre indicatif uniquement — le score ci-dessus est le seul chiffre qui compte. Tout ce qui suit explique le calcul derrière.",
+  },
+
   // ── Durable screening matches (sanctions/PEP, per customer) ─────────────
   screeningMatchesTitle: { en: "Screening matches", fr: "Correspondances de filtrage" },
   screeningMatchesEmpty: { en: "No sanctions/PEP matches on record for this customer.", fr: "Aucune correspondance sanctions/PPE enregistrée pour ce client." },

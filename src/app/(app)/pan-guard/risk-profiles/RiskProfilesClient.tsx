@@ -1,23 +1,23 @@
 "use client";
 
-import { Fragment, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ChevronDown, ChevronRight, Eye, ShieldAlert } from "lucide-react";
+import { Eye, ShieldAlert } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import { ExportCsvButton } from "@/components/ExportCsvButton";
-import { RiskBreakdown } from "./RiskBreakdown";
 import type { StringKey } from "@/lib/i18n/strings";
-import { exportRiskProfilesAction, type EntityRiskProfile, type RiskProfileCategory } from "./actions";
+import { exportRiskProfilesAction, type EntityRiskProfile } from "./actions";
 import type { PaginatedResult } from "../../transactions/actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
+import { riskProfileReason } from "./riskProfileReason";
 
 const RISK_PROFILES_GUIDE: Record<"en" | "fr", PageGuideContent> = {
   fr: {
     title: "Profils de risque",
     explanation:
-      "Chaque ligne ici est un client : son score de risque cumulé, décroissant et pondéré, calculé à partir de tout ce qui lui est arrivé — alertes, signaux d'appareil, signaux comportementaux, criblage sanctions/PPE. Plus le score est haut, plus il faut se méfier.\n\nLa pondération suit toujours la même formule : Comportemental 35 %, Réseau 40 %, Contextuel 15 %, Historique 10 %. Le score ne redescend jamais tout seul, mais chaque contribution ancienne pèse de moins en moins avec le temps (décroissance).\n\nClique sur un client pour voir le détail complet : chaque contribution au score, son historique, et les correspondances de criblage. C'est le seul endroit où tous les signaux du produit convergent en un seul chiffre par client.",
+      "Chaque ligne ici est un client : un score de risque (0 à 100) et la raison principale derrière — calculés à partir de tout ce qui lui est arrivé : alertes, signaux d'appareil, signaux comportementaux, criblage sanctions/PPE. Plus le score est haut, plus il faut se méfier.\n\nLe score ne redescend jamais tout seul, mais un incident ancien pèse de moins en moins avec le temps — un client qui a eu un souci il y a 6 mois et plus rien depuis n'est pas traité comme s'il posait toujours problème aujourd'hui.\n\nClique sur un client pour voir le détail complet : son historique, les correspondances de criblage, et — si besoin — le calcul exact derrière le score.",
     diagram: [
       [
         { label: "Règles de transaction", note: "Pan-Monitor" },
@@ -32,7 +32,7 @@ const RISK_PROFILES_GUIDE: Record<"en" | "fr", PageGuideContent> = {
   en: {
     title: "Risk profiles",
     explanation:
-      "Each row here is a customer: their cumulative, decayed and weighted risk score, built from everything that's happened to them — alerts, device signals, behavioral signals, sanctions/PEP screening. The higher the score, the more caution is warranted.\n\nThe weighting always follows the same formula: Behavioral 35%, Network 40%, Contextual 15%, Historical 10%. The score never goes down on its own, but each past contribution counts for less over time (decay).\n\nClick a customer to see the full detail: every contribution to the score, its history, and screening matches. This is the one place where every signal in the product converges into a single number per customer.",
+      "Each row here is a customer: a risk score (0 to 100) and the main reason behind it — built from everything that's happened to them: alerts, device signals, behavioral signals, sanctions/PEP screening. The higher the score, the more caution is warranted.\n\nThe score never goes down on its own, but an old incident counts for less over time — a customer who had an issue 6 months ago and nothing since isn't treated as if they're still a concern today.\n\nClick a customer to see the full detail: their history, screening matches, and — if you need it — the exact calculation behind the score.",
     diagram: [
       [
         { label: "Transaction rules", note: "Pan-Monitor" },
@@ -67,13 +67,6 @@ function RiskLevelBadge({ level, t }: { level: RiskLevel; t: (key: StringKey) =>
   return <span className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-semibold ${RISK_LEVEL_STYLES[level]}`}>{t(RISK_LEVEL_LABEL_KEY[level])}</span>;
 }
 
-const CATEGORY_LABEL_KEY: Record<RiskProfileCategory, StringKey> = {
-  behavioral: "riskProfileCategoryBehavioral",
-  network: "riskProfileCategoryNetwork",
-  contextual: "riskProfileCategoryContextual",
-  historical: "riskProfileCategoryHistorical",
-};
-
 export function RiskProfilesClient({
   result,
   page,
@@ -87,12 +80,6 @@ export function RiskProfilesClient({
   const { t, lang } = useLang();
   const [, startTransition] = useTransition();
   const [customer, setCustomer] = useState(initialCustomer);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-
-  const sourceLabel: Record<string, string> = {
-    device: t("riskProfileSourceDevice"),
-    behavioral: t("riskProfileSourceBehavioral"),
-  };
 
   function applyFilters(newPage: number = 1) {
     const params = new URLSearchParams();
@@ -147,93 +134,38 @@ export function RiskProfilesClient({
           <table className="w-full text-left text-sm">
             <thead className="bg-muted text-muted-foreground">
               <tr>
-                <th className="w-8 px-4 py-2.5" />
                 <th className="px-4 py-2.5 font-medium">{t("signalsColCustomer")}</th>
-                <th className="px-4 py-2.5 font-medium" title={t("riskProfileScoreWeightedHint")}>
-                  {t("riskProfilesColWeighted")}
-                </th>
-                <th className="px-4 py-2.5 font-medium" title={t("riskProfileScoreDecayedHint")}>
-                  {t("riskProfilesColDecayed")}
-                </th>
-                <th className="px-4 py-2.5 font-medium" title={t("riskProfileScoreCumulativeHint")}>
-                  {t("riskProfilesColScore")}
-                </th>
-                <th className="px-4 py-2.5 font-medium">{t("riskProfilesColTopCategory")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("riskProfilesColContributions")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("riskProfileScoreLabel")}</th>
+                <th className="px-4 py-2.5 font-medium">{t("riskProfilesColReason")}</th>
                 <th className="px-4 py-2.5 font-medium">{t("riskProfilesColLastUpdated")}</th>
                 <th className="px-4 py-2.5 font-medium" />
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {result.data.map((profile) => {
-                const expanded = expandedId === profile.id;
-                return (
-                  <Fragment key={profile.id}>
-                    <tr
-                      onClick={() => setExpandedId(expanded ? null : profile.id)}
-                      className="cursor-pointer hover:bg-muted/50"
+              {result.data.map((profile) => (
+                <tr key={profile.id} className="hover:bg-muted/50">
+                  <td className="px-4 py-2.5 text-foreground">{profile.externalCustomerId}</td>
+                  <td className="px-4 py-2.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-base font-bold text-foreground">{profile.weightedScore.toFixed(0)}</span>
+                      <RiskLevelBadge level={profile.riskLevel} t={t} />
+                    </div>
+                  </td>
+                  <td className="max-w-xs px-4 py-2.5 text-xs text-muted-foreground">{riskProfileReason(profile, t)}</td>
+                  <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">
+                    {new Date(profile.updatedAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
+                  </td>
+                  <td className="px-4 py-2.5 text-right">
+                    <Link
+                      href={`/pan-guard/risk-profiles/${encodeURIComponent(profile.externalCustomerId)}`}
+                      className="ml-auto flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
                     >
-                      <td className="px-4 py-2.5 text-muted-foreground">
-                        {expanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
-                      </td>
-                      <td className="px-4 py-2.5 text-foreground">{profile.externalCustomerId}</td>
-                      <td className="px-4 py-2.5">
-                        <div className="flex items-center gap-2">
-                          <span className="text-base font-bold text-foreground">{profile.weightedScore.toFixed(1)}</span>
-                          <RiskLevelBadge level={profile.riskLevel} t={t} />
-                        </div>
-                      </td>
-                      <td className="px-4 py-2.5 font-semibold text-muted-foreground">{profile.decayedScore.toFixed(1)}</td>
-                      <td className="px-4 py-2.5 text-xs text-muted-foreground">{profile.cumulativeScore}</td>
-                      <td className="px-4 py-2.5 text-xs text-muted-foreground">
-                        {profile.topCategory ? t(CATEGORY_LABEL_KEY[profile.topCategory]) : "—"}
-                      </td>
-                      <td className="px-4 py-2.5 text-xs text-muted-foreground">{profile.contributions.length}</td>
-                      <td className="whitespace-nowrap px-4 py-2.5 text-xs text-muted-foreground">
-                        {new Date(profile.updatedAt).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}
-                      </td>
-                      <td className="px-4 py-2.5 text-right">
-                        <Link
-                          href={`/pan-guard/risk-profiles/${encodeURIComponent(profile.externalCustomerId)}`}
-                          onClick={(e) => e.stopPropagation()}
-                          className="ml-auto flex w-fit items-center gap-1.5 rounded-md border border-border px-2.5 py-1 text-xs font-medium text-foreground transition-colors hover:bg-muted"
-                        >
-                          <Eye className="size-3.5" />
-                          {t("riskProfilesViewDetail")}
-                        </Link>
-                      </td>
-                    </tr>
-                    {expanded ? (
-                      <tr className="bg-muted/30">
-                        <td colSpan={9} className="px-4 py-4">
-                          <div className="flex flex-col gap-4">
-                            <div>
-                              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                                {t("riskProfilesBreakdownTitle")}
-                              </p>
-                              <RiskBreakdown breakdown={profile.breakdown} />
-                            </div>
-                            <ul className="flex flex-col gap-1.5 border-t border-border pt-3">
-                              {[...profile.contributions].reverse().slice(0, 8).map((c, i) => (
-                                <li key={i} className="flex items-center justify-between gap-3 text-xs">
-                                  <span className="text-muted-foreground">
-                                    <span className="font-medium text-foreground">{sourceLabel[c.source] ?? c.source}</span>{" "}
-                                    &mdash; {c.reason}
-                                  </span>
-                                  <span className="flex shrink-0 items-center gap-2">
-                                    <span className="text-muted-foreground">{new Date(c.at).toLocaleString(lang === "fr" ? "fr-FR" : "en-US")}</span>
-                                    <span className="font-semibold text-foreground">+{c.points}</span>
-                                  </span>
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : null}
-                  </Fragment>
-                );
-              })}
+                      <Eye className="size-3.5" />
+                      {t("riskProfilesViewDetail")}
+                    </Link>
+                  </td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
