@@ -7,7 +7,7 @@ export type RuleSegment = "KYC1" | "KYC2" | "AGENT" | "SUPER_AGENT" | "MERCHANT"
 export type AlertRuleStatus = "draft" | "active" | "disabled";
 export type AlertRuleSource = "system" | "manual" | "ai_generated";
 export type AlertRuleSeverity = "review" | "step_up" | "block" | "escalate";
-export type AlertRuleDomain = "transaction" | "identity";
+export type AlertRuleDomain = "transaction" | "identity" | "kyb" | "intel";
 
 export interface AlertRule {
   id: string;
@@ -112,8 +112,8 @@ export async function deleteAlertRule(id: string): Promise<MutationResult<{ succ
   return { success: true };
 }
 
-export async function generateAlertRule(description: string): Promise<MutationResult<AlertRule>> {
-  const result = await runGuarded<AlertRule>("/alert-rules/me/generate", { method: "POST", body: { description } });
+export async function generateAlertRule(description: string, domain: AlertRuleDomain): Promise<MutationResult<AlertRule>> {
+  const result = await runGuarded<AlertRule>("/alert-rules/me/generate", { method: "POST", body: { description, domain } });
   if (!("error" in result) && !("authExpired" in result)) revalidatePath("/alert-rules");
   return result;
 }

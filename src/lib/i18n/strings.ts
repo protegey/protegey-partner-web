@@ -297,6 +297,26 @@ const STRINGS = {
     en: "No messages yet — try the example below, or write your own.",
     fr: "Aucun message pour l'instant — essayez l'exemple ci-dessous, ou écrivez le vôtre.",
   },
+  chatModuleTransaction: { en: "Transaction", fr: "Transaction" },
+  chatModuleTransactionHint: {
+    en: "Watches every incoming transaction.",
+    fr: "Surveille chaque transaction entrante.",
+  },
+  chatModuleKyc: { en: "KYC", fr: "KYC" },
+  chatModuleKycHint: {
+    en: "Watches identity-verification decisions, not transactions.",
+    fr: "Surveille les décisions de vérification d'identité, pas les transactions.",
+  },
+  chatModuleKyb: { en: "KYB", fr: "KYB" },
+  chatModuleKybHint: {
+    en: "Watches business-application submissions, not transactions.",
+    fr: "Surveille les soumissions de dossiers entreprise, pas les transactions.",
+  },
+  chatModuleIntel: { en: "Pan-Intel", fr: "Pan-Intel" },
+  chatModuleIntelHint: {
+    en: "Watches device/session signals (login, session start), not transactions.",
+    fr: "Surveille les signaux d'appareil et de session (connexion, démarrage de session), pas les transactions.",
+  },
   chatExampleLabel: { en: "Example:", fr: "Exemple :" },
   chatExampleText: {
     en: "Flag any customer who receives more than 5 payments from 5 different people within 2 days, totaling more than 1,000,000 XOF.",
@@ -322,6 +342,26 @@ const STRINGS = {
     en: "Block any transaction from a customer with a confirmed sanctions match.",
     fr: "Bloque toute transaction provenant d'un client avec une correspondance sanctions confirmée.",
   },
+  chatExampleTextIdentity: {
+    en: "Flag an enrollment when its ID document number is already used on 3 or more accounts.",
+    fr: "Signale une inscription quand son numéro de pièce d'identité est déjà utilisé sur 3 comptes ou plus.",
+  },
+  chatExampleTextIdentity2: {
+    en: "Flag an enrollment when its ID document number is shared with at least 2 other accounts.",
+    fr: "Signale une inscription quand son numéro de pièce d'identité est partagé avec au moins 2 autres comptes.",
+  },
+  chatExampleTextKyb: {
+    en: "Flag a business application when a beneficial owner's tax ID is already used by 2 or more other businesses.",
+    fr: "Signale un dossier entreprise quand le numéro fiscal d'un bénéficiaire effectif est déjà utilisé par 2 autres entreprises ou plus.",
+  },
+  chatExampleTextIntel: {
+    en: "Flag a phone or SIM swap.",
+    fr: "Signale un changement de numéro ou de carte SIM.",
+  },
+  chatExampleTextIntel2: {
+    en: "Flag when a customer's phone number changes.",
+    fr: "Signale quand le numéro de téléphone d'un client change.",
+  },
   chatUseExample: { en: "Use this example", fr: "Utiliser cet exemple" },
   chatAnotherExample: { en: "Try another example", fr: "Un autre exemple" },
   chatInputPlaceholder: { en: "Describe the rule you want…", fr: "Décrivez la règle que vous voulez…" },
@@ -339,6 +379,18 @@ const STRINGS = {
   chatOnlyMonitoring: {
     en: "Only creates payment-monitoring rules — anything else is politely declined.",
     fr: "Ne crée que des règles de surveillance des paiements — toute autre demande est refusée poliment.",
+  },
+  chatOnlyMonitoringIdentity: {
+    en: "Only creates KYC identity-resolution rules — anything else is politely declined.",
+    fr: "Ne crée que des règles de résolution d'identité KYC — toute autre demande est refusée poliment.",
+  },
+  chatOnlyMonitoringKyb: {
+    en: "Only creates KYB business-onboarding rules — anything else is politely declined.",
+    fr: "Ne crée que des règles d'onboarding KYB — toute autre demande est refusée poliment.",
+  },
+  chatOnlyMonitoringIntel: {
+    en: "Only creates Pan-Intel device/session rules — anything else is politely declined.",
+    fr: "Ne crée que des règles Pan-Intel sur l'appareil/la session — toute autre demande est refusée poliment.",
   },
 
   // ── Rules list (right column) ───────────────────────────────────────────
@@ -1513,6 +1565,7 @@ const STRINGS = {
   txColCash: { en: "Cash", fr: "Espèces" },
   txColDecision: { en: "Decision", fr: "Décision" },
   txColRisk: { en: "Risk score", fr: "Score de risque" },
+  txColDeviceRisk: { en: "Device risk", fr: "Risque appareil" },
   txColDevice: { en: "Device", fr: "Appareil" },
   txColLocation: { en: "Location", fr: "Localisation" },
   txColIp: { en: "IP address", fr: "Adresse IP" },
@@ -1521,6 +1574,69 @@ const STRINGS = {
   txColChannel: { en: "Channel", fr: "Canal" },
   txColCounterpartyInstitution: { en: "Counterparty institution", fr: "Institution de la contrepartie" },
   txColCounterpartyCountry: { en: "Counterparty country", fr: "Pays de la contrepartie" },
+
+  // ── Transactions table — per-column "(?)" hints: what each value is and where it comes from ──
+  txColDateHint: {
+    en: "When the transaction happened, as reported by your system — not when Protegey received it.",
+    fr: "Le moment où la transaction a eu lieu, tel que rapporté par votre système — pas le moment où Protegey l'a reçue.",
+  },
+  txColExternalIdHint: {
+    en: "Your own transaction identifier, exactly as you sent it — used to look this transaction up on your side.",
+    fr: "Votre propre identifiant de transaction, tel que vous l'avez envoyé — sert à la retrouver de votre côté.",
+  },
+  txColCustomerHint: {
+    en: "Your own customer identifier, plus the name you reported (if any) — the name is never verified by Protegey, only what you told us.",
+    fr: "Votre propre identifiant client, plus le nom que vous avez rapporté (le cas échéant) — ce nom n'est jamais vérifié par Protegey, c'est juste ce que vous nous avez indiqué.",
+  },
+  txColCounterpartyHint: {
+    en: "The other party's identifier, only if you reported one — not every transaction has a counterparty.",
+    fr: "L'identifiant de l'autre partie, seulement si vous en avez fourni un — toutes les transactions n'ont pas de contrepartie.",
+  },
+  txColDirectionHint: {
+    en: "Whether money is coming into this customer's account (in) or going out of it (out).",
+    fr: "Si l'argent entre dans le compte de ce client (entrant) ou en sort (sortant).",
+  },
+  txColAmountHint: {
+    en: "The transaction amount and currency, exactly as reported — Protegey never converts or recalculates it.",
+    fr: "Le montant et la devise de la transaction, tels que rapportés — Protegey ne les convertit ni ne les recalcule jamais.",
+  },
+  txColTypeHint: {
+    en: "Your own free-text category for this transaction (e.g. recharge, cashout) — you define these, Protegey doesn't impose a fixed list.",
+    fr: "Votre propre catégorie en texte libre pour cette transaction (ex. recharge, retrait) — vous définissez ces catégories, Protegey n'impose pas de liste fixe.",
+  },
+  txColCashHint: {
+    en: "Whether you reported this as a cash transaction — cash is a classic laundering indicator, so several rules watch it specifically.",
+    fr: "Si vous avez signalé cette transaction comme étant en espèces — l'espèce est un indicateur classique de blanchiment, donc plusieurs règles la surveillent spécifiquement.",
+  },
+  txColDecisionHint: {
+    en: "The final verdict — combines every matched Pan Studio rule AND the device signal below. \"Blocked\" means at least one of them called for it.",
+    fr: "Le verdict final — combine toutes les règles Pan Studio déclenchées ET le signal d'appareil ci-dessous. « À bloquer » signifie qu'au moins l'un des deux l'a demandé.",
+  },
+  txColRiskHint: {
+    en: "The combined score (0-100) behind the decision — Pan Studio rule points plus the device risk score added on top, capped at 100. For the device's own score alone, see \"Device risk\" next to it.",
+    fr: "Le score combiné (0-100) derrière la décision — les points des règles Pan Studio plus le score de risque appareil ajouté par-dessus, plafonné à 100. Pour le score de l'appareil seul, voir « Risque appareil » juste à côté.",
+  },
+  txColDeviceRiskHint: {
+    en: "The device/session signal's OWN score (0-100), separate from the combined score — e.g. this exact device already seen on several other customer accounts, or a brand-new device. This is what actually got folded into the risk score; shown here on its own so it's never confused with a rule match.",
+    fr: "Le score propre au signal d'appareil/session (0-100), séparé du score combiné — ex. cet appareil déjà vu sur plusieurs autres comptes clients, ou un appareil tout nouveau. C'est ce qui a été intégré au score de risque ; affiché ici à part pour ne jamais être confondu avec une règle déclenchée.",
+  },
+  txColDeviceHint: {
+    en: "The device's own attributes (model, OS, connection) as reported by the SDK — informational only, not a risk value.",
+    fr: "Les attributs propres à l'appareil (modèle, OS, connexion) tels que rapportés par le SDK — purement informatif, ce n'est pas une valeur de risque.",
+  },
+  txColLocationHint: {
+    en: "The country and approximate location derived from the customer's own IP address at the time of the transaction.",
+    fr: "Le pays et la localisation approximative déduits de l'adresse IP du client au moment de la transaction.",
+  },
+  txColIpHint: {
+    en: "The customer's own IP address for this transaction, decrypted for you — stored encrypted, never shared with anyone but you.",
+    fr: "L'adresse IP du client pour cette transaction, déchiffrée pour vous — stockée chiffrée, jamais partagée avec personne d'autre que vous.",
+  },
+  txDeviceActionAllow: { en: "OK", fr: "OK" },
+  txDeviceActionSoftChallenge: { en: "Soft challenge", fr: "Vérification légère" },
+  txDeviceActionHardChallenge: { en: "Hard challenge", fr: "Vérification renforcée" },
+  txDeviceActionBlock: { en: "Blocked", fr: "Bloqué" },
+  txDeviceRiskNone: { en: "No device signal", fr: "Aucun signal d'appareil" },
   alertsSeverityReview: { en: "Review", fr: "Vérification" },
   alertsSeverityBlock: { en: "Block", fr: "Blocage" },
   alertsVerdictBlock: { en: "Block", fr: "Blocage" },

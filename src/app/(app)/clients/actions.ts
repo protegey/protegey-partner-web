@@ -108,7 +108,7 @@ export interface ScreeningResultSnapshot {
 }
 
 export type KybFieldType = "text" | "textarea" | "number" | "date" | "checkbox" | "checkbox_group" | "select" | "yes_no" | "document";
-export type KybFieldScreeningRole = "business_name" | "owner_name";
+export type KybFieldScreeningRole = "business_name" | "owner_name" | "business_phone" | "owner_phone" | "owner_tax_id";
 
 export interface KybFieldDef {
   id: string;

@@ -7,7 +7,16 @@ import { ArrowLeft, ArrowDown, ArrowUp, Eye, FilePenLine, Plus, Trash2 } from "l
 import { toast } from "sonner";
 import { DynamicKybField } from "@/components/kyb/DynamicKybField";
 import { KybStepIndicator } from "@/components/kyb/KybStepIndicator";
-import { updateKybTemplate, type KybFieldDef, type KybFieldType, type KybFormLayout, type KybFormTemplate, type KybSectionDef } from "../../actions";
+import { FieldHint } from "@/components/FieldHint";
+import {
+  updateKybTemplate,
+  type KybFieldDef,
+  type KybFieldScreeningRole,
+  type KybFieldType,
+  type KybFormLayout,
+  type KybFormTemplate,
+  type KybSectionDef,
+} from "../../actions";
 
 const inputClass = "w-full rounded-md border border-border bg-background px-3 py-1.5 text-sm text-foreground outline-none focus:ring-2 focus:ring-ring";
 const OPTIONS_FIELD_TYPES: KybFieldType[] = ["select", "checkbox_group"];
@@ -22,6 +31,23 @@ const FIELD_TYPES: { value: KybFieldType; labelEn: string; labelFr: string }[] =
   { value: "yes_no", labelEn: "Yes / No", labelFr: "Oui / Non" },
   { value: "checkbox", labelEn: "Single checkbox", labelFr: "Case à cocher unique" },
   { value: "document", labelEn: "Document", labelFr: "Document" },
+];
+
+/**
+ * Optional tag telling automated checks (sanctions/PEP screening, the shared fraud signal
+ * network, Pan Studio's kyb-domain rules) which of this partner's own custom fields holds a
+ * screenable name/phone/tax ID — none of those checks can otherwise know, since every partner's
+ * form has different field ids and labels. `business_*` roles make sense on at most one field;
+ * `owner_*` roles can be assigned to several fields when the form has one set of fields per
+ * beneficial owner (owner 1, owner 2, …) — each one tagged with the same role.
+ */
+const SCREENING_ROLES: { value: KybFieldScreeningRole | ""; labelEn: string; labelFr: string }[] = [
+  { value: "", labelEn: "— none —", labelFr: "— aucun —" },
+  { value: "business_name", labelEn: "Business name", labelFr: "Nom de l'entreprise" },
+  { value: "business_phone", labelEn: "Business phone", labelFr: "Téléphone de l'entreprise" },
+  { value: "owner_name", labelEn: "Beneficial owner's name", labelFr: "Nom du bénéficiaire effectif" },
+  { value: "owner_phone", labelEn: "Beneficial owner's phone", labelFr: "Téléphone du bénéficiaire effectif" },
+  { value: "owner_tax_id", labelEn: "Beneficial owner's tax ID", labelFr: "Numéro fiscal du bénéficiaire effectif" },
 ];
 
 function uid(prefix: string): string {
@@ -297,6 +323,30 @@ export function KybTemplateBuilder({ template, lang }: { template: KybFormTempla
                       {OPTIONS_FIELD_TYPES.includes(field.fieldType) ? (
                         <OptionsEditor field={field} lang={lang} onCommit={(options) => updateField(section.id, field.id, { options })} />
                       ) : null}
+
+                      <div className="flex items-center gap-1.5">
+                        <label className="shrink-0 text-xs font-medium text-muted-foreground">{fr ? "Rôle d'identification" : "Identification role"}</label>
+                        <select
+                          value={field.screeningRole ?? ""}
+                          onChange={(e) =>
+                            updateField(section.id, field.id, { screeningRole: (e.target.value || undefined) as KybFieldScreeningRole | undefined })
+                          }
+                          className="rounded-md border border-border bg-background px-2 py-1 text-xs text-foreground outline-none focus:ring-2 focus:ring-ring"
+                        >
+                          {SCREENING_ROLES.map((role) => (
+                            <option key={role.value} value={role.value}>
+                              {fr ? role.labelFr : role.labelEn}
+                            </option>
+                          ))}
+                        </select>
+                        <FieldHint
+                          text={
+                            fr
+                              ? "Facultatif — indique au filtrage automatique (sanctions, réseau de signaux partagés, règles Pan Studio) ce que représente ce champ, même si vous avez personnalisé ce formulaire. Sans ce tag, ces vérifications ne portent sur rien dans ce formulaire."
+                              : "Optional — tells automated checks (sanctions, the shared fraud signal network, Pan Studio rules) what this field represents, even on a fully custom form. Without this tag, those checks have nothing to check here."
+                          }
+                        />
+                      </div>
 
                       <div className="flex items-center justify-between">
                         <label className="flex items-center gap-1.5 text-xs font-medium text-foreground">

@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { Loader2, MessageCircle, Send, Sparkles } from "lucide-react";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
-import { generateAlertRule, type AlertRule } from "./actions";
+import { generateAlertRule, type AlertRule, type AlertRuleDomain } from "./actions";
 import { ruleExplanation, ruleName } from "./localize";
 import type { StringKey } from "@/lib/i18n/strings";
 
@@ -13,20 +13,42 @@ function isError(value: unknown): value is { error: string; suggestion?: string 
   return Boolean(value) && typeof value === "object" && "error" in (value as object);
 }
 
-const EXAMPLE_KEYS: StringKey[] = [
-  "chatExampleText",
-  "chatExampleText2",
-  "chatExampleText3",
-  "chatExampleText5",
-  "chatExampleText6",
-  "chatExampleText7",
+/** One closed field vocabulary per module — picking the module up front (instead of guessing it
+ * from free text) is what actually scopes which fields the assistant is allowed to use server
+ * side; see GenerateRuleDto/rule-expression-validator.ts. Each module gets its own example
+ * prompts, since a transaction example makes no sense once KYC is selected and vice versa. */
+const MODULES: { domain: AlertRuleDomain; labelKey: StringKey; hintKey: StringKey; exampleKeys: StringKey[] }[] = [
+  {
+    domain: "transaction",
+    labelKey: "chatModuleTransaction",
+    hintKey: "chatModuleTransactionHint",
+    exampleKeys: ["chatExampleText", "chatExampleText2", "chatExampleText3", "chatExampleText5", "chatExampleText6", "chatExampleText7"],
+  },
+  {
+    domain: "identity",
+    labelKey: "chatModuleKyc",
+    hintKey: "chatModuleKycHint",
+    exampleKeys: ["chatExampleTextIdentity", "chatExampleTextIdentity2"],
+  },
+  {
+    domain: "kyb",
+    labelKey: "chatModuleKyb",
+    hintKey: "chatModuleKybHint",
+    exampleKeys: ["chatExampleTextKyb"],
+  },
+  {
+    domain: "intel",
+    labelKey: "chatModuleIntel",
+    hintKey: "chatModuleIntelHint",
+    exampleKeys: ["chatExampleTextIntel", "chatExampleTextIntel2"],
+  },
 ];
 
-/** Picks a random example, different from `exclude` when there's more than one to choose from —
- * shown one at a time so the panel doesn't read as a wall of text, and varied so a partner who
- * reopens it later doesn't always see the exact same prompt. */
-function pickExampleKey(exclude?: StringKey): StringKey {
-  const candidates = exclude ? EXAMPLE_KEYS.filter((key) => key !== exclude) : EXAMPLE_KEYS;
+/** Picks a random example for this module, different from `exclude` when there's more than one
+ * to choose from — shown one at a time so the panel doesn't read as a wall of text, and varied so
+ * a partner who reopens it later doesn't always see the exact same prompt. */
+function pickExampleKey(exampleKeys: StringKey[], exclude?: StringKey): StringKey {
+  const candidates = exampleKeys.length > 1 && exclude ? exampleKeys.filter((key) => key !== exclude) : exampleKeys;
   return candidates[Math.floor(Math.random() * candidates.length)];
 }
 
@@ -45,11 +67,24 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
   const guard = useSessionGuard();
   const { lang, t } = useLang();
   const inputId = useId();
+  const [moduleIndex, setModuleIndex] = useState(0);
+  const activeModule = MODULES[moduleIndex];
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [pending, setPending] = useState(false);
   const [tooShort, setTooShort] = useState(false);
-  const [exampleKey, setExampleKey] = useState<StringKey>(() => pickExampleKey());
+  const [exampleKey, setExampleKey] = useState<StringKey>(() => pickExampleKey(MODULES[0].exampleKeys));
+
+  /** Switching module mid-conversation would leave earlier messages scoped to a field vocabulary
+   * that no longer applies — simplest correct behavior is starting a fresh conversation. */
+  function selectModule(index: number) {
+    if (index === moduleIndex) return;
+    setModuleIndex(index);
+    setMessages([]);
+    setDraft("");
+    setTooShort(false);
+    setExampleKey(pickExampleKey(MODULES[index].exampleKeys));
+  }
 
   async function send(text: string) {
     const trimmed = text.trim();
@@ -62,7 +97,7 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
     setDraft("");
     setPending(true);
     try {
-      const result = await guard(() => generateAlertRule(trimmed));
+      const result = await guard(() => generateAlertRule(trimmed, activeModule.domain));
       if (result === null) return;
       if (isError(result)) {
         setMessages((prev) => [
@@ -86,6 +121,21 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
         <p className="text-sm font-semibold text-foreground">{t("chatPanelTitle")}</p>
       </div>
       <p className="border-b border-border px-4 py-2.5 text-xs text-muted-foreground">{t("chatPanelIntro")}</p>
+      <div className="flex items-center gap-1.5 border-b border-border px-4 py-2.5">
+        {MODULES.map((module, index) => (
+          <button
+            key={module.domain}
+            type="button"
+            onClick={() => selectModule(index)}
+            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+              index === moduleIndex ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:bg-muted/60"
+            }`}
+          >
+            {t(module.labelKey)}
+          </button>
+        ))}
+        <p className="ml-1.5 text-xs text-muted-foreground">{t(activeModule.hintKey)}</p>
+      </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-4">
         {messages.length === 0 ? (
@@ -97,7 +147,7 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
                 <p className="text-[11px] font-semibold uppercase text-muted-foreground">{t("chatExampleLabel")}</p>
                 <button
                   type="button"
-                  onClick={() => setExampleKey((prev) => pickExampleKey(prev))}
+                  onClick={() => setExampleKey((prev) => pickExampleKey(activeModule.exampleKeys, prev))}
                   className="shrink-0 text-[11px] font-medium text-primary hover:underline"
                 >
                   {t("chatAnotherExample")}
@@ -202,7 +252,17 @@ export function RuleChatPanel({ onGenerated }: { onGenerated: (rule: AlertRule) 
             {t("chatSend")}
           </button>
         </form>
-        <p className="mt-2 text-[11px] text-muted-foreground">{t("chatOnlyMonitoring")}</p>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          {t(
+            activeModule.domain === "identity"
+              ? "chatOnlyMonitoringIdentity"
+              : activeModule.domain === "kyb"
+                ? "chatOnlyMonitoringKyb"
+                : activeModule.domain === "intel"
+                  ? "chatOnlyMonitoringIntel"
+                  : "chatOnlyMonitoring",
+          )}
+        </p>
       </div>
     </div>
   );

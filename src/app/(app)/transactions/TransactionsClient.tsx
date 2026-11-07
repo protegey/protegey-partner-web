@@ -8,7 +8,8 @@ import { useLang } from "@/lib/i18n/LangProvider";
 import { Pagination } from "@/components/Pagination";
 import { CountryBadge, DeviceSummaryCell, MapLinkBadge } from "@/components/DeviceAttributesSummary";
 import { ExportCsvButton } from "@/components/ExportCsvButton";
-import type { MonitoringTransaction, PaginatedResult, TransactionDecision, TransactionDirection } from "./actions";
+import { FieldHint } from "@/components/FieldHint";
+import type { MonitoringTransaction, PaginatedResult, TransactionDecision, TransactionDirection, DeviceAction } from "./actions";
 import { exportTransactionsAction } from "./actions";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
 
@@ -99,6 +100,13 @@ export function TransactionsClient({
     clear: t("txDecisionClear"),
     review: t("txDecisionReview"),
     blocked: t("txDecisionBlocked"),
+  };
+
+  const deviceActionLabel: Record<DeviceAction, string> = {
+    allow: t("txDeviceActionAllow"),
+    soft_challenge: t("txDeviceActionSoftChallenge"),
+    hard_challenge: t("txDeviceActionHardChallenge"),
+    block: t("txDeviceActionBlock"),
   };
 
   return (
@@ -203,19 +211,90 @@ export function TransactionsClient({
           <table className="w-full text-left text-sm">
             <thead className="bg-muted text-muted-foreground">
               <tr>
-                <th className="px-4 py-2.5 font-medium">{t("txColDate")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("txColExternalId")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("txColCustomer")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("txColCounterparty")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("txColDirection")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("txColAmount")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("txColType")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("txColCash")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("txColDecision")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("txColRisk")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("txColDevice")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("txColLocation")}</th>
-                <th className="px-4 py-2.5 font-medium">{t("txColIp")}</th>
+                <th className="px-4 py-2.5 font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    {t("txColDate")}
+                    <FieldHint text={t("txColDateHint")} />
+                  </span>
+                </th>
+                <th className="px-4 py-2.5 font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    {t("txColExternalId")}
+                    <FieldHint text={t("txColExternalIdHint")} />
+                  </span>
+                </th>
+                <th className="px-4 py-2.5 font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    {t("txColCustomer")}
+                    <FieldHint text={t("txColCustomerHint")} />
+                  </span>
+                </th>
+                <th className="px-4 py-2.5 font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    {t("txColCounterparty")}
+                    <FieldHint text={t("txColCounterpartyHint")} />
+                  </span>
+                </th>
+                <th className="px-4 py-2.5 font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    {t("txColDirection")}
+                    <FieldHint text={t("txColDirectionHint")} />
+                  </span>
+                </th>
+                <th className="px-4 py-2.5 font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    {t("txColAmount")}
+                    <FieldHint text={t("txColAmountHint")} />
+                  </span>
+                </th>
+                <th className="px-4 py-2.5 font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    {t("txColType")}
+                    <FieldHint text={t("txColTypeHint")} />
+                  </span>
+                </th>
+                <th className="px-4 py-2.5 font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    {t("txColCash")}
+                    <FieldHint text={t("txColCashHint")} />
+                  </span>
+                </th>
+                <th className="px-4 py-2.5 font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    {t("txColDecision")}
+                    <FieldHint text={t("txColDecisionHint")} />
+                  </span>
+                </th>
+                <th className="px-4 py-2.5 font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    {t("txColRisk")}
+                    <FieldHint text={t("txColRiskHint")} />
+                  </span>
+                </th>
+                <th className="px-4 py-2.5 font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    {t("txColDeviceRisk")}
+                    <FieldHint text={t("txColDeviceRiskHint")} />
+                  </span>
+                </th>
+                <th className="px-4 py-2.5 font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    {t("txColDevice")}
+                    <FieldHint text={t("txColDeviceHint")} />
+                  </span>
+                </th>
+                <th className="px-4 py-2.5 font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    {t("txColLocation")}
+                    <FieldHint text={t("txColLocationHint")} />
+                  </span>
+                </th>
+                <th className="px-4 py-2.5 font-medium">
+                  <span className="inline-flex items-center gap-1">
+                    {t("txColIp")}
+                    <FieldHint text={t("txColIpHint")} />
+                  </span>
+                </th>
                 <th className="px-4 py-2.5 font-medium" />
               </tr>
             </thead>
@@ -255,6 +334,19 @@ export function TransactionsClient({
                   <td className="px-4 py-2.5 text-xs text-muted-foreground">{tx.isCash ? t("txCashYes") : t("txCashNo")}</td>
                   <td className="whitespace-nowrap px-4 py-2.5 text-xs font-medium">{decisionLabel[tx.decision]}</td>
                   <td className={`px-4 py-2.5 text-xs font-semibold ${riskColor(tx.riskScore)}`}>{tx.riskScore}</td>
+                  <td className="px-4 py-2.5">
+                    {tx.deviceRiskScore !== null ? (
+                      <span className="inline-flex items-center gap-1 whitespace-nowrap">
+                        <span className={`text-xs font-semibold ${riskColor(tx.deviceRiskScore)}`}>{tx.deviceRiskScore}</span>
+                        <span className="text-xs text-muted-foreground">{deviceActionLabel[tx.deviceAction ?? "allow"]}</span>
+                        {tx.deviceReasons?.length ? <FieldHint text={tx.deviceReasons.join(", ")} /> : null}
+                      </span>
+                    ) : (
+                      <span className="text-xs text-muted-foreground" title={t("txDeviceRiskNone")}>
+                        —
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-2.5">
                     <DeviceSummaryCell attributes={tx.deviceAttributes} />
                   </td>
