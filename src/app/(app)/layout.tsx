@@ -100,39 +100,13 @@ function buildNavItemDefs(lang: Lang, isOnPremise: boolean): NavItemDef[] {
   const tt = (key: Parameters<typeof t>[1]) => t(lang, key);
   return [
     { href: "/dashboard", label: tt("navDashboard"), icon: <LayoutDashboard className="size-4" /> },
-    {
-      label: tt("navIntelligence"),
-      icon: <Fingerprint className="size-4" />,
-      children: [
-        { href: "/pan-guard/device-signals", label: tt("navDeviceSignals"), requiredPermission: "partners.view_transactions" },
-        { href: "/pan-guard/behavioral-signals", label: tt("navBehavioralSignals"), requiredPermission: "partners.view_transactions" },
-        { href: "/pan-guard/risk-profiles", label: tt("navRiskProfiles"), requiredPermission: "partners.view_transactions" },
-        // Temporarily hidden — not built yet. Uncomment when ready to ship these as real pages.
-        // { label: tt("navSignalAnalytics"), disabled: true },
-        // { label: tt("navIntelligenceFeed"), disabled: true },
-      ],
-    },
+    { href: "/alert-rules", label: tt("navAlertRules"), icon: <SlidersHorizontal className="size-4" />, requiredPermission: ["partners.manage_alert_rules", "partners.view_alert_rules"] },
     {
       label: tt("navPanId"),
       icon: <IdCard className="size-4" />,
       children: [
         { href: "/kyc", label: tt("navKyc"), requiredPermission: "partners.manage_kyc" },
         { href: "/clients", label: tt("navKyb"), requiredPermission: "partners.manage_clients" },
-      ],
-    },
-    {
-      label: tt("navPanRisk"),
-      icon: <ShieldCheck className="size-4" />,
-      children: [
-        { href: "/sanctions", label: tt("navSanctionsList"), requiredPermission: "sanctions.view" },
-        { href: "/sanctions/search", label: tt("sanctionsSearchToolLink"), requiredPermission: "sanctions.view" },
-        // Temporarily hidden — not ready to expose yet. Uncomment when ready to ship.
-        // { href: "/screening-provider", label: tt("navScreeningProvider"), requiredPermission: "sanctions.view" },
-        { href: "/pan-risk/shared-signal-network", label: tt("navSharedSignalNetwork"), requiredPermission: "partners.share_fraud_signal" },
-        { href: "/pep", label: tt("navPepControl"), requiredPermission: "sanctions.view" },
-        { href: "/edd", label: tt("navEdd"), requiredPermission: "sanctions.view" },
-        { href: "/sar-str", label: tt("navSarStr"), requiredPermission: ["partners.manage_compliance_cases", "partners.view_compliance_cases"] },
-        { href: "/ctr", label: tt("navCtr"), requiredPermission: "partners.manage_compliance_cases" },
       ],
     },
     {
@@ -145,7 +119,33 @@ function buildNavItemDefs(lang: Lang, isOnPremise: boolean): NavItemDef[] {
         { href: "/cases", label: tt("navCases"), requiredPermission: ["partners.manage_cases", "partners.view_cases"] },
       ],
     },
-    { href: "/alert-rules", label: tt("navAlertRules"), icon: <SlidersHorizontal className="size-4" />, requiredPermission: ["partners.manage_alert_rules", "partners.view_alert_rules"] },
+    {
+      label: tt("navPanRisk"),
+      icon: <ShieldCheck className="size-4" />,
+      children: [
+        { href: "/sanctions", label: tt("navSanctionsList"), requiredPermission: "sanctions.view" },
+        { href: "/sanctions/search", label: tt("sanctionsSearchToolLink"), requiredPermission: "sanctions.view" },
+        // Temporarily hidden — not ready to expose yet. Uncomment when ready to ship.
+        // { href: "/screening-provider", label: tt("navScreeningProvider"), requiredPermission: "sanctions.view" },
+        { href: "/pep", label: tt("navPepControl"), requiredPermission: "sanctions.view" },
+        { href: "/edd", label: tt("navEdd"), requiredPermission: "sanctions.view" },
+        { href: "/sar-str", label: tt("navSarStr"), requiredPermission: ["partners.manage_compliance_cases", "partners.view_compliance_cases"] },
+        { href: "/ctr", label: tt("navCtr"), requiredPermission: "partners.manage_compliance_cases" },
+      ],
+    },
+    {
+      label: tt("navIntelligence"),
+      icon: <Fingerprint className="size-4" />,
+      children: [
+        { href: "/pan-guard/device-signals", label: tt("navDeviceSignals"), requiredPermission: "partners.view_transactions" },
+        { href: "/pan-guard/behavioral-signals", label: tt("navBehavioralSignals"), requiredPermission: "partners.view_transactions" },
+        { href: "/pan-guard/risk-profiles", label: tt("navRiskProfiles"), requiredPermission: "partners.view_transactions" },
+        { href: "/pan-risk/shared-signal-network", label: tt("navSharedSignalNetwork"), requiredPermission: "partners.share_fraud_signal" },
+        // Temporarily hidden — not built yet. Uncomment when ready to ship these as real pages.
+        // { label: tt("navSignalAnalytics"), disabled: true },
+        // { label: tt("navIntelligenceFeed"), disabled: true },
+      ],
+    },
     {
       label: tt("navPartnerIntegrations"),
       icon: <KeyRound className="size-4" />,
