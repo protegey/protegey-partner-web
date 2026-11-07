@@ -411,6 +411,7 @@ const STRINGS = {
   rulesTabDisabled: { en: "Disabled", fr: "Désactivées" },
   rulesTabAll: { en: "All", fr: "Toutes" },
   rulesFilterModuleLabel: { en: "Filter by module", fr: "Filtrer par module" },
+  rulesFilterStatusLabel: { en: "Filter by status", fr: "Filtrer par statut" },
   rulesModuleAll: { en: "All modules", fr: "Tous les modules" },
   rulesFilterCustomOnly: { en: "My rules only", fr: "Mes règles uniquement" },
   ruleStatusOn: { en: "On", fr: "Activée" },

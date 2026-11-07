@@ -156,40 +156,47 @@ export function AlertRulesBoard({ initialRules, assistantConfigured }: { initial
   const rulesListRef = useRef<HTMLDivElement>(null);
   const justAddedRule = rules.find((r) => r.id === justAddedRuleId) ?? null;
   const [numberSearch, setNumberSearch] = useState("");
-  const [statusTab, setStatusTab] = useState<AlertRuleStatus | "all">("active");
+  const [statusTab, setStatusTab] = useState<AlertRuleStatus | "all">("all");
   const [moduleTab, setModuleTab] = useState<AlertRuleDomain | "all">("all");
   const [customOnly, setCustomOnly] = useState(false);
 
-  // Counts reflect the FULL set (ignoring the current tab/number-search), so every tab always
-  // shows how many rules it holds, not just how many match whatever's currently filtered in.
-  const statusCounts = useMemo(() => {
-    const counts: Record<AlertRuleStatus | "all", number> = { active: 0, draft: 0, disabled: 0, all: rules.length };
-    for (const rule of rules) counts[rule.status] += 1;
-    return counts;
-  }, [rules]);
-
-  // Filters shared by both the status tabs and the module tabs — status/search/custom-only narrow
-  // the set independently of which module tab is selected, so module counts stay accurate no
-  // matter which module is currently active.
-  const statusFilteredRules = useMemo(() => {
+  // Module is the PRIMARY tab (search/custom-only apply, but never the status filter) — its
+  // counts answer "how many rules does this module have at all", independent of which status
+  // sub-tab happens to be selected. Status is a SECONDARY tab, scoped to whichever module is
+  // currently selected, so its counts answer "within this module, how many are active/disabled".
+  // Keeping status counts module-scoped is what actually fixes the earlier confusion: switching
+  // modules now visibly changes what "Actives"/"Désactivées" mean, instead of two independent
+  // filters whose combination silently zeroed everything out.
+  const searchFilteredRules = useMemo(() => {
     const query = numberSearch.trim();
-    let visibleRules = statusTab === "all" ? rules : rules.filter((rule) => rule.status === statusTab);
+    let visibleRules = rules;
     if (customOnly) visibleRules = visibleRules.filter((rule) => rule.source !== "system");
     if (query) {
       const queryLower = query.toLowerCase();
       visibleRules = visibleRules.filter((rule) => String(rule.ruleNumber) === query || rule.code.toLowerCase().includes(queryLower));
     }
     return visibleRules;
-  }, [rules, numberSearch, statusTab, customOnly]);
+  }, [rules, numberSearch, customOnly]);
 
   const moduleCounts = useMemo(() => {
-    const counts: Record<AlertRuleDomain | "all", number> = { transaction: 0, identity: 0, kyb: 0, intel: 0, all: statusFilteredRules.length };
-    for (const rule of statusFilteredRules) counts[rule.domain] += 1;
+    const counts: Record<AlertRuleDomain | "all", number> = { transaction: 0, identity: 0, kyb: 0, intel: 0, all: searchFilteredRules.length };
+    for (const rule of searchFilteredRules) counts[rule.domain] += 1;
     return counts;
-  }, [statusFilteredRules]);
+  }, [searchFilteredRules]);
+
+  const moduleFilteredRules = useMemo(
+    () => (moduleTab === "all" ? searchFilteredRules : searchFilteredRules.filter((rule) => rule.domain === moduleTab)),
+    [searchFilteredRules, moduleTab],
+  );
+
+  const statusCounts = useMemo(() => {
+    const counts: Record<AlertRuleStatus | "all", number> = { active: 0, draft: 0, disabled: 0, all: moduleFilteredRules.length };
+    for (const rule of moduleFilteredRules) counts[rule.status] += 1;
+    return counts;
+  }, [moduleFilteredRules]);
 
   const groupedByModule = useMemo(() => {
-    const visibleRules = moduleTab === "all" ? statusFilteredRules : statusFilteredRules.filter((rule) => rule.domain === moduleTab);
+    const visibleRules = statusTab === "all" ? moduleFilteredRules : moduleFilteredRules.filter((rule) => rule.status === statusTab);
     const byModule = new Map<AlertRuleDomain, AlertRule[]>();
     for (const rule of visibleRules) {
       const list = byModule.get(rule.domain) ?? [];
@@ -213,7 +220,7 @@ export function AlertRulesBoard({ initialRules, assistantConfigured }: { initial
         })),
       };
     });
-  }, [statusFilteredRules, moduleTab]);
+  }, [moduleFilteredRules, statusTab]);
 
   function replaceRule(updated: AlertRule) {
     setRules((prev) => {
@@ -291,7 +298,7 @@ export function AlertRulesBoard({ initialRules, assistantConfigured }: { initial
           />
         </div>
 
-        <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label={t("rulesFilterModuleLabel")}>
+        <div className="flex flex-wrap items-center gap-1 border-b border-border" role="tablist" aria-label={t("rulesFilterModuleLabel")}>
           {(["all", ...MODULE_ORDER] as const).map((value) => (
             <button
               key={value}
@@ -299,17 +306,17 @@ export function AlertRulesBoard({ initialRules, assistantConfigured }: { initial
               role="tab"
               aria-selected={moduleTab === value}
               onClick={() => setModuleTab(value)}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                moduleTab === value ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:bg-muted/60"
+              className={`border-b-2 px-3 py-2 text-sm font-semibold transition-colors ${
+                moduleTab === value ? "border-primary text-foreground" : "border-transparent text-muted-foreground hover:text-foreground"
               }`}
             >
-              {value === "all" ? t("rulesModuleAll") : t(MODULE_LABEL_KEYS[value])} <span className="opacity-70">({moduleCounts[value]})</span>
+              {value === "all" ? t("rulesModuleAll") : t(MODULE_LABEL_KEYS[value])} <span className="font-normal opacity-70">({moduleCounts[value]})</span>
             </button>
           ))}
         </div>
 
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
-          <div className="flex flex-wrap items-center gap-1.5" role="tablist">
+          <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label={t("rulesFilterStatusLabel")}>
             {([
               ["active", "rulesTabActive"],
               ["draft", "rulesTabDraft"],
