@@ -9,7 +9,7 @@ import { ExportCsvButton } from "@/components/ExportCsvButton";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { useLang } from "@/lib/i18n/LangProvider";
 import { toCsv } from "@/lib/csv";
-import { updateAlertRule, deleteAlertRule, type AlertRule, type AlertRuleStatus, type RuleSegment } from "./actions";
+import { updateAlertRule, deleteAlertRule, type AlertRule, type AlertRuleDomain, type AlertRuleStatus, type RuleSegment } from "./actions";
 import { RuleChatPanel } from "./RuleChatPanel";
 import { RuleDialog } from "./RuleDialog";
 import { ruleExplanation, ruleName } from "./localize";
@@ -24,6 +24,16 @@ const SEGMENT_LABEL_KEYS: Record<RuleSegment, StringKey> = {
   MERCHANT: "segmentMerchant",
   CORPORATE: "segmentCorporate",
   ALL: "segmentAll",
+};
+
+// Same module order as the Pan Studio chat panel's picker — each rule belongs to exactly one,
+// chosen at creation time, so grouping the list this way mirrors how rules are actually authored.
+const MODULE_ORDER: AlertRuleDomain[] = ["transaction", "identity", "kyb", "intel"];
+const MODULE_LABEL_KEYS: Record<AlertRuleDomain, StringKey> = {
+  transaction: "chatModuleTransaction",
+  identity: "chatModuleKyc",
+  kyb: "chatModuleKyb",
+  intel: "chatModuleIntel",
 };
 
 function isError(value: unknown): value is { error: string } {
@@ -94,6 +104,12 @@ function RuleCard({
         {rule.domain === "identity" ? (
           <span className="rounded-full bg-purple-500/15 px-1.5 py-0.5 text-[10px] font-medium text-purple-600 dark:text-purple-300">{t("ruleDomainIdentity")}</span>
         ) : null}
+        {rule.domain === "kyb" ? (
+          <span className="rounded-full bg-amber-500/15 px-1.5 py-0.5 text-[10px] font-medium text-amber-600 dark:text-amber-300">{t("ruleDomainKyb")}</span>
+        ) : null}
+        {rule.domain === "intel" ? (
+          <span className="rounded-full bg-teal-500/15 px-1.5 py-0.5 text-[10px] font-medium text-teal-600 dark:text-teal-300">{t("ruleDomainIntel")}</span>
+        ) : null}
         <span className="text-[11px] font-medium text-foreground">{rule.severity === "block" ? t("ruleOnMatchBlock") : t("ruleOnMatchReview")}</span>
       </div>
 
@@ -141,6 +157,7 @@ export function AlertRulesBoard({ initialRules, assistantConfigured }: { initial
   const justAddedRule = rules.find((r) => r.id === justAddedRuleId) ?? null;
   const [numberSearch, setNumberSearch] = useState("");
   const [statusTab, setStatusTab] = useState<AlertRuleStatus | "all">("active");
+  const [moduleTab, setModuleTab] = useState<AlertRuleDomain | "all">("all");
   const [customOnly, setCustomOnly] = useState(false);
 
   // Counts reflect the FULL set (ignoring the current tab/number-search), so every tab always
@@ -151,7 +168,10 @@ export function AlertRulesBoard({ initialRules, assistantConfigured }: { initial
     return counts;
   }, [rules]);
 
-  const grouped = useMemo(() => {
+  // Filters shared by both the status tabs and the module tabs — status/search/custom-only narrow
+  // the set independently of which module tab is selected, so module counts stay accurate no
+  // matter which module is currently active.
+  const statusFilteredRules = useMemo(() => {
     const query = numberSearch.trim();
     let visibleRules = statusTab === "all" ? rules : rules.filter((rule) => rule.status === statusTab);
     if (customOnly) visibleRules = visibleRules.filter((rule) => rule.source !== "system");
@@ -159,18 +179,41 @@ export function AlertRulesBoard({ initialRules, assistantConfigured }: { initial
       const queryLower = query.toLowerCase();
       visibleRules = visibleRules.filter((rule) => String(rule.ruleNumber) === query || rule.code.toLowerCase().includes(queryLower));
     }
-    const bySegment = new Map<RuleSegment, AlertRule[]>();
-    for (const rule of visibleRules) {
-      const list = bySegment.get(rule.segment) ?? [];
-      list.push(rule);
-      bySegment.set(rule.segment, list);
-    }
-    for (const list of bySegment.values()) list.sort((a, b) => a.code.localeCompare(b.code));
-    return SEGMENT_ORDER.filter((segment) => bySegment.has(segment)).map((segment) => ({
-      segment,
-      rules: bySegment.get(segment)!,
-    }));
+    return visibleRules;
   }, [rules, numberSearch, statusTab, customOnly]);
+
+  const moduleCounts = useMemo(() => {
+    const counts: Record<AlertRuleDomain | "all", number> = { transaction: 0, identity: 0, kyb: 0, intel: 0, all: statusFilteredRules.length };
+    for (const rule of statusFilteredRules) counts[rule.domain] += 1;
+    return counts;
+  }, [statusFilteredRules]);
+
+  const groupedByModule = useMemo(() => {
+    const visibleRules = moduleTab === "all" ? statusFilteredRules : statusFilteredRules.filter((rule) => rule.domain === moduleTab);
+    const byModule = new Map<AlertRuleDomain, AlertRule[]>();
+    for (const rule of visibleRules) {
+      const list = byModule.get(rule.domain) ?? [];
+      list.push(rule);
+      byModule.set(rule.domain, list);
+    }
+    return MODULE_ORDER.filter((domain) => byModule.has(domain)).map((domain) => {
+      const domainRules = byModule.get(domain)!;
+      const bySegment = new Map<RuleSegment, AlertRule[]>();
+      for (const rule of domainRules) {
+        const list = bySegment.get(rule.segment) ?? [];
+        list.push(rule);
+        bySegment.set(rule.segment, list);
+      }
+      for (const list of bySegment.values()) list.sort((a, b) => a.code.localeCompare(b.code));
+      return {
+        domain,
+        segments: SEGMENT_ORDER.filter((segment) => bySegment.has(segment)).map((segment) => ({
+          segment,
+          rules: bySegment.get(segment)!,
+        })),
+      };
+    });
+  }, [statusFilteredRules, moduleTab]);
 
   function replaceRule(updated: AlertRule) {
     setRules((prev) => {
@@ -248,6 +291,23 @@ export function AlertRulesBoard({ initialRules, assistantConfigured }: { initial
           />
         </div>
 
+        <div className="flex flex-wrap items-center gap-1.5" role="tablist" aria-label={t("rulesFilterModuleLabel")}>
+          {(["all", ...MODULE_ORDER] as const).map((value) => (
+            <button
+              key={value}
+              type="button"
+              role="tab"
+              aria-selected={moduleTab === value}
+              onClick={() => setModuleTab(value)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                moduleTab === value ? "bg-primary text-primary-foreground" : "border border-border text-muted-foreground hover:bg-muted/60"
+              }`}
+            >
+              {value === "all" ? t("rulesModuleAll") : t(MODULE_LABEL_KEYS[value])} <span className="opacity-70">({moduleCounts[value]})</span>
+            </button>
+          ))}
+        </div>
+
         <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border pb-3">
           <div className="flex flex-wrap items-center gap-1.5" role="tablist">
             {([
@@ -290,7 +350,7 @@ export function AlertRulesBoard({ initialRules, assistantConfigured }: { initial
                     { header: "Source", value: (r) => r.source },
                     { header: "Updated at", value: (r) => r.updatedAt },
                   ],
-                  grouped.flatMap((g) => g.rules),
+                  groupedByModule.flatMap((m) => m.segments.flatMap((s) => s.rules)),
                 )
               }
             />
@@ -325,26 +385,35 @@ export function AlertRulesBoard({ initialRules, assistantConfigured }: { initial
 
         {toggleError ? <p className="text-sm text-destructive">{toggleError}</p> : null}
 
-        {grouped.length === 0 ? (
+        {groupedByModule.length === 0 ? (
           <p className="rounded-md border border-border p-6 text-center text-sm text-muted-foreground">{t("rulesListEmpty")}</p>
         ) : (
-          grouped.map(({ segment, rules: segmentRules }) => (
-            <div key={segment}>
-              <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t(SEGMENT_LABEL_KEYS[segment])}</p>
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                {segmentRules.map((rule) => (
-                  <RuleCard
-                    key={rule.id}
-                    rule={rule}
-                    lang={lang}
-                    t={t}
-                    toggling={togglingId === rule.id}
-                    onToggle={() => setConfirmToggleRule(rule)}
-                    onOpen={() => setEditingRule(rule)}
-                    onDelete={() => setConfirmDeleteRule(rule)}
-                  />
-                ))}
-              </div>
+          groupedByModule.map(({ domain, segments }) => (
+            <div key={domain} className="flex flex-col gap-3">
+              {moduleTab === "all" ? (
+                <p className="rounded-md bg-muted/60 px-3 py-1.5 text-xs font-bold uppercase tracking-wide text-foreground">
+                  {t(MODULE_LABEL_KEYS[domain])}
+                </p>
+              ) : null}
+              {segments.map(({ segment, rules: segmentRules }) => (
+                <div key={segment}>
+                  <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-muted-foreground">{t(SEGMENT_LABEL_KEYS[segment])}</p>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                    {segmentRules.map((rule) => (
+                      <RuleCard
+                        key={rule.id}
+                        rule={rule}
+                        lang={lang}
+                        t={t}
+                        toggling={togglingId === rule.id}
+                        onToggle={() => setConfirmToggleRule(rule)}
+                        onOpen={() => setEditingRule(rule)}
+                        onDelete={() => setConfirmDeleteRule(rule)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           ))
         )}

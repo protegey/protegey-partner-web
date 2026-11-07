@@ -401,6 +401,8 @@ const STRINGS = {
   rulesTabDraft: { en: "Waiting for review", fr: "En attente de validation" },
   rulesTabDisabled: { en: "Disabled", fr: "Désactivées" },
   rulesTabAll: { en: "All", fr: "Toutes" },
+  rulesFilterModuleLabel: { en: "Filter by module", fr: "Filtrer par module" },
+  rulesModuleAll: { en: "All modules", fr: "Tous les modules" },
   rulesFilterCustomOnly: { en: "My rules only", fr: "Mes règles uniquement" },
   ruleStatusOn: { en: "On", fr: "Activée" },
   ruleStatusOff: { en: "Off", fr: "Désactivée" },
@@ -424,6 +426,8 @@ const STRINGS = {
   ruleSourceManual: { en: "Your rule", fr: "Votre règle" },
   ruleSourceAi: { en: "Made with chat", fr: "Créée avec le chat" },
   ruleDomainIdentity: { en: "Identity — checked at KYC", fr: "Identité — vérifiée au KYC" },
+  ruleDomainKyb: { en: "KYB — checked on business applications", fr: "KYB — vérifiée sur les dossiers entreprise" },
+  ruleDomainIntel: { en: "Pan-Intel — checked on device signals", fr: "Pan-Intel — vérifiée sur les signaux appareil" },
 
   segmentKyc1: { en: "Basic personal accounts", fr: "Comptes personnels de base" },
   segmentKyc2: { en: "Full personal accounts", fr: "Comptes personnels complets" },
