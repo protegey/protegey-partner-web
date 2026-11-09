@@ -7,6 +7,7 @@ import { Dialog } from "@/components/Dialog";
 import { ConfirmActionDialog } from "@/components/ConfirmActionDialog";
 import { useSessionGuard } from "@/components/SessionExpiredProvider";
 import { FieldHint } from "@/components/FieldHint";
+import { CountrySelect } from "@/components/CountrySelect";
 import { useLang } from "@/lib/i18n/LangProvider";
 import {
   updateAlertRule,
@@ -448,9 +449,17 @@ export function RuleDialog({
                   </TestField>
                   <TestField label={t("ruleDialogAmountPlaceholder")} hint={t("ruleDialogAmountHint")}>
                     <input
-                      type="number"
+                      type="text"
+                      inputMode="decimal"
                       value={tx.amount || ""}
-                      onChange={(e) => updateTransaction(i, { amount: Number(e.target.value) })}
+                      onChange={(e) => {
+                        // type="number" forces React to re-set the DOM value on every keystroke,
+                        // which resets the caret to the end and makes it impossible to edit a
+                        // digit in the middle of the number — plain text + manual digit-filtering
+                        // avoids that entirely while still only ever storing a number.
+                        const digitsOnly = e.target.value.replace(/[^0-9]/g, "");
+                        updateTransaction(i, { amount: digitsOnly === "" ? 0 : Number(digitsOnly) });
+                      }}
                       className="w-28 rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
                     />
                   </TestField>
@@ -458,7 +467,16 @@ export function RuleDialog({
                     <input
                       type="datetime-local"
                       value={tx.occurredAt.slice(0, 16)}
-                      onChange={(e) => updateTransaction(i, { occurredAt: new Date(e.target.value).toISOString() })}
+                      onChange={(e) => {
+                        if (!e.target.value) return;
+                        // Appending a fixed ":00.000Z" instead of round-tripping through
+                        // `new Date(...).toISOString()` keeps the displayed value exactly what
+                        // was typed — going through the Date constructor reinterprets the typed
+                        // wall-clock value in the browser's local timezone and converts it to UTC,
+                        // so editing any single segment (hour, day, etc.) could silently shift the
+                        // whole timestamp and make it look like the field couldn't be edited at all.
+                        updateTransaction(i, { occurredAt: `${e.target.value}:00.000Z` });
+                      }}
                       className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
                     />
                   </TestField>
@@ -528,19 +546,19 @@ export function RuleDialog({
                       />
                     </TestField>
                     <TestField label={t("ruleDialogCounterpartyCountryPlaceholder")} hint={t("ruleDialogCounterpartyCountryHint")}>
-                      <input
-                        type="text"
-                        value={tx.counterpartyCountry ?? ""}
-                        onChange={(e) => updateTransaction(i, { counterpartyCountry: e.target.value || undefined })}
-                        className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                      <CountrySelect
+                        value={tx.counterpartyCountry}
+                        onChange={(code) => updateTransaction(i, { counterpartyCountry: code })}
+                        lang={lang}
+                        placeholder={t("ruleDialogCounterpartyCountryPlaceholder")}
                       />
                     </TestField>
                     <TestField label={t("ruleDialogCustomerCountryPlaceholder")} hint={t("ruleDialogCustomerCountryHint")}>
-                      <input
-                        type="text"
-                        value={tx.country ?? ""}
-                        onChange={(e) => updateTransaction(i, { country: e.target.value || undefined })}
-                        className="rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                      <CountrySelect
+                        value={tx.country}
+                        onChange={(code) => updateTransaction(i, { country: code })}
+                        lang={lang}
+                        placeholder={t("ruleDialogCustomerCountryPlaceholder")}
                       />
                     </TestField>
                     <div className="flex flex-col gap-1">
