@@ -13,6 +13,7 @@ import type {
 export interface ClientApplicationView {
   partnerName: string;
   hasPartnerLogo: boolean;
+  brandColors: { primary: string | null; secondary: string | null; tertiary: string | null };
   status: "pending" | "submitted" | "more_info_required" | "approved" | "rejected";
   language: "en" | "fr" | null;
   expiresAt: string;

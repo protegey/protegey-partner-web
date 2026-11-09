@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getApplication } from "./actions";
 import { ClientApplicationForm } from "./ClientApplicationForm";
 import { DynamicClientApplicationForm } from "./DynamicClientApplicationForm";
+import { brandColorStyleVars } from "@/lib/brandColors";
 
 export const metadata: Metadata = {
   title: "Business Application",
@@ -37,8 +38,13 @@ export default async function ClientApplicationPage({
     );
   }
 
-  if (application.template) {
-    return <DynamicClientApplicationForm token={token} initial={application} />;
-  }
-  return <ClientApplicationForm token={token} initial={application} />;
+  return (
+    <div style={brandColorStyleVars(application.brandColors)}>
+      {application.template ? (
+        <DynamicClientApplicationForm token={token} initial={application} />
+      ) : (
+        <ClientApplicationForm token={token} initial={application} />
+      )}
+    </div>
+  );
 }

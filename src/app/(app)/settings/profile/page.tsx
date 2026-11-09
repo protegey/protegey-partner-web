@@ -5,6 +5,7 @@ import { t } from "@/lib/i18n/strings";
 import { requirePageAccess } from "@/lib/requirePageAccess";
 import { getPartnerSettings } from "./actions";
 import { LogoUploadForm } from "./LogoUploadForm";
+import { BrandColorsForm } from "./BrandColorsForm";
 import { SharedSignalsToggle } from "./SharedSignalsToggle";
 import { NotificationsEmailForm } from "./NotificationsEmailForm";
 import { PageGuideButton, type PageGuideContent } from "@/components/PageGuideButton";
@@ -49,6 +50,16 @@ export default async function OrganizationProfilePage() {
       <div className="rounded-md border border-border bg-card p-5">
         <p className="mb-3 text-sm font-semibold text-foreground">{t(lang, "settingsOrgLogoTitle")}</p>
         <LogoUploadForm organizationName={partner.name} hasLogo={Boolean(partner.logoFileName)} canManage={canManageSettings} />
+      </div>
+
+      <div className="rounded-md border border-border bg-card p-5">
+        <p className="mb-3 text-sm font-semibold text-foreground">{t(lang, "brandColorsCardTitle")}</p>
+        <BrandColorsForm
+          initialPrimary={partner.brandPrimaryColor}
+          initialSecondary={partner.brandSecondaryColor}
+          initialTertiary={partner.brandTertiaryColor}
+          canManage={canManageSettings}
+        />
       </div>
 
       <div className="rounded-md border border-border bg-card p-5">

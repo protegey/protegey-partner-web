@@ -106,12 +106,15 @@ function StepIndicator({ lang, stepIndex }: { lang: Lang; stepIndex: number }) {
         <div key={label} className="flex items-center gap-1.5">
           <div
             className={`flex size-6 shrink-0 items-center justify-center rounded-full text-xs font-medium ${
-              index < stepIndex
-                ? "bg-primary text-primary-foreground"
-                : index === stepIndex
-                  ? "border-2 border-primary text-primary"
-                  : "border border-border text-muted-foreground"
+              index < stepIndex ? "" : index === stepIndex ? "border-2" : "border border-border text-muted-foreground"
             }`}
+            style={
+              index < stepIndex
+                ? { backgroundColor: "var(--brand-primary)", color: "var(--brand-primary-foreground)" }
+                : index === stepIndex
+                  ? { borderColor: "var(--brand-primary)", color: "var(--brand-primary)" }
+                  : undefined
+            }
           >
             {index < stepIndex ? <Check className="size-3.5" /> : index + 1}
           </div>
@@ -588,7 +591,9 @@ export function ClientApplicationForm({ token, initial }: { token: string; initi
 
         {stepError ? <p className="text-sm text-destructive">{stepError}</p> : null}
         {message ? (
-          <p className={`text-sm ${message.type === "error" ? "text-destructive" : "text-primary"}`}>{message.text}</p>
+          <p className={`text-sm ${message.type === "error" ? "text-destructive" : ""}`} style={message.type === "error" ? undefined : { color: "var(--brand-primary)" }}>
+            {message.text}
+          </p>
         ) : null}
 
         {editable ? (
@@ -619,7 +624,8 @@ export function ClientApplicationForm({ token, initial }: { token: string; initi
                   type="button"
                   onClick={handleSubmit}
                   disabled={autoSaving || submitting}
-                  className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+                  style={{ backgroundColor: "var(--brand-primary)", color: "var(--brand-primary-foreground)" }}
+                  className="rounded-md px-4 py-2 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-60"
                 >
                   {submitting ? t(lang, "submitting") : t(lang, "submit")}
                 </button>
@@ -628,7 +634,8 @@ export function ClientApplicationForm({ token, initial }: { token: string; initi
                   type="button"
                   onClick={handleNext}
                   disabled={autoSaving || submitting}
-                  className="rounded-md bg-primary px-4 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-60"
+                  style={{ backgroundColor: "var(--brand-primary)", color: "var(--brand-primary-foreground)" }}
+                  className="rounded-md px-4 py-2 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-60"
                 >
                   {autoSaving ? t(lang, "saving") : t(lang, "next")}
                 </button>

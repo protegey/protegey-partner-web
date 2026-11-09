@@ -230,7 +230,8 @@ export function DynamicClientApplicationForm({ token, initial }: { token: string
           type="button"
           onClick={handleNextStep}
           disabled={autoSaving}
-          className="rounded-md bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+          style={{ backgroundColor: "var(--brand-primary)", color: "var(--brand-primary-foreground)" }}
+          className="rounded-md px-5 py-2 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {t(lang, "next")}
         </button>
@@ -239,7 +240,8 @@ export function DynamicClientApplicationForm({ token, initial }: { token: string
           type="button"
           onClick={handleSubmit}
           disabled={submitting}
-          className="inline-flex items-center gap-2 rounded-md bg-primary px-5 py-2 text-sm font-semibold text-primary-foreground transition-opacity hover:opacity-90 disabled:opacity-50"
+          style={{ backgroundColor: "var(--brand-primary)", color: "var(--brand-primary-foreground)" }}
+          className="inline-flex items-center gap-2 rounded-md px-5 py-2 text-sm font-semibold transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {submitting ? <Loader2 className="size-4 animate-spin" /> : null}
           {t(lang, "submit")}
@@ -303,7 +305,11 @@ export function DynamicClientApplicationForm({ token, initial }: { token: string
           ))
         )}
 
-        {message ? <p className={`text-sm ${message.type === "error" ? "text-destructive" : "text-primary"}`}>{message.text}</p> : null}
+        {message ? (
+          <p className={`text-sm ${message.type === "error" ? "text-destructive" : ""}`} style={message.type === "error" ? undefined : { color: "var(--brand-primary)" }}>
+            {message.text}
+          </p>
+        ) : null}
 
         {bottomBar}
       </div>

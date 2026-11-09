@@ -12,6 +12,9 @@ export interface PartnerSettings {
   sharedSignalsEnabled: boolean;
   notificationsEmail: string | null;
   contactEmail: string | null;
+  brandPrimaryColor: string | null;
+  brandSecondaryColor: string | null;
+  brandTertiaryColor: string | null;
 }
 
 export interface ActionResult {
@@ -78,5 +81,24 @@ export async function updateNotificationsEmailAction(notificationsEmail: string)
     return { error: error instanceof ApiError ? error.message : t(lang, "commonGenericError") };
   }
   revalidatePath("/settings/profile");
+  return { success: true };
+}
+
+/** Each color independently: a hex string ("#1a2b3c") sets it, `null` resets it to Protegey's
+ * own default — never a bundled "reset all three" the way logo removal is. */
+export async function updateBrandingColorsAction(colors: {
+  primaryColor?: string | null;
+  secondaryColor?: string | null;
+  tertiaryColor?: string | null;
+}): Promise<ActionResult | AuthExpired> {
+  const lang = await getLang();
+  try {
+    await apiFetch("/partners/me/branding-colors", { method: "PATCH", body: colors });
+  } catch (error) {
+    if (error instanceof ApiError && error.status === 401) return { authExpired: true };
+    return { error: error instanceof ApiError ? error.message : t(lang, "commonGenericError") };
+  }
+  revalidatePath("/settings/profile");
+  revalidatePath("/client-application");
   return { success: true };
 }

@@ -2463,6 +2463,22 @@ const STRINGS = {
   amlSarSubmitted: { en: "SAR submitted", fr: "SAR soumises" },
 
   // ── Shared fraud signal network (cross-partner) ──────────────────────────
+  brandColorsCardTitle: { en: "Brand colors", fr: "Couleurs de marque" },
+  brandColorsHint: {
+    en: "Shown on your client-facing pages — the KYB application form and the identity verification flow — so your own customers never see Protegey's colors. Leave any color on Protegey's default if you don't want to customize it.",
+    fr: "Affichées sur tes pages visibles par tes clients — le formulaire de demande KYB et le flux de vérification d'identité — pour que tes propres clients ne voient jamais les couleurs de Protegey. Laisse une couleur sur la valeur par défaut de Protegey si tu ne veux pas la personnaliser.",
+  },
+  brandColorsPrimaryLabel: { en: "Primary", fr: "Primaire" },
+  brandColorsPrimaryHint: { en: "Main buttons and highlights.", fr: "Boutons principaux et mise en avant." },
+  brandColorsSecondaryLabel: { en: "Secondary", fr: "Secondaire" },
+  brandColorsSecondaryHint: { en: "Headers, secondary buttons and text.", fr: "En-têtes, boutons secondaires et texte." },
+  brandColorsTertiaryLabel: { en: "Tertiary", fr: "Tertiaire" },
+  brandColorsTertiaryHint: { en: "Accents and subtle highlighted backgrounds.", fr: "Accents et fonds légèrement mis en valeur." },
+  brandColorsResetOne: { en: "Reset", fr: "Réinitialiser" },
+  brandColorsSaveButton: { en: "Save colors", fr: "Enregistrer les couleurs" },
+  brandColorsSavingEllipsis: { en: "Saving…", fr: "Enregistrement…" },
+  brandColorsInvalidHex: { en: "Enter a valid hex color, e.g. #1a2b3c.", fr: "Saisis une couleur hexadécimale valide, ex. #1a2b3c." },
+  brandColorsUpdatedToast: { en: "Brand colors updated.", fr: "Couleurs de marque mises à jour." },
   sharedSignalsCardTitle: { en: "Shared fraud signal network", fr: "Réseau de signaux de fraude partagés" },
   sharedSignalsToggleLabel: { en: "Participate in the shared network", fr: "Participer au réseau partagé" },
   sharedSignalsEnableDialogTitle: { en: "Join the shared signal network?", fr: "Rejoindre le réseau de signaux partagés ?" },
