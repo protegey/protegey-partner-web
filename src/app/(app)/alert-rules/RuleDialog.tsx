@@ -157,16 +157,25 @@ function examplePayloadToSimulateInput(payload: Record<string, unknown> | null, 
   if (typeof payload.country === "string") input.country = payload.country;
   if (typeof payload.isPep === "boolean") input.isPep = payload.isPep;
 
-  // The real payload sends absolute dates (lastPasswordChangeAt etc.) — the simulator works in
-  // seconds-before-occurredAt instead, so convert rather than expecting the same shape.
+  // The example payload sends the seconds-elapsed value directly (secondsSincePasswordChange
+  // etc. — the same key the simulator itself reads), not an absolute lastXChangeAt date to
+  // convert. A direct numeric field always wins when present; the date-string conversion below is
+  // kept only as a defensive fallback in case a payload shape ever sends the older lastXChangeAt
+  // form again — it must never be the only path, or this exact bug (the direct value silently
+  // dropped because this function only knew how to read the old shape) recurs.
   const occurredAtMs = new Date(occurredAt).getTime();
-  const dateFields: { payloadKey: string; inputKey: "secondsSincePasswordChange" | "secondsSinceEmailChange" | "secondsSincePhoneChange" }[] = [
-    { payloadKey: "lastPasswordChangeAt", inputKey: "secondsSincePasswordChange" },
-    { payloadKey: "lastEmailChangeAt", inputKey: "secondsSinceEmailChange" },
-    { payloadKey: "lastPhoneChangeAt", inputKey: "secondsSincePhoneChange" },
+  const dateFields: { payloadKey: string; dateKey: string; inputKey: "secondsSincePasswordChange" | "secondsSinceEmailChange" | "secondsSincePhoneChange" }[] = [
+    { payloadKey: "secondsSincePasswordChange", dateKey: "lastPasswordChangeAt", inputKey: "secondsSincePasswordChange" },
+    { payloadKey: "secondsSinceEmailChange", dateKey: "lastEmailChangeAt", inputKey: "secondsSinceEmailChange" },
+    { payloadKey: "secondsSincePhoneChange", dateKey: "lastPhoneChangeAt", inputKey: "secondsSincePhoneChange" },
   ];
-  for (const { payloadKey, inputKey } of dateFields) {
-    const raw = payload[payloadKey];
+  for (const { payloadKey, dateKey, inputKey } of dateFields) {
+    const direct = payload[payloadKey];
+    if (typeof direct === "number") {
+      input[inputKey] = direct;
+      continue;
+    }
+    const raw = payload[dateKey];
     if (typeof raw === "string") {
       const seconds = Math.round((occurredAtMs - new Date(raw).getTime()) / 1000);
       if (seconds >= 0) input[inputKey] = seconds;
