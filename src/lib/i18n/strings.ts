@@ -488,6 +488,10 @@ const STRINGS = {
     fr: "Testez cette règle sur quelques transactions imaginaires avant de lui faire confiance — rien ici ne touche à des données réelles.",
   },
   ruleDialogAmountHint: { en: "The transaction amount to test — compared against this rule's own amount threshold, if it has one.", fr: "Le montant de la transaction à tester — comparé au seuil de montant de cette règle, si elle en a un." },
+  ruleDialogCurrencyHint: {
+    en: "The transaction's currency (e.g. XOF, USD, EUR) — defaults to XOF. Any count/sum this rule checks only ever adds up transactions in this same currency, never mixed with others.",
+    fr: "La devise de la transaction (ex. XOF, USD, EUR) — XOF par défaut. Tout cumul/comptage vérifié par cette règle n'additionne jamais que des transactions dans cette même devise, jamais mélangées avec d'autres.",
+  },
   ruleDialogCounterpartyHint: { en: "An arbitrary ID for the recipient/sender on the other end of this test transaction — any value works, it doesn't need to be a real account.", fr: "Un identifiant arbitraire pour le destinataire/expéditeur de l'autre côté de cette transaction de test — n'importe quelle valeur convient, pas besoin d'un vrai compte." },
   ruleDialogCashHint: { en: "Whether to test this as a cash transaction (e.g. an ATM withdrawal or cash deposit) rather than a digital transfer.", fr: "Simuler ceci comme une transaction en espèces (ex. retrait DAB ou dépôt en liquide) plutôt qu'un virement numérique." },
   ruleDialogChannelHint: { en: "Which channel the test transaction came through (branch, ATM, mobile app, etc.) — some rules only fire for specific channels.", fr: "Par quel canal transite la transaction de test (agence, DAB, application mobile, etc.) — certaines règles ne se déclenchent que pour des canaux précis." },
@@ -521,6 +525,7 @@ const STRINGS = {
   ruleDialogDirectionDebit: { en: "Money going out", fr: "Argent sortant" },
   ruleDialogDirectionCredit: { en: "Money coming in", fr: "Argent entrant" },
   ruleDialogAmountPlaceholder: { en: "Amount", fr: "Montant" },
+  ruleDialogCurrencyLabel: { en: "Currency", fr: "Devise" },
   ruleDialogDateLabel: { en: "Date and time", fr: "Date et heure" },
   ruleDialogDateHint: { en: "When this test transaction happens — some rules check the time of day or day of week.", fr: "À quel moment se produit cette transaction de test — certaines règles vérifient l'heure ou le jour de la semaine." },
   ruleDialogCounterpartyPlaceholder: { en: "Other person (optional)", fr: "Autre personne (optionnel)" },

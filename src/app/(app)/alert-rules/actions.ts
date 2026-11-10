@@ -124,6 +124,10 @@ export interface SimulateTransactionInput {
   externalCustomerId: string;
   direction: "DEBIT" | "CREDIT";
   amount: number;
+  /** ISO 4217-ish code (e.g. "XOF", "USD", "EUR") — defaults to "XOF" (the real ingestion
+   * default) when omitted. Every sum/count aggregate is automatically scoped to this same
+   * currency, so a customer transacting in several currencies is never summed/counted as one. */
+  currency?: string;
   counterpartyExternalId?: string;
   isCash?: boolean;
   occurredAt: string;

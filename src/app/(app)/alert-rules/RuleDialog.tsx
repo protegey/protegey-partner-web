@@ -110,6 +110,7 @@ function emptyTransaction(index: number): SimulateTransactionInput {
     externalCustomerId: "sim-customer",
     direction: "DEBIT",
     amount: 50_000,
+    currency: "XOF",
     occurredAt: nowIso(index),
   };
 }
@@ -138,6 +139,7 @@ function examplePayloadToSimulateInput(payload: Record<string, unknown> | null, 
     externalCustomerId: typeof payload.externalCustomerId === "string" ? payload.externalCustomerId : fallback.externalCustomerId,
     direction: payload.direction,
     amount: payload.amount,
+    currency: typeof payload.currency === "string" ? payload.currency : fallback.currency,
     occurredAt,
   };
 
@@ -470,6 +472,15 @@ export function RuleDialog({
                         updateTransaction(i, { amount: digitsOnly === "" ? 0 : Number(digitsOnly) });
                       }}
                       className="w-28 rounded-md border border-border bg-background px-2 py-1.5 text-sm text-foreground"
+                    />
+                  </TestField>
+                  <TestField label={t("ruleDialogCurrencyLabel")} hint={t("ruleDialogCurrencyHint")}>
+                    <input
+                      type="text"
+                      value={tx.currency ?? "XOF"}
+                      onChange={(e) => updateTransaction(i, { currency: e.target.value.toUpperCase() || undefined })}
+                      className="w-20 rounded-md border border-border bg-background px-2 py-1.5 text-sm uppercase text-foreground"
+                      maxLength={6}
                     />
                   </TestField>
                   <TestField label={t("ruleDialogDateLabel")} hint={t("ruleDialogDateHint")}>
