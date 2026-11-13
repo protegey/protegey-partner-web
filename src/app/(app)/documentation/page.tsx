@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KeyRound, ArrowRightLeft, IdCard, ShieldCheck, Webhook, AlertTriangle, Smartphone, Activity, Share2, Package } from "lucide-react";
+import { KeyRound, ArrowRightLeft, IdCard, ShieldCheck, Webhook, AlertTriangle, Smartphone, Activity, Share2, Package, Building2, SlidersHorizontal } from "lucide-react";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import { CodeBlock } from "@/components/CodeBlock";
@@ -87,6 +87,86 @@ curl -X POST https://api.protegey.com/partner-api/kyc/sessions/018f2a3e-.../rese
 
 # Response
 { "sessionId": "018f2a3e-...", "url": "https://verify-kyc.protegey.com/?enrollmentId=...&token=...&apiBase=..." }`;
+
+const KYB_INVITE_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/kyb/applicants \\
+  -H "Content-Type: application/json" \\
+  -H "x-api-key: YOUR_API_KEY" \\
+  -d '{
+    "contactName": "Awa Diallo",
+    "contactEmail": "awa@acme-sarl.com",
+    "templateId": "optional-custom-template-id"
+  }'
+
+# Response
+{ "id": "6e2e6a2e-...", "legalName": null, "contactName": "Awa Diallo", "contactEmail": "awa@acme-sarl.com", "status": "invited" }`;
+
+const KYB_LIST_EXAMPLE = `# search / status / stage are all optional filters
+curl "https://api.protegey.com/partner-api/kyb/applicants?status=pending_review&stage=responded" \\
+  -H "x-api-key: YOUR_API_KEY"
+
+# Response — status is one of: invited, pending_review, more_info_required, active, rejected
+{ "data": [ { "id": "6e2e6a2e-...", "legalName": "Acme SARL", "status": "pending_review", ... } ], "total": 1, "page": 1, "limit": 20 }`;
+
+const KYB_GET_EXAMPLE = `curl https://api.protegey.com/partner-api/kyb/applicants/6e2e6a2e-... \\
+  -H "x-api-key: YOUR_API_KEY"`;
+
+const KYB_RESEND_EXAMPLE = `# Issues a fresh invitation link — use when the first one expired or was lost, without
+# restarting the applicant's progress.
+curl -X POST https://api.protegey.com/partner-api/kyb/applicants/6e2e6a2e-.../resend-invitation \\
+  -H "x-api-key: YOUR_API_KEY"`;
+
+const KYB_SCREEN_EXAMPLE = `# Sanctions/PEP screening for the business and each declared owner — the same check that runs
+# automatically on submission, re-run on demand.
+curl https://api.protegey.com/partner-api/kyb/applicants/6e2e6a2e-.../screen \\
+  -H "x-api-key: YOUR_API_KEY"
+
+# Response
+{
+  "business": { "decision": "clear", "score": 0, "matches": [] },
+  "owners": [ { "ownerName": "Awa Diallo", "ownershipPercent": 60, "decision": "clear", "score": 0, "matches": [] } ],
+  "screenedAt": "2026-11-13T10:00:00.000Z"
+}`;
+
+const RULES_LIST_EXAMPLE = `curl https://api.protegey.com/partner-api/alert-rules \\
+  -H "x-api-key: YOUR_API_KEY"
+
+# Response
+[ { "id": "...", "ruleCode": "IND006-KYC1", "name": "Rapid velocity", "status": "active", "severity": "review", "segment": "KYC1", "domain": "transaction" }, ... ]`;
+
+const RULES_UPDATE_EXAMPLE = `# Tune a parameter, change its severity, or disable it outright — same fields the Pan Studio
+# editor itself writes.
+curl -X PATCH https://api.protegey.com/partner-api/alert-rules/{id} \\
+  -H "Content-Type: application/json" \\
+  -H "x-api-key: YOUR_API_KEY" \\
+  -d '{ "status": "disabled" }'`;
+
+const RULES_GENERATE_EXAMPLE = `# Describe a new rule in plain language — the same assistant behind Pan Studio's "Ask for a
+# rule". Created as a draft; review it before activating.
+curl -X POST https://api.protegey.com/partner-api/alert-rules/generate \\
+  -H "Content-Type: application/json" \\
+  -H "x-api-key: YOUR_API_KEY" \\
+  -d '{ "domain": "transaction", "description": "Flag any transaction above 1 million XOF made via USSD" }'
+
+# Response
+{ "id": "...", "ruleCode": "CUSTOM-C816CE83", "name": "Large USSD transaction", "status": "draft", ... }`;
+
+const RULES_SIMULATE_EXAMPLE = `# Test a rule against synthetic transactions before trusting it on real traffic — never persisted,
+# never scored against real customers.
+curl -X POST https://api.protegey.com/partner-api/alert-rules/{id}/simulate \\
+  -H "Content-Type: application/json" \\
+  -H "x-api-key: YOUR_API_KEY" \\
+  -d '{
+    "transactions": [
+      { "externalCustomerId": "cust-0001", "direction": "DEBIT", "amount": 1500000, "currency": "XOF", "channel": "ussd", "occurredAt": "2026-11-13T10:00:00.000Z" }
+    ]
+  }'
+
+# Response
+[ { "transaction": { "externalCustomerId": "cust-0001", "amount": 1500000, ... }, "matched": true } ]`;
+
+const RULES_DELETE_EXAMPLE = `curl -X DELETE https://api.protegey.com/partner-api/alert-rules/{id} \\
+  -H "x-api-key: YOUR_API_KEY"
+# 204 No Content`;
 
 const SANCTIONS_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/sanctions/screen \\
   -H "Content-Type: application/json" \\
@@ -272,7 +352,9 @@ export default async function DocumentationPage() {
     { id: "auth", label: t(lang, "docsNavAuth") },
     { id: "sdks", label: t(lang, "docsNavSdks") },
     { id: "transactions", label: t(lang, "docsNavTransactions") },
+    { id: "rules", label: t(lang, "docsNavRules") },
     { id: "kyc", label: t(lang, "docsNavKyc") },
+    { id: "kyb", label: t(lang, "docsNavKyb") },
     { id: "sanctions", label: t(lang, "docsNavSanctions") },
     { id: "device-events", label: t(lang, "docsNavDeviceEvents") },
     { id: "behavioral-events", label: t(lang, "docsNavBehavioralEvents") },
@@ -382,6 +464,34 @@ export default async function DocumentationPage() {
           </Link>
         </Section>
 
+        <Section id="rules" icon={SlidersHorizontal} title={t(lang, "docsRulesTitle")} body={t(lang, "docsRulesBody")}>
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsRulesListLabel")}</p>
+          <CodeBlock code={RULES_LIST_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsRulesUpdateLabel")}</p>
+          <CodeBlock code={RULES_UPDATE_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsRulesGenerateLabel")}</p>
+          <CodeBlock code={RULES_GENERATE_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsRulesSimulateLabel")}</p>
+          <CodeBlock code={RULES_SIMULATE_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsRulesDeleteLabel")}</p>
+          <CodeBlock code={RULES_DELETE_EXAMPLE} />
+          <p className="mt-3 text-xs text-muted-foreground">
+            <Link href="/alert-rules" className="text-primary hover:underline">
+              {t(lang, "navAlertRules")}
+            </Link>
+          </p>
+          <div className="mt-4">
+            <ApiConsole
+              method="POST"
+              path="/partner-api/alert-rules/generate"
+              fields={[
+                { name: "domain", label: "domain", type: "select", options: ["transaction", "identity", "kyb", "intel"], defaultValue: "transaction" },
+                { name: "description", label: "description", type: "text", required: true, placeholder: "Flag any transaction above 1 million XOF made via USSD" },
+              ]}
+            />
+          </div>
+        </Section>
+
         <Section id="kyc" icon={IdCard} title={t(lang, "docsKycTitle")} body={t(lang, "docsKycBody")}>
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
           <CodeBlock code={KYC_EXAMPLE} />
@@ -398,6 +508,30 @@ export default async function DocumentationPage() {
               method="POST"
               path="/partner-api/kyc/sessions"
               fields={[{ name: "externalUserId", label: "externalUserId", type: "text", required: true, placeholder: "cust-0001" }]}
+            />
+          </div>
+        </Section>
+
+        <Section id="kyb" icon={Building2} title={t(lang, "docsKybTitle")} body={t(lang, "docsKybBody")}>
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKybInviteLabel")}</p>
+          <CodeBlock code={KYB_INVITE_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKybListLabel")}</p>
+          <CodeBlock code={KYB_LIST_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKybGetLabel")}</p>
+          <CodeBlock code={KYB_GET_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKybResendLabel")}</p>
+          <CodeBlock code={KYB_RESEND_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKybScreenLabel")}</p>
+          <CodeBlock code={KYB_SCREEN_EXAMPLE} />
+          <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsKybScopeNote")}</p>
+          <div className="mt-4">
+            <ApiConsole
+              method="POST"
+              path="/partner-api/kyb/applicants"
+              fields={[
+                { name: "contactName", label: "contactName", type: "text", required: true, placeholder: "Awa Diallo" },
+                { name: "contactEmail", label: "contactEmail", type: "text", required: true, placeholder: "awa@acme-sarl.com" },
+              ]}
             />
           </div>
         </Section>
