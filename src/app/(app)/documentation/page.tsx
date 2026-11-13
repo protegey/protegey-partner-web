@@ -51,6 +51,40 @@ const TRANSACTION_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/t
   "alerts": [ { "ruleCode": "IND006-KYC1", "status": "open", ... } ]
 }`;
 
+const TRANSACTION_STATUS_EXAMPLE = `# Looked up by YOUR OWN externalTransactionId — never Protegey's internal id, so you never have
+# to learn or persist a second identifier just to ask "what happened to the one I sent you".
+curl https://api.protegey.com/partner-api/transactions/tx-00234 \\
+  -H "x-api-key: YOUR_API_KEY"
+
+# Response — same shape as the synchronous POST response above
+{
+  "transactionId": "b3b4f28f-...",
+  "externalTransactionId": "tx-00234",
+  "externalCustomerId": "cust-9981",
+  "decision": "review",
+  "riskScore": 20,
+  "deviceAction": "allow",
+  "occurredAt": "2026-01-15T10:00:00.000Z",
+  "createdAt": "2026-01-15T10:00:01.482Z",
+  "alerts": [ { "id": "27bfd203-...", "alertNumber": 1042, "ruleCode": "IND006-KYC1", "status": "open", "decisionVerdict": "review", "triggeredAt": "2026-01-15T10:00:01.482Z" } ]
+}`;
+
+const TRANSACTION_LIST_EXAMPLE = `# direction / decision / externalCustomerId / dateFrom / dateTo / page / limit are all optional
+curl "https://api.protegey.com/partner-api/transactions?externalCustomerId=cust-9981&decision=review&page=1&limit=20" \\
+  -H "x-api-key: YOUR_API_KEY"
+
+# Response — each row omits "alerts" (fetching them for every row on a list this size would be
+# an N+1 query per page); call the status endpoint above for one transaction's own alerts.
+{
+  "data": [
+    { "transactionId": "b3b4f28f-...", "externalTransactionId": "tx-00234", "externalCustomerId": "cust-9981", "direction": "DEBIT", "amount": 250000, "currency": "XOF", "decision": "review", "riskScore": 20, "deviceAction": "allow", "occurredAt": "2026-01-15T10:00:00.000Z", "createdAt": "2026-01-15T10:00:01.482Z" }
+  ],
+  "total": 1,
+  "page": 1,
+  "limit": 20,
+  "totalPages": 1
+}`;
+
 const KYC_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/kyc/sessions \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: YOUR_API_KEY" \\
@@ -411,6 +445,10 @@ export default async function DocumentationPage() {
               ]}
             />
           </div>
+          <p className="mt-6 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsTransactionsStatusLabel")}</p>
+          <CodeBlock code={TRANSACTION_STATUS_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsTransactionsListLabel")}</p>
+          <CodeBlock code={TRANSACTION_LIST_EXAMPLE} />
           <p className="mt-6 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSequenceTitle")}</p>
           <p className="mb-3 text-sm leading-relaxed text-muted-foreground">{t(lang, "docsSequenceBody")}</p>
           <Link
