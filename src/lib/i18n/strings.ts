@@ -3057,12 +3057,12 @@ const STRINGS = {
   docsWebhooksHeadersExampleTitle: { en: "Request shape", fr: "Forme de la requête" },
   docsWebhooksKycStatusValuesLabel: { en: "Possible status values", fr: "Valeurs de statut possibles" },
   docsWebhooksKycStatusLegacyNote: {
-    en: "Not Started, Awaiting User, Abandoned, and Kyc Expired exist on the type for historical compatibility but are never produced by a new enrollment.",
-    fr: "Not Started, Awaiting User, Abandoned et Kyc Expired existent pour la compatibilité avec d'anciennes données mais ne sont plus jamais produits pour un nouvel enregistrement.",
+    en: "NOT_STARTED, AWAITING_USER, ABANDONED, and KYC_EXPIRED exist on the type for historical compatibility but are never produced by a new enrollment.",
+    fr: "NOT_STARTED, AWAITING_USER, ABANDONED et KYC_EXPIRED existent pour la compatibilité avec d'anciennes données mais ne sont plus jamais produits pour un nouvel enregistrement.",
   },
   docsWebhooksKycOutcomeNote: {
-    en: 'decision.outcome (also mirrored at the top level on GET /partner-api/kyc/sessions/:sessionId) is "SUCCESS" (match confidence >= your auto-approve threshold, 80% by default — status "Approved"), "MANUAL" (passed liveness/ID-scan but below that threshold — status "In Review", a human on your side decides), or "FAILED" (liveness or ID-scan itself failed — status "Declined").',
-    fr: 'decision.outcome (aussi renvoyé au niveau racine sur GET /partner-api/kyc/sessions/:sessionId) vaut "SUCCESS" (confiance de correspondance ≥ votre seuil d\'auto-approbation, 80% par défaut — statut "Approved"), "MANUAL" (liveness/scan de document réussis mais confiance sous ce seuil — statut "In Review", une personne de votre équipe décide), ou "FAILED" (liveness ou scan de document échoué — statut "Declined").',
+    en: 'decision.outcome (also mirrored at the top level on GET /partner-api/kyc/sessions/:sessionId) is "SUCCESS" (match confidence >= your auto-approve threshold, 80% by default — status "APPROVED"), "MANUAL" (passed liveness/ID-scan but below that threshold — status "IN_REVIEW", a human on your side decides), or "FAILED" (liveness or ID-scan itself failed — status "DECLINED").',
+    fr: 'decision.outcome (aussi renvoyé au niveau racine sur GET /partner-api/kyc/sessions/:sessionId) vaut "SUCCESS" (confiance de correspondance ≥ votre seuil d\'auto-approbation, 80% par défaut — statut "APPROVED"), "MANUAL" (liveness/scan de document réussis mais confiance sous ce seuil — statut "IN_REVIEW", une personne de votre équipe décide), ou "FAILED" (liveness ou scan de document échoué — statut "DECLINED").',
   },
   docsWebhooksDispatchTitle: { en: "Handling multiple event types", fr: "Gérer plusieurs types d'événements" },
   docsWebhooksPayloadTitle: { en: "Payload", fr: "Payload" },

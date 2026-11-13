@@ -37,7 +37,7 @@ const TRANSACTION_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/t
     "currency": "XOF",
     "transactionType": "cashout",
     "isCash": true,
-    "channel": "ussd",
+    "channel": "USSD",
     "counterpartyInstitutionCode": "ECOBKTGTG",
     "counterpartyCountry": "SN",
     "occurredAt": "2026-01-15T10:00:00.000Z"
@@ -46,9 +46,9 @@ const TRANSACTION_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/t
 # Response
 {
   "transactionId": "b3b4f28f-...",
-  "decision": "review",
+  "decision": "REVIEW",
   "riskScore": 20,
-  "alerts": [ { "ruleCode": "IND006-KYC1", "status": "open", ... } ]
+  "alerts": [ { "ruleCode": "IND006-KYC1", "status": "OPEN", ... } ]
 }`;
 
 const TRANSACTION_STATUS_EXAMPLE = `# Looked up by YOUR OWN externalTransactionId — never Protegey's internal id, so you never have
@@ -61,23 +61,23 @@ curl https://api.protegey.com/partner-api/transactions/tx-00234 \\
   "transactionId": "b3b4f28f-...",
   "externalTransactionId": "tx-00234",
   "externalCustomerId": "cust-9981",
-  "decision": "review",
+  "decision": "REVIEW",
   "riskScore": 20,
-  "deviceAction": "allow",
+  "deviceAction": "ALLOW",
   "occurredAt": "2026-01-15T10:00:00.000Z",
   "createdAt": "2026-01-15T10:00:01.482Z",
-  "alerts": [ { "id": "27bfd203-...", "alertNumber": 1042, "ruleCode": "IND006-KYC1", "status": "open", "decisionVerdict": "review", "triggeredAt": "2026-01-15T10:00:01.482Z" } ]
+  "alerts": [ { "id": "27bfd203-...", "alertNumber": 1042, "ruleCode": "IND006-KYC1", "status": "OPEN", "decisionVerdict": "REVIEW", "triggeredAt": "2026-01-15T10:00:01.482Z" } ]
 }`;
 
 const TRANSACTION_LIST_EXAMPLE = `# direction / decision / externalCustomerId / dateFrom / dateTo / page / limit are all optional
-curl "https://api.protegey.com/partner-api/transactions?externalCustomerId=cust-9981&decision=review&page=1&limit=20" \\
+curl "https://api.protegey.com/partner-api/transactions?externalCustomerId=cust-9981&decision=REVIEW&page=1&limit=20" \\
   -H "x-api-key: YOUR_API_KEY"
 
 # Response — each row omits "alerts" (fetching them for every row on a list this size would be
 # an N+1 query per page); call the status endpoint above for one transaction's own alerts.
 {
   "data": [
-    { "transactionId": "b3b4f28f-...", "externalTransactionId": "tx-00234", "externalCustomerId": "cust-9981", "direction": "DEBIT", "amount": 250000, "currency": "XOF", "decision": "review", "riskScore": 20, "deviceAction": "allow", "occurredAt": "2026-01-15T10:00:00.000Z", "createdAt": "2026-01-15T10:00:01.482Z" }
+    { "transactionId": "b3b4f28f-...", "externalTransactionId": "tx-00234", "externalCustomerId": "cust-9981", "direction": "DEBIT", "amount": 250000, "currency": "XOF", "decision": "REVIEW", "riskScore": 20, "deviceAction": "ALLOW", "occurredAt": "2026-01-15T10:00:00.000Z", "createdAt": "2026-01-15T10:00:01.482Z" }
   ],
   "total": 1,
   "page": 1,
@@ -101,21 +101,21 @@ curl https://api.protegey.com/partner-api/kyc/sessions/018f2a3e-... \\
 # Response — identical shape to the outbound webhook payload, minus eventId.
 # "outcome" mirrors decision.outcome, exposed at the top level for convenience: "SUCCESS" (match
 # confidence >= your account's auto-approve threshold, 80% by default), "MANUAL" (passed
-# liveness/ID-scan but below that threshold — status is "In Review", a human on your side needs
+# liveness/ID-scan but below that threshold — status is "IN_REVIEW", a human on your side needs
 # to decide), or "FAILED" (liveness or ID-scan itself failed). null before a result exists yet.
-{ "sessionId": "018f2a3e-...", "externalUserId": "cust-9981", "status": "Approved", "outcome": "SUCCESS", "decision": { "source": "facetec", "outcome": "SUCCESS", "passed": true, "confidenceScore": 94, ... } }`;
+{ "sessionId": "018f2a3e-...", "externalUserId": "cust-9981", "status": "APPROVED", "outcome": "SUCCESS", "decision": { "source": "facetec", "outcome": "SUCCESS", "passed": true, "confidenceScore": 94, ... } }`;
 
-const KYC_UPDATE_EXAMPLE = `# Correct an OCR misread, or resolve an "In Review" session by overriding its status — only the
+const KYC_UPDATE_EXAMPLE = `# Correct an OCR misread, or resolve an "IN_REVIEW" session by overriding its status — only the
 # fields you send are changed. The original FaceTec signal (decision.outcome) is never
 # overwritten; a status override is layered on top as decision.manualReview instead.
 curl -X PATCH https://api.protegey.com/partner-api/kyc/sessions/018f2a3e-... \\
   -H "Content-Type: application/json" \\
   -H "x-api-key: YOUR_API_KEY" \\
-  -d '{ "status": "Approved", "reviewNote": "Manually verified against a second document" }'`;
+  -d '{ "status": "APPROVED", "reviewNote": "Manually verified against a second document" }'`;
 
 const KYC_RESEND_EXAMPLE = `# Issues a fresh single-use capture link for an enrollment whose previous attempt didn't lead
-# anywhere (Declined, Expired, or stuck In Review) — the customer retries without you having to
-# create a whole new enrollment and lose the original record. Sets status to "Resubmitted".
+# anywhere (DECLINED, EXPIRED, or stuck IN_REVIEW) — the customer retries without you having to
+# create a whole new enrollment and lose the original record. Sets status to "RESUBMITTED".
 curl -X POST https://api.protegey.com/partner-api/kyc/sessions/018f2a3e-.../resend \\
   -H "x-api-key: YOUR_API_KEY"
 
@@ -132,14 +132,14 @@ const KYB_INVITE_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/ky
   }'
 
 # Response
-{ "id": "6e2e6a2e-...", "legalName": null, "contactName": "Awa Diallo", "contactEmail": "awa@acme-sarl.com", "status": "invited" }`;
+{ "id": "6e2e6a2e-...", "legalName": null, "contactName": "Awa Diallo", "contactEmail": "awa@acme-sarl.com", "status": "INVITED" }`;
 
 const KYB_LIST_EXAMPLE = `# search / status / stage are all optional filters
-curl "https://api.protegey.com/partner-api/kyb/applicants?status=pending_review&stage=responded" \\
+curl "https://api.protegey.com/partner-api/kyb/applicants?status=PENDING_REVIEW&stage=RESPONDED" \\
   -H "x-api-key: YOUR_API_KEY"
 
-# Response — status is one of: invited, pending_review, more_info_required, active, rejected
-{ "data": [ { "id": "6e2e6a2e-...", "legalName": "Acme SARL", "status": "pending_review", ... } ], "total": 1, "page": 1, "limit": 20 }`;
+# Response — status is one of: INVITED, PENDING_REVIEW, MORE_INFO_REQUIRED, ACTIVE, REJECTED
+{ "data": [ { "id": "6e2e6a2e-...", "legalName": "Acme SARL", "status": "PENDING_REVIEW", ... } ], "total": 1, "page": 1, "limit": 20 }`;
 
 const KYB_GET_EXAMPLE = `curl https://api.protegey.com/partner-api/kyb/applicants/6e2e6a2e-... \\
   -H "x-api-key: YOUR_API_KEY"`;
@@ -156,8 +156,8 @@ curl https://api.protegey.com/partner-api/kyb/applicants/6e2e6a2e-.../screen \\
 
 # Response
 {
-  "business": { "decision": "clear", "score": 0, "matches": [] },
-  "owners": [ { "ownerName": "Awa Diallo", "ownershipPercent": 60, "decision": "clear", "score": 0, "matches": [] } ],
+  "business": { "decision": "CLEAR", "score": 0, "matches": [] },
+  "owners": [ { "ownerName": "Awa Diallo", "ownershipPercent": 60, "decision": "CLEAR", "score": 0, "matches": [] } ],
   "screenedAt": "2026-11-13T10:00:00.000Z"
 }`;
 
@@ -168,7 +168,7 @@ const SANCTIONS_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/san
 
 # Response
 {
-  "decision": "clear",
+  "decision": "CLEAR",
   "score": 0,
   "matches": []
 }`;
@@ -184,7 +184,7 @@ const DEVICE_EVENT_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/
   }'
 
 # Response
-{ "recorded": true, "action": "allow", "riskScore": 5 }`;
+{ "recorded": true, "action": "ALLOW", "riskScore": 5 }`;
 
 const BEHAVIORAL_EVENT_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/behavioral-events \\
   -H "Content-Type: application/json" \\
@@ -198,11 +198,11 @@ const BEHAVIORAL_EVENT_EXAMPLE = `curl -X POST https://api.protegey.com/partner-
     "session": { "loginHourBucket": 14, "loginDayOfWeek": 2, "sessionDurationMs": 45000 }
   }'
 
-# Response — first sessions for a customer come back as "learning" (no score yet)
-{ "status": "learning", "deviationScore": 0, "confidenceTier": null, "stepUpRecommended": false, "escalatedAlertId": null }
+# Response — first sessions for a customer come back as "LEARNING" (no score yet)
+{ "status": "LEARNING", "deviationScore": 0, "confidenceTier": null, "stepUpRecommended": false, "escalatedAlertId": null }
 
 # Response — once a baseline exists for that customer
-{ "status": "scored", "deviationScore": 35, "confidenceTier": "medium", "stepUpRecommended": true, "escalatedAlertId": null }`;
+{ "status": "SCORED", "deviationScore": 35, "confidenceTier": "MEDIUM", "stepUpRecommended": true, "escalatedAlertId": null }`;
 
 const SHARED_SIGNAL_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/shared-signal/check \\
   -H "Content-Type: application/json" \\
@@ -214,7 +214,7 @@ const SHARED_SIGNAL_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api
 { "flagged": false, "category": null, "reportedDaysAgo": null }
 
 # Response — a match (never reveals which partner reported it, or their case details)
-{ "flagged": true, "category": "confirmed_fraud", "reportedDaysAgo": 12 }`;
+{ "flagged": true, "category": "CONFIRMED_FRAUD", "reportedDaysAgo": 12 }`;
 
 const WEBHOOK_HEADERS_EXAMPLE = `POST https://your-endpoint.example.com/webhooks/protegey
 Content-Type: application/json
@@ -225,7 +225,7 @@ const WEBHOOK_KYC_PAYLOAD_EXAMPLE = `{
   "type": "kyc.status_changed",
   "eventId": "d0d61d39-88c5-4bfb-89eb-08bb1d407c5a",
   "externalUserId": "cust-9981",
-  "status": "Approved",
+  "status": "APPROVED",
   "sessionId": "018f2a3e-...",
   "decision": { "source": "facetec", "outcome": "SUCCESS", "passed": true, "confidenceScore": 94, "livenessScore": 97, "matchScore": 91, ... }
 }`;
@@ -237,7 +237,7 @@ const WEBHOOK_ALERT_CREATED_EXAMPLE = `{
   "ruleCode": "IND006-KYC1",
   "externalCustomerId": "cust-9981",
   "transactionId": "4d06ad4e-2018-428a-8323-d537da5e19fa",
-  "status": "open",
+  "status": "OPEN",
   "triggeredAt": "2026-09-20T12:51:42.593Z"
 }
 // transactionId is null for an alert escalated from behavioral biometrics (not tied to one transaction).
@@ -251,7 +251,7 @@ const WEBHOOK_ALERT_STATUS_EXAMPLE = `{
   "alertId": "27bfd203-d554-418a-bc19-fcaf13164a0e",
   "ruleCode": "IND006-KYC1",
   "externalCustomerId": "cust-9981",
-  "status": "confirmed"
+  "status": "CONFIRMED"
 }
 // Fires when someone on your team changes an alert's status from the portal — the only way
 // you'd otherwise learn of it is polling GET /alerts.`;
@@ -265,12 +265,12 @@ const WEBHOOK_TRANSACTION_BLOCKED_EXAMPLE = `{
   "amount": 400000,
   "currency": "XOF",
   "riskScore": 82,
-  "ruleDecision": "review",
-  "deviceAction": "block",
+  "ruleDecision": "REVIEW",
+  "deviceAction": "BLOCK",
   "alertIds": ["27bfd203-d554-418a-bc19-fcaf13164a0e"],
   "occurredAt": "2026-09-26T09:12:03.000Z"
 }
-// Fires whenever a transaction's FINAL decision is "blocked" — whether that came from a rule
+// Fires whenever a transaction's FINAL decision is "BLOCKED" — whether that came from a rule
 // (ruleDecision) or from the device signal (deviceAction), or both. This is the only asynchronous
 // signal for a device-only block, since that path never creates an Alert on its own.
 // alertIds cross-references any alert.created events also fired for the same transaction.`;
@@ -372,30 +372,30 @@ function ValuesRef({ label, items }: { label: string; items: { field: string; va
 }
 
 const kycValues = [
-  { field: "status", values: ["In Progress", "Approved", "Declined", "In Review", "Expired", "Resubmitted"] },
+  { field: "status", values: ["IN_PROGRESS", "APPROVED", "DECLINED", "IN_REVIEW", "EXPIRED", "RESUBMITTED"] },
   { field: "decision.outcome", values: ["SUCCESS", "MANUAL", "FAILED"] },
 ];
 const kybValues = [
-  { field: "status", values: ["invited", "pending_review", "more_info_required", "active", "rejected"] },
-  { field: "stage (query filter)", values: ["invited", "responded"] },
-  { field: "business.decision / owners[].decision", values: ["clear", "review", "blocked"] },
+  { field: "status", values: ["INVITED", "PENDING_REVIEW", "MORE_INFO_REQUIRED", "ACTIVE", "REJECTED"] },
+  { field: "stage (query filter)", values: ["INVITED", "RESPONDED"] },
+  { field: "business.decision / owners[].decision", values: ["CLEAR", "REVIEW", "BLOCKED"] },
 ];
 const transactionValues = [
   { field: "direction", values: ["DEBIT", "CREDIT"] },
-  { field: "channel", values: ["branch", "atm", "pos", "online", "mobile_app", "ussd", "agent", "api", "call_center"] },
-  { field: "decision", values: ["clear", "review", "blocked"] },
-  { field: "deviceAction", values: ["allow", "soft_challenge", "hard_challenge", "block"] },
+  { field: "channel", values: ["BRANCH", "ATM", "POS", "ONLINE", "MOBILE_APP", "USSD", "AGENT", "API", "CALL_CENTER"] },
+  { field: "decision", values: ["CLEAR", "REVIEW", "BLOCKED"] },
+  { field: "deviceAction", values: ["ALLOW", "SOFT_CHALLENGE", "HARD_CHALLENGE", "BLOCK"] },
 ];
 const sanctionsValues = [
-  { field: "decision", values: ["clear", "review", "blocked"] },
+  { field: "decision", values: ["CLEAR", "REVIEW", "BLOCKED"] },
   { field: "score", values: ["0.0", "–", "1.0 (similarity ratio, not a percentage)"] },
 ];
-const deviceValues = [{ field: "action", values: ["allow", "soft_challenge", "hard_challenge", "block"] }];
+const deviceValues = [{ field: "action", values: ["ALLOW", "SOFT_CHALLENGE", "HARD_CHALLENGE", "BLOCK"] }];
 const behavioralValues = [
-  { field: "status", values: ["learning", "scored"] },
-  { field: "confidenceTier", values: ["null (while learning)", "low", "medium", "high"] },
+  { field: "status", values: ["LEARNING", "SCORED"] },
+  { field: "confidenceTier", values: ["null (while learning)", "LOW", "MEDIUM", "HIGH"] },
 ];
-const sharedSignalValues = [{ field: "category", values: ["confirmed_fraud", "identity_theft", "money_laundering", "other"] }];
+const sharedSignalValues = [{ field: "category", values: ["CONFIRMED_FRAUD", "IDENTITY_THEFT", "MONEY_LAUNDERING", "OTHER"] }];
 
 export default async function DocumentationPage() {
   const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
@@ -557,7 +557,7 @@ export default async function DocumentationPage() {
                   name: "channel",
                   label: "channel",
                   type: "select",
-                  options: ["branch", "atm", "pos", "online", "mobile_app", "ussd", "agent", "api", "call_center"],
+                  options: ["BRANCH", "ATM", "POS", "ONLINE", "MOBILE_APP", "USSD", "AGENT", "API", "CALL_CENTER"],
                 },
                 { name: "counterpartyInstitutionCode", label: "counterpartyInstitutionCode", type: "text", placeholder: "SWIFT/BIC or local bank code" },
                 { name: "counterpartyCountry", label: "counterpartyCountry", type: "text", placeholder: "SN" },
