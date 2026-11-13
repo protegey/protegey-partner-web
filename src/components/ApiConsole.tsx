@@ -5,7 +5,11 @@ import { Loader2, Play, KeyRound } from "lucide-react";
 import { useLang } from "@/lib/i18n/LangProvider";
 
 const API_KEY_STORAGE_KEY = "protegey_console_api_key";
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL ?? "https://api.protegey.com";
+// Falls back to the demo/dev backend, not api.protegey.com — that hostname has no live server
+// behind it until the production cutover, so a console pointed there just hangs. The real prod
+// deployment must set NEXT_PUBLIC_BACKEND_API_URL=https://api.protegey.com explicitly once it
+// goes live; this default only covers this demo environment and local dev.
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL ?? "https://dev-api.protegey.com";
 
 export interface ApiConsoleField {
   name: string;
