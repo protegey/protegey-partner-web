@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { KeyRound, ArrowRightLeft, IdCard, ShieldCheck, Webhook, AlertTriangle, Smartphone, Activity, Share2, Package, Building2, SlidersHorizontal } from "lucide-react";
+import { KeyRound, ArrowRightLeft, IdCard, ShieldCheck, Webhook, AlertTriangle, Smartphone, Activity, Share2, Package, Building2 } from "lucide-react";
 import { getLang } from "@/lib/i18n/lang";
 import { t } from "@/lib/i18n/strings";
 import { CodeBlock } from "@/components/CodeBlock";
@@ -126,47 +126,6 @@ curl https://api.protegey.com/partner-api/kyb/applicants/6e2e6a2e-.../screen \\
   "owners": [ { "ownerName": "Awa Diallo", "ownershipPercent": 60, "decision": "clear", "score": 0, "matches": [] } ],
   "screenedAt": "2026-11-13T10:00:00.000Z"
 }`;
-
-const RULES_LIST_EXAMPLE = `curl https://api.protegey.com/partner-api/alert-rules \\
-  -H "x-api-key: YOUR_API_KEY"
-
-# Response
-[ { "id": "...", "ruleCode": "IND006-KYC1", "name": "Rapid velocity", "status": "active", "severity": "review", "segment": "KYC1", "domain": "transaction" }, ... ]`;
-
-const RULES_UPDATE_EXAMPLE = `# Tune a parameter, change its severity, or disable it outright — same fields the Pan Studio
-# editor itself writes.
-curl -X PATCH https://api.protegey.com/partner-api/alert-rules/{id} \\
-  -H "Content-Type: application/json" \\
-  -H "x-api-key: YOUR_API_KEY" \\
-  -d '{ "status": "disabled" }'`;
-
-const RULES_GENERATE_EXAMPLE = `# Describe a new rule in plain language — the same assistant behind Pan Studio's "Ask for a
-# rule". Created as a draft; review it before activating.
-curl -X POST https://api.protegey.com/partner-api/alert-rules/generate \\
-  -H "Content-Type: application/json" \\
-  -H "x-api-key: YOUR_API_KEY" \\
-  -d '{ "domain": "transaction", "description": "Flag any transaction above 1 million XOF made via USSD" }'
-
-# Response
-{ "id": "...", "ruleCode": "CUSTOM-C816CE83", "name": "Large USSD transaction", "status": "draft", ... }`;
-
-const RULES_SIMULATE_EXAMPLE = `# Test a rule against synthetic transactions before trusting it on real traffic — never persisted,
-# never scored against real customers.
-curl -X POST https://api.protegey.com/partner-api/alert-rules/{id}/simulate \\
-  -H "Content-Type: application/json" \\
-  -H "x-api-key: YOUR_API_KEY" \\
-  -d '{
-    "transactions": [
-      { "externalCustomerId": "cust-0001", "direction": "DEBIT", "amount": 1500000, "currency": "XOF", "channel": "ussd", "occurredAt": "2026-11-13T10:00:00.000Z" }
-    ]
-  }'
-
-# Response
-[ { "transaction": { "externalCustomerId": "cust-0001", "amount": 1500000, ... }, "matched": true } ]`;
-
-const RULES_DELETE_EXAMPLE = `curl -X DELETE https://api.protegey.com/partner-api/alert-rules/{id} \\
-  -H "x-api-key: YOUR_API_KEY"
-# 204 No Content`;
 
 const SANCTIONS_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/sanctions/screen \\
   -H "Content-Type: application/json" \\
@@ -352,7 +311,6 @@ export default async function DocumentationPage() {
     { id: "auth", label: t(lang, "docsNavAuth") },
     { id: "sdks", label: t(lang, "docsNavSdks") },
     { id: "transactions", label: t(lang, "docsNavTransactions") },
-    { id: "rules", label: t(lang, "docsNavRules") },
     { id: "kyc", label: t(lang, "docsNavKyc") },
     { id: "kyb", label: t(lang, "docsNavKyb") },
     { id: "sanctions", label: t(lang, "docsNavSanctions") },
@@ -462,34 +420,6 @@ export default async function DocumentationPage() {
             {t(lang, "navDecisionFlow")}
             <ArrowRightLeft className="size-3.5" />
           </Link>
-        </Section>
-
-        <Section id="rules" icon={SlidersHorizontal} title={t(lang, "docsRulesTitle")} body={t(lang, "docsRulesBody")}>
-          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsRulesListLabel")}</p>
-          <CodeBlock code={RULES_LIST_EXAMPLE} />
-          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsRulesUpdateLabel")}</p>
-          <CodeBlock code={RULES_UPDATE_EXAMPLE} />
-          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsRulesGenerateLabel")}</p>
-          <CodeBlock code={RULES_GENERATE_EXAMPLE} />
-          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsRulesSimulateLabel")}</p>
-          <CodeBlock code={RULES_SIMULATE_EXAMPLE} />
-          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsRulesDeleteLabel")}</p>
-          <CodeBlock code={RULES_DELETE_EXAMPLE} />
-          <p className="mt-3 text-xs text-muted-foreground">
-            <Link href="/alert-rules" className="text-primary hover:underline">
-              {t(lang, "navAlertRules")}
-            </Link>
-          </p>
-          <div className="mt-4">
-            <ApiConsole
-              method="POST"
-              path="/partner-api/alert-rules/generate"
-              fields={[
-                { name: "domain", label: "domain", type: "select", options: ["transaction", "identity", "kyb", "intel"], defaultValue: "transaction" },
-                { name: "description", label: "description", type: "text", required: true, placeholder: "Flag any transaction above 1 million XOF made via USSD" },
-              ]}
-            />
-          </div>
         </Section>
 
         <Section id="kyc" icon={IdCard} title={t(lang, "docsKycTitle")} body={t(lang, "docsKycBody")}>
