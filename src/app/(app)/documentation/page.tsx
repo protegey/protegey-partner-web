@@ -336,6 +336,67 @@ function Section({
   );
 }
 
+/** Groups endpoint sections the same way the sidebar itself groups its pages (Pan-ID / Pan-Monitor
+ * / Pan-Risk / Intelligence) — this reference reads the same way the product is organized, not by
+ * an arbitrary technical taxonomy. */
+function ModuleGroup({ id, title, tagline, children }: { id: string; title: string; tagline: string; children: React.ReactNode }) {
+  return (
+    <div id={id} className="scroll-mt-8 flex flex-col gap-6">
+      <div className="flex items-center gap-3 pt-2">
+        <div className="h-px flex-1 bg-border" />
+        <span className="text-sm font-bold text-foreground">{title}</span>
+        <div className="h-px flex-1 bg-border" />
+      </div>
+      <p className="-mt-4 text-center text-xs text-muted-foreground">{tagline}</p>
+      {children}
+    </div>
+  );
+}
+
+/** Enum/status reference box — field: value1 | value2 | value3. Field names and enum tokens are
+ * API vocabulary, language-agnostic; only the box's own label is translated. */
+function ValuesRef({ label, items }: { label: string; items: { field: string; values: string[] }[] }) {
+  return (
+    <div className="mt-4 rounded-md border border-dashed border-border p-3.5">
+      <p className="mb-2 text-[10px] font-bold uppercase tracking-wide text-muted-foreground">{label}</p>
+      <dl className="flex flex-col gap-1.5">
+        {items.map((item) => (
+          <div key={item.field} className="flex flex-wrap items-baseline gap-x-2 text-xs">
+            <dt className="font-mono font-bold text-foreground">{item.field}:</dt>
+            <dd className="font-mono text-muted-foreground">{item.values.join(" | ")}</dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
+
+const kycValues = [
+  { field: "status", values: ["In Progress", "Approved", "Declined", "In Review", "Expired", "Resubmitted"] },
+  { field: "decision.outcome", values: ["SUCCESS", "MANUAL", "FAILED"] },
+];
+const kybValues = [
+  { field: "status", values: ["invited", "pending_review", "more_info_required", "active", "rejected"] },
+  { field: "stage (query filter)", values: ["invited", "responded"] },
+  { field: "business.decision / owners[].decision", values: ["clear", "review", "blocked"] },
+];
+const transactionValues = [
+  { field: "direction", values: ["DEBIT", "CREDIT"] },
+  { field: "channel", values: ["branch", "atm", "pos", "online", "mobile_app", "ussd", "agent", "api", "call_center"] },
+  { field: "decision", values: ["clear", "review", "blocked"] },
+  { field: "deviceAction", values: ["allow", "soft_challenge", "hard_challenge", "block"] },
+];
+const sanctionsValues = [
+  { field: "decision", values: ["clear", "review", "blocked"] },
+  { field: "score", values: ["0.0", "–", "1.0 (similarity ratio, not a percentage)"] },
+];
+const deviceValues = [{ field: "action", values: ["allow", "soft_challenge", "hard_challenge", "block"] }];
+const behavioralValues = [
+  { field: "status", values: ["learning", "scored"] },
+  { field: "confidenceTier", values: ["null (while learning)", "low", "medium", "high"] },
+];
+const sharedSignalValues = [{ field: "category", values: ["confirmed_fraud", "identity_theft", "money_laundering", "other"] }];
+
 export default async function DocumentationPage() {
   const [user, lang] = await Promise.all([getSessionUser(), getLang()]);
   const denied = requirePageAccess(user, "partners.manage_integrations", lang);
@@ -344,10 +405,14 @@ export default async function DocumentationPage() {
   const nav = [
     { id: "auth", label: t(lang, "docsNavAuth") },
     { id: "sdks", label: t(lang, "docsNavSdks") },
-    { id: "transactions", label: t(lang, "docsNavTransactions") },
+    { id: "group-pan-id", label: t(lang, "navPanId"), isGroup: true },
     { id: "kyc", label: t(lang, "docsNavKyc") },
     { id: "kyb", label: t(lang, "docsNavKyb") },
+    { id: "group-pan-monitor", label: t(lang, "navPanMonitor"), isGroup: true },
+    { id: "transactions", label: t(lang, "docsNavTransactions") },
+    { id: "group-pan-risk", label: t(lang, "navPanRisk"), isGroup: true },
     { id: "sanctions", label: t(lang, "docsNavSanctions") },
+    { id: "group-pan-intel", label: t(lang, "navIntelligence"), isGroup: true },
     { id: "device-events", label: t(lang, "docsNavDeviceEvents") },
     { id: "behavioral-events", label: t(lang, "docsNavBehavioralEvents") },
     { id: "shared-signal", label: t(lang, "docsNavSharedSignal") },
@@ -358,11 +423,17 @@ export default async function DocumentationPage() {
   return (
     <div className="mx-auto flex max-w-5xl gap-8">
       <nav className="sticky top-8 hidden h-fit w-48 shrink-0 flex-col gap-1 lg:flex">
-        {nav.map((item) => (
-          <a key={item.id} href={`#${item.id}`} className="rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-            {item.label}
-          </a>
-        ))}
+        {nav.map((item) =>
+          item.isGroup ? (
+            <div key={item.id} className="mt-3 px-2.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 first:mt-0">
+              {item.label}
+            </div>
+          ) : (
+            <a key={item.id} href={`#${item.id}`} className="rounded-md px-2.5 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
+              {item.label}
+            </a>
+          ),
+        )}
       </nav>
 
       <div className="flex min-w-0 flex-1 flex-col gap-6">
@@ -417,6 +488,55 @@ export default async function DocumentationPage() {
           </div>
         </Section>
 
+        <ModuleGroup id="group-pan-id" title={t(lang, "navPanId")} tagline={t(lang, "docsGroupPanIdTagline")}>
+        <Section id="kyc" icon={IdCard} title={t(lang, "docsKycTitle")} body={t(lang, "docsKycBody")}>
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
+          <CodeBlock code={KYC_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKycPollLabel")}</p>
+          <CodeBlock code={KYC_POLL_EXAMPLE} />
+          <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsKycPollNote")}</p>
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKycUpdateLabel")}</p>
+          <CodeBlock code={KYC_UPDATE_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKycResendLabel")}</p>
+          <CodeBlock code={KYC_RESEND_EXAMPLE} />
+          <ValuesRef label={t(lang, "docsValuesLabel")} items={kycValues} />
+          <div className="mt-4">
+            <p className="mb-1.5 text-xs text-amber-600">{t(lang, "docsKycConsoleRealWarning")}</p>
+            <ApiConsole
+              method="POST"
+              path="/partner-api/kyc/sessions"
+              fields={[{ name: "externalUserId", label: "externalUserId", type: "text", required: true, placeholder: "cust-0001" }]}
+            />
+          </div>
+        </Section>
+
+        <Section id="kyb" icon={Building2} title={t(lang, "docsKybTitle")} body={t(lang, "docsKybBody")}>
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKybInviteLabel")}</p>
+          <CodeBlock code={KYB_INVITE_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKybListLabel")}</p>
+          <CodeBlock code={KYB_LIST_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKybGetLabel")}</p>
+          <CodeBlock code={KYB_GET_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKybResendLabel")}</p>
+          <CodeBlock code={KYB_RESEND_EXAMPLE} />
+          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKybScreenLabel")}</p>
+          <CodeBlock code={KYB_SCREEN_EXAMPLE} />
+          <ValuesRef label={t(lang, "docsValuesLabel")} items={kybValues} />
+          <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsKybScopeNote")}</p>
+          <div className="mt-4">
+            <ApiConsole
+              method="POST"
+              path="/partner-api/kyb/applicants"
+              fields={[
+                { name: "contactName", label: "contactName", type: "text", required: true, placeholder: "Awa Diallo" },
+                { name: "contactEmail", label: "contactEmail", type: "text", required: true, placeholder: "awa@acme-sarl.com" },
+              ]}
+            />
+          </div>
+        </Section>
+        </ModuleGroup>
+
+        <ModuleGroup id="group-pan-monitor" title={t(lang, "navPanMonitor")} tagline={t(lang, "docsGroupPanMonitorTagline")}>
         <Section id="transactions" icon={ArrowRightLeft} title={t(lang, "docsTransactionsTitle")} body={t(lang, "docsTransactionsBody")}>
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
           <CodeBlock code={TRANSACTION_EXAMPLE} />
@@ -449,6 +569,7 @@ export default async function DocumentationPage() {
           <CodeBlock code={TRANSACTION_STATUS_EXAMPLE} />
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsTransactionsListLabel")}</p>
           <CodeBlock code={TRANSACTION_LIST_EXAMPLE} />
+          <ValuesRef label={t(lang, "docsValuesLabel")} items={transactionValues} />
           <p className="mt-6 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsSequenceTitle")}</p>
           <p className="mb-3 text-sm leading-relaxed text-muted-foreground">{t(lang, "docsSequenceBody")}</p>
           <Link
@@ -459,54 +580,13 @@ export default async function DocumentationPage() {
             <ArrowRightLeft className="size-3.5" />
           </Link>
         </Section>
+        </ModuleGroup>
 
-        <Section id="kyc" icon={IdCard} title={t(lang, "docsKycTitle")} body={t(lang, "docsKycBody")}>
-          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
-          <CodeBlock code={KYC_EXAMPLE} />
-          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKycPollLabel")}</p>
-          <CodeBlock code={KYC_POLL_EXAMPLE} />
-          <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsKycPollNote")}</p>
-          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKycUpdateLabel")}</p>
-          <CodeBlock code={KYC_UPDATE_EXAMPLE} />
-          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKycResendLabel")}</p>
-          <CodeBlock code={KYC_RESEND_EXAMPLE} />
-          <div className="mt-4">
-            <p className="mb-1.5 text-xs text-amber-600">{t(lang, "docsKycConsoleRealWarning")}</p>
-            <ApiConsole
-              method="POST"
-              path="/partner-api/kyc/sessions"
-              fields={[{ name: "externalUserId", label: "externalUserId", type: "text", required: true, placeholder: "cust-0001" }]}
-            />
-          </div>
-        </Section>
-
-        <Section id="kyb" icon={Building2} title={t(lang, "docsKybTitle")} body={t(lang, "docsKybBody")}>
-          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKybInviteLabel")}</p>
-          <CodeBlock code={KYB_INVITE_EXAMPLE} />
-          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKybListLabel")}</p>
-          <CodeBlock code={KYB_LIST_EXAMPLE} />
-          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKybGetLabel")}</p>
-          <CodeBlock code={KYB_GET_EXAMPLE} />
-          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKybResendLabel")}</p>
-          <CodeBlock code={KYB_RESEND_EXAMPLE} />
-          <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "docsKybScreenLabel")}</p>
-          <CodeBlock code={KYB_SCREEN_EXAMPLE} />
-          <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsKybScopeNote")}</p>
-          <div className="mt-4">
-            <ApiConsole
-              method="POST"
-              path="/partner-api/kyb/applicants"
-              fields={[
-                { name: "contactName", label: "contactName", type: "text", required: true, placeholder: "Awa Diallo" },
-                { name: "contactEmail", label: "contactEmail", type: "text", required: true, placeholder: "awa@acme-sarl.com" },
-              ]}
-            />
-          </div>
-        </Section>
-
+        <ModuleGroup id="group-pan-risk" title={t(lang, "navPanRisk")} tagline={t(lang, "docsGroupPanRiskTagline")}>
         <Section id="sanctions" icon={ShieldCheck} title={t(lang, "docsSanctionsTitle")} body={t(lang, "docsSanctionsBody")}>
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
           <CodeBlock code={SANCTIONS_EXAMPLE} />
+          <ValuesRef label={t(lang, "docsValuesLabel")} items={sanctionsValues} />
           <div className="mt-4">
             <ApiConsole
               method="POST"
@@ -515,10 +595,13 @@ export default async function DocumentationPage() {
             />
           </div>
         </Section>
+        </ModuleGroup>
 
+        <ModuleGroup id="group-pan-intel" title={t(lang, "navIntelligence")} tagline={t(lang, "docsGroupPanIntelTagline")}>
         <Section id="device-events" icon={Smartphone} title={t(lang, "docsDeviceEventsTitle")} body={t(lang, "docsDeviceEventsBody")}>
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
           <CodeBlock code={DEVICE_EVENT_EXAMPLE} />
+          <ValuesRef label={t(lang, "docsValuesLabel")} items={deviceValues} />
           <p className="mt-3 text-xs text-muted-foreground">
             <Link href="/pan-guard/device-signals" className="text-primary hover:underline">
               {t(lang, "docsSeeAlsoDeviceSignals")}
@@ -541,6 +624,7 @@ export default async function DocumentationPage() {
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
           <CodeBlock code={BEHAVIORAL_EVENT_EXAMPLE} />
           <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsBehavioralEventsStepUpNote")}</p>
+          <ValuesRef label={t(lang, "docsValuesLabel")} items={behavioralValues} />
           <p className="mt-3 text-xs text-muted-foreground">
             <Link href="/pan-guard/behavioral-signals" className="text-primary hover:underline">
               {t(lang, "docsSeeAlsoBehavioralSignals")}
@@ -563,6 +647,7 @@ export default async function DocumentationPage() {
           <p className="mt-4 mb-1.5 text-xs font-semibold uppercase text-muted-foreground">{t(lang, "igCodeExampleTitle")}</p>
           <CodeBlock code={SHARED_SIGNAL_EXAMPLE} />
           <p className="mt-3 text-xs text-muted-foreground">{t(lang, "docsSharedSignalOptInNote")}</p>
+          <ValuesRef label={t(lang, "docsValuesLabel")} items={sharedSignalValues} />
           <div className="mt-4">
             <ApiConsole
               method="POST"
@@ -575,6 +660,7 @@ export default async function DocumentationPage() {
             />
           </div>
         </Section>
+        </ModuleGroup>
 
         <Section id="webhooks" icon={Webhook} title={t(lang, "docsWebhooksTitle")} body={t(lang, "docsWebhooksBody")}>
           <p className="mt-4 text-sm leading-relaxed text-muted-foreground">{t(lang, "docsWebhooksSyncNote")}</p>

@@ -2719,6 +2719,23 @@ const STRINGS = {
     en: "Everything you need to integrate Protegey into your own systems.",
     fr: "Tout ce dont vous avez besoin pour intégrer Protegey à vos propres systèmes.",
   },
+  docsValuesLabel: { en: "Possible values", fr: "Valeurs possibles" },
+  docsGroupPanIdTagline: {
+    en: "Identity & business verification — the same module that powers KYC and KYB onboarding in the sidebar.",
+    fr: "Vérification d'identité et d'entreprise — le même module qui alimente l'intégration KYC et KYB dans le menu.",
+  },
+  docsGroupPanMonitorTagline: {
+    en: "Real-time transaction monitoring — the same data the Pan-Monitor pages are built on.",
+    fr: "Surveillance des transactions en temps réel — les mêmes données sur lesquelles reposent les pages Pan-Monitor.",
+  },
+  docsGroupPanRiskTagline: {
+    en: "Sanctions and compliance screening against watchlists.",
+    fr: "Criblage sanctions et conformité contre les listes de surveillance.",
+  },
+  docsGroupPanIntelTagline: {
+    en: "Device, behavioral and cross-partner network signals — the intelligence layer beneath every other module.",
+    fr: "Signaux d'appareil, comportementaux et du réseau inter-partenaires — la couche de renseignement sous chaque autre module.",
+  },
   docsNavAuth: { en: "Authentication", fr: "Authentification" },
   docsNavSdks: { en: "SDKs", fr: "SDKs" },
   docsNavTransactions: { en: "Sending transactions", fr: "Envoyer des transactions" },
