@@ -51,9 +51,13 @@ const TRANSACTION_EXAMPLE = `curl -X POST https://api.protegey.com/partner-api/t
   "alerts": [ { "ruleCode": "IND006-KYC1", "status": "OPEN", ... } ]
 }`;
 
-const TRANSACTION_STATUS_EXAMPLE = `# Looked up by YOUR OWN externalTransactionId — never Protegey's internal id, so you never have
-# to learn or persist a second identifier just to ask "what happened to the one I sent you".
+const TRANSACTION_STATUS_EXAMPLE = `# The id in the path can be EITHER identifier — your own externalTransactionId, or Protegey's
+# own transactionId from the original POST response — whichever one you have on hand.
 curl https://api.protegey.com/partner-api/transactions/tx-00234 \\
+  -H "x-api-key: YOUR_API_KEY"
+
+# Equally valid — Protegey's own id instead
+curl https://api.protegey.com/partner-api/transactions/b3b4f28f-... \\
   -H "x-api-key: YOUR_API_KEY"
 
 # Response — same shape as the synchronous POST response above
